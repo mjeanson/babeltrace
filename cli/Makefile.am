@@ -78,6 +78,8 @@ endif
 
 if BABELTRACE_BUILD_WITH_MINGW
 babeltrace_bin_LDADD += -lws2_32 -lrpcrt4 -lintl -liconv -lole32 -lpthread
+#babeltrace_bin_LDFLAGS += --static -static-libgcc -static-libstdc++ \
+#  -Wl,--start-group,-lgmodule-2.0,-lglib-2.0,-liconv,-lintl,-lrpcrt4,-lws2_32,-lwinmm,-lole32,-lpopt,-lpthread,--end-group
 endif
 
 # Only used for in-tree execution and tests
