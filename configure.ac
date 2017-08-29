@@ -666,7 +666,6 @@ AC_CONFIG_FILES([
 	bindings/Makefile
 	tests/Makefile
 	tests/cli/Makefile
-	tests/cli/intersection/Makefile
 	tests/lib/Makefile
 	tests/lib/writer/Makefile
 	tests/lib/test-plugin-plugins/Makefile
@@ -705,8 +704,8 @@ AC_CONFIG_FILES([
 	babeltrace-ctf.pc
 ])
 
-AC_CONFIG_FILES([tests/cli/intersection/bt_python_helper.py])
 AC_CONFIG_FILES([tests/cli/intersection/test_intersection], [chmod +x tests/cli/intersection/test_intersection])
+AC_CONFIG_FILES([tests/cli/intersection/test_multi_trace_intersection], [chmod +x tests/cli/intersection/test_multi_trace_intersection])
 AC_CONFIG_FILES([tests/cli/test_convert_args], [chmod +x tests/cli/test_convert_args])
 AC_CONFIG_FILES([tests/cli/test_debug_info], [chmod +x tests/cli/test_debug_info])
 AC_CONFIG_FILES([tests/cli/test_packet_seq_num], [chmod +x tests/cli/test_packet_seq_num])

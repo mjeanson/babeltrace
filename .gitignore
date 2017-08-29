@@ -1,6 +1,6 @@
 *~
-/tests/cli/intersection/bt_python_helper.py
 /tests/cli/intersection/test_intersection
+/tests/cli/intersection/test_multi_trace_intersection
 /tests/cli/test_convert_args
 /tests/cli/test_debug_info
 /tests/cli/test_packet_seq_num
