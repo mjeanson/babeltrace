@@ -14,7 +14,7 @@ libdebug_info_la_SOURCES = \
 	logging.c \
 	logging.h
 
-plugindir = "$(PLUGINSDIR)"
+plugindir = "$(BABELTRACE_PLUGINSDIR)"
 plugin_LTLIBRARIES = babeltrace-plugin-lttng-utils.la
 
 babeltrace_plugin_lttng_utils_la_SOURCES = \

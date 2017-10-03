@@ -376,9 +376,9 @@ AC_ARG_VAR([PYTHON_INCLUDE], [Include flags for Python, bypassing python-config]
 AC_ARG_VAR([PYTHON_LIBS], [Library flags for Python, bypassing python-config])
 AC_ARG_VAR([PYTHON_CONFIG], [Path to python-config])
 
-# PLUGINSDIR: Plugins directory
-AC_ARG_VAR([PLUGINSDIR], [built-in plugins install directory [LIBDIR/babeltrace/plugins]])
-AS_IF([test "x$PLUGINSDIR" = x], [PLUGINSDIR='$(libdir)/babeltrace/plugins'])
+# BABELTRACE_PLUGINSDIR: Plugins directory
+AC_ARG_VAR([BABELTRACE_PLUGINSDIR], [built-in plugins install directory [LIBDIR/babeltrace/plugins]])
+AS_IF([test "x$BABELTRACE_PLUGINSDIR" = x], [BABELTRACE_PLUGINSDIR='${libdir}/babeltrace/plugins'])
 
 # BABELTRACE_MINIMAL_LOG_LEVEL:
 AC_ARG_VAR([BABELTRACE_MINIMAL_LOG_LEVEL], [Minimal log level for Babeltrace program, library, and plugins (VERBOSE, DEBUG, INFO, WARN, ERROR (default), FATAL, or NONE)])
@@ -897,5 +897,5 @@ AS_ECHO
 PPRINT_SUBTITLE([Install directories])
 PPRINT_PROP_STRING([Binaries], [$report_bindir])
 PPRINT_PROP_STRING([Libraries], [$report_libdir])
-PPRINT_PROP_STRING([Plugins], [$report_libdir/babeltrace/plugins])
+PPRINT_PROP_STRING([Plugins], [$BABELTRACE_PLUGINSDIR])
 PPRINT_PROP_STRING([Configuration], [$report_sysconfdif])
