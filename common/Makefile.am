@@ -1,5 +1,4 @@
-AM_CPPFLAGS += -DINSTALL_LIBDIR=\"$(libdir)\"
-
+AM_CPPFLAGS += -DBABELTRACE_PLUGINSDIR='"$(BABELTRACE_PLUGINSDIR)"'
 
 noinst_LTLIBRARIES = libbabeltrace-common.la
 

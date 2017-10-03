@@ -2,7 +2,7 @@ AM_CPPFLAGS += -I$(top_srcdir)/plugins
 
 SUBDIRS = dummy counter trimmer muxer .
 
-plugindir = "$(PLUGINSDIR)"
+plugindir = "$(BABELTRACE_PLUGINSDIR)"
 plugin_LTLIBRARIES = babeltrace-plugin-utils.la
 
 babeltrace_plugin_utils_la_SOURCES = plugin.c

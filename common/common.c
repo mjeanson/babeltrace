@@ -43,7 +43,10 @@
 #include <pwd.h>
 #endif
 
-#define SYSTEM_PLUGIN_PATH	INSTALL_LIBDIR "/babeltrace/plugins"
+#ifndef BABELTRACE_PLUGINSDIR
+#define BABELTRACE_PLUGINSDIR "/usr/local/lib/babeltrace/plugins"
+#endif
+
 #define HOME_ENV_VAR		"HOME"
 #define HOME_PLUGIN_SUBPATH	"/.local/lib/babeltrace/plugins"
 
@@ -94,7 +97,7 @@ void __attribute__((constructor)) bt_common_color_ctor(void)
 BT_HIDDEN
 const char *bt_common_get_system_plugin_path(void)
 {
-	return SYSTEM_PLUGIN_PATH;
+	return BABELTRACE_PLUGINSDIR;
 }
 
 #ifdef __MINGW32__

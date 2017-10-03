@@ -2,7 +2,7 @@ SUBDIRS = common fs-src fs-sink lttng-live
 
 noinst_HEADERS = print.h
 
-plugindir = "$(PLUGINSDIR)"
+plugindir = "$(BABELTRACE_PLUGINSDIR)"
 plugin_LTLIBRARIES = babeltrace-plugin-ctf.la
 
 # ctf plugin

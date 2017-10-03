@@ -2,7 +2,7 @@ AM_CPPFLAGS += -I$(top_srcdir)/plugins
 
 SUBDIRS = pretty dmesg .
 
-plugindir = "$(PLUGINSDIR)"
+plugindir = "$(BABELTRACE_PLUGINSDIR)"
 plugin_LTLIBRARIES = babeltrace-plugin-text.la
 
 babeltrace_plugin_text_la_SOURCES = plugin.c
