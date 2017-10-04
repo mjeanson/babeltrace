@@ -53,8 +53,10 @@ endif
 
 TESTS_PYTHON_PLUGIN_PROVIDER =
 
+if ENABLE_PYTHON_BINDINGS
 if ENABLE_PYTHON_PLUGINS
 TESTS_PYTHON_PLUGIN_PROVIDER += python-plugin-provider/test_python_plugin_provider
+endif
 endif
 
 LOG_DRIVER_FLAGS = '--merge'
