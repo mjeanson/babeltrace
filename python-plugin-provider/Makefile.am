@@ -1,18 +1,20 @@
 AM_CPPFLAGS += $(PYTHON_INCLUDE)
 
-lib_LTLIBRARIES = libbabeltrace-python-plugin-provider.la
+providerdir = "$(BABELTRACE_PROVIDERSDIR)"
 
-libbabeltrace_python_plugin_provider_la_SOURCES = \
+provider_LTLIBRARIES = babeltrace-python-plugin-provider.la
+
+babeltrace_python_plugin_provider_la_SOURCES = \
 	python-plugin-provider.c logging.c logging.h
-libbabeltrace_python_plugin_provider_la_LDFLAGS = \
+babeltrace_python_plugin_provider_la_LDFLAGS = \
 	$(LT_NO_UNDEFINED) \
-	-version-info $(BABELTRACE_LIBRARY_VERSION) \
+	-avoid-version -module \
 	$(PYTHON_LIBS)
 
-libbabeltrace_python_plugin_provider_la_LIBADD =
+babeltrace_python_plugin_provider_la_LIBADD =
 
 if !ENABLE_BUILT_IN_PLUGINS
-libbabeltrace_python_plugin_provider_la_LIBADD += \
+babeltrace_python_plugin_provider_la_LIBADD += \
 	$(top_builddir)/logging/libbabeltrace-logging.la \
 	$(top_builddir)/common/libbabeltrace-common.la \
 	$(top_builddir)/lib/libbabeltrace.la

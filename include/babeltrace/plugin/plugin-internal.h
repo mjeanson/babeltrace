@@ -33,6 +33,9 @@
 #include <babeltrace/object-internal.h>
 #include <babeltrace/types.h>
 #include <glib.h>
+#include <gmodule.h>
+
+extern GModule *bt_provider_find(const char *provider_filename);
 
 enum bt_plugin_type {
 	BT_PLUGIN_TYPE_SO = 0,

@@ -380,6 +380,10 @@ AC_ARG_VAR([PYTHON_CONFIG], [Path to python-config])
 AC_ARG_VAR([BABELTRACE_PLUGINSDIR], [built-in plugins install directory [LIBDIR/babeltrace/plugins]])
 AS_IF([test "x$BABELTRACE_PLUGINSDIR" = x], [BABELTRACE_PLUGINSDIR='${libdir}/babeltrace/plugins'])
 
+# BABELTRACE_PROVIDERSDIR: Provider directory
+AC_ARG_VAR([BABELTRACE_PROVIDERSDIR], [built-in providers install directory [LIBDIR/babeltrace/providers]])
+AS_IF([test "x$BABELTRACE_PROVIDERSDIR" = x], [BABELTRACE_PROVIDERSDIR='${libdir}/babeltrace/providers'])
+
 # BABELTRACE_MINIMAL_LOG_LEVEL:
 AC_ARG_VAR([BABELTRACE_MINIMAL_LOG_LEVEL], [Minimal log level for Babeltrace program, library, and plugins (VERBOSE, DEBUG, INFO, WARN, ERROR (default), FATAL, or NONE)])
 AS_IF([test "x$BABELTRACE_MINIMAL_LOG_LEVEL" = x], [BABELTRACE_MINIMAL_LOG_LEVEL="VERBOSE"])
@@ -570,6 +574,11 @@ AS_IF([test "x$enable_python_bindings" = xyes || test "x$enable_python_plugins" 
   ]
 )
 
+# The python bindings native module needs PIC code when linked against static libraries
+AS_IF([test "x$enable_python_bindings" = xyes || test "x$enable_shared" != xyes],
+  [PYTHON_EXTRA_CFLAGS="-fPIC"]
+)
+
 AS_IF([test "x$enable_python_bindings_doc" = xyes],
   [
     AM_CHECK_PYTHON_SPHINX([PYTHON])
@@ -660,7 +669,7 @@ AC_SUBST(LIBDIR)
 
 
 # Set global CFLAGS in AM_CFLAGS
-AM_CFLAGS="-Wall -Wformat $PTHREAD_CFLAGS $GLIB_CFLAGS"
+AM_CFLAGS="-Wall -Wformat $PTHREAD_CFLAGS $GLIB_CFLAGS $PYTHON_EXTRA_CFLAGS"
 AC_SUBST(AM_CFLAGS)
 
 # Set global CPPFLAGS in AM_CPPFLAGS
@@ -898,4 +907,5 @@ PPRINT_SUBTITLE([Install directories])
 PPRINT_PROP_STRING([Binaries], [$report_bindir])
 PPRINT_PROP_STRING([Libraries], [$report_libdir])
 PPRINT_PROP_STRING([Plugins], [$BABELTRACE_PLUGINSDIR])
+PPRINT_PROP_STRING([Providers], [$BABELTRACE_PROVIDERSDIR])
 PPRINT_PROP_STRING([Configuration], [$report_sysconfdif])

@@ -17,7 +17,7 @@ libbabeltrace_la_LIBADD = \
 	$(top_builddir)/compat/libcompat.la
 
 if ENABLE_BUILT_IN_PYTHON_PLUGIN_SUPPORT
-libbabeltrace_la_LIBADD += $(top_builddir)/python-plugin-provider/libbabeltrace-python-plugin-provider.la
+libbabeltrace_la_LIBADD += $(top_builddir)/python-plugin-provider/babeltrace-python-plugin-provider.la
 endif
 
 # Build a libbabeltrace-ctf library for backwards compatibility.
