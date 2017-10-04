@@ -48,13 +48,15 @@
 #include <ftw.h>
 #include <pthread.h>
 
-#define PYTHON_PLUGIN_PROVIDER_FILENAME	"libbabeltrace-python-plugin-provider." G_MODULE_SUFFIX
+#define PYTHON_PLUGIN_PROVIDER_FILENAME	"babeltrace-python-plugin-provider." G_MODULE_SUFFIX
 #define PYTHON_PLUGIN_PROVIDER_SYM_NAME	bt_plugin_python_create_all_from_file
 #define PYTHON_PLUGIN_PROVIDER_SYM_NAME_STR	TOSTRING(PYTHON_PLUGIN_PROVIDER_SYM_NAME)
 
 #define APPEND_ALL_FROM_DIR_NFDOPEN_MAX	8
 
-#ifdef BT_BUILT_IN_PYTHON_PLUGIN_SUPPORT
+static void destroy_gstring(void *data);
+
+#ifdef BT_BUILT_IN_PYTHON_PLUGIN_PROVIDER
 #include <babeltrace/plugin/python-plugin-provider-internal.h>
 
 static
@@ -63,10 +65,12 @@ struct bt_plugin_set *(*bt_plugin_python_create_all_from_file_sym)(const char *p
 
 static
 void init_python_plugin_provider(void) {}
-#else /* BT_BUILT_IN_PYTHON_PLUGIN_SUPPORT */
+#else /* BT_BUILT_IN_PYTHON_PLUGIN_PROVIDER */
 static GModule *python_plugin_provider_module;
 static
 struct bt_plugin_set *(*bt_plugin_python_create_all_from_file_sym)(const char *path);
+
+static GModule *bt_provider_find(const char *filename);
 
 static
 void init_python_plugin_provider(void) {
@@ -76,7 +80,7 @@ void init_python_plugin_provider(void) {
 
 	BT_LOGD_STR("Loading Python plugin provider module.");
 	python_plugin_provider_module =
-		g_module_open(PYTHON_PLUGIN_PROVIDER_FILENAME, 0);
+		bt_provider_find(PYTHON_PLUGIN_PROVIDER_FILENAME);
 	if (!python_plugin_provider_module) {
 		BT_LOGI("Cannot open `%s`: %s: continuing without Python plugin support.",
 			PYTHON_PLUGIN_PROVIDER_FILENAME, g_module_error());
@@ -109,6 +113,128 @@ void fini_python_plugin_provider(void) {
 
 		python_plugin_provider_module = NULL;
 	}
+}
+
+static
+GModule *bt_provider_find(const char *provider_filename)
+{
+	const char *system_provider_dir;
+	char *home_provider_dir = NULL;
+	const char *envvar;
+	GPtrArray *dirs = NULL;
+	int ret, i;
+	GModule *provider = NULL;
+
+	if (!provider_filename) {
+		BT_LOGW_STR("Invalid parameter: provider filename is NULL.");
+		goto end;
+	}
+
+	BT_LOGD("Finding provider in standard directories: "
+		"filename=\"%s\"", provider_filename);
+	dirs = g_ptr_array_new_with_free_func((GDestroyNotify) destroy_gstring);
+	if (!dirs) {
+		BT_LOGE_STR("Failed to allocate a GPtrArray.");
+		goto end;
+	}
+
+	/*
+	 * Search order is:
+	 *
+	 * 1. BABELTRACE_PROVIDER_PATH environment variable
+	 *    (colon-separated list of directories)
+	 * 2. ~/.local/lib/babeltrace/providers
+	 * 3. Default system directory for Babeltrace providers, usually
+	 *    /usr/lib/babeltrace/providers or
+	 *    /usr/local/lib/babeltrace/providers if installed
+	 *    locally
+	 *
+	 * Directories are searched non-recursively.
+	 */
+	envvar = getenv("BABELTRACE_PROVIDER_PATH");
+	if (envvar) {
+		ret = bt_common_append_plugin_path_dirs(envvar, dirs);
+		if (ret) {
+			BT_LOGE_STR("Failed to append providers path to array of directories.");
+			goto end;
+		}
+	}
+
+	home_provider_dir = bt_common_get_home_provider_path();
+	if (home_provider_dir) {
+		GString *home_provider_dir_str =
+			g_string_new(home_provider_dir);
+
+		if (!home_provider_dir_str) {
+			BT_LOGE_STR("Failed to allocate a GString.");
+			goto end;
+		}
+
+		g_ptr_array_add(dirs, home_provider_dir_str);
+	}
+
+	system_provider_dir = bt_common_get_system_provider_path();
+	if (system_provider_dir) {
+		GString *system_provider_dir_str =
+			g_string_new(system_provider_dir);
+
+		if (!system_provider_dir_str) {
+			BT_LOGE_STR("Failed to allocate a GString.");
+			goto end;
+		}
+
+		g_ptr_array_add(dirs, system_provider_dir_str);
+	}
+
+	/*
+	 * Check each directory we collected for the provider, return the
+	 * first result.
+	 */
+	for (i = 0; i < dirs->len; i++) {
+		GString *dir = g_ptr_array_index(dirs, i);
+		gchar *provider_path = g_build_filename(dir->str,
+				provider_filename, NULL);
+
+		if (g_file_test(provider_path, G_FILE_TEST_IS_REGULAR)) {
+			provider = g_module_open(provider_path, 0);
+			/*
+			 * If we fail to open the provider, continue with the
+			 * other directories.
+			 */
+			if (!provider) {
+				BT_LOGI("Cannot open `%s`: %s", provider_path,
+						g_module_error());
+			}
+
+			BT_LOGD("Found provider in standard directories: "
+				"path=\"%s\"", provider_path);
+		} else {
+			BT_LOGD("Provider not found in directory: "
+				"filename=\"%s\", path=\"%s\"",
+				provider_filename, dir->str);
+		}
+
+		g_free(provider_path);
+		provider_path = NULL;
+
+		if (provider != NULL) {
+			break;
+		}
+	}
+
+end:
+	free(home_provider_dir);
+
+	if (dirs) {
+		g_ptr_array_free(dirs, TRUE);
+	}
+
+	if (!provider) {
+		BT_LOGD("No provider found in standard directories: "
+			"name=\"%s\"", provider_filename);
+	}
+
+	return provider;
 }
 #endif
 

@@ -3,13 +3,18 @@ ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = include		\
 	common			\
 	compat			\
-	logging			\
-	lib
+	logging
 
-if ENABLE_PYTHON_PLUGINS
-# Only build the Python plugin provider shared object if the
-# configuration doesn't ask to make it built-in.
-SUBDIRS += python-plugin-provider
+# If the plugin provider is to be built in the library,
+# build it first and don't link it on the lib.
+# Otherwise, build the lib first, then the provider and link
+# it on the lib.
+if ENABLE_BUILT_IN_PYTHON_PLUGIN_PROVIDER
+SUBDIRS += python-plugin-provider \
+	lib
+else
+SUBDIRS += lib			\
+	python-plugin-provider
 endif
 
 SUBDIRS +=			\

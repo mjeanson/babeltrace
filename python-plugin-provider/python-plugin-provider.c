@@ -91,12 +91,13 @@ void init_python(void)
 
 	/*
 	 * User can disable Python plugin support with the
-	 * BABELTRACE_DISABLE_PYTHON_PLUGINS environment variable set to
-	 * 1.
+	 * BABELTRACE_DISABLE_PYTHON_PLUGIN_PROVIDER environment variable set
+	 * to 1.
 	 */
-	dis_python_env = getenv("BABELTRACE_DISABLE_PYTHON_PLUGINS");
+	dis_python_env = getenv("BABELTRACE_DISABLE_PYTHON_PLUGIN_PROVIDER");
 	if (dis_python_env && strcmp(dis_python_env, "1") == 0) {
-		BT_LOGI_STR("Python plugin support is disabled because `BABELTRACE_DISABLE_PYTHON_PLUGINS=1`.");
+		BT_LOGI_STR("Python plugin support is disabled because "
+			    "`BABELTRACE_DISABLE_PYTHON_PLUGIN_PROVIDER=1`.");
 		python_state = PYTHON_STATE_CANNOT_INITIALIZE;
 		goto end;
 	}

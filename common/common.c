@@ -43,12 +43,20 @@
 #include <pwd.h>
 #endif
 
+/*
+ * The following defines are passed by the build system through the compiler
+ * command line and are defined here only to silence editors.
+ */
 #ifndef BABELTRACE_PLUGINSDIR
 #define BABELTRACE_PLUGINSDIR "/usr/local/lib/babeltrace/plugins"
+#endif
+#ifndef BABELTRACE_PROVIDERSDIR
+#define BABELTRACE_PROVIDERSDIR "/usr/local/lib/babeltrace/providers"
 #endif
 
 #define HOME_ENV_VAR		"HOME"
 #define HOME_PLUGIN_SUBPATH	"/.local/lib/babeltrace/plugins"
+#define HOME_PROVIDER_SUBPATH	"/.local/lib/babeltrace/providers"
 
 static const char *bt_common_color_code_reset = "";
 static const char *bt_common_color_code_bold = "";
@@ -98,6 +106,12 @@ BT_HIDDEN
 const char *bt_common_get_system_plugin_path(void)
 {
 	return BABELTRACE_PLUGINSDIR;
+}
+
+BT_HIDDEN
+const char *bt_common_get_system_provider_path(void)
+{
+	return BABELTRACE_PROVIDERSDIR;
 }
 
 #ifdef __MINGW32__
@@ -153,19 +167,23 @@ end:
 }
 #endif /* __MINGW32__ */
 
-BT_HIDDEN
-char *bt_common_get_home_plugin_path(void)
+static
+char *get_home_with_subpath(const char *subpath)
 {
 	char *path = NULL;
 	const char *home_dir;
 	size_t length;
+
+	if (!subpath) {
+		goto end;
+	}
 
 	home_dir = bt_get_home_dir();
 	if (!home_dir) {
 		goto end;
 	}
 
-	length = strlen(home_dir) + strlen(HOME_PLUGIN_SUBPATH) + 1;
+	length = strlen(home_dir) + strlen(subpath) + 1;
 
 	if (length >= PATH_MAX) {
 		BT_LOGW("Home directory path is too long: length=%zu",
@@ -179,7 +197,7 @@ char *bt_common_get_home_plugin_path(void)
 	}
 
 	strcpy(path, home_dir);
-	strcat(path, HOME_PLUGIN_SUBPATH);
+	strcat(path, subpath);
 
 end:
 	return path;
@@ -243,6 +261,18 @@ error:
 
 end:
 	return ret;
+}
+
+BT_HIDDEN
+char *bt_common_get_home_plugin_path(void)
+{
+	return get_home_with_subpath(HOME_PLUGIN_SUBPATH);
+}
+
+BT_HIDDEN
+char *bt_common_get_home_provider_path(void)
+{
+	return get_home_with_subpath(HOME_PROVIDER_SUBPATH);
 }
 
 static

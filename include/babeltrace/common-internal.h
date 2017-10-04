@@ -48,12 +48,27 @@ BT_HIDDEN
 const char *bt_common_get_system_plugin_path(void);
 
 /*
+ * Returns the system-wide providers path, e.g.
+ * `/usr/lib/babeltrace/providers`. Do not free the return value.
+ */
+BT_HIDDEN
+const char *bt_common_get_system_provider_path(void);
+
+/*
  * Returns the user plugin path, e.g.
  * `/home/user/.local/lib/babeltrace/plugins`. You need to free the
  * return value.
  */
 BT_HIDDEN
 char *bt_common_get_home_plugin_path(void);
+
+/*
+ * Returns the user provider path, e.g.
+ * `/home/user/.local/lib/babeltrace/providers`. You need to free the
+ * return value.
+ */
+BT_HIDDEN
+char *bt_common_get_home_provider_path(void);
 
 /*
  * Appends the list of directories in `paths` to the array `dirs`.

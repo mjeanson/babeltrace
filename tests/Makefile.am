@@ -1,18 +1,19 @@
-SUBDIRS = utils cli lib bindings plugins
+SUBDIRS = utils cli lib bindings plugins python-plugin-provider
 
 EXTRA_DIST = $(srcdir)/ctf-traces/** \
 	     $(srcdir)/debug-info-data/** \
 	     $(srcdir)/debug-info-data/.build-id/cd/**
 
 TESTS_BINDINGS =
-
-if ENABLE_PYTHON_PLUGINS
-SUBDIRS += python-plugin-provider
-endif
+TESTS_PYTHON_PLUGIN_PROVIDER =
 
 if ENABLE_PYTHON_BINDINGS
 TESTS_BINDINGS += bindings/python/bt2/test_python_bt2 \
 	bindings/python/babeltrace/test_python_babeltrace
+
+if ENABLE_PYTHON_PLUGIN_PROVIDER
+TESTS_PYTHON_PLUGIN_PROVIDER += python-plugin-provider/test_python_plugin_provider
+endif
 endif
 
 TESTS_CLI = \
@@ -49,14 +50,6 @@ if ENABLE_DEBUG_INFO
 TESTS_PLUGINS += \
 	plugins/test_dwarf_complete \
 	plugins/test_bin_info_complete
-endif
-
-TESTS_PYTHON_PLUGIN_PROVIDER =
-
-if ENABLE_PYTHON_BINDINGS
-if ENABLE_PYTHON_PLUGINS
-TESTS_PYTHON_PLUGIN_PROVIDER += python-plugin-provider/test_python_plugin_provider
-endif
 endif
 
 LOG_DRIVER_FLAGS = '--merge'

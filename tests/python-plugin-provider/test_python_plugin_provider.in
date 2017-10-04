@@ -28,10 +28,12 @@ TESTRUNNER_PY="${BT_SRC_PATH}/tests/utils/python/testrunner.py"
 THIS_DIR="${BT_SRC_PATH}/tests/python-plugin-provider"
 
 if [ "x${MSYSTEM}" != "x" ]; then
-	export PATH="${BT_BUILD_PATH}/lib/.libs:${BT_BUILD_PATH}/python-plugin-provider/.libs:${PATH}"
+	export PATH="${BT_BUILD_PATH}/lib/.libs:${PATH}"
 else
-	export LD_LIBRARY_PATH="${BT_BUILD_PATH}/lib/.libs:${BT_BUILD_PATH}/python-plugin-provider/.libs:${LD_LIBRARY_PATH}"
+	export LD_LIBRARY_PATH="${BT_BUILD_PATH}/lib/.libs:${LD_LIBRARY_PATH}"
 fi
+
+export BABELTRACE_PROVIDER_PATH="${BT_BUILD_PATH}/python-plugin-provider/.libs"
 
 PYTHONPATH="${PYTHON_BUILD_DIR}:${TESTS_UTILS_PYTHON_DIR}" \
 	"@PYTHON@" "${TESTRUNNER_PY}" "${THIS_DIR}"

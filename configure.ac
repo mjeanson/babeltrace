@@ -380,6 +380,10 @@ AC_ARG_VAR([PYTHON_CONFIG], [Path to python-config])
 AC_ARG_VAR([BABELTRACE_PLUGINSDIR], [built-in plugins install directory [LIBDIR/babeltrace/plugins]])
 AS_IF([test "x$BABELTRACE_PLUGINSDIR" = x], [BABELTRACE_PLUGINSDIR='${libdir}/babeltrace/plugins'])
 
+# BABELTRACE_PROVIDERSDIR: Provider directory
+AC_ARG_VAR([BABELTRACE_PROVIDERSDIR], [built-in providers install directory [LIBDIR/babeltrace/providers]])
+AS_IF([test "x$BABELTRACE_PROVIDERSDIR" = x], [BABELTRACE_PROVIDERSDIR='${libdir}/babeltrace/providers'])
+
 # BABELTRACE_MINIMAL_LOG_LEVEL:
 AC_ARG_VAR([BABELTRACE_MINIMAL_LOG_LEVEL], [Minimal log level for Babeltrace program, library, and plugins (VERBOSE, DEBUG, INFO, WARN, ERROR (default), FATAL, or NONE)])
 AS_IF([test "x$BABELTRACE_MINIMAL_LOG_LEVEL" = x], [BABELTRACE_MINIMAL_LOG_LEVEL="VERBOSE"])
@@ -415,12 +419,12 @@ AC_ARG_ENABLE([python-bindings-doc],
   [enable_python_bindings_doc=no]
 )
 
-# Python plugins
+# Python plugin provider
 # Disabled by default
-AC_ARG_ENABLE([python-plugins],
-  [AC_HELP_STRING([--enable-python-plugins], [enable the Python plugins support for the library and converter])],
-  [], dnl AC_ARG_ENABLE will fill enable_python_plugins with the user choice
-  [enable_python_plugins=no]
+AC_ARG_ENABLE([python-plugin-provider],
+  [AC_HELP_STRING([--enable-python-plugin-provider], [enable the Python plugin provider for the library and converter])],
+  [], dnl AC_ARG_ENABLE will fill enable_python_plugin_provider with the user choice
+  [enable_python_plugin_provider=no]
 )
 
 # Debug info
@@ -447,12 +451,12 @@ AC_ARG_ENABLE([built-in-plugins],
   [enable_built_in_plugins=no]
 )
 
-# Built-in python plugin support
+# Built-in python plugin provider
 # Disabled by default
-AC_ARG_ENABLE([built-in-python-plugin-support],
-  [AC_HELP_STRING([--enable-built-in-python-plugin-support], [Statically-link Python plugin support into the babeltrace library])],
-  [], dnl AC_ARG_ENABLE will fill enable_built_in_python_plugin_support with the user choice
-  [enable_built_in_python_plugin_support=no]
+AC_ARG_ENABLE([built-in-python-plugin-provider],
+  [AC_HELP_STRING([--enable-built-in-python-plugin-provider], [Statically-link Python plugin provider into the babeltrace library])],
+  [], dnl AC_ARG_ENABLE will fill enable_built_in_python_plugin_provider with the user choice
+  [enable_built_in_python_plugin_provider=no]
 )
 
 # Man pages
@@ -467,19 +471,18 @@ AC_ARG_ENABLE([man-pages],
 # Set automake variables for optionnal feature conditionnals in Makefile.am
 AM_CONDITIONAL([ENABLE_PYTHON_BINDINGS], [test "x$enable_python_bindings" = xyes])
 AM_CONDITIONAL([ENABLE_PYTHON_BINDINGS_DOC], [test "x$enable_python_bindings_doc" = xyes])
-AM_CONDITIONAL([ENABLE_PYTHON_PLUGINS], [test "x$enable_python_plugins" = xyes])
+AM_CONDITIONAL([ENABLE_PYTHON_PLUGIN_PROVIDER], [test "x$enable_python_plugin_provider" = xyes])
 AM_CONDITIONAL([ENABLE_DEBUG_INFO], [test "x$enable_debug_info" = xyes])
 AM_CONDITIONAL([ENABLE_API_DOC], [test "x$enable_api_doc" = xyes])
 AM_CONDITIONAL([ENABLE_BUILT_IN_PLUGINS], [test "x$enable_built_in_plugins" = xyes])
-AM_CONDITIONAL([ENABLE_BUILT_IN_PYTHON_PLUGIN_SUPPORT], [test "x$enable_built_in_python_plugin_support" = xyes])
+AM_CONDITIONAL([ENABLE_BUILT_IN_PYTHON_PLUGIN_PROVIDER], [test "x$enable_built_in_python_plugin_provider" = xyes])
 AM_CONDITIONAL([ENABLE_MAN_PAGES], [test "x$enable_man_pages" = xyes])
 
 
 # Set defines for optionnal features conditionnals in the source code
 
-## jgalar: still used?
-AS_IF([test "x$enable_python_plugins" = xyes],
-  [AC_DEFINE([PYTHON_PLUGINS], [1], [Python plugin support.])]
+AS_IF([test "x$enable_python_plugin_provider" = xyes],
+  [AC_DEFINE([PYTHON_PLUGIN_PROVIDER], [1], [Python plugin provider.])]
 )
 
 AS_IF([test "x$enable_debug_info" = xyes],
@@ -490,8 +493,8 @@ AS_IF([test "x$enable_built_in_plugins" = xyes],
   [AC_DEFINE([BT_BUILT_IN_PLUGINS], [1], [Define to 1 to register plug-in attributes in static executable sections])]
 )
 
-AS_IF([test "x$enable_built_in_python_plugin_support" = xyes],
-  [AC_DEFINE([BT_BUILT_IN_PYTHON_PLUGIN_SUPPORT], [1], [Define to 1 to register plug-in attributes in static executable sections])]
+AS_IF([test "x$enable_built_in_python_plugin_provider" = xyes],
+  [AC_DEFINE([BT_BUILT_IN_PYTHON_PLUGIN_PROVIDER], [1], [Define to 1 to register plug-in attributes in static executable sections])]
 )
 
 AS_IF([test "x$enable_debug_info" = xyes],
@@ -518,12 +521,12 @@ AS_IF([test "x$enable_built_in_plugins" = xyes],
   ]
 )
 
-AS_IF([test "x$enable_built_in_python_plugin_support" = xyes],
+AS_IF([test "x$enable_built_in_python_plugin_provider" = xyes],
   [
-    AS_IF([test "x$enable_python_plugins" = xno], [AC_MSG_ERROR([--enable-python-plugins must be used to bundle Python plugin support in the babeltrace executable])])
+    AS_IF([test "x$enable_python_plugin_provider" = xno], [AC_MSG_ERROR([--enable-python-plugin-provider must be used to bundle Python plugin provider in the babeltrace library])])
     # Built-in plug-ins are only available when the --disable-shared --enable-static options are used.
-    AS_IF([test "x$enable_static" != xyes], [AC_MSG_ERROR(--enable-static must be used to bundle Python plugin support in the babeltrace executable)])
-    AS_IF([test "x$enable_shared" = xyes], [AC_MSG_ERROR(--disable-shared must be used to bundle Python plugin support in the babeltrace executable)])
+    AS_IF([test "x$enable_static" != xyes], [AC_MSG_ERROR(--enable-static must be used to bundle Python plugin provider in the babeltrace library)])
+    AS_IF([test "x$enable_shared" = xyes], [AC_MSG_ERROR(--disable-shared must be used to bundle Python plugin provider in the babeltrace library)])
   ]
 )
 
@@ -534,7 +537,7 @@ AS_IF([test "x$enable_python_bindings" = xyes],
   [AX_PKG_SWIG(2.0.0, [], [AC_MSG_ERROR([SWIG 2.0.0 or newer is required to build the python bindings])])]
 )
 
-AS_IF([test "x$enable_python_bindings" = xyes || test "x$enable_python_plugins" = xyes],
+AS_IF([test "x$enable_python_bindings" = xyes || test "x$enable_python_plugin_provider" = xyes],
   [
   AM_PATH_PYTHON([3.0], [], [AC_MSG_ERROR(Python 3 is not available or is not the default Python interpreter on your system. See the README file to learn how to override your distribution's default Python interpreter.)])
 
@@ -568,6 +571,11 @@ AS_IF([test "x$enable_python_bindings" = xyes || test "x$enable_python_plugins" 
     AC_MSG_RESULT([$PYTHON_LIBS])
   ])
   ]
+)
+
+# The python bindings native module needs PIC code when linked against static libraries
+AS_IF([test "x$enable_python_bindings" = xyes && test "x$enable_shared" != xyes],
+  [PYTHON_EXTRA_CFLAGS="-fPIC"]
 )
 
 AS_IF([test "x$enable_python_bindings_doc" = xyes],
@@ -660,7 +668,7 @@ AC_SUBST(LIBDIR)
 
 
 # Set global CFLAGS in AM_CFLAGS
-AM_CFLAGS="-Wall -Wformat $PTHREAD_CFLAGS $GLIB_CFLAGS"
+AM_CFLAGS="-Wall -Wformat $PTHREAD_CFLAGS $GLIB_CFLAGS $PYTHON_EXTRA_CFLAGS"
 AC_SUBST(AM_CFLAGS)
 
 # Set global CPPFLAGS in AM_CPPFLAGS
@@ -722,8 +730,8 @@ AC_CONFIG_FILES([
 	doc/bindings/Makefile
 	doc/bindings/python/Makefile
 	doc/contributing-images/Makefile
-  doc/man/Makefile
-  doc/man/asciidoc-attrs.conf
+	doc/man/Makefile
+	doc/man/asciidoc-attrs.conf
 	lib/Makefile
 	lib/prio_heap/Makefile
 	lib/plugin/Makefile
@@ -795,7 +803,7 @@ AS_IF([test "x$enable_python_bindings" = xyes],
   ]
 )
 
-AS_IF([test "x$enable_python_plugins" = "xyes"],
+AS_IF([test "x$enable_python_plugin_provider" = "xyes"],
   [AC_CONFIG_FILES([tests/python-plugin-provider/test_python_plugin_provider], [chmod +x tests/python-plugin-provider/test_python_plugin_provider])]
 )
 
@@ -833,9 +841,9 @@ AS_ECHO
 PPRINT_SUBTITLE([Python 3 language support])
 test "x$enable_python_bindings" = "xyes" && value=1 || value=0
 PPRINT_PROP_BOOL([Python bindings], $value)
-test "x$enable_python_plugins" = "xyes" && value=1 || value=0
-PPRINT_PROP_BOOL([Python plugin support], $value)
-AS_IF([test "x$enable_python_bindings" = "xyes" || test "x$enable_python_plugins" = "xyes"], [
+test "x$enable_python_plugin_provider" = "xyes" && value=1 || value=0
+PPRINT_PROP_BOOL([Python plugin provider], $value)
+AS_IF([test "x$enable_python_bindings" = "xyes" || test "x$enable_python_plugin_provider" = "xyes"], [
   PPRINT_PROP_STRING([Python include paths], [$PYTHON_INCLUDE])
   PPRINT_PROP_STRING([Python libraries], [$PYTHON_LIBS])
 ])
@@ -852,8 +860,8 @@ AS_ECHO
 PPRINT_SUBTITLE([Built-in features])
 test "x$enable_built_in_plugins" = "xyes" && value=1 || value=0
 PPRINT_PROP_BOOL([Built-in plugins], $value)
-test "x$enable_built_in_python_plugin_support" = "xyes" && value=1 || value=0
-PPRINT_PROP_BOOL([Built-in Python plugin support], $value)
+test "x$enable_built_in_python_plugin_provider" = "xyes" && value=1 || value=0
+PPRINT_PROP_BOOL([Built-in Python plugin provider], $value)
 
 AS_ECHO
 PPRINT_SUBTITLE([Documentation])
@@ -898,4 +906,5 @@ PPRINT_SUBTITLE([Install directories])
 PPRINT_PROP_STRING([Binaries], [$report_bindir])
 PPRINT_PROP_STRING([Libraries], [$report_libdir])
 PPRINT_PROP_STRING([Plugins], [$BABELTRACE_PLUGINSDIR])
+PPRINT_PROP_STRING([Providers], [$BABELTRACE_PROVIDERSDIR])
 PPRINT_PROP_STRING([Configuration], [$report_sysconfdif])

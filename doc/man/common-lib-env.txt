@@ -2,7 +2,7 @@ Babeltrace library
 ~~~~~~~~~~~~~~~~~~
 include::common-common-compat-env.txt[]
 
-`BABELTRACE_DISABLE_PYTHON_PLUGINS`::
+`BABELTRACE_DISABLE_PYTHON_PLUGIN_PROVIDER`::
     Set to `1` to disable the loading of any Babeltrace Python plugin.
 
 `BABELTRACE_LOGGING_GLOBAL_LEVEL`::
