@@ -32,7 +32,7 @@
 
 #include "common/common.h"
 #include <babeltrace2/babeltrace.h>
-#include "compat/uuid.h"
+#include "common/uuid.h"
 #include <glib.h>
 #include "common/assert.h"
 #include <inttypes.h>
@@ -426,9 +426,9 @@ gchar *ctf_fs_make_port_name(struct ctf_fs_ds_file_group *ds_file_group)
 
 	/* For the trace, use the uuid if present, else the path. */
 	if (ds_file_group->ctf_fs_trace->metadata->tc->is_uuid_set) {
-		char uuid_str[BABELTRACE_UUID_STR_LEN];
+		char uuid_str[BT_UUID_STR_LEN + 1];
 
-		bt_uuid_unparse(ds_file_group->ctf_fs_trace->metadata->tc->uuid, uuid_str);
+		bt_uuid_to_str(ds_file_group->ctf_fs_trace->metadata->tc->uuid, uuid_str);
 		g_string_assign(name, uuid_str);
 	} else {
 		g_string_assign(name, ds_file_group->ctf_fs_trace->path->str);
@@ -1398,7 +1398,7 @@ gint sort_traces_by_uuid(gconstpointer a, gconstpointer b)
 	} else if (!trace_a_has_uuid && !trace_b_has_uuid) {
 		ret = 0;
 	} else {
-		ret = bt_uuid_compare(trace_a->metadata->tc->uuid, trace_b->metadata->tc->uuid);
+		ret = bt_uuid_cmp(trace_a->metadata->tc->uuid, trace_b->metadata->tc->uuid);
 	}
 
 	return ret;
@@ -1571,7 +1571,7 @@ int merge_ctf_fs_traces(struct ctf_fs_trace **traces, unsigned int num_traces)
 	struct ctf_fs_trace *winner;
 	guint i;
 	int ret = 0;
-	char uuid_str[BABELTRACE_UUID_STR_LEN];
+	char uuid_str[BT_UUID_STR_LEN + 1];
 
 	BT_ASSERT(num_traces >= 2);
 
@@ -1586,7 +1586,7 @@ int merge_ctf_fs_traces(struct ctf_fs_trace **traces, unsigned int num_traces)
 		candidate = traces[i];
 
 		/* A bit of sanity check. */
-		BT_ASSERT(bt_uuid_compare(winner->metadata->tc->uuid, candidate->metadata->tc->uuid) == 0);
+		BT_ASSERT(bt_uuid_cmp(winner->metadata->tc->uuid, candidate->metadata->tc->uuid) == 0);
 
 		candidate_count = metadata_count_stream_and_event_classes(candidate);
 
@@ -1617,7 +1617,7 @@ int merge_ctf_fs_traces(struct ctf_fs_trace **traces, unsigned int num_traces)
 	}
 
 	/* Use the string representation of the UUID as the trace name. */
-	bt_uuid_unparse(winner->metadata->tc->uuid, uuid_str);
+	bt_uuid_to_str(winner->metadata->tc->uuid, uuid_str);
 	g_string_printf(winner->name, "%s", uuid_str);
 
 end:
@@ -1653,7 +1653,7 @@ int merge_traces_with_same_uuid(struct ctf_fs_component *ctf_fs)
 			struct ctf_fs_trace *this_trace = g_ptr_array_index(traces, range_end_exc_idx);
 
 			if (!range_start_trace->metadata->tc->is_uuid_set ||
-				(bt_uuid_compare(range_start_trace->metadata->tc->uuid, this_trace->metadata->tc->uuid) != 0)) {
+				(bt_uuid_cmp(range_start_trace->metadata->tc->uuid, this_trace->metadata->tc->uuid) != 0)) {
 				break;
 			}
 

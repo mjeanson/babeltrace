@@ -35,7 +35,7 @@
 #include <babeltrace2/types.h>
 #include <glib.h>
 #include <sys/types.h>
-#include "compat/uuid.h"
+#include "common/uuid.h"
 
 #include "stream-class.h"
 #include "attributes.h"
@@ -52,7 +52,7 @@ struct bt_trace_class {
 	} name;
 
 	struct {
-		uint8_t uuid[BABELTRACE_UUID_LEN];
+		bt_uuid_t uuid;
 
 		/* NULL or `uuid` above */
 		bt_uuid value;

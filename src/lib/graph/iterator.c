@@ -678,7 +678,7 @@ bool clock_classes_are_compatible_one(struct bt_self_component_port_input_messag
 				iterator->clock_expectation.type = CLOCK_EXPECTATION_ORIGIN_UNIX;
 			} else if (clock_class_uuid) {
 				iterator->clock_expectation.type = CLOCK_EXPECTATION_ORIGIN_OTHER_UUID;
-				memcpy(iterator->clock_expectation.uuid, clock_class_uuid, BABELTRACE_UUID_LEN);
+				bt_uuid_cpy(iterator->clock_expectation.uuid, clock_class_uuid);
 			} else {
 				iterator->clock_expectation.type = CLOCK_EXPECTATION_ORIGIN_OTHER_NO_UUID;
 			}
@@ -730,7 +730,7 @@ bool clock_classes_are_compatible_one(struct bt_self_component_port_input_messag
 				goto end;
 			}
 
-			if (bt_uuid_compare(iterator->clock_expectation.uuid, clock_class_uuid)) {
+			if (bt_uuid_cmp(iterator->clock_expectation.uuid, clock_class_uuid)) {
 				BT_ASSERT_POST_MSG("Expecting a clock class with UUID, got one "
 					"with a different UUID: %![cc-]+K, expected-uuid=%!u",
 					clock_class, iterator->clock_expectation.uuid);

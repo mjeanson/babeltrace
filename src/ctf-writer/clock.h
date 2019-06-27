@@ -26,7 +26,7 @@
 #include <babeltrace2/ctf-writer/clock.h>
 #include "common/macros.h"
 #include <glib.h>
-#include "compat/uuid.h"
+#include "common/uuid.h"
 
 #include "clock-class.h"
 #include "object.h"

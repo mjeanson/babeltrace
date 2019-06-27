@@ -39,10 +39,8 @@ libctf_ast_la_SOURCES = \
 	ctf-meta-translate.c \
 	ctf-meta-resolve.c
 
-libctf_ast_la_LIBADD = $(UUID_LIBS)
-
 if BABELTRACE_BUILD_WITH_MINGW
-libctf_ast_la_LIBADD += -lrpcrt4 -lintl -liconv -lole32 $(POPT_LIBS)
+libctf_ast_la_LIBADD = -lintl -liconv -lole32 $(POPT_LIBS)
 endif
 
 # start with empty files to clean

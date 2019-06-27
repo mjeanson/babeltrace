@@ -35,7 +35,7 @@
 #include <babeltrace2/types.h>
 #include <glib.h>
 #include <sys/types.h>
-#include "compat/uuid.h"
+#include "common/uuid.h"
 
 #include "attributes.h"
 #include "clock-class.h"

@@ -18,7 +18,7 @@
 #include <babeltrace2/babeltrace.h>
 #include "common/common.h"
 #include "common/assert.h"
-#include "compat/uuid.h"
+#include "common/uuid.h"
 #include <glib.h>
 #include <stdint.h>
 #include <string.h>
@@ -159,7 +159,7 @@ struct fs_sink_ctf_trace_class {
 	/* Weak */
 	const bt_trace_class *ir_tc;
 
-	unsigned char uuid[BABELTRACE_UUID_LEN];
+	bt_uuid_t uuid;
 
 	/* Array of `struct fs_sink_ctf_stream_class *` (owned by this) */
 	GPtrArray *stream_classes;
@@ -821,18 +821,13 @@ struct fs_sink_ctf_trace_class *fs_sink_ctf_trace_class_create(
 
 	BT_ASSERT(tc);
 
-	if (bt_uuid_generate(tc->uuid)) {
-		fs_sink_ctf_trace_class_destroy(tc);
-		tc = NULL;
-		goto end;
-	}
+	bt_uuid_generate(tc->uuid);
 
 	tc->ir_tc = ir_tc;
 	tc->stream_classes = g_ptr_array_new_with_free_func(
 		(GDestroyNotify) fs_sink_ctf_stream_class_destroy);
 	BT_ASSERT(tc->stream_classes);
 
-end:
 	return tc;
 }
 
