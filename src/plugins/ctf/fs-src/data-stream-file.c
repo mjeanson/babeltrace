@@ -99,8 +99,10 @@ enum bt_msg_iter_medium_status ds_file_mmap_next(
 		ds_file->request_offset = 0;
 	}
 
+	// Must respect the allocator granularity
 	ds_file->mmap_len = MIN(ds_file->file->size - ds_file->mmap_offset,
 			ds_file->mmap_max_len);
+
 	if (ds_file->mmap_len == 0) {
 		ret = BT_MSG_ITER_MEDIUM_STATUS_EOF;
 		goto end;
@@ -251,7 +253,7 @@ enum bt_msg_iter_medium_status medop_seek(enum bt_msg_iter_seek_whence whence,
 
 map_requested_offset:
 	offset_in_mapping = offset %
-		bt_common_get_page_size(ds_file->log_level);
+		bt_mmap_get_alloc_granularity(ds_file->log_level);
 
 	ds_file->mmap_offset = offset - offset_in_mapping;
 	ds_file->request_offset = offset_in_mapping;
@@ -642,7 +644,7 @@ struct ctf_fs_ds_file *ctf_fs_ds_file_create(
 		bt_logging_level log_level)
 {
 	int ret;
-	const size_t page_size = bt_common_get_page_size(log_level);
+	const size_t alloc_granularity = bt_mmap_get_alloc_granularity(log_level);
 	struct ctf_fs_ds_file *ds_file = g_new0(struct ctf_fs_ds_file, 1);
 
 	if (!ds_file) {
@@ -672,7 +674,8 @@ struct ctf_fs_ds_file *ctf_fs_ds_file_create(
 		goto error;
 	}
 
-	ds_file->mmap_max_len = page_size * 2048;
+	// Why 2048? Magic?
+	ds_file->mmap_max_len = alloc_granularity * 2048;
 
 	goto end;
 
