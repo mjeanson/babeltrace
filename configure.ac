@@ -207,17 +207,17 @@ AM_CONDITIONAL([IN_GIT_REPO], [test "x$in_git_repo" = "xyes"])
 
 # check for bison
 AC_PROG_YACC
-AX_PROG_BISON_VERSION([2.5], [have_bison=yes])
+AX_PROG_BISON_VERSION([3.0], [have_bison=yes])
 
 AS_IF([test "x$have_bison" != "xyes"], [
   AS_IF([test "x$in_git_repo" = "xyes"], [
     AC_MSG_FAILURE([dnl
-Bison >= 2.4 is required when building from the Git repository. You can
+Bison >= 3.0 is required when building from the Git repository. You can
 set the YACC variable to override automatic detection.
     ])
   ], [
     AC_MSG_WARN([dnl
-Missing Bison >= 2.4. Note that the parser files are already built in
+Missing Bison >= 3.0. Note that the parser files are already built in
 this distribution tarball, so Bison is only needed if you intend to
 modify their sources. You can set the YACC variable to override automatic
 detection.
