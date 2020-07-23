@@ -1060,9 +1060,12 @@ void ctf_scanner_free(struct ctf_scanner *scanner)
 	int import_string(struct ctf_scanner *scanner, YYSTYPE *lvalp, const char *src, char delim);
 }
 
+%no-lines
+%require "3.0"
+
 %define api.pure
 	/* %locations */
-%error-verbose
+%define parse.error verbose
 %parse-param {struct ctf_scanner *scanner}
 %parse-param {yyscan_t yyscanner}
 %lex-param {yyscan_t yyscanner}
@@ -2112,7 +2115,7 @@ enum_field_class_specifier:
 
 struct_or_variant_declaration_list:
 		/* empty */
-		{	$$ = NULL;	}
+		 %empty {	$$ = NULL;	}
 	|	struct_or_variant_declaration_list struct_or_variant_declaration
 		{
 			if ($1) {
@@ -2345,7 +2348,7 @@ abstract_declarator:
 
 direct_abstract_declarator:
 		/* empty */
-		{
+		 %empty {
 			$$ = make_node(scanner, NODE_TYPE_DECLARATOR);
                         $$->u.field_class_declarator.type = TYPEDEC_ID;
 			/* id is NULL */
@@ -2401,7 +2404,7 @@ alias_abstract_declarator:
 
 direct_alias_abstract_declarator:
 		/* empty */
-		{
+		 %empty {
 			$$ = make_node(scanner, NODE_TYPE_DECLARATOR);
                         $$->u.field_class_declarator.type = TYPEDEC_ID;
 			/* id is NULL */

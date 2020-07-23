@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 AM_CPPFLAGS += -I$(builddir) -I$(srcdir)
-AM_YFLAGS = -t -d -v -Wno-yacc
+AM_YFLAGS = -t -d -v -Wno-yacc -Wall
 
 noinst_LTLIBRARIES = libctf-parser.la libctf-ast.la
 
