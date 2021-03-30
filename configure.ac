@@ -528,14 +528,14 @@ AE_IF_FEATURE_ENABLED([python-bindings],
   [AX_PKG_SWIG(2.0.0, [], [AC_MSG_ERROR([SWIG 2.0.0 or newer is required to build the python bindings])])]
 )
 
-AS_IF([test "$PYTHON" != :], [have_python=yes], [have_python=no])
-AS_IF([test -n "$PYTHON_CONFIG"], [have_python_dev=yes], [have_python_dev=no])
+AS_IF([test "$PYTHON" != ":"], [have_python=yes])
+AS_IF([test "x$PYTHON_CONFIG" != "x"], [have_python_dev=yes])
 
 AM_CONDITIONAL([HAVE_PYTHON], [test "x$have_python" = xyes])
 AM_CONDITIONAL([HAVE_PYTHON_DEV], [test "x$have_python_dev" = xyes])
 
 AS_IF([AE_IS_FEATURE_ENABLED([python-bindings]) || AE_IS_FEATURE_ENABLED([python-plugins])], [
-  AS_IF([test "x$have_python_dev" = xno], [
+  AS_IF([test "x$have_python_dev" != "xyes"], [
     AC_MSG_ERROR([Cannot find a suitable python-config. You can override the python-config path with the PYTHON_CONFIG environment variable.])
   ])
 ])
@@ -882,7 +882,6 @@ AS_IF([test -n "bt_version_description"], [
   ], [
     AS_ECHO("bt_version_description")
   ])
-
   AS_ECHO
 ])
 
