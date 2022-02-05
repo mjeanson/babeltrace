@@ -28,6 +28,8 @@
 #include "stream.h"
 #include "lib/value.h"
 #include "lib/func-status.h"
+#include "lib/graph/component.h"
+#include "lib/graph/graph.h"
 
 struct bt_trace_class_destruction_listener_elem {
 	bt_trace_class_destruction_listener_func func;
@@ -126,6 +128,8 @@ struct bt_trace_class *bt_trace_class_create(bt_self_component *self_comp)
 	}
 
 	bt_object_init_shared_with_parent(&tc->base, destroy_trace_class);
+	tc->mip_version = bt_component_borrow_graph((void *) self_comp)->mip_version;
+
 	tc->user_attributes = bt_value_map_create();
 	if (!tc->user_attributes) {
 		BT_LIB_LOGE_APPEND_CAUSE(

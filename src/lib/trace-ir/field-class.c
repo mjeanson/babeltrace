@@ -27,6 +27,7 @@
 #include "lib/func-status.h"
 #include "lib/integer-range-set.h"
 #include "lib/value.h"
+#include "lib/trace-ir/trace-class.h"
 
 BT_EXPORT
 enum bt_field_class_type bt_field_class_get_type(
@@ -38,7 +39,8 @@ enum bt_field_class_type bt_field_class_get_type(
 
 static
 int init_field_class(struct bt_field_class *fc, enum bt_field_class_type type,
-		bt_object_release_func release_func)
+		bt_object_release_func release_func,
+		const struct bt_trace_class *trace_class)
 {
 	int ret = 0;
 
@@ -53,6 +55,8 @@ int init_field_class(struct bt_field_class *fc, enum bt_field_class_type type,
 		ret = -1;
 		goto end;
 	}
+
+	fc->mip_version = trace_class->mip_version;
 
 end:
 	return ret;
@@ -93,7 +97,7 @@ struct bt_field_class *bt_field_class_bit_array_create(
 	}
 
 	if (init_field_class((void *) ba_fc, BT_FIELD_CLASS_TYPE_BIT_ARRAY,
-			destroy_bit_array_field_class)) {
+			destroy_bit_array_field_class, trace_class)) {
 		goto error;
 	}
 
@@ -145,7 +149,7 @@ struct bt_field_class *bt_field_class_bool_create(
 	}
 
 	if (init_field_class((void *) bool_fc, BT_FIELD_CLASS_TYPE_BOOL,
-			destroy_bool_field_class)) {
+			destroy_bool_field_class, trace_class)) {
 		goto error;
 	}
 
@@ -162,11 +166,13 @@ end:
 static
 int init_integer_field_class(struct bt_field_class_integer *fc,
 		enum bt_field_class_type type,
-		bt_object_release_func release_func)
+		bt_object_release_func release_func,
+		const struct bt_trace_class *trace_class)
 {
 	int ret;
 
-	ret = init_field_class((void *) fc, type, release_func);
+	ret = init_field_class((void *) fc, type, release_func,
+		trace_class);
 	if (ret) {
 		goto end;
 	}
@@ -204,7 +210,7 @@ struct bt_field_class *create_integer_field_class(bt_trace_class *trace_class,
 	}
 
 	if (init_integer_field_class(int_fc, type,
-			destroy_integer_field_class)) {
+			destroy_integer_field_class, trace_class)) {
 		goto error;
 	}
 
@@ -367,7 +373,7 @@ struct bt_field_class *create_enumeration_field_class(
 	}
 
 	if (init_integer_field_class((void *) enum_fc, type,
-			destroy_enumeration_field_class)) {
+			destroy_enumeration_field_class, trace_class)) {
 		goto error;
 	}
 
@@ -742,7 +748,8 @@ struct bt_field_class *create_real_field_class(bt_trace_class *trace_class,
 		goto error;
 	}
 
-	if (init_field_class((void *) real_fc, type, destroy_real_field_class)) {
+	if (init_field_class((void *) real_fc, type, destroy_real_field_class,
+			trace_class)) {
 		goto error;
 	}
 
@@ -781,11 +788,13 @@ int init_named_field_classes_container(
 		struct bt_field_class_named_field_class_container *fc,
 		enum bt_field_class_type type,
 		bt_object_release_func fc_release_func,
-		GDestroyNotify named_fc_destroy_func)
+		GDestroyNotify named_fc_destroy_func,
+		const struct bt_trace_class *trace_class)
 {
 	int ret = 0;
 
-	ret = init_field_class((void *) fc, type, fc_release_func);
+	ret = init_field_class((void *) fc, type, fc_release_func,
+		trace_class);
 	if (ret) {
 		goto end;
 	}
@@ -898,7 +907,7 @@ struct bt_field_class *bt_field_class_structure_create(
 
 	ret = init_named_field_classes_container((void *) struct_fc,
 		BT_FIELD_CLASS_TYPE_STRUCTURE, destroy_structure_field_class,
-		destroy_named_field_class);
+		destroy_named_field_class, trace_class);
 	if (ret) {
 		/* init_named_field_classes_container() logs errors */
 		goto error;
@@ -1286,7 +1295,7 @@ struct bt_field_class *create_option_field_class(
 	BT_ASSERT(opt_fc);
 
 	if (init_field_class((void *) opt_fc, fc_type,
-			destroy_option_field_class)) {
+			destroy_option_field_class, trace_class)) {
 		goto error;
 	}
 
@@ -1558,7 +1567,8 @@ struct bt_field_class *bt_field_class_variant_create(
 		ret = init_named_field_classes_container(
 			(void *) var_with_sel_fc, fc_type,
 			destroy_variant_with_selector_field_field_class,
-			destroy_variant_with_selector_field_option);
+			destroy_variant_with_selector_field_option,
+			trace_class);
 		if (ret) {
 			/* init_named_field_classes_container() logs errors */
 			goto error;
@@ -1580,7 +1590,8 @@ struct bt_field_class *bt_field_class_variant_create(
 
 		ret = init_named_field_classes_container((void *) var_fc,
 			BT_FIELD_CLASS_TYPE_VARIANT_WITHOUT_SELECTOR_FIELD,
-			destroy_variant_field_class, destroy_named_field_class);
+			destroy_variant_field_class, destroy_named_field_class,
+			trace_class);
 		if (ret) {
 			/* init_named_field_classes_container() logs errors */
 			goto error;
@@ -2009,12 +2020,14 @@ bt_field_class_variant_with_selector_field_borrow_selector_field_path_const(
 static
 int init_array_field_class(struct bt_field_class_array *fc,
 		enum bt_field_class_type type, bt_object_release_func release_func,
-		struct bt_field_class *element_fc)
+		struct bt_field_class *element_fc,
+		const struct bt_trace_class *trace_class)
 {
 	int ret;
 
 	BT_ASSERT(element_fc);
-	ret = init_field_class((void *) fc, type, release_func);
+	ret = init_field_class((void *) fc, type, release_func,
+		trace_class);
 	if (ret) {
 		goto end;
 	}
@@ -2066,7 +2079,8 @@ bt_field_class_array_static_create(bt_trace_class *trace_class,
 
 	if (init_array_field_class((void *) array_fc,
 			BT_FIELD_CLASS_TYPE_STATIC_ARRAY,
-			destroy_static_array_field_class, element_fc)) {
+			destroy_static_array_field_class, element_fc,
+			trace_class)) {
 		goto error;
 	}
 
@@ -2155,7 +2169,8 @@ struct bt_field_class *bt_field_class_array_dynamic_create(
 			length_fc ?
 				BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITH_LENGTH_FIELD :
 				BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITHOUT_LENGTH_FIELD,
-			destroy_dynamic_array_field_class, element_fc)) {
+			destroy_dynamic_array_field_class, element_fc,
+			trace_class)) {
 		goto error;
 	}
 
@@ -2218,7 +2233,7 @@ struct bt_field_class *bt_field_class_string_create(bt_trace_class *trace_class)
 	}
 
 	if (init_field_class((void *) string_fc, BT_FIELD_CLASS_TYPE_STRING,
-			destroy_string_field_class)) {
+			destroy_string_field_class, trace_class)) {
 		goto error;
 	}
 

@@ -21,6 +21,9 @@
 struct bt_trace_class {
 	struct bt_object base;
 
+	/* Effective MIP version for this trace class */
+	uint64_t mip_version;
+
 	/* Owned by this */
 	struct bt_value *user_attributes;
 

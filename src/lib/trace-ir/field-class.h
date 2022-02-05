@@ -38,6 +38,9 @@ struct bt_field_class {
 	 * of a trace class.
 	 */
 	bool part_of_trace_class;
+
+	/* Effective MIP version for this field class */
+	uint64_t mip_version;
 };
 
 struct bt_field_class_bool {
