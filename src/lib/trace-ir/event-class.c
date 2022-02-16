@@ -279,7 +279,8 @@ bt_event_class_set_specific_context_field_class(
 		struct bt_event_class *event_class,
 		struct bt_field_class *field_class)
 {
-	int ret;
+	enum bt_event_class_set_field_class_status status;
+	enum bt_resolve_field_xref_status resolve_status;
 	struct bt_stream_class *stream_class;
 	struct bt_resolve_field_xref_context resolve_ctx = {
 		.packet_context = NULL,
@@ -300,14 +301,9 @@ bt_event_class_set_specific_context_field_class(
 	resolve_ctx.event_common_context =
 		stream_class->event_common_context_fc;
 
-	ret = bt_resolve_field_paths(field_class, &resolve_ctx, __func__);
-	if (ret) {
-		/*
-		 * This is the only reason for which
-		 * bt_resolve_field_paths() can fail: anything else
-		 * would be because a precondition is not satisfied.
-		 */
-		ret = BT_FUNC_STATUS_MEMORY_ERROR;
+	resolve_status = bt_resolve_field_paths(field_class, &resolve_ctx, __func__);
+	if (resolve_status != BT_RESOLVE_FIELD_XREF_STATUS_OK) {
+		status = (int) resolve_status;
 		goto end;
 	}
 
@@ -319,8 +315,10 @@ bt_event_class_set_specific_context_field_class(
 	BT_LIB_LOGD("Set event class's specific context field class: %!+E",
 		event_class);
 
+	status = BT_EVENT_CLASS_SET_FIELD_CLASS_STATUS_OK;
+
 end:
-	return ret;
+	return status;
 }
 
 BT_EXPORT
@@ -345,7 +343,8 @@ bt_event_class_set_payload_field_class(
 		struct bt_event_class *event_class,
 		struct bt_field_class *field_class)
 {
-	int ret;
+	enum bt_event_class_set_field_class_status status;
+	enum bt_resolve_field_xref_status resolve_status;
 	struct bt_stream_class *stream_class;
 	struct bt_resolve_field_xref_context resolve_ctx = {
 		.packet_context = NULL,
@@ -366,14 +365,9 @@ bt_event_class_set_payload_field_class(
 		stream_class->event_common_context_fc;
 	resolve_ctx.event_specific_context = event_class->specific_context_fc;
 
-	ret = bt_resolve_field_paths(field_class, &resolve_ctx, __func__);
-	if (ret) {
-		/*
-		 * This is the only reason for which
-		 * bt_resolve_field_paths() can fail: anything else
-		 * would be because a precondition is not satisfied.
-		 */
-		ret = BT_FUNC_STATUS_MEMORY_ERROR;
+	resolve_status = bt_resolve_field_paths(field_class, &resolve_ctx, __func__);
+	if (resolve_status != BT_RESOLVE_FIELD_XREF_STATUS_OK) {
+		status = (int) resolve_status;
 		goto end;
 	}
 
@@ -384,8 +378,10 @@ bt_event_class_set_payload_field_class(
 	bt_field_class_freeze(field_class);
 	BT_LIB_LOGD("Set event class's payload field class: %!+E", event_class);
 
+	status = BT_EVENT_CLASS_SET_FIELD_CLASS_STATUS_OK;
+
 end:
-	return ret;
+	return status;
 }
 
 void _bt_event_class_freeze(const struct bt_event_class *event_class)

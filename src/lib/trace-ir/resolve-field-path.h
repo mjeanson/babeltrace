@@ -15,7 +15,7 @@
 #include <glib.h>
 #include "resolve-field-xref.h"
 
-int bt_resolve_field_paths(
+enum bt_resolve_field_xref_status bt_resolve_field_paths(
 		struct bt_field_class *field_class,
 		struct bt_resolve_field_xref_context *ctx,
 		const char *api_func);

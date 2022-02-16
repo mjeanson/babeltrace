@@ -9,6 +9,11 @@
 
 #include "lib/func-status.h"
 
+enum bt_resolve_field_xref_status {
+	BT_RESOLVE_FIELD_XREF_STATUS_OK = BT_FUNC_STATUS_OK,
+	BT_RESOLVE_FIELD_XREF_STATUS_MEMORY_ERROR = BT_FUNC_STATUS_MEMORY_ERROR
+};
+
 struct bt_resolve_field_xref_context {
 	struct bt_field_class *packet_context;
 	struct bt_field_class *event_common_context;

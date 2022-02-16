@@ -91,20 +91,23 @@ end:
 }
 
 static
-int find_field_class(struct bt_field_class *root_fc,
-		enum bt_field_path_scope root_scope, struct bt_field_class *tgt_fc,
+enum bt_resolve_field_xref_status find_field_class(
+		struct bt_field_class *root_fc,
+		enum bt_field_path_scope root_scope,
+		struct bt_field_class *tgt_fc,
 		struct bt_field_path **ret_field_path)
 {
-	int ret = 0;
+	enum bt_resolve_field_xref_status ret;
 	struct bt_field_path *field_path = NULL;
 
 	if (!root_fc) {
+		ret = BT_RESOLVE_FIELD_XREF_STATUS_OK;
 		goto end;
 	}
 
 	field_path = bt_field_path_create();
 	if (!field_path) {
-		ret = -1;
+		ret = BT_RESOLVE_FIELD_XREF_STATUS_MEMORY_ERROR;
 		goto end;
 	}
 
@@ -114,44 +117,49 @@ int find_field_class(struct bt_field_class *root_fc,
 		BT_OBJECT_PUT_REF_AND_RESET(field_path);
 	}
 
+	ret = BT_RESOLVE_FIELD_XREF_STATUS_OK;
+
 end:
 	*ret_field_path = field_path;
 	return ret;
 }
 
 static
-struct bt_field_path *find_field_class_in_ctx(struct bt_field_class *fc,
-		struct bt_resolve_field_xref_context *ctx)
+enum bt_resolve_field_xref_status find_field_class_in_ctx(
+		struct bt_field_class *fc,
+		struct bt_resolve_field_xref_context *ctx,
+		struct bt_field_path **ret_field_path)
 {
-	struct bt_field_path *field_path = NULL;
-	int ret;
+	enum bt_resolve_field_xref_status ret;
 
-	ret = find_field_class(ctx->packet_context, BT_FIELD_PATH_SCOPE_PACKET_CONTEXT,
-		fc, &field_path);
-	if (ret || field_path) {
+	*ret_field_path = NULL;
+
+	ret = find_field_class(ctx->packet_context,
+		BT_FIELD_PATH_SCOPE_PACKET_CONTEXT, fc, ret_field_path);
+	if (ret != BT_RESOLVE_FIELD_XREF_STATUS_OK || *ret_field_path) {
 		goto end;
 	}
 
 	ret = find_field_class(ctx->event_common_context,
-		BT_FIELD_PATH_SCOPE_EVENT_COMMON_CONTEXT, fc, &field_path);
-	if (ret || field_path) {
+		BT_FIELD_PATH_SCOPE_EVENT_COMMON_CONTEXT, fc, ret_field_path);
+	if (ret != BT_RESOLVE_FIELD_XREF_STATUS_OK || *ret_field_path) {
 		goto end;
 	}
 
 	ret = find_field_class(ctx->event_specific_context,
-		BT_FIELD_PATH_SCOPE_EVENT_SPECIFIC_CONTEXT, fc, &field_path);
-	if (ret || field_path) {
+		BT_FIELD_PATH_SCOPE_EVENT_SPECIFIC_CONTEXT, fc, ret_field_path);
+	if (ret != BT_RESOLVE_FIELD_XREF_STATUS_OK || *ret_field_path) {
 		goto end;
 	}
 
-	ret = find_field_class(ctx->event_payload, BT_FIELD_PATH_SCOPE_EVENT_PAYLOAD,
-		fc, &field_path);
-	if (ret || field_path) {
+	ret = find_field_class(ctx->event_payload,
+		BT_FIELD_PATH_SCOPE_EVENT_PAYLOAD, fc, ret_field_path);
+	if (ret != BT_RESOLVE_FIELD_XREF_STATUS_OK || *ret_field_path) {
 		goto end;
 	}
 
 end:
-	return field_path;
+	return ret;
 }
 
 BT_ASSERT_COND_DEV_FUNC
@@ -422,11 +430,13 @@ bool field_path_is_valid(struct bt_field_class *src_fc,
 		struct bt_field_class *tgt_fc,
 		struct bt_resolve_field_xref_context *ctx)
 {
-	bool is_valid = true;
-	struct bt_field_path *src_field_path = find_field_class_in_ctx(
-		src_fc, ctx);
-	struct bt_field_path *tgt_field_path = find_field_class_in_ctx(
-		tgt_fc, ctx);
+	struct bt_field_path *src_field_path;
+	struct bt_field_path *tgt_field_path = NULL;
+	enum bt_resolve_field_xref_status status;
+	bool is_valid;
+
+	status = find_field_class_in_ctx(src_fc, ctx, &src_field_path);
+	BT_ASSERT(status == BT_RESOLVE_FIELD_XREF_STATUS_OK);
 
 	if (!src_field_path) {
 		BT_ASSERT_COND_DEV_MSG("Cannot find requesting field class in "
@@ -434,6 +444,9 @@ bool field_path_is_valid(struct bt_field_class *src_fc,
 		is_valid = false;
 		goto end;
 	}
+
+	status = find_field_class_in_ctx(tgt_fc, ctx, &tgt_field_path);
+	BT_ASSERT(status == BT_RESOLVE_FIELD_XREF_STATUS_OK);
 
 	if (!tgt_field_path) {
 		BT_ASSERT_COND_DEV_MSG("Cannot find target field class in "
@@ -487,6 +500,8 @@ bool field_path_is_valid(struct bt_field_class *src_fc,
 		goto end;
 	}
 
+	is_valid = true;
+
 end:
 	bt_object_put_ref(src_field_path);
 	bt_object_put_ref(tgt_field_path);
@@ -494,23 +509,26 @@ end:
 }
 
 static
-struct bt_field_path *resolve_field_path(struct bt_field_class *src_fc,
+enum bt_resolve_field_xref_status resolve_field_path(
+		struct bt_field_class *src_fc,
 		struct bt_field_class *tgt_fc,
 		struct bt_resolve_field_xref_context *ctx,
-		const char *api_func)
+		const char *api_func,
+		struct bt_field_path **ret_field_path)
 {
 	BT_ASSERT_PRE_DEV_FROM_FUNC(api_func, "valid-field-class",
 		field_path_is_valid(src_fc, tgt_fc, ctx),
 		"Invalid target field class: %![req-fc-]+F, %![tgt-fc-]+F",
 		src_fc, tgt_fc);
-	return find_field_class_in_ctx(tgt_fc, ctx);
+	return find_field_class_in_ctx(tgt_fc, ctx, ret_field_path);
 }
 
-int bt_resolve_field_paths(struct bt_field_class *fc,
+enum bt_resolve_field_xref_status bt_resolve_field_paths(
+		struct bt_field_class *fc,
 		struct bt_resolve_field_xref_context *ctx,
 		const char *api_func)
 {
-	int ret = 0;
+	enum bt_resolve_field_xref_status status;
 
 	BT_ASSERT(fc);
 
@@ -522,10 +540,10 @@ int bt_resolve_field_paths(struct bt_field_class *fc,
 		if (opt_fc->selector_field_xref_kind == FIELD_XREF_KIND_PATH) {
 			BT_ASSERT(opt_fc->selector_field.path.class);
 			BT_ASSERT(!opt_fc->selector_field.path.path);
-			opt_fc->selector_field.path.path = resolve_field_path(
-				fc, opt_fc->selector_field.path.class, ctx, __func__);
-			if (!opt_fc->selector_field.path.path) {
-				ret = -1;
+			status = resolve_field_path(
+				fc, opt_fc->selector_field.path.class, ctx, __func__,
+				&opt_fc->selector_field.path.path);
+			if (status != BT_RESOLVE_FIELD_XREF_STATUS_OK) {
 				goto end;
 			}
 		}
@@ -535,10 +553,10 @@ int bt_resolve_field_paths(struct bt_field_class *fc,
 		if (dyn_array_fc->length_field.xref_kind == FIELD_XREF_KIND_PATH) {
 			BT_ASSERT(dyn_array_fc->length_field.path.class);
 			BT_ASSERT(!dyn_array_fc->length_field.path.path);
-			dyn_array_fc->length_field.path.path = resolve_field_path(
-				fc, dyn_array_fc->length_field.path.class, ctx, __func__);
-			if (!dyn_array_fc->length_field.path.path) {
-				ret = -1;
+			status = resolve_field_path(
+				fc, dyn_array_fc->length_field.path.class, ctx, __func__,
+				&dyn_array_fc->length_field.path.path);
+			if (status != BT_RESOLVE_FIELD_XREF_STATUS_OK) {
 				goto end;
 			}
 		}
@@ -550,12 +568,10 @@ int bt_resolve_field_paths(struct bt_field_class *fc,
 		if (var_fc->selector_field_xref_kind == FIELD_XREF_KIND_PATH) {
 			BT_ASSERT(var_fc->selector_field.path.class);
 			BT_ASSERT(!var_fc->selector_field.path.path);
-			var_fc->selector_field.path.path =
-				resolve_field_path(fc,
-					(void *) var_fc->selector_field.path.class, ctx,
-					__func__);
-			if (!var_fc->selector_field.path.path) {
-				ret = -1;
+			status = resolve_field_path(fc,
+				(void *) var_fc->selector_field.path.class, ctx,
+				__func__, &var_fc->selector_field.path.path);
+			if (status != BT_RESOLVE_FIELD_XREF_STATUS_OK) {
 				goto end;
 			}
 		}
@@ -565,7 +581,10 @@ int bt_resolve_field_paths(struct bt_field_class *fc,
 	if (bt_field_class_type_is(fc->type, BT_FIELD_CLASS_TYPE_OPTION)) {
 		struct bt_field_class_option *opt_fc = (void *) fc;
 
-		ret = bt_resolve_field_paths(opt_fc->content_fc, ctx, api_func);
+		status = bt_resolve_field_paths(opt_fc->content_fc, ctx, api_func);
+		if (status != BT_RESOLVE_FIELD_XREF_STATUS_OK) {
+			goto end;
+		}
 	} else if (fc->type == BT_FIELD_CLASS_TYPE_STRUCTURE ||
 			bt_field_class_type_is(fc->type,
 				BT_FIELD_CLASS_TYPE_VARIANT)) {
@@ -577,9 +596,9 @@ int bt_resolve_field_paths(struct bt_field_class *fc,
 			struct bt_named_field_class *named_fc =
 				container_fc->named_fcs->pdata[i];
 
-			ret = bt_resolve_field_paths(named_fc->fc, ctx,
+			status = bt_resolve_field_paths(named_fc->fc, ctx,
 				api_func);
-			if (ret) {
+			if (status != BT_RESOLVE_FIELD_XREF_STATUS_OK) {
 				goto end;
 			}
 		}
@@ -587,10 +606,15 @@ int bt_resolve_field_paths(struct bt_field_class *fc,
 			BT_FIELD_CLASS_TYPE_ARRAY)) {
 		struct bt_field_class_array *array_fc = (void *) fc;
 
-		ret = bt_resolve_field_paths(array_fc->element_fc, ctx,
+		status = bt_resolve_field_paths(array_fc->element_fc, ctx,
 			api_func);
+		if (status != BT_RESOLVE_FIELD_XREF_STATUS_OK) {
+			goto end;
+		}
 	}
 
+	status = BT_RESOLVE_FIELD_XREF_STATUS_OK;
+
 end:
-	return ret;
+	return status;
 }

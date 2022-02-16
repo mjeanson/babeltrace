@@ -299,7 +299,8 @@ bt_stream_class_set_packet_context_field_class(
 		struct bt_stream_class *stream_class,
 		struct bt_field_class *field_class)
 {
-	int ret;
+	enum bt_stream_class_set_field_class_status status;
+	enum bt_resolve_field_xref_status resolve_status;
 	struct bt_resolve_field_xref_context resolve_ctx = {
 		.packet_context = field_class,
 		.event_common_context = NULL,
@@ -317,14 +318,9 @@ bt_stream_class_set_packet_context_field_class(
 	BT_ASSERT_PRE_DEV_STREAM_CLASS_HOT(stream_class);
 	BT_ASSERT_PRE_FC_IS_STRUCT("field-class", field_class,
 		"Packet context field class");
-	ret = bt_resolve_field_paths(field_class, &resolve_ctx, __func__);
-	if (ret) {
-		/*
-		 * This is the only reason for which
-		 * bt_resolve_field_paths() can fail: anything else
-		 * would be because a precondition is not satisfied.
-		 */
-		ret = BT_FUNC_STATUS_MEMORY_ERROR;
+	resolve_status = bt_resolve_field_paths(field_class, &resolve_ctx, __func__);
+	if (resolve_status != BT_RESOLVE_FIELD_XREF_STATUS_OK) {
+		status = (int) resolve_status;
 		goto end;
 	}
 
@@ -336,8 +332,10 @@ bt_stream_class_set_packet_context_field_class(
 	BT_LIB_LOGD("Set stream class's packet context field class: %!+S",
 		stream_class);
 
+	status = BT_STREAM_CLASS_SET_FIELD_CLASS_STATUS_OK;
+
 end:
-	return ret;
+	return status;
 }
 
 BT_EXPORT
@@ -364,7 +362,8 @@ bt_stream_class_set_event_common_context_field_class(
 		struct bt_stream_class *stream_class,
 		struct bt_field_class *field_class)
 {
-	int ret;
+	enum bt_stream_class_set_field_class_status status;
+	enum bt_resolve_field_xref_status resolve_status;
 	struct bt_resolve_field_xref_context resolve_ctx = {
 		.packet_context = NULL,
 		.event_common_context = field_class,
@@ -379,14 +378,9 @@ bt_stream_class_set_event_common_context_field_class(
 	BT_ASSERT_PRE_FC_IS_STRUCT("field-class", field_class,
 		"Event common context field class");
 	resolve_ctx.packet_context = stream_class->packet_context_fc;
-	ret = bt_resolve_field_paths(field_class, &resolve_ctx, __func__);
-	if (ret) {
-		/*
-		 * This is the only reason for which
-		 * bt_resolve_field_paths() can fail: anything else
-		 * would be because a precondition is not satisfied.
-		 */
-		ret = BT_FUNC_STATUS_MEMORY_ERROR;
+	resolve_status = bt_resolve_field_paths(field_class, &resolve_ctx, __func__);
+	if (resolve_status != BT_RESOLVE_FIELD_XREF_STATUS_OK) {
+		status = (int) resolve_status;
 		goto end;
 	}
 
@@ -398,8 +392,10 @@ bt_stream_class_set_event_common_context_field_class(
 	BT_LIB_LOGD("Set stream class's event common context field class: %!+S",
 		stream_class);
 
+	status = BT_STREAM_CLASS_SET_FIELD_CLASS_STATUS_OK;
+
 end:
-	return ret;
+	return status;
 }
 
 void _bt_stream_class_freeze(const struct bt_stream_class *stream_class)
