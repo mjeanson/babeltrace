@@ -267,6 +267,22 @@ struct bt_field_class_variant_with_selector_field {
 	} selector_field;
 };
 
+struct bt_field_class_blob {
+	struct bt_field_class common;
+
+	GString *media_type;
+};
+
+struct bt_field_class_blob_static {
+	struct bt_field_class_blob common;
+	uint64_t length;
+};
+
+struct bt_field_class_blob_dynamic {
+	struct bt_field_class_blob common;
+	const struct bt_field_location *length_fl;
+};
+
 void _bt_field_class_freeze(const struct bt_field_class *field_class);
 
 #ifdef BT_DEV_MODE

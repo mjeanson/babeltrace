@@ -155,6 +155,13 @@ static inline void format_array_field_class(char **buf_ch, const char *prefix,
 		PRFIELD(bt_common_field_class_type_string(array_fc->element_fc->type)));
 }
 
+static inline void format_blob_field_class(char **buf_ch, const char *prefix,
+		const struct bt_field_class_blob *field_class)
+{
+	BUF_APPEND(", %smedia-type=\"%s\"",
+		PRFIELD(field_class->media_type->str));
+}
+
 static inline void format_field_class(char **buf_ch, bool extended,
 		const char *prefix, const struct bt_field_class *field_class)
 {
@@ -330,6 +337,33 @@ static inline void format_field_class(char **buf_ch, bool extended,
 					var_with_sel_fc->selector_field.location);
 				break;
 			}
+		}
+
+		break;
+	}
+	case BT_FIELD_CLASS_TYPE_STATIC_BLOB:
+	{
+		const struct bt_field_class_blob_static *blob_fc =
+			(const void *) field_class;
+
+		format_blob_field_class(buf_ch, prefix, (const void *) blob_fc);
+		BUF_APPEND(", %slength=%" PRIu64, PRFIELD(blob_fc->length));
+		break;
+	}
+	case BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITHOUT_LENGTH_FIELD:
+	case BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITH_LENGTH_FIELD:
+	{
+		const struct bt_field_class_blob_dynamic *blob_fc =
+			(const void *) field_class;
+
+		format_blob_field_class(buf_ch, prefix, (const void *) blob_fc);
+
+		if (field_class->type == BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITH_LENGTH_FIELD) {
+			BT_ASSERT(blob_fc->length_fl);
+			SET_TMP_PREFIX("length-fl-");
+			format_field_location(buf_ch, extended, tmp_prefix,
+				blob_fc->length_fl);
+			break;
 		}
 
 		break;

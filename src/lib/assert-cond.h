@@ -358,6 +358,15 @@
 #define _BT_ASSERT_PRE_FC_IS_VARIANT_WITH_SEL_ID(_fc_id)		\
 	"is-variant-field-class-with-selector:" _fc_id
 
+#define _BT_ASSERT_PRE_FC_IS_BLOB_ID(_fc_id)				\
+	"is-blob-field-class:" _fc_id
+
+#define _BT_ASSERT_PRE_FC_IS_BLOB_COND(_fc)				\
+	bt_field_class_type_is((_fc)->type, BT_FIELD_CLASS_TYPE_BLOB)
+
+#define _BT_ASSERT_PRE_FC_IS_BLOB_FMT(_name)	\
+	_name " is not a BLOB field class: %![fc-]+F"
+
 #define _BT_ASSERT_PRE_FC_HAS_TYPE_COND(_fc, _type)			\
 	(((const struct bt_field_class *) (_fc))->type == (_type))
 
@@ -435,6 +444,12 @@
 		_BT_ASSERT_PRE_FC_IS_VARIANT_WITH_SEL_ID(_fc_id),	\
 		_BT_ASSERT_PRE_FC_IS_VARIANT_WITH_SEL_COND(_fc),	\
 		_BT_ASSERT_PRE_FC_IS_VARIANT_WITH_SEL_FMT(_name), (_fc))
+
+#define BT_ASSERT_PRE_FC_IS_BLOB(_fc_id, _fc, _name)		\
+	BT_ASSERT_PRE(						\
+		_BT_ASSERT_PRE_FC_IS_BLOB_ID(_fc_id),		\
+		_BT_ASSERT_PRE_FC_IS_BLOB_COND(_fc),		\
+		_BT_ASSERT_PRE_FC_IS_BLOB_FMT(_name), (_fc))
 
 #define BT_ASSERT_PRE_FC_HAS_TYPE_FROM_FUNC(_func, _fc_id, _fc, _type_id, _type, _name) \
 	BT_ASSERT_PRE_FROM_FUNC(_func,					\
@@ -665,6 +680,18 @@
 		((const struct bt_field *) (_field))->class->type == BT_FIELD_CLASS_TYPE_VARIANT_WITH_UNSIGNED_INTEGER_SELECTOR_FIELD || \
 		((const struct bt_field *) (_field))->class->type == BT_FIELD_CLASS_TYPE_VARIANT_WITH_SIGNED_INTEGER_SELECTOR_FIELD, \
 		_name " is not a variant field: %![field-]+f", (_field))
+
+#define BT_ASSERT_PRE_DEV_FIELD_IS_BLOB(_field_id, _field, _name)			\
+	BT_ASSERT_PRE_DEV(								\
+		"is-blob-field:" _field_id,						\
+		bt_field_class_type_is(_field->class->type, BT_FIELD_CLASS_TYPE_BLOB),	\
+		_name "is not a BLOB field: %![field-]+f", (_field))
+
+#define BT_ASSERT_PRE_DEV_FIELD_IS_DYNAMIC_BLOB(_field_id, _field, _name)			\
+	BT_ASSERT_PRE_DEV(									\
+		"is-dynamic-blob-field:" _field_id,						\
+		bt_field_class_type_is(_field->class->type, BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB),	\
+		_name "is not a dynamic BLOB field: %![field-]+f", (_field))
 
 #define BT_ASSERT_PRE_DEV_FIELD_IS_SET(_field_id, _field)		\
 	BT_ASSERT_PRE_DEV("is-field-set:" _field_id,			\

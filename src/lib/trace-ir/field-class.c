@@ -2855,6 +2855,252 @@ void bt_field_class_variant_option_set_user_attributes(
 }
 
 BT_EXPORT
+bt_field_class_blob_set_media_type_status bt_field_class_blob_set_media_type(
+		struct bt_field_class *fc, const char *media_type)
+{
+	struct bt_field_class_blob *fc_blob = (void *) fc;
+
+	BT_ASSERT_PRE_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_FC_IS_BLOB("field-class", fc, "Field class");
+	BT_ASSERT_PRE_DEV_FC_HOT(fc);
+	BT_ASSERT_PRE_NON_NULL("media-type", media_type, "Media type");
+
+	g_string_assign(fc_blob->media_type, media_type);
+
+	return BT_FIELD_CLASS_BLOB_SET_MEDIA_TYPE_STATUS_OK;
+}
+
+BT_EXPORT
+const char *bt_field_class_blob_get_media_type(
+		const bt_field_class *fc)
+{
+	struct bt_field_class_blob *fc_blob = (void *) fc;
+
+	BT_ASSERT_PRE_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_FC_IS_BLOB("field-class", fc, "Field class");
+
+	return fc_blob->media_type->str;
+}
+
+static
+int init_blob_field_class(struct bt_field_class_blob *fc,
+		enum bt_field_class_type type,
+		bt_object_release_func release_func,
+		bt_trace_class *trace_class)
+{
+	int ret;
+
+	ret = init_field_class((void *) fc, type, release_func,
+		trace_class);
+	if (ret) {
+		goto end;
+	}
+
+	fc->media_type = g_string_new("application/octet-stream");
+
+end:
+	return ret;
+}
+
+static
+void destroy_blob_field_class(struct bt_object *obj)
+{
+	struct bt_field_class_blob *blob = (void *) obj;
+
+	BT_ASSERT(obj);
+	g_string_free(blob->media_type, TRUE);
+	finalize_field_class((void *) obj);
+	g_free(obj);
+}
+
+static
+void destroy_static_blob_field_class(struct bt_object *obj)
+{
+	struct bt_field_class_blob_static *fc = (void *) obj;
+
+	BT_ASSERT(fc);
+	BT_LIB_LOGD("Destroying static BLOB field class object: %!+F", fc);
+
+	destroy_blob_field_class(obj);
+}
+
+BT_EXPORT
+struct bt_field_class *bt_field_class_blob_static_create(
+		struct bt_trace_class *trace_class, uint64_t length)
+{
+	struct bt_field_class_blob_static *blob_fc = NULL;
+	int ret;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace_class, 1);
+
+	BT_LOGD_STR("Creating default static BLOB field class object.");
+	blob_fc = g_new0(struct bt_field_class_blob_static, 1);
+	if (!blob_fc) {
+		BT_LIB_LOGE_APPEND_CAUSE(
+			"Failed to allocate one static BLOB field class.");
+		goto error;
+	}
+
+	ret = init_blob_field_class((void *) blob_fc,
+		BT_FIELD_CLASS_TYPE_STATIC_BLOB,
+		destroy_static_blob_field_class,
+		trace_class);
+	if (ret) {
+		goto end;
+	}
+
+	blob_fc->length = length;
+	BT_LIB_LOGD("Created static BLOB field class object: %!+F", blob_fc);
+	goto end;
+
+error:
+	BT_OBJECT_PUT_REF_AND_RESET(blob_fc);
+
+end:
+	return (void *) blob_fc;
+}
+
+BT_EXPORT
+uint64_t bt_field_class_blob_static_get_length(
+		const bt_field_class *fc)
+{
+	const struct bt_field_class_blob_static *blob_fc = (const void *) fc;
+
+	BT_ASSERT_PRE_DEV_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_DEV_FC_HAS_TYPE("field-class", fc,
+		"static-blob-field-class", BT_FIELD_CLASS_TYPE_STATIC_BLOB,
+		"Field class");
+
+	return blob_fc->length;
+}
+
+static
+void destroy_dynamic_blob_field_class(struct bt_object *obj)
+{
+	struct bt_field_class_blob_dynamic *fc = (void *) obj;
+
+	BT_ASSERT(fc);
+	BT_LIB_LOGD("Destroying dynamic BLOB field class object: %!+F", fc);
+
+	bt_object_put_ref(fc->length_fl);
+	fc->length_fl = NULL;
+
+	destroy_blob_field_class(obj);
+}
+
+static
+struct bt_field_class_blob_dynamic *create_dynamic_blob_field_class(
+		struct bt_trace_class *trace_class, enum bt_field_class_type type)
+{
+	struct bt_field_class_blob_dynamic *blob_fc = NULL;
+	int ret;
+
+	BT_LOGD_STR("Creating default dynamic BLOB field class object.");
+	blob_fc = g_new0(struct bt_field_class_blob_dynamic, 1);
+	if (!blob_fc) {
+		BT_LIB_LOGE_APPEND_CAUSE(
+			"Failed to allocate one dynamic BLOB field class.");
+		goto error;
+	}
+
+	ret = init_blob_field_class((void *) blob_fc, type,
+		destroy_dynamic_blob_field_class, trace_class);
+	if (ret) {
+		goto error;
+	}
+
+	goto end;
+
+error:
+	BT_OBJECT_PUT_REF_AND_RESET(blob_fc);
+
+end:
+	return blob_fc;
+}
+
+BT_EXPORT
+struct bt_field_class *bt_field_class_blob_dynamic_without_length_field_location_create(
+		struct bt_trace_class *trace_class)
+{
+	struct bt_field_class_blob_dynamic *blob_fc = NULL;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace_class, 1);
+
+	blob_fc = create_dynamic_blob_field_class(trace_class,
+		BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITHOUT_LENGTH_FIELD);
+	if (!blob_fc) {
+		goto error;
+	}
+
+	BT_LIB_LOGD("Created dynamic BLOB field class without field location object: %!+F",
+		blob_fc);
+
+	goto end;
+
+error:
+	BT_OBJECT_PUT_REF_AND_RESET(blob_fc);
+
+end:
+	return (void *) blob_fc;
+}
+
+BT_EXPORT
+struct bt_field_class *bt_field_class_blob_dynamic_with_length_field_location_create(
+		bt_trace_class *trace_class,
+		const bt_field_location *length_field_location)
+{
+	struct bt_field_class_blob_dynamic *blob_fc = NULL;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_FL_NON_NULL(length_field_location);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace_class, 1);
+
+	blob_fc = create_dynamic_blob_field_class(trace_class,
+		BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITH_LENGTH_FIELD);
+	if (!blob_fc) {
+		goto error;
+	}
+
+	blob_fc->length_fl = length_field_location;
+	bt_object_get_ref_no_null_check(length_field_location);
+
+	BT_LIB_LOGD("Created dynamic BLOB field class with field location object: %!+F",
+		blob_fc);
+
+	goto end;
+
+error:
+	BT_OBJECT_PUT_REF_AND_RESET(blob_fc);
+
+end:
+	return (void *) blob_fc;
+}
+
+BT_EXPORT
+const bt_field_location *
+bt_field_class_blob_dynamic_with_length_field_borrow_length_field_location_const(
+		const bt_field_class *fc)
+{
+	const struct bt_field_class_blob_dynamic *blob_fc = (const void *) fc;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_FC_HAS_TYPE("field-class", fc,
+		"dynamic-blob-field-class-with-length-field",
+		BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITH_LENGTH_FIELD,
+		"Field class");
+	BT_ASSERT_PRE_FC_MIP_VERSION_GE(fc, 1);
+	BT_ASSERT(blob_fc->length_fl);
+
+	return blob_fc->length_fl;
+}
+
+BT_EXPORT
 void bt_field_class_get_ref(const struct bt_field_class *field_class)
 {
 	bt_object_get_ref(field_class);

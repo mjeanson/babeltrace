@@ -43,6 +43,9 @@ given \bt_field from a given <em>root scope</em>.
 
 A field location indicates how to reach:
 
+- The length field of a \bt_dblob_field
+  (instances with a linked length field).
+
 - The length field of a \bt_darray_field
   (instances with a linked length field).
 

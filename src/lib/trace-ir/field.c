@@ -135,6 +135,13 @@ struct bt_field_methods variant_field_methods = {
 };
 
 static
+struct bt_field_methods blob_field_methods = {
+	.set_is_frozen = set_single_field_is_frozen,
+	.is_set = single_field_is_set,
+	.reset = reset_single_field,
+};
+
+static
 struct bt_field *create_bool_field(struct bt_field_class *);
 
 static
@@ -165,6 +172,9 @@ static
 struct bt_field *create_variant_field(struct bt_field_class *);
 
 static
+struct bt_field *create_blob_field(struct bt_field_class *);
+
+static
 void destroy_bool_field(struct bt_field *field);
 
 static
@@ -190,6 +200,9 @@ void destroy_option_field(struct bt_field *field);
 
 static
 void destroy_variant_field(struct bt_field *field);
+
+static
+void destroy_blob_field(struct bt_field *field);
 
 BT_EXPORT
 struct bt_field_class *bt_field_borrow_class(struct bt_field *field)
@@ -259,6 +272,11 @@ struct bt_field *bt_field_create(struct bt_field_class *fc)
 	case BT_FIELD_CLASS_TYPE_VARIANT_WITH_UNSIGNED_INTEGER_SELECTOR_FIELD:
 	case BT_FIELD_CLASS_TYPE_VARIANT_WITH_SIGNED_INTEGER_SELECTOR_FIELD:
 		field = create_variant_field(fc);
+		break;
+	case BT_FIELD_CLASS_TYPE_STATIC_BLOB:
+	case BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITHOUT_LENGTH_FIELD:
+	case BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITH_LENGTH_FIELD:
+		field = create_blob_field(fc);
 		break;
 	default:
 		bt_common_abort();
@@ -525,6 +543,43 @@ struct bt_field *create_variant_field(struct bt_field_class *fc)
 
 end:
 	return (void *) var_field;
+}
+
+static
+struct bt_field *create_blob_field(struct bt_field_class *fc)
+{
+	struct bt_field_blob *blob_field;
+
+	BT_LIB_LOGD("Creating BLOB field object: %![fc-]+F", fc);
+	blob_field = g_new0(struct bt_field_blob, 1);
+	if (!blob_field) {
+		BT_LIB_LOGE_APPEND_CAUSE(
+			"Failed to allocate one BLOB field.");
+		goto end;
+	}
+
+	init_field((void *) blob_field, fc, &blob_field_methods);
+
+	if (bt_field_class_type_is(fc->type, BT_FIELD_CLASS_TYPE_STATIC_BLOB)) {
+		struct bt_field_class_blob_static *blob_static_fc =
+			(void *) fc;
+		blob_field->length = blob_static_fc->length;
+		blob_field->data = g_malloc(blob_field->length);
+		if (!blob_field->data) {
+			BT_LIB_LOGE_APPEND_CAUSE(
+				"Failed to allocate BLOB field data: %![fc-]+F",
+				fc);
+			goto error;
+		}
+	}
+
+	goto end;
+error:
+	bt_field_destroy((void *) blob_field);
+	blob_field = NULL;
+
+end:
+	return (void *) blob_field;
 }
 
 static inline
@@ -1290,6 +1345,81 @@ uint64_t bt_field_variant_get_selected_option_index(
 	return var_field->selected_index;
 }
 
+BT_EXPORT
+uint8_t *bt_field_blob_get_data(struct bt_field *field)
+{
+	const struct bt_field_blob *blob_field = (const void *) field;
+
+	BT_ASSERT_PRE_DEV_FIELD_NON_NULL(field);
+	BT_ASSERT_PRE_DEV_FIELD_IS_BLOB("field", field, "Field");
+	BT_ASSERT_PRE_DEV_FIELD_HOT(field);
+	BT_ASSERT_PRE_DEV("blob-field-length-is-set",
+		blob_field->length > 0,
+		"BLOB field length is not set: %!+f", field);
+
+	/* Assume that the user will fill the bytes. */
+	bt_field_set_single(field, true);
+
+	return blob_field->data;
+}
+
+BT_EXPORT
+const uint8_t *bt_field_blob_get_data_const(const struct bt_field *field)
+{
+	const struct bt_field_blob *blob_field = (const void *) field;
+
+	BT_ASSERT_PRE_DEV_FIELD_NON_NULL(field);
+	BT_ASSERT_PRE_DEV_FIELD_IS_BLOB("field", field, "Field");
+
+	return blob_field->data;
+}
+
+BT_EXPORT
+enum bt_field_blob_dynamic_set_length_status bt_field_blob_dynamic_set_length(
+		struct bt_field *field, uint64_t length)
+{
+	int ret;
+	struct bt_field_blob *blob_field = (void *) field;
+
+	BT_ASSERT_PRE_DEV_NO_ERROR();
+	BT_ASSERT_PRE_DEV_FIELD_NON_NULL(field);
+	BT_ASSERT_PRE_DEV_FIELD_IS_DYNAMIC_BLOB("field", field, "Field");
+	BT_ASSERT_PRE_DEV_FIELD_HOT(field);
+
+	if (G_UNLIKELY(length > blob_field->length)) {
+		/* Make more room */
+		uint8_t *data = g_realloc(blob_field->data, length);
+
+		if (!data) {
+			BT_LIB_LOGE_APPEND_CAUSE(
+				"Failed to reallocate BLOB field data: %!+f",
+				field);
+			ret = BT_FIELD_DYNAMIC_BLOB_SET_LENGTH_STATUS_MEMORY_ERROR;
+			goto end;
+		}
+
+		blob_field->data = data;
+	}
+
+	blob_field->length = length;
+	ret = BT_FIELD_DYNAMIC_BLOB_SET_LENGTH_STATUS_OK;
+
+end:
+	return ret;
+}
+
+BT_EXPORT
+uint64_t bt_field_blob_get_length(const struct bt_field *field)
+{
+	const struct bt_field_blob *blob_field = (const void *) field;
+
+	BT_ASSERT_PRE_DEV_FIELD_NON_NULL(field);
+	BT_ASSERT_PRE_DEV_FIELD_IS_BLOB("field", field, "Field");
+
+	return blob_field->length;
+}
+
+
 static inline
 void bt_field_finalize(struct bt_field *field)
 {
@@ -1385,6 +1515,20 @@ void destroy_variant_field(struct bt_field *field)
 }
 
 static
+void destroy_blob_field(struct bt_field *field)
+{
+	struct bt_field_blob *blob_field = (void *) field;
+
+	BT_ASSERT(field);
+	BT_LIB_LOGD("Destroying BLOB field object: %!+f", field);
+	bt_field_finalize(field);
+
+	g_free(blob_field->data);
+
+	g_free(field);
+}
+
+static
 void destroy_array_field(struct bt_field *field)
 {
 	struct bt_field_array *array_field = (void *) field;
@@ -1460,6 +1604,11 @@ void bt_field_destroy(struct bt_field *field)
 	case BT_FIELD_CLASS_TYPE_VARIANT_WITH_UNSIGNED_INTEGER_SELECTOR_FIELD:
 	case BT_FIELD_CLASS_TYPE_VARIANT_WITH_SIGNED_INTEGER_SELECTOR_FIELD:
 		destroy_variant_field(field);
+		break;
+	case BT_FIELD_CLASS_TYPE_STATIC_BLOB:
+	case BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITHOUT_LENGTH_FIELD:
+	case BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITH_LENGTH_FIELD:
+		destroy_blob_field(field);
 		break;
 	default:
 		bt_common_abort();

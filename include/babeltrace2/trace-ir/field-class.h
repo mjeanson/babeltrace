@@ -51,6 +51,7 @@ categories:
     - \ref api-tir-fc-enum "Enumeration" (unsigned and signed)
     - \ref api-tir-fc-real "Real" (single-precision and double-precision)
     - \ref api-tir-fc-string "String"
+    - \ref api-tir-fc-blob "BLOB" (static and dynamic)
   </dd>
 
   <dt>Container</dt>
@@ -147,6 +148,22 @@ functions for each type of \em concrete (non-abstract) field class:
     <td><em>\ref api-tir-fc-string "String"</em>
     <td>#BT_FIELD_CLASS_TYPE_STRING
     <td>bt_field_class_string_create()
+  <tr>
+    <td><em>Static \ref api-tir-fc-blob "BLOB"</em>
+    <td>#BT_FIELD_CLASS_TYPE_STATIC_BLOB
+    <td>bt_field_class_blob_static_create()
+  <tr>
+    <td>
+      <em>Dynamic \ref api-tir-fc-blob "BLOB"
+      (instances without a linked length field)</em>
+    <td>#BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITHOUT_LENGTH_FIELD
+    <td>bt_field_class_blob_dynamic_without_length_field_location_create()
+  <tr>
+    <td>
+      <em>Dynamic \ref api-tir-fc-blob "BLOB"
+      (instances with a linked length field)</em>
+    <td>#BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITH_LENGTH_FIELD
+    <td>bt_field_class_blob_dynamic_with_length_field_location_create()
   <tr>
     <td><em>Static \ref api-tir-fc-array "array"</em>
     <td>#BT_FIELD_CLASS_TYPE_STATIC_ARRAY
@@ -549,6 +566,102 @@ A string field contains an UTF-8 string value.
 Create a string field class with bt_field_class_string_create().
 
 A string field class has no specific properties.
+
+<h1>\anchor api-tir-fc-blob BLOB field classes</h1>
+
+@image html fc-blob.png
+
+<strong><em>BLOB field classes</em></strong> are
+classes of \bt_p_blob_field.
+
+BLOB fields contain zero or more bytes of binary data.
+
+@note
+    BLOB field classes are only available when the \bt_trace_cls from
+    which you create them was created from a \bt_comp which belongs
+    to a trace processing \bt_graph with the effective \bt_mip
+    version&nbsp;1.
+
+A BLOB field class is an \em abstract field class: you cannot create
+one. The concrete BLOB field classes are:
+
+<dl>
+  <dt>Static BLOB field class</dt>
+  <dd>
+    Its instances (static BLOB fields) contain a fixed number of bytes.
+
+    Create with bt_field_class_blob_static_create().
+
+    A static BLOB field class has the following specific property:
+
+    <dl>
+      <dt>
+        \anchor api-tir-fc-sblob-prop-len
+        Length
+      </dt>
+      <dd>
+        Number of bytes contained in the instances (static BLOB
+        fields) of the static BLOB field class.
+
+        You cannot change the length once the static BLOB field class is
+        created.
+
+        Get a static BLOB field class's length with
+        bt_field_class_blob_static_get_length().
+      </dd>
+    </dl>
+  </dd>
+
+  <dt>Dynamic BLOB field class</dt>
+  <dd>
+    Its instances (dynamic BLOB fields) contain a variable number
+    of bytes.
+
+    There are two types of dynamic BLOB field classes: instances
+    without or with a linked length field. See
+    \ref api-tir-fc-link "Fields with links to other fields"
+    to learn more.
+
+    @image html dblob-link.png "A dynamic blob field linked to an unsigned integer length field."
+
+    Create with
+    bt_field_class_blob_dynamic_without_length_field_location_create()
+    or bt_field_class_blob_dynamic_with_length_field_location_create().
+
+    The class of a dynamic BLOB field with a linked length field has
+    the following specific property:
+
+    <dl>
+      <dt>
+        \anchor api-tir-fc-dblob-prop-len-fl
+        Length field location
+      </dt>
+      <dd>
+        \bt_c_field_loc to locate the linked length field of an
+        instance.
+
+        Get a dynamic BLOB field class's length field location with
+        bt_field_class_blob_dynamic_with_length_field_borrow_length_field_location_const().
+      </dd>
+    </dl>
+  </dd>
+</dl>
+
+BLOB field classes have the following common property:
+
+<dl>
+  <dt>
+    \anchor api-tir-fc-blob-prop-media-type
+    Media type
+  </dt>
+  <dd>
+    <a href="https://datatracker.ietf.org/doc/html/rfc2046">IANA media type</a>
+    of instances of the BLOB field class.
+
+    Use bt_field_class_blob_set_media_type() and
+    bt_field_class_blob_get_media_type().
+  </dd>
+</dl>
 
 <h1>\anchor api-tir-fc-array Array field classes</h1>
 
@@ -1167,18 +1280,24 @@ Variant field classes have the following common property:
 
 <h1>\anchor api-tir-fc-link Fields with links to other fields</h1>
 
-An instance of a \bt_darray_fc, a \bt_opt_fc, or a \bt_var_fc \em may
-have a link to another, anterior field within the same \bt_pkt or
-\bt_ev.
+An instance of a \bt_dblob_fc, a \bt_darray_fc, a \bt_opt_fc, or a
+\bt_var_fc \em may have a link to another, anterior field within the
+same \bt_pkt or \bt_ev.
 
 This feature exists so that the linked field can contain the value of a
 dynamic property of the "dependent" field. Those properties are:
 
 <dl>
+  <dt>\bt_c_dblob_field</dt>
+  <dd>
+    The linked field, a \bt_uint_field, contains the \b length (number
+    of bytes) of the dynamic BLOB field.
+  </dd>
+
   <dt>\bt_c_darray_field</dt>
   <dd>
-    The linked field, a \bt_uint_field, contains the \b length of the
-    dynamic array field.
+    The linked field, a \bt_uint_field, contains the \b length (number
+    of elements) of the dynamic array field.
   </dd>
 
   <dt>\bt_c_opt_field</dt>
@@ -1249,6 +1368,7 @@ processing \bt_graph:
 
     The functions to borrow the field location of a field class are:
 
+    - bt_field_class_blob_dynamic_with_length_field_borrow_length_field_location_const()
     - bt_field_class_array_dynamic_with_length_field_borrow_length_field_location_const()
     - bt_field_class_option_with_selector_field_borrow_selector_field_location_const()
     - bt_field_class_variant_with_selector_field_borrow_selector_field_location_const()
@@ -1486,6 +1606,52 @@ typedef enum bt_field_class_type {
 	    \bt_c_string_fc..
 	*/
 	BT_FIELD_CLASS_TYPE_STRING						= 1ULL << 9,
+
+	/*!
+	@brief
+	    \bt_c_blob_fc.
+
+	No field class has this type: use it with
+	bt_field_class_type_is().
+	*/
+	BT_FIELD_CLASS_TYPE_BLOB						= (1ULL << 29),
+
+	/*!
+	@brief
+	    \bt_c_sblob_fc.
+
+	This type conceptually inherits #BT_FIELD_CLASS_TYPE_BLOB.
+	*/
+	BT_FIELD_CLASS_TYPE_STATIC_BLOB						= (1ULL << 30) | BT_FIELD_CLASS_TYPE_BLOB,
+
+	/*!
+	@brief
+	    \bt_c_dblob_fc.
+
+	This type conceptually inherits #BT_FIELD_CLASS_TYPE_BLOB.
+
+	No field class has this type: use it with
+	bt_field_class_type_is().
+	*/
+	BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB					= (1ULL << 31) | BT_FIELD_CLASS_TYPE_BLOB,
+
+	/*!
+	@brief
+	    \bt_c_dblob_fc (instances without a linked length field).
+
+	This type conceptually inherits
+	#BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB.
+	*/
+	BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITHOUT_LENGTH_FIELD			= (1ULL << 32) | BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB,
+
+	/*!
+	@brief
+	    \bt_c_dblob_fc (instances with a linked length field).
+
+	This type conceptually inherits
+	#BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB.
+	*/
+	BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITH_LENGTH_FIELD			= (1ULL << 33) | BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB,
 
 	/*!
 	@brief
@@ -2890,6 +3056,267 @@ value:
 */
 extern bt_field_class *bt_field_class_string_create(
 		bt_trace_class *trace_class) __BT_NOEXCEPT;
+
+/*! @} */
+
+/*!
+@name BLOB field class
+@{
+*/
+
+/*!
+@brief
+    Creates a \bt_sblob_fc having the length \bt_p{length} from the
+    trace class \bt_p{trace_class}.
+
+On success, the returned static BLOB field class has the following
+property values:
+
+<table>
+  <tr>
+    <th>Property
+    <th>Value
+  <tr>
+    <td>\ref api-tir-fc-sarray-prop-len "Length"
+    <td>\bt_p{length}
+  <tr>
+    <td>\ref api-tir-fc-blob-prop-media-type "Media type"
+    <td><code>application/octet-stream</code>
+  <tr>
+    <td>\ref api-tir-fc-prop-user-attrs "User attributes"
+    <td>Empty \bt_map_val
+</table>
+
+@param[in] trace_class
+    Trace class from which to create a static BLOB field class.
+@param[in] length
+    Length (number of bytes) of the instances of the static BLOB
+    field class to create.
+
+@returns
+    New static BLOB field class reference, or \c NULL on memory error.
+
+@bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 1}
+
+@sa bt_field_class_blob_dynamic_without_length_field_location_create() &mdash;
+    Creates a class of dynamic BLOB field without a linked length field.
+@sa bt_field_class_blob_dynamic_with_length_field_location_create() &mdash;
+    Creates a class of dynamic BLOB field with a linked length field.
+*/
+extern bt_field_class *bt_field_class_blob_static_create(
+		bt_trace_class *trace_class, uint64_t length) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Creates a \bt_dblob_fc (instances without a linked length field)
+    from the trace class \bt_p{trace_class}.
+
+On success, the returned dynamic BLOB field class has the following
+property values:
+
+<table>
+  <tr>
+    <th>Property
+    <th>Value
+  <tr>
+    <td>\ref api-tir-fc-dblob-prop-len-fl "Length field location"
+    <td>
+      \em None
+  <tr>
+    <td>\ref api-tir-fc-blob-prop-media-type "Media type"
+    <td><code>application/octet-stream</code>
+  <tr>
+    <td>\ref api-tir-fc-prop-user-attrs "User attributes"
+    <td>Empty \bt_map_val
+</table>
+
+@param[in] trace_class
+    Trace class from which to create a dynamic BLOB field class.
+
+@returns
+    New dynamic BLOB field class reference (without a length field),
+    or \c NULL on memory error.
+
+@bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 1}
+
+@sa bt_field_class_blob_dynamic_with_length_field_location_create() &mdash;
+    Creates a class of dynamic BLOB field with a linked length field.
+*/
+extern bt_field_class *
+bt_field_class_blob_dynamic_without_length_field_location_create(
+		bt_trace_class *trace_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Creates a \bt_dblob_fc (instances with a linked length field)
+    having the length \bt_field_loc \bt_p{length_field_location} from
+    the trace class \bt_p{trace_class}.
+
+On success, the returned dynamic BLOB field class has the following
+property values:
+
+<table>
+  <tr>
+    <th>Property
+    <th>Value
+  <tr>
+    <td>\ref api-tir-fc-dblob-prop-len-fl "Length field location"
+    <td>
+      \bt_p{length_field_location}.
+
+      See \ref api-tir-fc-link "Fields with links to other fields"
+      to learn more.
+  <tr>
+    <td>\ref api-tir-fc-blob-prop-media-type "Media type"
+    <td><code>application/octet-stream</code>
+  <tr>
+    <td>\ref api-tir-fc-prop-user-attrs "User attributes"
+    <td>Empty \bt_map_val
+</table>
+
+@param[in] trace_class
+    Trace class from which to create a dynamic BLOB field class.
+@param[in] length_field_location
+    Length field location of the dynamic BLOB field class to create.
+
+@returns
+    New dynamic BLOB field class reference (instances with a linked
+    length field), or \c NULL on memory error.
+
+@bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 1}
+@bt_pre_not_null{length_field_location}
+
+@sa bt_field_class_blob_dynamic_without_length_field_location_create() &mdash;
+    Creates a class of dynamic BLOB field without a linked
+    length field.
+*/
+extern bt_field_class *
+bt_field_class_blob_dynamic_with_length_field_location_create(
+		bt_trace_class *trace_class,
+		const bt_field_location *length_field_location) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the length of the \bt_sblob_fc \bt_p{field_class}.
+
+See the \ref api-tir-fc-sblob-prop-len "length" property.
+
+@param[in] field_class
+    Static BLOB field class of which to get the length (number of bytes
+    in instances).
+
+@returns
+    Length of \bt_p{field_class}.
+
+@bt_pre_not_null{field_class}
+@bt_pre_is_sblob_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 1}
+*/
+extern uint64_t bt_field_class_blob_static_get_length(
+		const bt_field_class *field_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Borrows the length field location from the \bt_dblob_fc (instances
+    with a linked length field) \bt_p{field_class}.
+
+See the \ref api-tir-fc-dblob-prop-len-fl "length field location"
+property.
+
+@param[in] field_class
+    Dynamic BLOB field class from which to borrow the length
+    field location.
+
+@returns
+    Length field location of \bt_p{field_class}.
+
+@bt_pre_not_null{field_class}
+@bt_pre_is_dblob_wl_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 1}
+*/
+extern const bt_field_location *
+bt_field_class_blob_dynamic_with_length_field_borrow_length_field_location_const(
+		const bt_field_class *field_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Status codes for bt_field_class_blob_set_media_type().
+*/
+typedef enum bt_field_class_blob_set_media_type_status {
+	/*!
+	@brief
+	    Success.
+	*/
+	BT_FIELD_CLASS_BLOB_SET_MEDIA_TYPE_STATUS_OK		= __BT_FUNC_STATUS_OK,
+
+	/*!
+	@brief
+	    Out of memory.
+	*/
+	BT_FIELD_CLASS_BLOB_SET_MEDIA_TYPE_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
+} bt_field_class_blob_set_media_type_status;
+
+/*!
+@brief
+    Sets the IANA media type of the \bt_blob_fc \bt_p{field_class}
+    to a copy of \bt_p{media_type}.
+
+See the \ref api-tir-fc-blob-prop-media-type "media type" property.
+
+@param[in] field_class
+    BLOB field class of which to set the media type to a copy of
+    \bt_p{media_type}.
+@param[in] media_type
+    New media type of \bt_p{field_class} (copied).
+
+@retval #BT_FIELD_CLASS_BLOB_SET_MEDIA_TYPE_STATUS_OK
+    Success.
+@retval #BT_FIELD_CLASS_BLOB_SET_MEDIA_TYPE_STATUS_MEMORY_ERROR
+    Out of memory.
+
+@bt_pre_not_null{field_class}
+@bt_pre_hot{field_class}
+@bt_pre_is_blob_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 1}
+
+@sa bt_field_class_blob_get_media_type() &mdash;
+    Returns the IANA media type of BLOB field class.
+*/
+extern bt_field_class_blob_set_media_type_status
+bt_field_class_blob_set_media_type(bt_field_class *field_class,
+		const char *media_type) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the IANA media type of the \bt_blob_fc \bt_p{field_class}.
+
+See the \ref api-tir-fc-blob-prop-media-type "media type" property.
+
+If \bt_p{field_class} has no media type, this function returns \c NULL.
+
+@param[in] field_class
+    BLOB field class of which to get the media type.
+
+@returns
+    @parblock
+    Media type of \bt_p{field_class}, or \c NULL if none.
+
+    The returned pointer remains valid as long as \bt_p{field_class}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{field_class}
+@bt_pre_is_blob_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 1}
+
+@sa bt_field_class_blob_set_media_type() &mdash;
+    Sets the media type of a BLOB field class.
+*/
+extern const char *bt_field_class_blob_get_media_type(
+		const bt_field_class *field_class) __BT_NOEXCEPT;
 
 /*! @} */
 

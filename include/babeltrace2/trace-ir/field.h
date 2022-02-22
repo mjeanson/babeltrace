@@ -56,6 +56,7 @@ categories:
     - \ref api-tir-field-enum "Enumeration" (unsigned and signed)
     - \ref api-tir-field-real "Real" (single-precision and double-precision)
     - \ref api-tir-field-string "String"
+    - \ref api-tir-field-blob "BLOB" (static and dynamic)
   </dd>
 
   <dt>Container</dt>
@@ -311,6 +312,48 @@ bt_field_string_append() and bt_field_string_append_with_length().
 
 Clear a string field with bt_field_string_clear().
 
+<h1>\anchor api-tir-field-blob BLOB fields</h1>
+
+<strong><em>BLOB fields</em></strong> are \bt_blob_fc instances.
+
+BLOB fields contain zero or more bytes of binary data.
+
+@note
+    BLOB fields are only available when the \bt_trace_cls from
+    which you create their classes was created from a \bt_comp
+    which belongs to a trace processing \bt_graph with the effective
+    \bt_mip version&nbsp;1.
+
+A BLOB field is an \em abstract field. The concrete BLOB fields are:
+
+<dl>
+  <dt>Static BLOB field</dt>
+  <dd>
+    A \bt_sblob_fc instance.
+
+    A static BLOB field contains a fixed number of bytes. Its length
+    is \ref api-tir-fc-sblob-prop-len "given by its class".
+  </dd>
+
+  <dt>Dynamic BLOB field</dt>
+  <dd>
+    A \bt_dblob_fc instance.
+
+    A dynamic BLOB field contains a variable number of bytes, that is,
+    each instance of the same dynamic BLOB field class can contain a
+    different number of bytes.
+
+    Set a dynamic BLOB field's length with
+    bt_field_blob_dynamic_set_length() before you get its data
+    with bt_field_blob_get_data().
+  </dd>
+</dl>
+
+Get a BLOB field's length with bt_field_blob_get_length().
+
+Get the data of a BLOB field with bt_field_blob_get_data()
+or bt_field_blob_get_data_const().
+
 <h1>\anchor api-tir-field-array Array fields</h1>
 
 <strong><em>Array fields</em></strong> are \bt_array_fc instances.
@@ -328,7 +371,7 @@ An array field is an \em abstract field. The concrete array fields are:
     is \ref api-tir-fc-sarray-prop-len "given by its class".
   </dd>
 
-  <dt>Dynamic array field class</dt>
+  <dt>Dynamic array field</dt>
   <dd>
     A \bt_darray_fc instance.
 
@@ -1075,6 +1118,122 @@ extern void bt_field_string_clear(bt_field *field) __BT_NOEXCEPT;
 /*! @} */
 
 /*!
+@name BLOB field
+@{
+*/
+
+/*!
+@brief
+    Returns the length (number of bytes) of the \bt_blob_field \bt_p{field}.
+
+@param[in] field
+    BLOB field of which to get the length.
+
+@returns
+    Length of \bt_p{field}.
+
+@bt_pre_not_null{field}
+@bt_pre_is_blob_field{field}
+@bt_pre_field_with_mip{field, 1}
+*/
+extern uint64_t bt_field_blob_get_length(const bt_field *field);
+
+/*!
+@brief
+    Returns the writable data of the \bt_blob_field \bt_p{field}.
+
+@attention
+    If \bt_p{field} is a dynamic BLOB field, then it must have a length
+    (call bt_field_blob_dynamic_set_length()) before you call this
+    function.
+
+@param[in] field
+    BLOB field from which to get the writable data.
+
+@returns
+    @parblock
+    Writable data of \bt_p{field}.
+
+    The returned pointer remains valid until \bt_p{field} is modified.
+    @endparblock
+
+@bt_pre_not_null{field}
+@bt_pre_is_blob_field{field}
+@bt_pre_hot{field}
+@bt_pre_field_with_mip{field, 1}
+
+@sa bt_field_blob_get_data_const() &mdash;
+    Returns the readable data of a BLOB field.
+*/
+extern uint8_t *bt_field_blob_get_data(bt_field *field);
+
+/*!
+@brief
+    Returns the readable data of the \bt_blob_field \bt_p{field}.
+
+@param[in] field
+    BLOB field from which to get the readable data.
+
+@returns
+    @parblock
+    Readable data of \bt_p{field}.
+
+    The returned pointer remains valid until \bt_p{field} is modified.
+    @endparblock
+
+@bt_pre_not_null{field}
+@bt_pre_is_blob_field{field}
+@bt_pre_field_with_mip{field, 1}
+
+@sa bt_field_blob_get_data() &mdash;
+    Returns the writable data of a BLOB field.
+*/
+extern const uint8_t *bt_field_blob_get_data_const(const bt_field *field);
+
+/*!
+@brief
+    Status codes for bt_field_blob_dynamic_set_length().
+*/
+typedef enum bt_field_blob_dynamic_set_length_status {
+	/*!
+	@brief
+	    Success.
+	*/
+	BT_FIELD_DYNAMIC_BLOB_SET_LENGTH_STATUS_OK		= __BT_FUNC_STATUS_OK,
+
+	/*!
+	@brief
+	    Out of memory.
+	*/
+	BT_FIELD_DYNAMIC_BLOB_SET_LENGTH_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
+} bt_field_blob_dynamic_set_length_status;
+
+/*!
+@brief
+    Sets the length (number of bytes) of the
+    \bt_dblob_field \bt_p{field}.
+
+@param[in] field
+    Dynamic BLOB field of which to set the length (number of bytes).
+@param[in] length
+    New length of \bt_p{field}.
+
+@retval #BT_FIELD_DYNAMIC_BLOB_SET_LENGTH_STATUS_OK
+    Success.
+@retval #BT_FIELD_DYNAMIC_BLOB_SET_LENGTH_STATUS_MEMORY_ERROR
+    Out of memory.
+
+@bt_pre_not_null{field}
+@bt_pre_is_dblob_field{field}
+@bt_pre_hot{field}
+@bt_pre_field_with_mip{field, 1}
+*/
+extern bt_field_blob_dynamic_set_length_status bt_field_blob_dynamic_set_length(
+		bt_field *field, uint64_t length);
+
+/*! @} */
+
+/*!
 @name Array field
 @{
 */
@@ -1100,7 +1259,7 @@ extern uint64_t bt_field_array_get_length(const bt_field *field) __BT_NOEXCEPT;
     \bt_p{field}.
 
 @attention
-    If \bt_p{field} is a dynamic array field, it must have a length
+    If \bt_p{field} is a dynamic array field, then it must have a length
     (call bt_field_array_dynamic_set_length()) before you call this
     function.
 

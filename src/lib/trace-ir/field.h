@@ -96,6 +96,13 @@ struct bt_field_variant {
 	GPtrArray *fields;
 };
 
+struct bt_field_blob {
+	struct bt_field common;
+
+	uint64_t length;
+	uint8_t *data;
+};
+
 struct bt_field_array {
 	struct bt_field common;
 
