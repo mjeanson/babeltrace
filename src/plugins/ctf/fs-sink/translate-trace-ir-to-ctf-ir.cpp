@@ -26,7 +26,6 @@
 
 struct field_path_elem
 {
-    uint64_t index_in_parent;
     GString *name;
 
     /* Weak */
@@ -152,8 +151,8 @@ end:
     return must_protect;
 }
 
-static inline int cur_path_stack_push(struct ctx *ctx, uint64_t index_in_parent, const char *name,
-                                      bool force_protect_name, const bt_field_class *ir_fc,
+static inline int cur_path_stack_push(struct ctx *ctx, const char *name, bool force_protect_name,
+                                      const bt_field_class *ir_fc,
                                       struct fs_sink_ctf_field_class *parent_fc)
 {
     int ret = 0;
@@ -161,7 +160,6 @@ static inline int cur_path_stack_push(struct ctx *ctx, uint64_t index_in_parent,
 
     g_array_set_size(ctx->cur_path, ctx->cur_path->len + 1);
     field_path_elem = cur_path_stack_top(ctx);
-    field_path_elem->index_in_parent = index_in_parent;
     field_path_elem->name = g_string_new(NULL);
 
     if (name) {
@@ -605,7 +603,7 @@ static inline int translate_structure_field_class_members(
         member = bt_field_class_structure_borrow_member_by_index_const(ir_fc, i);
         name = bt_field_class_structure_member_get_name(member);
         memb_ir_fc = bt_field_class_structure_member_borrow_field_class_const(member);
-        ret = cur_path_stack_push(ctx, i, name, true, memb_ir_fc, &struct_fc->base);
+        ret = cur_path_stack_push(ctx, name, true, memb_ir_fc, &struct_fc->base);
         if (ret) {
             BT_COMP_LOGE("Cannot translate structure field class member: "
                          "name=\"%s\"",
@@ -631,8 +629,8 @@ end:
 static inline int translate_structure_field_class(struct ctx *ctx)
 {
     int ret;
-    struct fs_sink_ctf_field_class_struct *fc = fs_sink_ctf_field_class_struct_create_empty(
-        cur_path_stack_top(ctx)->ir_fc, cur_path_stack_top(ctx)->index_in_parent);
+    struct fs_sink_ctf_field_class_struct *fc =
+        fs_sink_ctf_field_class_struct_create_empty(cur_path_stack_top(ctx)->ir_fc);
 
     BT_ASSERT(fc);
     append_to_parent_field_class(ctx, &fc->base);
@@ -844,8 +842,8 @@ end:
 
 static inline int translate_option_field_class(struct ctx *ctx)
 {
-    struct fs_sink_ctf_field_class_option *fc = fs_sink_ctf_field_class_option_create_empty(
-        cur_path_stack_top(ctx)->ir_fc, cur_path_stack_top(ctx)->index_in_parent);
+    struct fs_sink_ctf_field_class_option *fc =
+        fs_sink_ctf_field_class_option_create_empty(cur_path_stack_top(ctx)->ir_fc);
     const bt_field_class *content_ir_fc =
         bt_field_class_option_borrow_field_class_const(fc->base.ir_fc);
     int ret;
@@ -864,7 +862,7 @@ static inline int translate_option_field_class(struct ctx *ctx)
      * unsigned enumeration field class).
      */
     append_to_parent_field_class(ctx, &fc->base);
-    ret = cur_path_stack_push(ctx, UINT64_C(-1), NULL, false, content_ir_fc, &fc->base);
+    ret = cur_path_stack_push(ctx, NULL, false, content_ir_fc, &fc->base);
     if (ret) {
         BT_COMP_LOGE_STR("Cannot translate option field class content.");
         goto end;
@@ -887,8 +885,8 @@ static inline int translate_variant_field_class(struct ctx *ctx)
 {
     int ret = 0;
     uint64_t i;
-    struct fs_sink_ctf_field_class_variant *fc = fs_sink_ctf_field_class_variant_create_empty(
-        cur_path_stack_top(ctx)->ir_fc, cur_path_stack_top(ctx)->index_in_parent);
+    struct fs_sink_ctf_field_class_variant *fc =
+        fs_sink_ctf_field_class_variant_create_empty(cur_path_stack_top(ctx)->ir_fc);
     bt_field_class_type ir_fc_type;
     const bt_field_path *ir_selector_field_path = NULL;
     struct fs_sink_ctf_field_class *tgt_fc = NULL;
@@ -1015,7 +1013,7 @@ append_to_parent:
          * option name because it's already protected at this
          * point.
          */
-        ret = cur_path_stack_push(ctx, i, prot_opt_name, false, opt_ir_fc, &fc->base);
+        ret = cur_path_stack_push(ctx, prot_opt_name, false, opt_ir_fc, &fc->base);
         if (ret) {
             BT_COMP_LOGE("Cannot translate variant field class option: "
                          "name=\"%s\"",
@@ -1045,15 +1043,15 @@ end:
 
 static inline int translate_static_array_field_class(struct ctx *ctx)
 {
-    struct fs_sink_ctf_field_class_array *fc = fs_sink_ctf_field_class_array_create_empty(
-        cur_path_stack_top(ctx)->ir_fc, cur_path_stack_top(ctx)->index_in_parent);
+    struct fs_sink_ctf_field_class_array *fc =
+        fs_sink_ctf_field_class_array_create_empty(cur_path_stack_top(ctx)->ir_fc);
     const bt_field_class *elem_ir_fc =
         bt_field_class_array_borrow_element_field_class_const(fc->base.base.ir_fc);
     int ret;
 
     BT_ASSERT(fc);
     append_to_parent_field_class(ctx, &fc->base.base);
-    ret = cur_path_stack_push(ctx, UINT64_C(-1), NULL, false, elem_ir_fc, &fc->base.base);
+    ret = cur_path_stack_push(ctx, NULL, false, elem_ir_fc, &fc->base.base);
     if (ret) {
         BT_COMP_LOGE_STR("Cannot translate static array field class element.");
         goto end;
@@ -1074,8 +1072,8 @@ end:
 
 static inline int translate_dynamic_array_field_class(struct ctx *ctx)
 {
-    struct fs_sink_ctf_field_class_sequence *fc = fs_sink_ctf_field_class_sequence_create_empty(
-        cur_path_stack_top(ctx)->ir_fc, cur_path_stack_top(ctx)->index_in_parent);
+    struct fs_sink_ctf_field_class_sequence *fc =
+        fs_sink_ctf_field_class_sequence_create_empty(cur_path_stack_top(ctx)->ir_fc);
     const bt_field_class *elem_ir_fc =
         bt_field_class_array_borrow_element_field_class_const(fc->base.base.ir_fc);
     int ret;
@@ -1093,7 +1091,7 @@ static inline int translate_dynamic_array_field_class(struct ctx *ctx)
     }
 
     append_to_parent_field_class(ctx, &fc->base.base);
-    ret = cur_path_stack_push(ctx, UINT64_C(-1), NULL, false, elem_ir_fc, &fc->base.base);
+    ret = cur_path_stack_push(ctx, NULL, false, elem_ir_fc, &fc->base.base);
     if (ret) {
         BT_COMP_LOGE_STR("Cannot translate dynamic array field class element.");
         goto end;
@@ -1114,8 +1112,8 @@ end:
 
 static inline int translate_bool_field_class(struct ctx *ctx)
 {
-    struct fs_sink_ctf_field_class_bool *fc = fs_sink_ctf_field_class_bool_create(
-        cur_path_stack_top(ctx)->ir_fc, cur_path_stack_top(ctx)->index_in_parent);
+    struct fs_sink_ctf_field_class_bool *fc =
+        fs_sink_ctf_field_class_bool_create(cur_path_stack_top(ctx)->ir_fc);
 
     BT_ASSERT(fc);
     append_to_parent_field_class(ctx, &fc->base.base);
@@ -1124,8 +1122,8 @@ static inline int translate_bool_field_class(struct ctx *ctx)
 
 static inline int translate_bit_array_field_class(struct ctx *ctx)
 {
-    struct fs_sink_ctf_field_class_bit_array *fc = fs_sink_ctf_field_class_bit_array_create(
-        cur_path_stack_top(ctx)->ir_fc, cur_path_stack_top(ctx)->index_in_parent);
+    struct fs_sink_ctf_field_class_bit_array *fc =
+        fs_sink_ctf_field_class_bit_array_create(cur_path_stack_top(ctx)->ir_fc);
 
     BT_ASSERT(fc);
     append_to_parent_field_class(ctx, &fc->base);
@@ -1134,8 +1132,8 @@ static inline int translate_bit_array_field_class(struct ctx *ctx)
 
 static inline int translate_integer_field_class(struct ctx *ctx)
 {
-    struct fs_sink_ctf_field_class_int *fc = fs_sink_ctf_field_class_int_create(
-        cur_path_stack_top(ctx)->ir_fc, cur_path_stack_top(ctx)->index_in_parent);
+    struct fs_sink_ctf_field_class_int *fc =
+        fs_sink_ctf_field_class_int_create(cur_path_stack_top(ctx)->ir_fc);
 
     BT_ASSERT(fc);
     append_to_parent_field_class(ctx, &fc->base.base);
@@ -1144,8 +1142,8 @@ static inline int translate_integer_field_class(struct ctx *ctx)
 
 static inline int translate_real_field_class(struct ctx *ctx)
 {
-    struct fs_sink_ctf_field_class_float *fc = fs_sink_ctf_field_class_float_create(
-        cur_path_stack_top(ctx)->ir_fc, cur_path_stack_top(ctx)->index_in_parent);
+    struct fs_sink_ctf_field_class_float *fc =
+        fs_sink_ctf_field_class_float_create(cur_path_stack_top(ctx)->ir_fc);
 
     BT_ASSERT(fc);
     append_to_parent_field_class(ctx, &fc->base.base);
@@ -1154,8 +1152,8 @@ static inline int translate_real_field_class(struct ctx *ctx)
 
 static inline int translate_string_field_class(struct ctx *ctx)
 {
-    struct fs_sink_ctf_field_class_string *fc = fs_sink_ctf_field_class_string_create(
-        cur_path_stack_top(ctx)->ir_fc, cur_path_stack_top(ctx)->index_in_parent);
+    struct fs_sink_ctf_field_class_string *fc =
+        fs_sink_ctf_field_class_string_create(cur_path_stack_top(ctx)->ir_fc);
 
     BT_ASSERT(fc);
     append_to_parent_field_class(ctx, &fc->base);
@@ -1431,11 +1429,11 @@ static int translate_scope_field_class(struct ctx *ctx, bt_field_path_scope scop
 
     BT_ASSERT(bt_field_class_get_type(ir_fc) == BT_FIELD_CLASS_TYPE_STRUCTURE);
     BT_ASSERT(fc);
-    *fc = &fs_sink_ctf_field_class_struct_create_empty(ir_fc, UINT64_C(-1))->base;
+    *fc = &fs_sink_ctf_field_class_struct_create_empty(ir_fc)->base;
     BT_ASSERT(*fc);
     ctx->cur_scope = scope;
     BT_ASSERT(ctx->cur_path->len == 0);
-    ret = cur_path_stack_push(ctx, UINT64_C(-1), NULL, false, ir_fc, NULL);
+    ret = cur_path_stack_push(ctx, NULL, false, ir_fc, NULL);
     if (ret) {
         BT_COMP_LOGE("Cannot translate scope structure field class: "
                      "scope=%d",

@@ -39,9 +39,6 @@ struct fs_sink_ctf_field_class
     const bt_field_class *ir_fc;
 
     unsigned int alignment;
-
-    /* Index of the field class within its own parent */
-    uint64_t index_in_parent;
 };
 
 struct fs_sink_ctf_field_class_bit_array
@@ -288,33 +285,31 @@ static inline void fs_sink_ctf_field_class_destroy(struct fs_sink_ctf_field_clas
 static inline void _fs_sink_ctf_field_class_init(struct fs_sink_ctf_field_class *fc,
                                                  enum fs_sink_ctf_field_class_type type,
                                                  const bt_field_class *ir_fc,
-                                                 unsigned int alignment, uint64_t index_in_parent)
+                                                 unsigned int alignment)
 {
     BT_ASSERT(fc);
     fc->type = type;
     fc->ir_fc = ir_fc;
     fc->alignment = alignment;
-    fc->index_in_parent = index_in_parent;
 }
 
-static inline void _fs_sink_ctf_field_class_bit_array_init(
-    struct fs_sink_ctf_field_class_bit_array *fc, enum fs_sink_ctf_field_class_type type,
-    const bt_field_class *ir_fc, unsigned int size, uint64_t index_in_parent)
+static inline void
+_fs_sink_ctf_field_class_bit_array_init(struct fs_sink_ctf_field_class_bit_array *fc,
+                                        enum fs_sink_ctf_field_class_type type,
+                                        const bt_field_class *ir_fc, unsigned int size)
 {
-    _fs_sink_ctf_field_class_init(&fc->base, type, ir_fc, size % 8 == 0 ? 8 : 1, index_in_parent);
+    _fs_sink_ctf_field_class_init(&fc->base, type, ir_fc, size % 8 == 0 ? 8 : 1);
     fc->size = size;
 }
 
 static inline void _fs_sink_ctf_field_class_int_init(struct fs_sink_ctf_field_class_int *fc,
                                                      enum fs_sink_ctf_field_class_type type,
-                                                     const bt_field_class *ir_fc,
-                                                     uint64_t index_in_parent)
+                                                     const bt_field_class *ir_fc)
 {
     bt_field_class_type ir_fc_type = bt_field_class_get_type(ir_fc);
 
     _fs_sink_ctf_field_class_bit_array_init(
-        &fc->base, type, ir_fc, (unsigned int) bt_field_class_integer_get_field_value_range(ir_fc),
-        index_in_parent);
+        &fc->base, type, ir_fc, (unsigned int) bt_field_class_integer_get_field_value_range(ir_fc));
     fc->is_signed = bt_field_class_type_is(ir_fc_type, BT_FIELD_CLASS_TYPE_SIGNED_INTEGER);
 }
 
@@ -341,7 +336,7 @@ _fs_sink_ctf_named_field_class_fini(struct fs_sink_ctf_named_field_class *named_
 }
 
 static inline struct fs_sink_ctf_field_class_bit_array *
-fs_sink_ctf_field_class_bit_array_create(const bt_field_class *ir_fc, uint64_t index_in_parent)
+fs_sink_ctf_field_class_bit_array_create(const bt_field_class *ir_fc)
 {
     struct fs_sink_ctf_field_class_bit_array *fc =
         g_new0(struct fs_sink_ctf_field_class_bit_array, 1);
@@ -349,12 +344,12 @@ fs_sink_ctf_field_class_bit_array_create(const bt_field_class *ir_fc, uint64_t i
     BT_ASSERT(fc);
     _fs_sink_ctf_field_class_bit_array_init(
         fc, FS_SINK_CTF_FIELD_CLASS_TYPE_BIT_ARRAY, ir_fc,
-        (unsigned int) bt_field_class_bit_array_get_length(ir_fc), index_in_parent);
+        (unsigned int) bt_field_class_bit_array_get_length(ir_fc));
     return fc;
 }
 
 static inline struct fs_sink_ctf_field_class_bool *
-fs_sink_ctf_field_class_bool_create(const bt_field_class *ir_fc, uint64_t index_in_parent)
+fs_sink_ctf_field_class_bool_create(const bt_field_class *ir_fc)
 {
     struct fs_sink_ctf_field_class_bool *fc = g_new0(struct fs_sink_ctf_field_class_bool, 1);
 
@@ -364,79 +359,73 @@ fs_sink_ctf_field_class_bool_create(const bt_field_class *ir_fc, uint64_t index_
      * CTF 1.8 has no boolean field class type, so this component
      * translates it to an 8-bit unsigned integer field class.
      */
-    _fs_sink_ctf_field_class_bit_array_init(&fc->base, FS_SINK_CTF_FIELD_CLASS_TYPE_BOOL, ir_fc, 8,
-                                            index_in_parent);
+    _fs_sink_ctf_field_class_bit_array_init(&fc->base, FS_SINK_CTF_FIELD_CLASS_TYPE_BOOL, ir_fc, 8);
     return fc;
 }
 
 static inline struct fs_sink_ctf_field_class_int *
-fs_sink_ctf_field_class_int_create(const bt_field_class *ir_fc, uint64_t index_in_parent)
+fs_sink_ctf_field_class_int_create(const bt_field_class *ir_fc)
 {
     struct fs_sink_ctf_field_class_int *fc = g_new0(struct fs_sink_ctf_field_class_int, 1);
 
     BT_ASSERT(fc);
-    _fs_sink_ctf_field_class_int_init(fc, FS_SINK_CTF_FIELD_CLASS_TYPE_INT, ir_fc, index_in_parent);
+    _fs_sink_ctf_field_class_int_init(fc, FS_SINK_CTF_FIELD_CLASS_TYPE_INT, ir_fc);
     return fc;
 }
 
 static inline struct fs_sink_ctf_field_class_float *
-fs_sink_ctf_field_class_float_create(const bt_field_class *ir_fc, uint64_t index_in_parent)
+fs_sink_ctf_field_class_float_create(const bt_field_class *ir_fc)
 {
     struct fs_sink_ctf_field_class_float *fc = g_new0(struct fs_sink_ctf_field_class_float, 1);
 
     BT_ASSERT(fc);
     _fs_sink_ctf_field_class_bit_array_init(
         &fc->base, FS_SINK_CTF_FIELD_CLASS_TYPE_FLOAT, ir_fc,
-        bt_field_class_get_type(ir_fc) == BT_FIELD_CLASS_TYPE_SINGLE_PRECISION_REAL ? 32 : 64,
-        index_in_parent);
+        bt_field_class_get_type(ir_fc) == BT_FIELD_CLASS_TYPE_SINGLE_PRECISION_REAL ? 32 : 64);
     return fc;
 }
 
 static inline struct fs_sink_ctf_field_class_string *
-fs_sink_ctf_field_class_string_create(const bt_field_class *ir_fc, uint64_t index_in_parent)
+fs_sink_ctf_field_class_string_create(const bt_field_class *ir_fc)
 {
     struct fs_sink_ctf_field_class_string *fc = g_new0(struct fs_sink_ctf_field_class_string, 1);
 
     BT_ASSERT(fc);
-    _fs_sink_ctf_field_class_init(&fc->base, FS_SINK_CTF_FIELD_CLASS_TYPE_STRING, ir_fc, 8,
-                                  index_in_parent);
+    _fs_sink_ctf_field_class_init(&fc->base, FS_SINK_CTF_FIELD_CLASS_TYPE_STRING, ir_fc, 8);
     return fc;
 }
 
 static inline struct fs_sink_ctf_field_class_struct *
-fs_sink_ctf_field_class_struct_create_empty(const bt_field_class *ir_fc, uint64_t index_in_parent)
+fs_sink_ctf_field_class_struct_create_empty(const bt_field_class *ir_fc)
 {
     struct fs_sink_ctf_field_class_struct *fc = g_new0(struct fs_sink_ctf_field_class_struct, 1);
 
     BT_ASSERT(fc);
-    _fs_sink_ctf_field_class_init(&fc->base, FS_SINK_CTF_FIELD_CLASS_TYPE_STRUCT, ir_fc, 1,
-                                  index_in_parent);
+    _fs_sink_ctf_field_class_init(&fc->base, FS_SINK_CTF_FIELD_CLASS_TYPE_STRUCT, ir_fc, 1);
     fc->members = g_array_new(FALSE, TRUE, sizeof(struct fs_sink_ctf_named_field_class));
     BT_ASSERT(fc->members);
     return fc;
 }
 
 static inline struct fs_sink_ctf_field_class_option *
-fs_sink_ctf_field_class_option_create_empty(const bt_field_class *ir_fc, uint64_t index_in_parent)
+fs_sink_ctf_field_class_option_create_empty(const bt_field_class *ir_fc)
 {
     struct fs_sink_ctf_field_class_option *fc = g_new0(struct fs_sink_ctf_field_class_option, 1);
 
     BT_ASSERT(fc);
-    _fs_sink_ctf_field_class_init(&fc->base, FS_SINK_CTF_FIELD_CLASS_TYPE_OPTION, ir_fc, 1,
-                                  index_in_parent);
+    _fs_sink_ctf_field_class_init(&fc->base, FS_SINK_CTF_FIELD_CLASS_TYPE_OPTION, ir_fc, 1);
     fc->tag_ref = g_string_new(NULL);
     BT_ASSERT(fc->tag_ref);
     return fc;
 }
 
 static inline struct fs_sink_ctf_field_class_variant *
-fs_sink_ctf_field_class_variant_create_empty(const bt_field_class *ir_fc, uint64_t index_in_parent)
+fs_sink_ctf_field_class_variant_create_empty(const bt_field_class *ir_fc)
 {
     struct fs_sink_ctf_field_class_variant *fc = g_new0(struct fs_sink_ctf_field_class_variant, 1);
 
     BT_ASSERT(fc);
-    _fs_sink_ctf_field_class_init(&fc->base, FS_SINK_CTF_FIELD_CLASS_TYPE_VARIANT, ir_fc, 1,
-                                  index_in_parent);
+    _fs_sink_ctf_field_class_init(&fc->base, FS_SINK_CTF_FIELD_CLASS_TYPE_VARIANT, ir_fc, 1);
     fc->options = g_array_new(FALSE, TRUE, sizeof(struct fs_sink_ctf_named_field_class));
     BT_ASSERT(fc->options);
     fc->tag_ref = g_string_new(NULL);
@@ -447,26 +436,24 @@ fs_sink_ctf_field_class_variant_create_empty(const bt_field_class *ir_fc, uint64
 }
 
 static inline struct fs_sink_ctf_field_class_array *
-fs_sink_ctf_field_class_array_create_empty(const bt_field_class *ir_fc, uint64_t index_in_parent)
+fs_sink_ctf_field_class_array_create_empty(const bt_field_class *ir_fc)
 {
     struct fs_sink_ctf_field_class_array *fc = g_new0(struct fs_sink_ctf_field_class_array, 1);
 
     BT_ASSERT(fc);
-    _fs_sink_ctf_field_class_init(&fc->base.base, FS_SINK_CTF_FIELD_CLASS_TYPE_ARRAY, ir_fc, 1,
-                                  index_in_parent);
+    _fs_sink_ctf_field_class_init(&fc->base.base, FS_SINK_CTF_FIELD_CLASS_TYPE_ARRAY, ir_fc, 1);
     fc->length = bt_field_class_array_static_get_length(ir_fc);
     return fc;
 }
 
 static inline struct fs_sink_ctf_field_class_sequence *
-fs_sink_ctf_field_class_sequence_create_empty(const bt_field_class *ir_fc, uint64_t index_in_parent)
+fs_sink_ctf_field_class_sequence_create_empty(const bt_field_class *ir_fc)
 {
     struct fs_sink_ctf_field_class_sequence *fc =
         g_new0(struct fs_sink_ctf_field_class_sequence, 1);
 
     BT_ASSERT(fc);
-    _fs_sink_ctf_field_class_init(&fc->base.base, FS_SINK_CTF_FIELD_CLASS_TYPE_SEQUENCE, ir_fc, 1,
-                                  index_in_parent);
+    _fs_sink_ctf_field_class_init(&fc->base.base, FS_SINK_CTF_FIELD_CLASS_TYPE_SEQUENCE, ir_fc, 1);
     fc->length_ref = g_string_new(NULL);
     BT_ASSERT(fc->length_ref);
     fc->length_is_before =
