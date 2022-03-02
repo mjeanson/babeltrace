@@ -94,7 +94,7 @@ STATIC_BINDINGS_DEPS =					\
 # Convenience static libraries on which the Python bindings library depends.
 # These are listed in the setup.py(.in) file.
 STATIC_LIBRARIES_DEPS = \
-	$(top_builddir)/src/autodisc/libbabeltrace2-autodisc.la \
+	$(top_builddir)/src/libautodisc.la \
 	$(top_builddir)/src/logging/libbabeltrace2-logging.la \
 	$(top_builddir)/src/libcommon.la \
 	$(top_builddir)/src/py-common/libbabeltrace2-py-common.la \

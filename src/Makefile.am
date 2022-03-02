@@ -5,7 +5,6 @@ AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = \
 	. \
 	py-common \
-	autodisc \
 	argpar \
 	ctfser \
 	fd-cache \
@@ -43,7 +42,12 @@ noinst_HEADERS = \
 
 # Convenience internal libraries
 noinst_LTLIBRARIES = \
+	libautodisc.la \
 	libcommon.la
+
+libautodisc_la_SOURCES = \
+	autodisc/autodisc.c \
+	autodisc/autodisc.h
 
 libcommon_la_SOURCES = \
 	common/align.h \
