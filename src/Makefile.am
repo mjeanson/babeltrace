@@ -5,7 +5,6 @@ AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = \
 	. \
 	py-common \
-	cpp-common \
 	autodisc \
 	argpar \
 	ctfser \
@@ -20,6 +19,27 @@ SUBDIRS = \
 	param-parse \
 	cli \
 	bindings
+
+# C++ internal header libraries
+noinst_HEADERS = \
+	cpp-common/bt2/clock-class.hpp \
+	cpp-common/bt2/clock-snapshot.hpp \
+	cpp-common/bt2/field-class.hpp \
+	cpp-common/bt2/field.hpp \
+	cpp-common/bt2/field-path.hpp \
+	cpp-common/bt2/integer-range.hpp \
+	cpp-common/bt2/integer-range-set.hpp \
+	cpp-common/bt2/internal/borrowed-obj.hpp \
+	cpp-common/bt2/internal/shared-obj.hpp \
+	cpp-common/bt2/internal/utils.hpp \
+	cpp-common/bt2/lib-error.hpp \
+	cpp-common/bt2/logging.hpp \
+	cpp-common/bt2/message.hpp \
+	cpp-common/bt2/trace-ir.hpp \
+	cpp-common/bt2/value.hpp \
+	cpp-common/optional.hpp \
+	cpp-common/string_view.hpp \
+	cpp-common/uuid-view.hpp
 
 # Convenience internal libraries
 noinst_LTLIBRARIES = \
@@ -142,7 +162,7 @@ CLEANFILES = common/version.i.tmp
 ##
 DISTCLEANFILES = common/version.i
 
-noinst_HEADERS = common/version.h common/version.i
+noinst_HEADERS += common/version.h common/version.i
 
 
 # Install pkgconfig files
