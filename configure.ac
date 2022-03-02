@@ -797,12 +797,7 @@ AC_CONFIG_FILES([
   src/ctfser/Makefile
   src/ctf-writer/Makefile
   src/fd-cache/Makefile
-  src/lib/graph/Makefile
-  src/lib/graph/message/Makefile
   src/lib/Makefile
-  src/lib/plugin/Makefile
-  src/lib/prio-heap/Makefile
-  src/lib/trace-ir/Makefile
   src/logging/Makefile
   src/Makefile
   src/plugins/common/Makefile
