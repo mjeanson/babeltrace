@@ -791,7 +791,6 @@ AC_CONFIG_FILES([
   src/bindings/python/Makefile
   src/cli/Makefile
   src/compat/Makefile
-  src/ctfser/Makefile
   src/ctf-writer/Makefile
   src/fd-cache/Makefile
   src/lib/Makefile

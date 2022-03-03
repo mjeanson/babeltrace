@@ -62,7 +62,7 @@ babeltrace2_bin_LDADD = \
 	$(top_builddir)/src/compat/libcompat.la \
 	$(top_builddir)/src/libcommon.la \
 	$(top_builddir)/src/logging/libbabeltrace2-logging.la \
-	$(top_builddir)/src/ctfser/libbabeltrace2-ctfser.la
+	$(top_builddir)/src/libctfser.la
 
 if ENABLE_BUILT_IN_PLUGINS
 # Takes a plugin name and outputs the needed LDFLAGS to embed it.

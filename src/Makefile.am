@@ -4,7 +4,6 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 SUBDIRS = \
 	. \
-	ctfser \
 	fd-cache \
 	compat \
 	logging \
@@ -42,6 +41,7 @@ noinst_LTLIBRARIES = \
 	libargpar.la \
 	libautodisc.la \
 	libcommon.la \
+	libctfser.la \
 	libstring-format.la
 
 libargpar_la_SOURCES = \
@@ -68,6 +68,10 @@ libcommon_la_SOURCES = \
 libcommon_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DBABELTRACE_PLUGINS_DIR=\"$(BABELTRACE_PLUGINS_DIR)\"
+
+libctfser_la_SOURCES = \
+	ctfser/ctfser.c \
+	ctfser/ctfser.h
 
 libstring_format_la_SOURCES = \
 	string-format/format-plugin-comp-cls-name.c \
