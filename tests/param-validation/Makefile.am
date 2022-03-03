@@ -9,5 +9,5 @@ test_param_validation_LDADD = \
 	$(top_builddir)/src/plugins/common/param-validation/libbabeltrace2-param-validation.la \
 	$(top_builddir)/src/lib/libbabeltrace2.la \
 	$(top_builddir)/src/libcommon.la \
-	$(top_builddir)/src/logging/libbabeltrace2-logging.la \
+	$(top_builddir)/src/liblogging.la \
 	$(top_builddir)/tests/utils/tap/libtap.la

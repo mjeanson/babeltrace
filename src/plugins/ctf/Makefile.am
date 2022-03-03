@@ -26,7 +26,7 @@ babeltrace_plugin_ctf_la_LIBADD = \
 if !ENABLE_BUILT_IN_PLUGINS
 babeltrace_plugin_ctf_la_LIBADD += \
 	$(top_builddir)/src/lib/libbabeltrace2.la \
-	$(top_builddir)/src/logging/libbabeltrace2-logging.la \
+	$(top_builddir)/src/liblogging.la \
 	$(top_builddir)/src/libcommon.la \
 	$(top_builddir)/src/libctfser.la
 endif

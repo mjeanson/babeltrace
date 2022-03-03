@@ -92,7 +92,7 @@ def main():
         libraries=['babeltrace2', 'glib-2.0'],
         extra_objects=[
             '@top_builddir@/src/.libs/libautodisc.a',
-            '@top_builddir@/src/logging/.libs/libbabeltrace2-logging.a',
+            '@top_builddir@/src/.libs/liblogging.a',
             '@top_builddir@/src/.libs/libcommon.a',
             '@top_builddir@/src/.libs/libpy-common.a',
             '@top_builddir@/src/.libs/libstring-format.a',

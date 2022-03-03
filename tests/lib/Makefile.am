@@ -8,7 +8,7 @@ COMMON_TEST_LDADD = \
 	$(top_builddir)/tests/utils/tap/libtap.la \
 	$(top_builddir)/tests/utils/libtestcommon.la \
 	$(top_builddir)/src/libcommon.la \
-	$(top_builddir)/src/logging/libbabeltrace2-logging.la
+	$(top_builddir)/src/liblogging.la
 
 test_bt_values_LDADD = $(COMMON_TEST_LDADD) \
 	$(top_builddir)/src/lib/libbabeltrace2.la

@@ -95,7 +95,7 @@ STATIC_BINDINGS_DEPS =					\
 # These are listed in the setup.py(.in) file.
 STATIC_LIBRARIES_DEPS = \
 	$(top_builddir)/src/libautodisc.la \
-	$(top_builddir)/src/logging/libbabeltrace2-logging.la \
+	$(top_builddir)/src/liblogging.la \
 	$(top_builddir)/src/libcommon.la \
 	$(top_builddir)/src/libpy-common.la \
 	$(top_builddir)/src/libstring-format.la

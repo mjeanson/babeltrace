@@ -4,7 +4,6 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 SUBDIRS = \
 	. \
-	logging \
 	ctf-writer \
 	lib \
 	python-plugin-provider \
@@ -42,6 +41,7 @@ noinst_LTLIBRARIES = \
 	libcompat.la \
 	libctfser.la \
 	libfd-cache.la \
+	liblogging.la \
 	libstring-format.la
 
 libargpar_la_SOURCES = \
@@ -98,6 +98,11 @@ libctfser_la_SOURCES = \
 libfd_cache_la_SOURCES = \
 	fd-cache/fd-cache.c \
 	fd-cache/fd-cache.h
+
+liblogging_la_SOURCES = \
+	logging/comp-logging.h \
+	logging/log.c \
+	logging/log.h
 
 libstring_format_la_SOURCES = \
 	string-format/format-plugin-comp-cls-name.c \

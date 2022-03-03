@@ -792,7 +792,6 @@ AC_CONFIG_FILES([
   src/cli/Makefile
   src/ctf-writer/Makefile
   src/lib/Makefile
-  src/logging/Makefile
   src/Makefile
   src/plugins/common/Makefile
   src/plugins/common/muxing/Makefile

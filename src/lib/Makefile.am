@@ -136,7 +136,7 @@ libbabeltrace2_la_LIBADD = \
 	libgraph.la \
 	libplugin.la \
 	libtrace-ir.la \
-	$(top_builddir)/src/logging/libbabeltrace2-logging.la \
+	$(top_builddir)/src/liblogging.la \
 	$(top_builddir)/src/libcommon.la \
 	$(top_builddir)/src/libcompat.la
 
