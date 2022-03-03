@@ -56,6 +56,6 @@ libbabeltrace2_ctf_writer_la_LDFLAGS = \
 
 libbabeltrace2_ctf_writer_la_LIBADD = \
 	$(top_builddir)/src/logging/libbabeltrace2-logging.la \
-	$(top_builddir)/src/common/libbabeltrace2-common.la \
+	$(top_builddir)/src/libcommon.la \
 	$(top_builddir)/src/ctfser/libbabeltrace2-ctfser.la \
 	$(top_builddir)/src/compat/libcompat.la

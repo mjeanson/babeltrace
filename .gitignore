@@ -24,6 +24,7 @@
 *.exe
 .libs
 .deps
+.dirstamp
 *.bkp
 *.trs
 ctf-lexer.c

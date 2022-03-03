@@ -7,7 +7,7 @@ AM_CPPFLAGS += -I$(top_srcdir)/tests/utils
 COMMON_TEST_LDADD = \
 	$(top_builddir)/tests/utils/tap/libtap.la \
 	$(top_builddir)/tests/utils/libtestcommon.la \
-	$(top_builddir)/src/common/libbabeltrace2-common.la \
+	$(top_builddir)/src/libcommon.la \
 	$(top_builddir)/src/logging/libbabeltrace2-logging.la
 
 test_bt_values_LDADD = $(COMMON_TEST_LDADD) \
