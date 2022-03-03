@@ -792,7 +792,6 @@ AC_CONFIG_FILES([
   src/cli/Makefile
   src/compat/Makefile
   src/ctf-writer/Makefile
-  src/fd-cache/Makefile
   src/lib/Makefile
   src/logging/Makefile
   src/Makefile

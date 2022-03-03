@@ -4,7 +4,6 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 SUBDIRS = \
 	. \
-	fd-cache \
 	compat \
 	logging \
 	ctf-writer \
@@ -42,6 +41,7 @@ noinst_LTLIBRARIES = \
 	libautodisc.la \
 	libcommon.la \
 	libctfser.la \
+	libfd-cache.la \
 	libstring-format.la
 
 libargpar_la_SOURCES = \
@@ -72,6 +72,10 @@ libcommon_la_CPPFLAGS = \
 libctfser_la_SOURCES = \
 	ctfser/ctfser.c \
 	ctfser/ctfser.h
+
+libfd_cache_la_SOURCES = \
+	fd-cache/fd-cache.c \
+	fd-cache/fd-cache.h
 
 libstring_format_la_SOURCES = \
 	string-format/format-plugin-comp-cls-name.c \

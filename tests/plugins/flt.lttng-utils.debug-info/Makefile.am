@@ -26,7 +26,7 @@ noinst_PROGRAMS += test_dwarf test_bin_info
 
 test_dwarf_LDADD = \
 	$(top_builddir)/src/plugins/lttng-utils/debug-info/libdebug-info.la \
-	$(top_builddir)/src/fd-cache/libbabeltrace2-fd-cache.la \
+	$(top_builddir)/src/libfd-cache.la \
 	$(top_builddir)/src/logging/libbabeltrace2-logging.la \
 	$(top_builddir)/src/libcommon.la \
 	$(ELFUTILS_LIBS) \
@@ -35,7 +35,7 @@ test_dwarf_SOURCES = test_dwarf.c
 
 test_bin_info_LDADD = \
 	$(top_builddir)/src/plugins/lttng-utils/debug-info/libdebug-info.la \
-	$(top_builddir)/src/fd-cache/libbabeltrace2-fd-cache.la \
+	$(top_builddir)/src/libfd-cache.la \
 	$(top_builddir)/src/logging/libbabeltrace2-logging.la \
 	$(top_builddir)/src/libcommon.la \
 	$(top_builddir)/src/lib/libbabeltrace2.la \

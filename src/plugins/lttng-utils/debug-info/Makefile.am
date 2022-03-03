@@ -3,7 +3,7 @@
 noinst_LTLIBRARIES = libdebug-info.la
 
 libdebug_info_la_LIBADD = \
-	$(top_builddir)/src/fd-cache/libbabeltrace2-fd-cache.la
+	$(top_builddir)/src/libfd-cache.la
 
 libdebug_info_la_SOURCES = \
 	bin-info.c \
