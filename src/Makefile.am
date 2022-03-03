@@ -8,7 +8,6 @@ SUBDIRS = \
 	lib \
 	python-plugin-provider \
 	plugins \
-	param-parse \
 	cli \
 	bindings
 
@@ -42,6 +41,7 @@ noinst_LTLIBRARIES = \
 	libctfser.la \
 	libfd-cache.la \
 	liblogging.la \
+	libparam-parse.la \
 	libstring-format.la
 
 libargpar_la_SOURCES = \
@@ -103,6 +103,10 @@ liblogging_la_SOURCES = \
 	logging/comp-logging.h \
 	logging/log.c \
 	logging/log.h
+
+libparam_parse_la_SOURCES = \
+	param-parse/param-parse.c \
+	param-parse/param-parse.h
 
 libstring_format_la_SOURCES = \
 	string-format/format-plugin-comp-cls-name.c \

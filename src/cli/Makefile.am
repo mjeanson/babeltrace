@@ -56,7 +56,7 @@ babeltrace2_bin_LDFLAGS = $(AM_LDFLAGS) $(LD_NO_AS_NEEDED)
 babeltrace2_bin_LDADD = \
 	$(top_builddir)/src/libargpar.la \
 	$(top_builddir)/src/libautodisc.la \
-	$(top_builddir)/src/param-parse/libbabeltrace2-param-parse.la \
+	$(top_builddir)/src/libparam-parse.la \
 	$(top_builddir)/src/libstring-format.la \
 	$(top_builddir)/src/lib/libbabeltrace2.la \
 	$(top_builddir)/src/libcompat.la \
