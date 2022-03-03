@@ -4,7 +4,6 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 SUBDIRS = \
 	. \
-	compat \
 	logging \
 	ctf-writer \
 	lib \
@@ -40,6 +39,7 @@ noinst_LTLIBRARIES = \
 	libargpar.la \
 	libautodisc.la \
 	libcommon.la \
+	libcompat.la \
 	libctfser.la \
 	libfd-cache.la \
 	libstring-format.la
@@ -68,6 +68,28 @@ libcommon_la_SOURCES = \
 libcommon_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DBABELTRACE_PLUGINS_DIR=\"$(BABELTRACE_PLUGINS_DIR)\"
+
+libcompat_la_SOURCES = \
+	compat/bitfield.h \
+	compat/compiler.h \
+	compat/endian.h \
+	compat/fcntl.h \
+	compat/glib.h \
+	compat/limits.h \
+	compat/memstream.h \
+	compat/mman.c \
+	compat/mman.h \
+	compat/socket.h \
+	compat/stdio.h \
+	compat/stdlib.h \
+	compat/string.h \
+	compat/time.h \
+	compat/unistd.h \
+	compat/utc.h
+
+libcompat_la_LDFLAGS = \
+	$(AM_LDFLAGS) \
+	$(LD_NO_AS_NEEDED)
 
 libctfser_la_SOURCES = \
 	ctfser/ctfser.c \

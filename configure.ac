@@ -790,7 +790,6 @@ AC_CONFIG_FILES([
   src/bindings/python/bt2/setup.py
   src/bindings/python/Makefile
   src/cli/Makefile
-  src/compat/Makefile
   src/ctf-writer/Makefile
   src/lib/Makefile
   src/logging/Makefile

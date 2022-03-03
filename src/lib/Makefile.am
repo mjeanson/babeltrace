@@ -138,7 +138,7 @@ libbabeltrace2_la_LIBADD = \
 	libtrace-ir.la \
 	$(top_builddir)/src/logging/libbabeltrace2-logging.la \
 	$(top_builddir)/src/libcommon.la \
-	$(top_builddir)/src/compat/libcompat.la
+	$(top_builddir)/src/libcompat.la
 
 if ENABLE_BUILT_IN_PYTHON_PLUGIN_SUPPORT
 libbabeltrace2_la_LIBADD += $(top_builddir)/src/python-plugin-provider/babeltrace2-python-plugin-provider.la

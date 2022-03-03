@@ -58,4 +58,4 @@ libbabeltrace2_ctf_writer_la_LIBADD = \
 	$(top_builddir)/src/logging/libbabeltrace2-logging.la \
 	$(top_builddir)/src/libcommon.la \
 	$(top_builddir)/src/libctfser.la \
-	$(top_builddir)/src/compat/libcompat.la
+	$(top_builddir)/src/libcompat.la
