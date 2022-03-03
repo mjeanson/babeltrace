@@ -98,7 +98,7 @@ STATIC_LIBRARIES_DEPS = \
 	$(top_builddir)/src/logging/libbabeltrace2-logging.la \
 	$(top_builddir)/src/libcommon.la \
 	$(top_builddir)/src/py-common/libbabeltrace2-py-common.la \
-	$(top_builddir)/src/string-format/libbabeltrace2-string-format.la
+	$(top_builddir)/src/libstring-format.la
 
 GENERATED_BINDINGS_DEPS =	\
 	bt2/native_bt.c		\

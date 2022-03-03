@@ -824,7 +824,6 @@ AC_CONFIG_FILES([
   src/py-common/Makefile
   src/python-plugin-provider/Makefile
   src/param-parse/Makefile
-  src/string-format/Makefile
   tests/bitfield/Makefile
   tests/ctf-writer/Makefile
   tests/lib/Makefile

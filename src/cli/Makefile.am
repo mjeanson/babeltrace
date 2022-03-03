@@ -57,7 +57,7 @@ babeltrace2_bin_LDADD = \
 	$(top_builddir)/src/argpar/libargpar.la \
 	$(top_builddir)/src/libautodisc.la \
 	$(top_builddir)/src/param-parse/libbabeltrace2-param-parse.la \
-	$(top_builddir)/src/string-format/libbabeltrace2-string-format.la \
+	$(top_builddir)/src/libstring-format.la \
 	$(top_builddir)/src/lib/libbabeltrace2.la \
 	$(top_builddir)/src/compat/libcompat.la \
 	$(top_builddir)/src/libcommon.la \

@@ -12,7 +12,6 @@ SUBDIRS = \
 	logging \
 	ctf-writer \
 	lib \
-	string-format \
 	python-plugin-provider \
 	plugins \
 	param-parse \
@@ -43,7 +42,8 @@ noinst_HEADERS = \
 # Convenience internal libraries
 noinst_LTLIBRARIES = \
 	libautodisc.la \
-	libcommon.la
+	libcommon.la \
+	libstring-format.la
 
 libautodisc_la_SOURCES = \
 	autodisc/autodisc.c \
@@ -65,6 +65,12 @@ libcommon_la_SOURCES = \
 libcommon_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DBABELTRACE_PLUGINS_DIR=\"$(BABELTRACE_PLUGINS_DIR)\"
+
+libstring_format_la_SOURCES = \
+	string-format/format-plugin-comp-cls-name.c \
+	string-format/format-plugin-comp-cls-name.h \
+	string-format/format-error.c \
+	string-format/format-error.h
 
 
 # The following section is based on a similar feature in LTTng-tools.
