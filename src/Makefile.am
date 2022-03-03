@@ -4,7 +4,6 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 SUBDIRS = \
 	. \
-	py-common \
 	argpar \
 	ctfser \
 	fd-cache \
@@ -71,6 +70,19 @@ libstring_format_la_SOURCES = \
 	string-format/format-plugin-comp-cls-name.h \
 	string-format/format-error.c \
 	string-format/format-error.h
+
+
+if ENABLE_PYTHON_COMMON_DEPS
+noinst_LTLIBRARIES += libpy-common.la
+
+libpy_common_la_SOURCES = \
+	py-common/py-common.c \
+	py-common/py-common.h
+
+libpy_common_la_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
+	$(PYTHON_INCLUDE)
+endif # ENABLE_PYTHON_COMMON_DEPS
 
 
 # The following section is based on a similar feature in LTTng-tools.

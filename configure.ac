@@ -821,7 +821,6 @@ AC_CONFIG_FILES([
   src/plugins/utils/Makefile
   src/plugins/utils/muxer/Makefile
   src/plugins/utils/trimmer/Makefile
-  src/py-common/Makefile
   src/python-plugin-provider/Makefile
   src/param-parse/Makefile
   tests/bitfield/Makefile
