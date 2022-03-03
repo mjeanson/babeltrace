@@ -6,7 +6,7 @@ noinst_PROGRAMS = test_param_validation
 test_param_validation_SOURCES = test_param_validation.c
 test_param_validation_LDADD = \
 	$(top_builddir)/src/libparam-parse.la \
-	$(top_builddir)/src/plugins/common/param-validation/libbabeltrace2-param-validation.la \
+	$(top_builddir)/src/plugins/libplugins-common-param-validation.la \
 	$(top_builddir)/src/lib/libbabeltrace2.la \
 	$(top_builddir)/src/libcommon.la \
 	$(top_builddir)/src/liblogging.la \

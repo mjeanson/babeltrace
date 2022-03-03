@@ -1,16 +1,11 @@
 # SPDX-License-Identifier: MIT
 
 PLUGINS_PATH = $(abs_top_builddir)/src/plugins
-LTTNG_UTILS_PLUGIN_PATH =
-
-if ENABLE_DEBUG_INFO
-LTTNG_UTILS_PLUGIN_PATH += :$(PLUGINS_PATH)/lttng-utils
-endif
 
 if BABELTRACE_BUILD_WITH_MINGW
-IN_TREE_PLUGIN_PATH := $(shell cygpath -pm "$(PLUGINS_PATH)/ctf:$(PLUGINS_PATH)/text:$(PLUGINS_PATH)/utils$(LTTNG_UTILS_PLUGIN_PATH)")
+IN_TREE_PLUGIN_PATH := $(shell cygpath -pm "$(PLUGINS_PATH)")
 else
-IN_TREE_PLUGIN_PATH = $(PLUGINS_PATH)/ctf:$(PLUGINS_PATH)/text:$(PLUGINS_PATH)/utils$(LTTNG_UTILS_PLUGIN_PATH)
+IN_TREE_PLUGIN_PATH = $(PLUGINS_PATH)
 endif
 
 AM_CPPFLAGS += '-DCONFIG_IN_TREE_PLUGIN_PATH="$(IN_TREE_PLUGIN_PATH)"'
@@ -79,7 +74,7 @@ if ENABLE_BUILT_IN_PLUGINS
 # binary that are filled by plugin objects. If the linker discards those
 # symbols because the CLI does not use them directly, the CLI reports
 # no plugins found (plugins are effectively not embedded).
-pluginarchive = $(LD_WHOLE_ARCHIVE)$(PLUGINS_PATH)/$(1)/.libs/babeltrace-plugin-$(1).a$(LD_NO_WHOLE_ARCHIVE)
+pluginarchive = $(LD_WHOLE_ARCHIVE)$(PLUGINS_PATH)/.libs/babeltrace-plugin-$(1).a$(LD_NO_WHOLE_ARCHIVE)
 
 # Built-in plugins
 babeltrace2_bin_LDFLAGS += $(call pluginarchive,ctf)

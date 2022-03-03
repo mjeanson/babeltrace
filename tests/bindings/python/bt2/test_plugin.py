@@ -7,7 +7,7 @@ import unittest
 import bt2
 import os
 
-
+_TEST_PLUGIN_BUILDDIR = os.environ['BT_TESTS_BUILDDIR']
 _TEST_PLUGIN_PLUGINS_PATH = os.environ['BT_PLUGINS_PATH']
 _TEST_PLUGIN_PLUGIN_EXTENSION_BY_OS = {'cygwin': 'dll', 'mingw': 'dll'}
 
@@ -41,7 +41,7 @@ class FindPluginsTestCase(unittest.TestCase):
             )
 
     def test_find_none_existing_dir(self):
-        plugins = bt2.find_plugins_in_path(_TEST_PLUGIN_PLUGINS_PATH, recurse=False)
+        plugins = bt2.find_plugins_in_path(_TEST_PLUGIN_BUILDDIR, recurse=False)
         self.assertIsNone(plugins)
 
     def test_find_dir(self):
@@ -53,7 +53,7 @@ class FindPluginsTestCase(unittest.TestCase):
             os.environ['BT_TESTS_OS_TYPE'], 'so'
         )
         plugin_name = 'babeltrace-plugin-utils.{}'.format(extension)
-        path = os.path.join(_TEST_PLUGIN_PLUGINS_PATH, 'utils', '.libs', plugin_name)
+        path = os.path.join(_TEST_PLUGIN_PLUGINS_PATH, '.libs', plugin_name)
         pset = bt2.find_plugins_in_path(path)
         self.assertTrue(len(pset) == 1)
 

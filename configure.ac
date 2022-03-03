@@ -793,29 +793,7 @@ AC_CONFIG_FILES([
   src/ctf-writer/Makefile
   src/lib/Makefile
   src/Makefile
-  src/plugins/common/Makefile
-  src/plugins/common/muxing/Makefile
-  src/plugins/common/param-validation/Makefile
-  src/plugins/ctf/common/bfcr/Makefile
-  src/plugins/ctf/common/Makefile
-  src/plugins/ctf/common/metadata/Makefile
-  src/plugins/ctf/common/msg-iter/Makefile
-  src/plugins/ctf/fs-sink/Makefile
-  src/plugins/ctf/fs-src/Makefile
-  src/plugins/ctf/lttng-live/Makefile
-  src/plugins/ctf/Makefile
-  src/plugins/lttng-utils/debug-info/Makefile
-  src/plugins/lttng-utils/Makefile
   src/plugins/Makefile
-  src/plugins/text/dmesg/Makefile
-  src/plugins/text/Makefile
-  src/plugins/text/pretty/Makefile
-  src/plugins/text/details/Makefile
-  src/plugins/utils/counter/Makefile
-  src/plugins/utils/dummy/Makefile
-  src/plugins/utils/Makefile
-  src/plugins/utils/muxer/Makefile
-  src/plugins/utils/trimmer/Makefile
   src/python-plugin-provider/Makefile
   tests/bitfield/Makefile
   tests/ctf-writer/Makefile

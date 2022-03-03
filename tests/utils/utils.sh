@@ -79,7 +79,7 @@ BT_PLUGINS_PATH="${BT_TESTS_BUILDDIR}/../src/plugins"
 
 # Allow overriding the babeltrace2 plugin path
 if [ "x${BT_TESTS_BABELTRACE_PLUGIN_PATH:-}" = "x" ]; then
-	BT_TESTS_BABELTRACE_PLUGIN_PATH="${BT_PLUGINS_PATH}/ctf:${BT_PLUGINS_PATH}/utils:${BT_PLUGINS_PATH}/text:${BT_PLUGINS_PATH}/lttng-utils"
+	BT_TESTS_BABELTRACE_PLUGIN_PATH="${BT_PLUGINS_PATH}"
 fi
 export BT_TESTS_BABELTRACE_PLUGIN_PATH
 
