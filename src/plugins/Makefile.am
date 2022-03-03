@@ -2,19 +2,12 @@
 
 AUTOMAKE_OPTIONS = subdir-objects
 
+noinst_LTLIBRARIES =
+
 ## Common plugins internal libs ##
 
-noinst_LTLIBRARIES = \
-	libplugins-common-muxing.la \
-	libplugins-common-param-validation.la
-
-libplugins_common_muxing_la_SOURCES = \
-	common/muxing/muxing.c \
-	common/muxing/muxing.h
-
-libplugins_common_param_validation_la_SOURCES = \
-	common/param-validation/param-validation.c \
-	common/param-validation/param-validation.h
+include $(srcdir)/common/muxing/Makefile.am.inc
+include $(srcdir)/common/param-validation/Makefile.am.inc
 
 
 ## Plugins ##
