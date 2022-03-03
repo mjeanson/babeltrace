@@ -782,7 +782,6 @@ AC_CONFIG_FILES([
   doc/man/Makefile
   include/Makefile
   Makefile
-  src/argpar/Makefile
   src/babeltrace2-ctf-writer.pc
   src/babeltrace2.pc
   src/bindings/Makefile

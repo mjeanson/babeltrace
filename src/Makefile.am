@@ -4,7 +4,6 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 SUBDIRS = \
 	. \
-	argpar \
 	ctfser \
 	fd-cache \
 	compat \
@@ -40,9 +39,14 @@ noinst_HEADERS = \
 
 # Convenience internal libraries
 noinst_LTLIBRARIES = \
+	libargpar.la \
 	libautodisc.la \
 	libcommon.la \
 	libstring-format.la
+
+libargpar_la_SOURCES = \
+	argpar/argpar.c \
+	argpar/argpar.h
 
 libautodisc_la_SOURCES = \
 	autodisc/autodisc.c \
