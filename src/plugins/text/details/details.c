@@ -158,6 +158,7 @@ struct details_comp *create_details_comp(
 	details_comp->log_level = bt_component_get_logging_level(
 		bt_self_component_as_component(self_comp));
 	details_comp->self_comp = self_comp;
+	details_comp->mip_version = bt_self_component_get_graph_mip_version(self_comp);
 	details_comp->meta = g_hash_table_new_full(g_direct_hash,
 		g_direct_equal, NULL,
 		(GDestroyNotify) details_destroy_details_trace_class_meta);

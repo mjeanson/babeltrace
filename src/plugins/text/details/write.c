@@ -762,6 +762,11 @@ void write_enum_field_class_mappings(struct details_write_ctx *ctx,
 	g_ptr_array_free(mappings, TRUE);
 }
 
+static const char *PACKET_CONTEXT_STR = "Packet context";
+static const char *EVENT_COMMON_CONTEXT_STR = "Event common context";
+static const char *EVENT_SPECIFIC_CONTEXT_STR = "Event specific context";
+static const char *EVENT_PAYLOAD_STR = "Event payload";
+
 static
 void write_field_path(struct details_write_ctx *ctx,
 		const bt_field_path *field_path)
@@ -772,16 +777,16 @@ void write_field_path(struct details_write_ctx *ctx,
 
 	switch (bt_field_path_get_root_scope(field_path)) {
 	case BT_FIELD_PATH_SCOPE_PACKET_CONTEXT:
-		write_str_prop_value(ctx, "Packet context");
+		write_str_prop_value(ctx, PACKET_CONTEXT_STR);
 		break;
 	case BT_FIELD_PATH_SCOPE_EVENT_COMMON_CONTEXT:
-		write_str_prop_value(ctx, "Event common context");
+		write_str_prop_value(ctx, EVENT_COMMON_CONTEXT_STR);
 		break;
 	case BT_FIELD_PATH_SCOPE_EVENT_SPECIFIC_CONTEXT:
-		write_str_prop_value(ctx, "Event specific context");
+		write_str_prop_value(ctx, EVENT_SPECIFIC_CONTEXT_STR);
 		break;
 	case BT_FIELD_PATH_SCOPE_EVENT_PAYLOAD:
-		write_str_prop_value(ctx, "Event payload");
+		write_str_prop_value(ctx, EVENT_PAYLOAD_STR);
 		break;
 	default:
 		bt_common_abort();
@@ -808,6 +813,47 @@ void write_field_path(struct details_write_ctx *ctx,
 		default:
 			bt_common_abort();
 		}
+	}
+
+	g_string_append_c(ctx->str, ']');
+}
+
+static
+void write_field_location(struct details_write_ctx *ctx,
+		const bt_field_location *field_location)
+{
+	bt_field_location_scope scope = bt_field_location_get_root_scope(field_location);
+	uint64_t item_count = bt_field_location_get_item_count(field_location);
+
+	g_string_append_c(ctx->str, '[');
+
+	switch (scope) {
+	case BT_FIELD_LOCATION_SCOPE_PACKET_CONTEXT:
+		write_str_prop_value(ctx, PACKET_CONTEXT_STR);
+		break;
+	case BT_FIELD_LOCATION_SCOPE_EVENT_COMMON_CONTEXT:
+		write_str_prop_value(ctx, EVENT_COMMON_CONTEXT_STR);
+		break;
+	case BT_FIELD_LOCATION_SCOPE_EVENT_SPECIFIC_CONTEXT:
+		write_str_prop_value(ctx, EVENT_SPECIFIC_CONTEXT_STR);
+		break;
+	case BT_FIELD_LOCATION_SCOPE_EVENT_PAYLOAD:
+		write_str_prop_value(ctx, EVENT_PAYLOAD_STR);
+		break;
+	default:
+		bt_common_abort();
+	}
+
+	g_string_append(ctx->str, ": ");
+
+	for (uint64_t idx = 0; idx < item_count; ++idx) {
+		const char *item = bt_field_location_get_item_by_index(field_location, idx);
+
+		if (idx != 0) {
+			g_string_append(ctx->str, ", ");
+		}
+
+		write_str_prop_value(ctx, item);
 	}
 
 	g_string_append_c(ctx->str, ']');
@@ -1006,34 +1052,61 @@ void write_field_class(struct details_write_ctx *ctx, const bt_field_class *fc)
 			bt_field_class_array_static_get_length(fc));
 		g_string_append_c(ctx->str, ')');
 	} else if (fc_type == BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITH_LENGTH_FIELD) {
-		const bt_field_path *length_field_path =
-			bt_field_class_array_dynamic_with_length_field_borrow_length_field_path_const(
-				fc);
+		if (ctx->details_comp->mip_version == 0) {
+			const bt_field_path *length_field_path =
+				bt_field_class_array_dynamic_with_length_field_borrow_length_field_path_const(
+					fc);
 
-		g_string_append(ctx->str, " (Length field path ");
-		write_field_path(ctx, length_field_path);
-		g_string_append_c(ctx->str, ')');
+			g_string_append(ctx->str, " (Length field path ");
+			write_field_path(ctx, length_field_path);
+			g_string_append_c(ctx->str, ')');
+		} else {
+			const bt_field_location *length_field_location =
+				bt_field_class_array_dynamic_with_length_field_borrow_length_field_location_const(
+					fc);
+
+			g_string_append(ctx->str, " (Length field location ");
+			write_field_location(ctx, length_field_location);
+			g_string_append_c(ctx->str, ')');
+		}
 	} else if (bt_field_class_type_is(fc_type,
 			BT_FIELD_CLASS_TYPE_OPTION_WITH_SELECTOR_FIELD)) {
-		const bt_field_path *selector_field_path =
-			bt_field_class_option_with_selector_field_borrow_selector_field_path_const(
-				fc);
+		if (ctx->details_comp->mip_version == 0) {
+			const bt_field_path *selector_field_path =
+				bt_field_class_option_with_selector_field_borrow_selector_field_path_const(
+					fc);
 
-		g_string_append(ctx->str, " (Selector field path ");
-		write_field_path(ctx, selector_field_path);
-		g_string_append_c(ctx->str, ')');
+			g_string_append(ctx->str, " (Selector field path ");
+			write_field_path(ctx, selector_field_path);
+			g_string_append_c(ctx->str, ')');
+		} else {
+			const bt_field_location *selector_field_location =
+				bt_field_class_option_with_selector_field_borrow_selector_field_location_const(fc);
+
+			g_string_append(ctx->str, " (Selector field location ");
+			write_field_location(ctx, selector_field_location);
+			g_string_append_c(ctx->str, ')');
+		}
 	} else if (bt_field_class_type_is(fc_type,
 			BT_FIELD_CLASS_TYPE_VARIANT)) {
 		uint64_t option_count =
 			bt_field_class_variant_get_option_count(fc);
 		const bt_field_path *sel_field_path = NULL;
+		const bt_field_location *sel_field_loc = NULL;
 
 		if (bt_field_class_type_is(fc_type,
 				BT_FIELD_CLASS_TYPE_VARIANT_WITH_SELECTOR_FIELD)) {
-			sel_field_path =
-				bt_field_class_variant_with_selector_field_borrow_selector_field_path_const(
-					fc);
-			BT_ASSERT_DBG(sel_field_path);
+			if (ctx->details_comp->mip_version == 0) {
+				sel_field_path =
+					bt_field_class_variant_with_selector_field_borrow_selector_field_path_const(
+						fc);
+				BT_ASSERT_DBG(sel_field_path);
+			} else {
+				sel_field_loc =
+					bt_field_class_variant_with_selector_field_borrow_selector_field_location_const(
+						fc);
+				BT_ASSERT_DBG(sel_field_loc);
+			}
 		}
 
 		g_string_append(ctx->str, " (");
@@ -1044,6 +1117,9 @@ void write_field_class(struct details_write_ctx *ctx, const bt_field_class *fc)
 		if (sel_field_path) {
 			g_string_append(ctx->str, ", Selector field path ");
 			write_field_path(ctx, sel_field_path);
+		} else if (sel_field_loc) {
+			g_string_append(ctx->str, ", Selector field location ");
+			write_field_location(ctx, sel_field_loc);
 		}
 
 		g_string_append_c(ctx->str, ')');

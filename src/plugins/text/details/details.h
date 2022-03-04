@@ -60,6 +60,7 @@ struct details_trace {
 struct details_comp {
 	bt_logging_level log_level;
 	bt_self_component *self_comp;
+	uint64_t mip_version;
 
 	/* Component's configuration */
 	struct {
