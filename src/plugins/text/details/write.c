@@ -1016,6 +1016,15 @@ void write_field_class(struct details_write_ctx *ctx, const bt_field_class *fc)
 	case BT_FIELD_CLASS_TYPE_VARIANT_WITH_SIGNED_INTEGER_SELECTOR_FIELD:
 		type = "Variant (signed integer selector)";
 		break;
+	case BT_FIELD_CLASS_TYPE_STATIC_BLOB:
+		type = "Static BLOB";
+		break;
+	case BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITHOUT_LENGTH_FIELD:
+		type = "Dynamic BLOB (no length field)";
+		break;
+	case BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITH_LENGTH_FIELD:
+		type = "Dynamic BLOB (with length field)";
+		break;
 	default:
 		bt_common_abort();
 	}
@@ -1123,6 +1132,32 @@ void write_field_class(struct details_write_ctx *ctx, const bt_field_class *fc)
 		}
 
 		g_string_append_c(ctx->str, ')');
+	} else if (bt_field_class_type_is(fc_type, BT_FIELD_CLASS_TYPE_BLOB)) {
+		const char *media_type;
+
+		g_string_append(ctx->str, " (");
+
+		if (fc_type == BT_FIELD_CLASS_TYPE_STATIC_BLOB) {
+			g_string_append(ctx->str, "Length ");
+			write_uint_prop_value(ctx,
+				bt_field_class_blob_static_get_length(fc));
+			g_string_append(ctx->str, ", ");
+		} else if (fc_type == BT_FIELD_CLASS_TYPE_DYNAMIC_BLOB_WITH_LENGTH_FIELD) {
+			const bt_field_location *length_field_location =
+				bt_field_class_blob_dynamic_with_length_field_borrow_length_field_location_const(
+					fc);
+
+			g_string_append(ctx->str, "Length field location ");
+			write_field_location(ctx, length_field_location);
+			g_string_append(ctx->str, ", ");
+		}
+
+		media_type = bt_field_class_blob_get_media_type(fc);
+		BT_ASSERT(media_type);
+
+		g_string_append(ctx->str, "Media type `");
+		write_str_prop_value(ctx, media_type);
+		g_string_append(ctx->str, "`)");
 	}
 
 	incr_indent(ctx);
@@ -1993,6 +2028,40 @@ void write_field(struct details_write_ctx *ctx, const bt_field *field,
 		write_field(ctx,
 			bt_field_variant_borrow_selected_option_field_const(
 				field), NULL);
+	} else if (bt_field_class_type_is(fc_type, BT_FIELD_CLASS_TYPE_BLOB)) {
+		uint64_t length = bt_field_blob_get_length(field);
+		const uint8_t *blob_data = bt_field_blob_get_data_const(field);
+
+		if (length == 0) {
+			write_sp(ctx);
+			write_none_prop_value(ctx, "Empty");
+		} else {
+			g_string_append(ctx->str, " Length ");
+			write_uint_prop_value(ctx, length);
+			g_string_append_c(ctx->str, ':');
+		}
+
+		incr_indent(ctx);
+
+		/* Print bytes on 16-byte long lines */
+		for (i = 0; i < length; i++) {
+			uint8_t byte = blob_data[i];
+			char byte_buf[3];
+
+			if (i % 16 == 0) {
+				/* Start of a line */
+				write_nl(ctx);
+				write_indent(ctx);
+			} else {
+				/* Not the start of a line */
+				write_sp(ctx);
+			}
+
+			sprintf(byte_buf, "%02x", byte);
+			write_uint_str_prop_value(ctx, byte_buf);
+		}
+
+		decr_indent(ctx);
 	} else {
 		bt_common_abort();
 	}
