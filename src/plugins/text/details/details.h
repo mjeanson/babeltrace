@@ -88,6 +88,9 @@ struct details_comp {
 		/* Write trace's name */
 		bool with_trace_name;
 
+		/* Write stream class's namespace */
+		bool with_stream_class_ns;
+
 		/* Write stream class's name */
 		bool with_stream_class_name;
 

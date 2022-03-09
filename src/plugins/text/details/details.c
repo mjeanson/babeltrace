@@ -26,6 +26,7 @@
 #define WITH_TIME_PARAM_NAME "with-time"
 #define WITH_TRACE_NAME_PARAM_NAME "with-trace-name"
 #define WITH_STREAM_CLASS_NAME_PARAM_NAME "with-stream-class-name"
+#define WITH_STREAM_CLASS_NAMESPACE_PARAM_NAME "with-stream-class-namespace"
 #define WITH_STREAM_NAME_PARAM_NAME "with-stream-name"
 #define WITH_UUID_PARAM_NAME "with-uuid"
 #define COMPACT_PARAM_NAME "compact"
@@ -222,6 +223,7 @@ static const struct bt_param_validation_map_value_entry_descr details_params[] =
 	{ COMPACT_PARAM_NAME, BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_OPTIONAL, { .type = BT_VALUE_TYPE_BOOL } },
 	{ WITH_TIME_PARAM_NAME, BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_OPTIONAL, { .type = BT_VALUE_TYPE_BOOL } },
 	{ WITH_TRACE_NAME_PARAM_NAME, BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_OPTIONAL, { .type = BT_VALUE_TYPE_BOOL } },
+	{ WITH_STREAM_CLASS_NAMESPACE_PARAM_NAME, BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_OPTIONAL, { .type = BT_VALUE_TYPE_BOOL } },
 	{ WITH_STREAM_CLASS_NAME_PARAM_NAME, BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_OPTIONAL, { .type = BT_VALUE_TYPE_BOOL } },
 	{ WITH_STREAM_NAME_PARAM_NAME, BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_OPTIONAL, { .type = BT_VALUE_TYPE_BOOL } },
 	{ WITH_UUID_PARAM_NAME, BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_OPTIONAL, { .type = BT_VALUE_TYPE_BOOL } },
@@ -293,6 +295,10 @@ bt_component_class_initialize_method_status configure_details_comp(
 	configure_bool_opt(params, WITH_STREAM_CLASS_NAME_PARAM_NAME, true,
 		&details_comp->cfg.with_stream_class_name);
 
+	/* With stream class namespace? */
+	configure_bool_opt(params, WITH_STREAM_CLASS_NAMESPACE_PARAM_NAME, true,
+		&details_comp->cfg.with_stream_class_ns);
+
 	/* With stream name? */
 	configure_bool_opt(params, WITH_STREAM_NAME_PARAM_NAME, true,
 		&details_comp->cfg.with_stream_name);
@@ -322,6 +328,8 @@ void log_configuration(bt_self_component_sink *comp,
 	BT_COMP_LOGI("  With metadata: %d", details_comp->cfg.with_meta);
 	BT_COMP_LOGI("  With time: %d", details_comp->cfg.with_time);
 	BT_COMP_LOGI("  With trace name: %d", details_comp->cfg.with_trace_name);
+	BT_COMP_LOGI("  With stream class namespace: %d",
+		details_comp->cfg.with_stream_class_ns);
 	BT_COMP_LOGI("  With stream class name: %d",
 		details_comp->cfg.with_stream_class_name);
 	BT_COMP_LOGI("  With stream name: %d", details_comp->cfg.with_stream_name);

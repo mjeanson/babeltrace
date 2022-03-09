@@ -85,8 +85,8 @@ objects which it did not print yet. You can use the param:with-metadata
 parameter to disable this.
 
 You can hide specific properties with the param:with-stream-class-name,
-param:with-stream-name, param:with-time, param:with-trace-name, and
-param:with-uuid parameters.
+param:with-stream-class-namespace, param:with-stream-name,
+param:with-time, param:with-trace-name, and param:with-uuid parameters.
 
 To make the component hide many message details and print a single
 message per line, you can enable the compact mode with the param:compact
@@ -132,6 +132,11 @@ Default: true.
 
 param:with-stream-class-name='VAL' vtype:[optional boolean]::
     If 'VAL' is false, then do not print stream class names.
++
+Default: true.
+
+param:with-stream-class-namespace='VAL' vtype:[optional boolean]::
+    If 'VAL' is false, then do not print stream class namespaces.
 +
 Default: true.
 

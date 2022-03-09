@@ -1516,7 +1516,7 @@ void write_stream_class(struct details_write_ctx *ctx,
 	write_indent(ctx);
 	write_obj_type_name(ctx, "Stream class");
 
-	/* Write name and ID */
+	/* Write name, namespace and ID */
 	if (ctx->details_comp->cfg.with_stream_class_name) {
 		const char *name = bt_stream_class_get_name(sc);
 
@@ -1527,7 +1527,20 @@ void write_stream_class(struct details_write_ctx *ctx,
 		}
 	}
 
-	g_string_append(ctx->str, " (ID ");
+	g_string_append(ctx->str, " (");
+
+	if (ctx->details_comp->cfg.with_stream_class_ns
+			&& ctx->details_comp->mip_version >= 1) {
+		const char *ns = bt_stream_class_get_namespace(sc);
+
+		if (ns) {
+			g_string_append(ctx->str, "Namespace `");
+			write_str_prop_value(ctx, ns);
+			g_string_append(ctx->str, "`, ");
+		}
+	}
+
+	g_string_append(ctx->str, "ID ");
 	write_uint_prop_value(ctx, bt_stream_class_get_id(sc));
 	g_string_append(ctx->str, "):\n");
 
