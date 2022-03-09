@@ -22,13 +22,14 @@
 #include "lib/func-status.h"
 
 BT_HIDDEN
-void bt_component_sink_destroy(struct bt_component *component)
+void bt_component_sink_destroy(
+		struct bt_component *component __attribute__((unused)))
 {
 }
 
 BT_HIDDEN
 struct bt_component *bt_component_sink_create(
-		const struct bt_component_class *class)
+		const struct bt_component_class *class __attribute__((unused)))
 {
 	struct bt_component_sink *sink = NULL;
 

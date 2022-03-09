@@ -707,7 +707,6 @@ m4_define([WARN_FLAGS_COMMON_LIST], [ dnl
   -Wduplicated-cond dnl
   -Wduplicated-branches dnl
   -Wlogical-op dnl
-  -Wno-unused-parameter dnl
   dnl GCC enables this with -Wall in C++ and -Wextra in C, and that generates a
   dnl lot of warnings that have on average a low value to fix.
   -Wno-sign-compare dnl

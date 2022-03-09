@@ -825,8 +825,15 @@ BT_HIDDEN
 struct bt_ctf_field *bt_ctf_field_enumeration_borrow_container(
 		struct bt_ctf_field *field);
 
+#ifndef BT_DEV_MODE
+#define BT_FIELD_UNUSED_ATTR __attribute__((unused))
+#else
+#define BT_FIELD_UNUSED_ATTR
+#endif
+
 static inline
-bt_ctf_bool bt_ctf_field_is_set_recursive(struct bt_ctf_field *field)
+bt_ctf_bool bt_ctf_field_is_set_recursive(
+		struct bt_ctf_field *field BT_FIELD_UNUSED_ATTR)
 {
 	return bt_ctf_field_common_is_set_recursive((void *) field);
 }

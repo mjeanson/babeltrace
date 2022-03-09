@@ -15,7 +15,7 @@
 #include "field.h"
 
 BT_HIDDEN
-struct bt_field_wrapper *bt_field_wrapper_new(void *data)
+struct bt_field_wrapper *bt_field_wrapper_new(void *data __attribute__((unused)))
 {
 	struct bt_field_wrapper *field_wrapper =
 		g_new0(struct bt_field_wrapper, 1);
