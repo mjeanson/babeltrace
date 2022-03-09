@@ -1355,13 +1355,25 @@ void write_event_class(struct details_write_ctx *ctx, const bt_event_class *ec)
 	write_indent(ctx);
 	write_obj_type_name(ctx, "Event class");
 
-	/* Write name and ID */
+	/* Write name, namespace and ID */
 	if (name) {
 		g_string_append_printf(ctx->str, " `%s%s%s`",
 			color_fg_green(ctx), name, color_reset(ctx));
 	}
 
-	g_string_append(ctx->str, " (ID ");
+	g_string_append(ctx->str, " (");
+
+	if (ctx->details_comp->mip_version >= 1) {
+		const char *ns = bt_event_class_get_namespace(ec);
+
+		if (ns) {
+			g_string_append(ctx->str, "Namespace `");
+			write_none_prop_value(ctx, ns);
+			g_string_append(ctx->str, "`, ");
+		}
+	}
+
+	g_string_append(ctx->str, "ID ");
 	write_uint_prop_value(ctx, bt_event_class_get_id(ec));
 	g_string_append(ctx->str, "):\n");
 
