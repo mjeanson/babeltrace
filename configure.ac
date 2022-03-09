@@ -724,7 +724,6 @@ m4_define([WARN_FLAGS_COMMON_LIST], [ dnl
   dnl
   dnl Ref: https://github.com/swig/swig/issues/1259
   -Wno-cast-function-type dnl
-  -Wno-missing-field-initializers dnl
 ])
 
 # Detect warning flags specific to the C compiler and append them to
