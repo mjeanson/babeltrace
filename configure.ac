@@ -690,29 +690,26 @@ CFLAGS=${save_CFLAGS}
 
 # Detect warning flags supported by the C and C++ compilers and append them to
 # WARN_CFLAGS and WARN_CXXFLAGS.
-#
-m4_define([WARN_FLAGS_LIST], [ dnl
+m4_define([WARN_FLAGS_COMMON_LIST], [ dnl
   -Wall dnl
   -Wextra dnl
-  -Wmissing-prototypes dnl
   -Wmissing-declarations dnl
   -Wnull-dereference dnl
   -Wundef dnl
   -Wredundant-decls dnl
   -Wshadow dnl
-  -Wjump-misses-init dnl
   -Wsuggest-attribute=format dnl
-  -Wtautological-constant-out-of-range-compare dnl
-  -Wnested-externs dnl
+  -Wtautological-constant-out-of-range-compare dnl Clang specific
   -Wwrite-strings dnl
   -Wformat=2 dnl
   -Wstrict-aliasing dnl
   -Wmissing-noreturn dnl
-  -Winit-self dnl
   -Wduplicated-cond dnl
   -Wduplicated-branches dnl
   -Wlogical-op dnl
   -Wno-unused-parameter dnl
+  dnl GCC enables this with -Wall in C++ and -Wextra in C, and that generates a
+  dnl lot of warnings that have on average a low value to fix.
   -Wno-sign-compare dnl
   dnl
   dnl Some versions of SWIG (like 3.0.12) generate code that produces
@@ -730,12 +727,30 @@ m4_define([WARN_FLAGS_LIST], [ dnl
   -Wno-missing-field-initializers dnl
 ])
 
+# Detect warning flags specific to the C compiler and append them to
+# WARN_CFLAGS.
+m4_define([WARN_FLAGS_C_LIST], [ dnl
+  -Wdiscarded-qualifiers dnl
+  -Wmissing-prototypes dnl
+  -Wmissing-parameter-type dnl
+  -Wjump-misses-init dnl
+  -Wnested-externs dnl
+])
+
+# Detect warning flags specific to the C++ compiler and append them to
+# WARN_CXXFLAGS.
+m4_define([WARN_FLAGS_CXX_LIST], [ dnl
+  -Winit-self dnl
+])
+
 # Pass -Werror as an extra flag during the test: this is needed to make the
 # -Wunknown-warning-option diagnostic fatal with clang.
-AC_LANG([C++])
-AX_APPEND_COMPILE_FLAGS([WARN_FLAGS_LIST], [WARN_CXXFLAGS], [-Werror])
-AC_LANG([C])
-AX_APPEND_COMPILE_FLAGS([WARN_FLAGS_LIST], [WARN_CFLAGS], [-Werror])
+AC_LANG_PUSH([C])
+AX_APPEND_COMPILE_FLAGS([WARN_FLAGS_COMMON_LIST WARN_FLAGS_C_LIST], [WARN_CFLAGS], [-Werror])
+AC_LANG_POP([C])
+AC_LANG_PUSH([C++])
+AX_APPEND_COMPILE_FLAGS([WARN_FLAGS_COMMON_LIST WARN_FLAGS_CXX_LIST], [WARN_CXXFLAGS], [-Werror])
+AC_LANG_POP([C++])
 
 AE_IF_FEATURE_ENABLED([Werror], [WARN_CXXFLAGS="${WARN_CXXFLAGS} -Werror"])
 AE_IF_FEATURE_ENABLED([Werror], [WARN_CFLAGS="${WARN_CFLAGS} -Werror"])
