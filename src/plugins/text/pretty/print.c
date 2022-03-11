@@ -1311,11 +1311,9 @@ int print_field(struct pretty_component *pretty,
 	} else if (bt_field_class_type_is(class_id,
 			BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY)) {
 		return print_sequence(pretty, field, print_names);
-	} else {
-		// TODO: log instead
-		fprintf(pretty->err, "[error] Unknown type id: %d\n", (int) class_id);
-		return -1;
 	}
+
+	bt_common_abort();
 }
 
 static
