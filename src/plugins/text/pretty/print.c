@@ -1221,6 +1221,25 @@ end:
 }
 
 static
+int print_blob(struct pretty_component *pretty, const bt_field *blob)
+{
+	const uint8_t *data = bt_field_blob_get_data_const(blob);
+	uint64_t len = bt_field_blob_get_length(blob);
+	size_t i;
+
+	bt_common_g_string_append(pretty->string, "{ ");
+
+	for (i = 0; i < len; ++i) {
+		uint8_t b = data[i];
+
+		bt_common_g_string_append_printf(pretty->string, "%02x ", b);
+	}
+
+	bt_common_g_string_append(pretty->string, "}");
+	return 0;
+}
+
+static
 int print_field(struct pretty_component *pretty,
 		const bt_field *field, bool print_names)
 {
@@ -1311,6 +1330,8 @@ int print_field(struct pretty_component *pretty,
 	} else if (bt_field_class_type_is(class_id,
 			BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY)) {
 		return print_sequence(pretty, field, print_names);
+	} else if (bt_field_class_type_is(class_id, BT_FIELD_CLASS_TYPE_BLOB)) {
+		return print_blob(pretty, field);
 	}
 
 	bt_common_abort();
