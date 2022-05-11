@@ -383,29 +383,6 @@ const char *ctf_metadata_decoder_get_text(struct ctf_metadata_decoder *mdec)
     return mdec->text->str;
 }
 
-int ctf_metadata_decoder_get_byte_order(struct ctf_metadata_decoder *mdec)
-{
-    BT_ASSERT_DBG(mdec);
-    return mdec->bo;
-}
-
-int ctf_metadata_decoder_get_uuid(struct ctf_metadata_decoder *mdec, bt_uuid_t uuid)
-{
-    int ret = 0;
-
-    BT_ASSERT_DBG(mdec);
-
-    if (!mdec->is_uuid_set) {
-        ret = -1;
-        goto end;
-    }
-
-    bt_uuid_copy(uuid, mdec->uuid);
-
-end:
-    return ret;
-}
-
 static enum ctf_metadata_decoder_status find_uuid_in_trace_decl(struct ctf_metadata_decoder *mdec,
                                                                 struct ctf_node *trace_node,
                                                                 bt_uuid_t uuid)

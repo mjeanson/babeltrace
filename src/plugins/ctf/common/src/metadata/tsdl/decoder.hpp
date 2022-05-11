@@ -155,20 +155,6 @@ int ctf_metadata_decoder_is_packetized(FILE *fp, bool *is_packetized, int *byte_
                                        const bt2c::Logger& logger);
 
 /*
- * Returns the byte order of the decoder's metadata stream as set by the
- * last call to ctf_metadata_decoder_append_content().
- *
- * Returns -1 if unknown (plain text content).
- */
-int ctf_metadata_decoder_get_byte_order(struct ctf_metadata_decoder *mdec);
-
-/*
- * Returns the UUID of the decoder's metadata stream as set by the last
- * call to ctf_metadata_decoder_append_content().
- */
-int ctf_metadata_decoder_get_uuid(struct ctf_metadata_decoder *mdec, bt_uuid_t uuid);
-
-/*
  * Returns the UUID of the decoder's trace class, if available.
  *
  * Returns:
