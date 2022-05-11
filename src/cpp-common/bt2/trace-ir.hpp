@@ -1897,6 +1897,18 @@ public:
         return OptionFieldClass::Shared::createWithoutRef(libObjPtr);
     }
 
+    OptionFieldClass::Shared
+    createOptionWithoutSelectorFieldLocationFieldClass(const FieldClass optionalFieldClass) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTraceClass`.");
+
+        const auto libObjPtr = bt_field_class_option_without_selector_field_location_create(
+            this->libObjPtr(), optionalFieldClass.libObjPtr());
+
+        internal::validateCreatedObjPtr(libObjPtr);
+        return OptionFieldClass::Shared::createWithoutRef(libObjPtr);
+    }
+
     OptionWithBoolSelectorFieldClass::Shared
     createOptionWithBoolSelectorFieldClass(const FieldClass optionalFieldClass,
                                            const FieldClass selectorFieldClass) const
@@ -1905,6 +1917,18 @@ public:
 
         const auto libObjPtr = bt_field_class_option_with_selector_field_bool_create(
             this->libObjPtr(), optionalFieldClass.libObjPtr(), selectorFieldClass.libObjPtr());
+
+        internal::validateCreatedObjPtr(libObjPtr);
+        return OptionWithBoolSelectorFieldClass::Shared::createWithoutRef(libObjPtr);
+    }
+
+    OptionWithBoolSelectorFieldClass::Shared createOptionWithBoolSelectorFieldLocationFieldClass(
+        const FieldClass optionalFieldClass, const ConstFieldLocation selectorFieldLocation) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTraceClass`.");
+
+        const auto libObjPtr = bt_field_class_option_with_selector_field_location_bool_create(
+            this->libObjPtr(), optionalFieldClass.libObjPtr(), selectorFieldLocation.libObjPtr());
 
         internal::validateCreatedObjPtr(libObjPtr);
         return OptionWithBoolSelectorFieldClass::Shared::createWithoutRef(libObjPtr);
@@ -1925,6 +1949,22 @@ public:
         return OptionWithUnsignedIntegerSelectorFieldClass::Shared::createWithoutRef(libObjPtr);
     }
 
+    OptionWithUnsignedIntegerSelectorFieldClass::Shared
+    createOptionWithUnsignedIntegerSelectorFieldLocationFieldClass(
+        const FieldClass optionalFieldClass, const ConstFieldLocation selectorFieldLocation,
+        const ConstUnsignedIntegerRangeSet ranges) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTraceClass`.");
+
+        const auto libObjPtr =
+            bt_field_class_option_with_selector_field_location_integer_unsigned_create(
+                this->libObjPtr(), optionalFieldClass.libObjPtr(),
+                selectorFieldLocation.libObjPtr(), ranges.libObjPtr());
+
+        internal::validateCreatedObjPtr(libObjPtr);
+        return OptionWithUnsignedIntegerSelectorFieldClass::Shared::createWithoutRef(libObjPtr);
+    }
+
     OptionWithSignedIntegerSelectorFieldClass::Shared
     createOptionWithSignedIntegerSelectorFieldClass(const FieldClass optionalFieldClass,
                                                     const IntegerFieldClass selectorFieldClass,
@@ -1935,6 +1975,22 @@ public:
         const auto libObjPtr = bt_field_class_option_with_selector_field_integer_signed_create(
             this->libObjPtr(), optionalFieldClass.libObjPtr(), selectorFieldClass.libObjPtr(),
             ranges.libObjPtr());
+
+        internal::validateCreatedObjPtr(libObjPtr);
+        return OptionWithSignedIntegerSelectorFieldClass::Shared::createWithoutRef(libObjPtr);
+    }
+
+    OptionWithSignedIntegerSelectorFieldClass::Shared
+    createOptionWithSignedIntegerSelectorFieldLocationFieldClass(
+        const FieldClass optionalFieldClass, const ConstFieldLocation selectorFieldLocation,
+        const ConstSignedIntegerRangeSet ranges) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTraceClass`.");
+
+        const auto libObjPtr =
+            bt_field_class_option_with_selector_field_location_integer_signed_create(
+                this->libObjPtr(), optionalFieldClass.libObjPtr(),
+                selectorFieldLocation.libObjPtr(), ranges.libObjPtr());
 
         internal::validateCreatedObjPtr(libObjPtr);
         return OptionWithSignedIntegerSelectorFieldClass::Shared::createWithoutRef(libObjPtr);
