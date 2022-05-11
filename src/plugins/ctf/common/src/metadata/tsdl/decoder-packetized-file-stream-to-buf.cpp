@@ -26,15 +26,6 @@
 
 #define TSDL_MAGIC 0x75d11d57
 
-struct ctf_metadata_decoder
-{
-    struct ctf_visitor_generate_ir *visitor;
-    bt_uuid_t uuid;
-    bool is_uuid_set;
-    int bo;
-    struct ctf_metadata_decoder_config config;
-};
-
 struct packet_header
 {
     uint32_t magic;
