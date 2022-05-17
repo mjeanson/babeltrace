@@ -182,11 +182,26 @@ void write_indent(struct details_write_ctx *ctx)
 }
 
 static inline
+void write_none_str(struct details_write_ctx *ctx, const char *str)
+{
+	g_string_append_printf(ctx->str, "%s%s%s%s",
+		color_bold(ctx), color_fg_bright_magenta(ctx),
+		str, color_reset(ctx));
+}
+
+static inline
 void write_compound_member_name(struct details_write_ctx *ctx, const char *name)
 {
 	write_indent(ctx);
-	g_string_append_printf(ctx->str, "%s%s%s:",
-		color_fg_cyan(ctx), name, color_reset(ctx));
+
+	if (name) {
+		g_string_append_printf(ctx->str, "%s%s%s",
+			color_fg_cyan(ctx), name, color_reset(ctx));
+	} else {
+		write_none_str(ctx, "Unnamed");
+	}
+
+	g_string_append(ctx->str, ":");
 }
 
 static inline
@@ -229,14 +244,6 @@ void write_str_prop_value(struct details_write_ctx *ctx, const char *value)
 {
 	g_string_append_printf(ctx->str, "%s%s%s",
 		color_bold(ctx), value, color_reset(ctx));
-}
-
-static inline
-void write_none_prop_value(struct details_write_ctx *ctx, const char *value)
-{
-	g_string_append_printf(ctx->str, "%s%s%s%s",
-		color_bold(ctx), color_fg_bright_magenta(ctx),
-		value, color_reset(ctx));
 }
 
 static inline
@@ -392,7 +399,7 @@ void write_value(struct details_write_ctx *ctx, const bt_value *value,
 	switch (value_type) {
 	case BT_VALUE_TYPE_NULL:
 		write_sp(ctx);
-		write_none_prop_value(ctx, "Null");
+		write_none_str(ctx, "Null");
 		break;
 	case BT_VALUE_TYPE_BOOL:
 		write_sp(ctx);
@@ -425,7 +432,7 @@ void write_value(struct details_write_ctx *ctx, const bt_value *value,
 
 		if (length == 0) {
 			write_sp(ctx);
-			write_none_prop_value(ctx, "Empty");
+			write_none_str(ctx, "Empty");
 		} else {
 			g_string_append(ctx->str, " Length ");
 			write_uint_prop_value(ctx, length);
@@ -473,7 +480,7 @@ void write_value(struct details_write_ctx *ctx, const bt_value *value,
 			decr_indent(ctx);
 		} else {
 			write_sp(ctx);
-			write_none_prop_value(ctx, "Empty");
+			write_none_str(ctx, "Empty");
 		}
 
 		break;
@@ -1368,7 +1375,7 @@ void write_event_class(struct details_write_ctx *ctx, const bt_event_class *ec)
 
 		if (ns) {
 			g_string_append(ctx->str, "Namespace `");
-			write_none_prop_value(ctx, ns);
+			write_none_str(ctx, ns);
 			g_string_append(ctx->str, "`, ");
 		}
 	}
@@ -2010,14 +2017,14 @@ void write_field(struct details_write_ctx *ctx, const bt_field *field,
 			decr_indent(ctx);
 		} else {
 			write_sp(ctx);
-			write_none_prop_value(ctx, "Empty");
+			write_none_str(ctx, "Empty");
 		}
 	} else if (bt_field_class_type_is(fc_type, BT_FIELD_CLASS_TYPE_ARRAY)) {
 		uint64_t length = bt_field_array_get_length(field);
 
 		if (length == 0) {
 			write_sp(ctx);
-			write_none_prop_value(ctx, "Empty");
+			write_none_str(ctx, "Empty");
 		} else {
 			g_string_append(ctx->str, " Length ");
 			write_uint_prop_value(ctx, length);
@@ -2044,7 +2051,7 @@ void write_field(struct details_write_ctx *ctx, const bt_field *field,
 
 		if (!content_field) {
 			write_sp(ctx);
-			write_none_prop_value(ctx, "None");
+			write_none_str(ctx, "None");
 		} else {
 			write_field(ctx, content_field, NULL);
 		}
@@ -2059,7 +2066,7 @@ void write_field(struct details_write_ctx *ctx, const bt_field *field,
 
 		if (length == 0) {
 			write_sp(ctx);
-			write_none_prop_value(ctx, "Empty");
+			write_none_str(ctx, "Empty");
 		} else {
 			g_string_append(ctx->str, " Length ");
 			write_uint_prop_value(ctx, length);
