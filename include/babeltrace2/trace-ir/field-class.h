@@ -1209,7 +1209,12 @@ Variant field classes have the following common property:
 
     - A name, unique amongst all the option names of the same
       variant field class.
+
+      The name is optional when the effective \bt_mip version of the
+      trace processing \bt_graph is&nbsp;1.
+
     - A field class.
+
     - User attributes.
 
     If an instance of the variant field class is linked to a selector
@@ -5070,12 +5075,22 @@ bt_field_class_variant_borrow_option_by_name_const(
 
 See the \ref api-tir-fc-var-prop-opts "options" property.
 
+This function may return \c NULL when the following are true:
+
+- The variant field class containing \bt_p{option} was created from a
+  \bt_trace_cls which was created from a \bt_comp which belongs
+  to a trace processing \bt_graph with the effective
+  \bt_mip version&nbsp;1.
+
+- \bt_p{option} has no name.
+
 @param[in] option
     Variant field class option of which to get the name.
 
 @returns
     @parblock
-    Name of \bt_p{option}.
+    Name of \bt_p{option}, or \c NULL if none
+    (possible under MIP&nbsp;1).
 
     The returned pointer remains valid as long as \bt_p{option} exists.
     @endparblock
@@ -5275,7 +5290,12 @@ See the \ref api-tir-fc-var-prop-opts "options" property.
     Variant field class to which to append an option having
     the name \bt_p{name} and the field class \bt_p{option_field_class}.
 @param[in] name
+    @parblock
     Name of the option to append to \bt_p{field_class} (copied).
+
+    Can be \c NULL when the effective \bt_mip version of the trace
+    processing \bt_graph is&nbsp;1.
+    @endparblock
 @param[in] option_field_class
     Field class of the option to append to \bt_p{field_class}.
 
@@ -5288,8 +5308,13 @@ See the \ref api-tir-fc-var-prop-opts "options" property.
 @bt_pre_hot{field_class}
 @bt_pre_is_var_wos_fc{field_class}
 @pre
+    <strong>If \bt_p{name} is not \c NULL</strong>, then
     \bt_p{field_class} has no option with the name \bt_p{name}.
-@bt_pre_not_null{name}
+@pre
+    <strong>If \bt_p{field_class} was created from a
+    \bt_trace_cls which was created from a \bt_comp which belongs
+    to a trace processing \bt_graph with the effective \bt_mip
+    version&nbsp;0</strong>, then \bt_p{name} is \em not \c NULL.
 @bt_pre_not_null{option_field_class}
 @bt_pre_fc_not_in_tc{option_field_class}
 
@@ -5464,7 +5489,12 @@ See the \ref api-tir-fc-var-prop-opts "options" property.
     the name \bt_p{name}, the field class \bt_p{option_field_class},
     and the unsigned integer ranges \bt_p{ranges}.
 @param[in] name
+    @parblock
     Name of the option to append to \bt_p{field_class} (copied).
+
+    Can be \c NULL when the effective \bt_mip version of the trace
+    processing \bt_graph is&nbsp;1.
+    @endparblock
 @param[in] option_field_class
     Field class of the option to append to \bt_p{field_class}.
 @param[in] ranges
@@ -5480,8 +5510,13 @@ See the \ref api-tir-fc-var-prop-opts "options" property.
 @bt_pre_hot{field_class}
 @bt_pre_is_var_wuis_fc{field_class}
 @pre
+    <strong>If \bt_p{name} is not \c NULL</strong>, then
     \bt_p{field_class} has no option with the name \bt_p{name}.
-@bt_pre_not_null{name}
+@pre
+    <strong>If \bt_p{field_class} was created from a
+    \bt_trace_cls which was created from a \bt_comp which belongs
+    to a trace processing \bt_graph with the effective \bt_mip
+    version&nbsp;0</strong>, then \bt_p{name} is \em not \c NULL.
 @bt_pre_not_null{option_field_class}
 @bt_pre_fc_not_in_tc{option_field_class}
 @bt_pre_not_null{ŗanges}
@@ -5712,7 +5747,12 @@ See the \ref api-tir-fc-var-prop-opts "options" property.
     the name \bt_p{name} and the field class \bt_p{option_field_class},
     and the signed integer ranges \bt_p{ranges}.
 @param[in] name
+    @parblock
     Name of the option to append to \bt_p{field_class} (copied).
+
+    Can be \c NULL when the effective \bt_mip version of the trace
+    processing \bt_graph is&nbsp;1.
+    @endparblock
 @param[in] option_field_class
     Field class of the option to append to \bt_p{field_class}.
 @param[in] ranges
@@ -5728,8 +5768,13 @@ See the \ref api-tir-fc-var-prop-opts "options" property.
 @bt_pre_hot{field_class}
 @bt_pre_is_var_wsis_fc{field_class}
 @pre
+    <strong>If \bt_p{name} is not \c NULL</strong>, then
     \bt_p{field_class} has no option with the name \bt_p{name}.
-@bt_pre_not_null{name}
+@pre
+    <strong>If \bt_p{field_class} was created from a
+    \bt_trace_cls which was created from a \bt_comp which belongs
+    to a trace processing \bt_graph with the effective \bt_mip
+    version&nbsp;0</strong>, then \bt_p{name} is \em not \c NULL.
 @bt_pre_not_null{option_field_class}
 @bt_pre_fc_not_in_tc{option_field_class}
 @bt_pre_not_null{ŗanges}

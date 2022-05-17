@@ -930,13 +930,15 @@ int init_named_field_class(struct bt_named_field_class *named_fc,
 	int status = BT_FUNC_STATUS_OK;
 
 	BT_ASSERT(named_fc);
-	BT_ASSERT(name);
 	BT_ASSERT(fc);
-	named_fc->name = g_string_new(name);
-	if (!named_fc->name) {
-		BT_LIB_LOGE_APPEND_CAUSE("Failed to allocate a GString.");
-		status = BT_FUNC_STATUS_MEMORY_ERROR;
-		goto end;
+
+	if (name) {
+		named_fc->name = g_string_new(name);
+		if (!named_fc->name) {
+			BT_LIB_LOGE_APPEND_CAUSE("Failed to allocate a GString.");
+			status = BT_FUNC_STATUS_MEMORY_ERROR;
+			goto end;
+		}
 	}
 
 	named_fc->user_attributes = bt_value_map_create();
@@ -1026,8 +1028,9 @@ int append_named_field_class_to_container_field_class(
 	BT_ASSERT(named_fc);
 	BT_ASSERT_PRE_DEV_FC_HOT_FROM_FUNC(api_func, container_fc);
 	BT_ASSERT_PRE_FROM_FUNC(api_func, unique_entry_precond_id,
-		!bt_g_hash_table_contains(container_fc->name_to_index,
-			named_fc->name->str),
+		!named_fc->name ||
+			!bt_g_hash_table_contains(container_fc->name_to_index,
+				named_fc->name->str),
 		"Duplicate member/option name in structure/variant field class: "
 		"%![container-fc-]+F, name=\"%s\"", container_fc,
 		named_fc->name->str);
@@ -1039,8 +1042,17 @@ int append_named_field_class_to_container_field_class(
 	 */
 	bt_field_class_freeze(named_fc->fc);
 	g_ptr_array_add(container_fc->named_fcs, named_fc);
-	g_hash_table_insert(container_fc->name_to_index, named_fc->name->str,
-		GUINT_TO_POINTER(container_fc->named_fcs->len - 1));
+
+	if (named_fc->name) {
+		/*
+		 * MIP > 0: a variant field class option may have no
+		 * name.
+		 */
+		g_hash_table_insert(container_fc->name_to_index,
+			named_fc->name->str,
+			GUINT_TO_POINTER(container_fc->named_fcs->len - 1));
+	}
+
 	return BT_FUNC_STATUS_OK;
 }
 
@@ -1055,6 +1067,7 @@ bt_field_class_structure_append_member(
 
 	BT_ASSERT_PRE_NO_ERROR();
 	BT_ASSERT_PRE_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_NAME_NON_NULL(name);
 	BT_ASSERT_PRE_FC_IS_STRUCT("field-class", fc, "Field class");
 	named_fc = create_named_field_class(name, member_fc);
 	if (!named_fc) {
@@ -1176,6 +1189,7 @@ const char *bt_field_class_structure_member_get_name(
 	const struct bt_named_field_class *named_fc = (const void *) member;
 
 	BT_ASSERT_PRE_DEV_STRUCT_FC_MEMBER_NON_NULL(member);
+	BT_ASSERT_DBG(named_fc->name);
 	return named_fc->name->str;
 }
 
@@ -1900,7 +1914,12 @@ bt_field_class_variant_without_selector_append_option(struct bt_field_class *fc,
 
 	BT_ASSERT_PRE_NO_ERROR();
 	BT_ASSERT_PRE_FC_NON_NULL(fc);
-	BT_ASSERT_PRE_NAME_NON_NULL(name);
+
+	/* Name is mandatory in MIP 0, optional later. */
+	if (fc->mip_version == 0) {
+		BT_ASSERT_PRE_NAME_NON_NULL(name);
+	}
+
 	BT_ASSERT_PRE_NON_NULL("option-field-class", option_fc,
 		"Option field class");
 	BT_ASSERT_PRE_FC_HAS_TYPE("field-class", fc,
@@ -2028,7 +2047,12 @@ int append_option_to_variant_with_selector_field_field_class(
 	bool has_overlap;
 
 	BT_ASSERT(fc);
-	BT_ASSERT_PRE_NAME_NON_NULL_FROM_FUNC(api_func, name);
+
+	/* Name is mandatory in MIP 0, optional later. */
+	if (fc->mip_version == 0) {
+		BT_ASSERT_PRE_NAME_NON_NULL_FROM_FUNC(api_func, name);
+	}
+
 	BT_ASSERT_PRE_NON_NULL_FROM_FUNC(api_func, "option-field-class",
 		option_fc, "Option field class");
 	BT_ASSERT_PRE_INT_RANGE_SET_NON_NULL_FROM_FUNC(api_func, range_set);
@@ -2230,7 +2254,9 @@ const char *bt_field_class_variant_option_get_name(
 	const struct bt_named_field_class *named_fc = (const void *) option;
 
 	BT_ASSERT_PRE_DEV_VAR_FC_OPT_NON_NULL(option);
-	return named_fc->name->str;
+
+	/* MIP > 0: a variant field class option may have no name */
+	return named_fc->name ? named_fc->name->str : NULL;
 }
 
 BT_EXPORT

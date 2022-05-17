@@ -115,6 +115,7 @@ struct bt_field_class_string {
 
 /* A named field class is a (name, field class) pair */
 struct bt_named_field_class {
+	/* MIP > 0: `NULL` if not set */
 	GString *name;
 
 	/* Owned by this */
@@ -137,6 +138,10 @@ struct bt_field_class_named_field_class_container {
 	/*
 	 * Key: `const char *`, not owned by this (owned by named field
 	 * class objects contained in `named_fcs` below).
+	 *
+	 * MIP > 0: the size of this hash table may be less than the
+	 * size of `named_fcs` below because, for a variant field class,
+	 * its option names are optional.
 	 */
 	GHashTable *name_to_index;
 
