@@ -40,20 +40,20 @@ namespace sink {
 
 struct TraceIrToCtfIrCtx
 {
-    bt_logging_level log_level;
-    bt_self_component *self_comp;
+    bt_logging_level log_level = BT_LOGGING_LEVEL_NONE;
+    bt_self_component *self_comp = nullptr;
 
     /* Weak */
-    struct fs_sink_ctf_stream_class *cur_sc;
+    struct fs_sink_ctf_stream_class *cur_sc = nullptr;
 
     /* Weak */
-    struct fs_sink_ctf_event_class *cur_ec;
+    struct fs_sink_ctf_event_class *cur_ec = nullptr;
 
-    bt_field_path_scope cur_scope;
+    bt_field_path_scope cur_scope = BT_FIELD_PATH_SCOPE_PACKET_CONTEXT;
 
     /*
      * Array of `struct field_path_elem` */
-    GArray *cur_path;
+    GArray *cur_path = nullptr;
 };
 
 } /* namespace sink */
@@ -1472,7 +1472,6 @@ end:
 
 static inline void ctx_init(ctf::sink::TraceIrToCtfIrCtx *ctx, struct fs_sink_comp *fs_sink)
 {
-    memset(ctx, 0, sizeof(*ctx));
     ctx->cur_path = g_array_new(FALSE, TRUE, sizeof(struct field_path_elem));
     BT_ASSERT(ctx->cur_path);
     ctx->log_level = fs_sink->log_level;

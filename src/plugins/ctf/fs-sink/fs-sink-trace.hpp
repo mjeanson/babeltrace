@@ -11,13 +11,16 @@
 
 #include <babeltrace2/babeltrace.h>
 
+struct fs_sink_comp;
+struct fs_sink_ctf_trace;
+
 struct fs_sink_trace
 {
-    bt_logging_level log_level;
-    struct fs_sink_comp *fs_sink;
+    bt_logging_level log_level = BT_LOGGING_LEVEL_NONE;
+    fs_sink_comp *fs_sink = nullptr;
 
     /* Owned by this */
-    struct fs_sink_ctf_trace *trace;
+    fs_sink_ctf_trace *trace = nullptr;
 
     /*
      * Weak reference: this object does not own it, and `trace`
@@ -31,21 +34,21 @@ struct fs_sink_trace
      * could "leak" resources (memory, file descriptors) associated
      * to traces and streams which otherwise would not exist.
      */
-    const bt_trace *ir_trace;
+    const bt_trace *ir_trace = nullptr;
 
-    bt_listener_id ir_trace_destruction_listener_id;
+    bt_listener_id ir_trace_destruction_listener_id = 0;
 
     /* Trace's directory */
-    GString *path;
+    GString *path = nullptr;
 
     /* `metadata` file path */
-    GString *metadata_path;
+    GString *metadata_path = nullptr;
 
     /*
      * Hash table of `const bt_stream *` (weak) to
      * `struct fs_sink_stream *` (owned by hash table).
      */
-    GHashTable *streams;
+    GHashTable *streams = nullptr;
 };
 
 struct fs_sink_trace *fs_sink_trace_create(struct fs_sink_comp *fs_sink, const bt_trace *ir_trace);

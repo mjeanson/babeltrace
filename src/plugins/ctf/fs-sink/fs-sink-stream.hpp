@@ -14,19 +14,22 @@
 
 #include "ctfser/ctfser.h"
 
+struct fs_sink_trace;
+struct fs_sink_ctf_stream_class;
+
 struct fs_sink_stream
 {
-    bt_logging_level log_level;
-    struct fs_sink_trace *trace;
-    struct bt_ctfser ctfser;
+    bt_logging_level log_level = BT_LOGGING_LEVEL_NONE;
+    fs_sink_trace *trace = nullptr;
+    bt_ctfser ctfser {};
 
     /* Stream's file name */
-    GString *file_name;
+    GString *file_name = nullptr;
 
     /* Weak */
-    const bt_stream *ir_stream;
+    const bt_stream *ir_stream = nullptr;
 
-    struct fs_sink_ctf_stream_class *sc;
+    fs_sink_ctf_stream_class *sc = nullptr;
 
     /* Current packet's state */
     struct
@@ -36,65 +39,65 @@ struct fs_sink_stream
          * packet (got a packet beginning message, but no
          * packet end message yet).
          */
-        bool is_open;
+        bool is_open = false;
 
         /*
          * Current beginning default clock snapshot for the
          * current packet (`UINT64_C(-1)` if not set).
          */
-        uint64_t beginning_cs;
+        uint64_t beginning_cs = 0;
 
         /*
          * Current end default clock snapshot for the current
          * packet (`UINT64_C(-1)` if not set).
          */
-        uint64_t end_cs;
+        uint64_t end_cs = 0;
 
         /*
          * Current packet's content size (bits) for the current
          * packet.
          */
-        uint64_t content_size;
+        uint64_t content_size = 0;
 
         /*
          * Current packet's total size (bits) for the current
          * packet.
          */
-        uint64_t total_size;
+        uint64_t total_size = 0;
 
         /*
          * Discarded events (free running) counter for the
          * current packet.
          */
-        uint64_t discarded_events_counter;
+        uint64_t discarded_events_counter = 0;
 
         /* Sequence number (free running) of the current packet */
-        uint64_t seq_num;
+        uint64_t seq_num = 0;
 
         /*
          * Offset of the packet context structure within the
          * current packet (bits).
          */
-        uint64_t context_offset_bits;
+        uint64_t context_offset_bits = 0;
 
         /*
          * Owned by this; `NULL` if the current packet is closed
          * or if the trace IR stream does not support packets.
          */
-        const bt_packet *packet;
+        const bt_packet *packet = nullptr;
     } packet_state;
 
     /* Previous packet's state */
     struct
     {
         /* End default clock snapshot (`UINT64_C(-1)` if not set) */
-        uint64_t end_cs;
+        uint64_t end_cs = 0;
 
         /* Discarded events (free running) counter */
-        uint64_t discarded_events_counter;
+        uint64_t discarded_events_counter = 0;
 
         /* Sequence number (free running) */
-        uint64_t seq_num;
+        uint64_t seq_num = 0;
     } prev_packet_state;
 
     /* State to handle discarded events */
@@ -116,14 +119,14 @@ struct fs_sink_stream
          *
          * * Its end time is the current packet's end time.
          */
-        bool in_range;
+        bool in_range = false;
 
         /*
          * Beginning and end times of the time range given by a
          * previously received discarded events message.
          */
-        uint64_t beginning_cs;
-        uint64_t end_cs;
+        uint64_t beginning_cs = 0;
+        uint64_t end_cs = 0;
     } discarded_events_state;
 
     /* State to handle discarded packets */
@@ -146,14 +149,14 @@ struct fs_sink_stream
          * * Its end time is the current packet's beginning
          *   time.
          */
-        bool in_range;
+        bool in_range = false;
 
         /*
          * Beginning and end times of the time range given by a
          * previously received discarded packets message.
          */
-        uint64_t beginning_cs;
-        uint64_t end_cs;
+        uint64_t beginning_cs = 0;
+        uint64_t end_cs = 0;
     } discarded_packets_state;
 };
 

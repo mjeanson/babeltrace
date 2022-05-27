@@ -526,7 +526,7 @@ void fs_sink_trace_destroy(struct fs_sink_trace *trace)
 
     fs_sink_ctf_trace_destroy(trace->trace);
     trace->trace = NULL;
-    g_free(trace);
+    delete trace;
 
     g_string_free(tsdl, TRUE);
 
@@ -550,12 +550,8 @@ static void ir_trace_destruction_listener(const bt_trace *ir_trace, void *data)
 struct fs_sink_trace *fs_sink_trace_create(struct fs_sink_comp *fs_sink, const bt_trace *ir_trace)
 {
     int ret;
-    struct fs_sink_trace *trace = g_new0(struct fs_sink_trace, 1);
+    fs_sink_trace *trace = new fs_sink_trace;
     bt_trace_add_listener_status trace_status;
-
-    if (!trace) {
-        goto end;
-    }
 
     trace->log_level = fs_sink->log_level;
     trace->fs_sink = fs_sink;

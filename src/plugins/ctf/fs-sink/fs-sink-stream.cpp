@@ -38,7 +38,7 @@ void fs_sink_stream_destroy(struct fs_sink_stream *stream)
     }
 
     bt_packet_put_ref(stream->packet_state.packet);
-    g_free(stream);
+    delete stream;
 
 end:
     return;
@@ -124,13 +124,9 @@ static void set_stream_file_name(struct fs_sink_stream *stream)
 struct fs_sink_stream *fs_sink_stream_create(struct fs_sink_trace *trace,
                                              const bt_stream *ir_stream)
 {
-    struct fs_sink_stream *stream = g_new0(struct fs_sink_stream, 1);
+    fs_sink_stream *stream = new fs_sink_stream;
     int ret;
     GString *path = g_string_new(trace->path->str);
-
-    if (!stream) {
-        goto end;
-    }
 
     stream->log_level = trace->log_level;
     stream->trace = trace;

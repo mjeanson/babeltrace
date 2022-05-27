@@ -126,7 +126,7 @@ static void destroy_fs_sink_comp(struct fs_sink_comp *fs_sink)
     }
 
     BT_MESSAGE_ITERATOR_PUT_REF_AND_RESET(fs_sink->upstream_iter);
-    g_free(fs_sink);
+    delete fs_sink;
 
 end:
     return;
@@ -143,16 +143,7 @@ bt_component_class_initialize_method_status ctf_fs_sink_init(bt_self_component_s
     bt_logging_level log_level =
         bt_component_get_logging_level(bt_self_component_as_component(self_comp));
 
-    fs_sink = g_new0(struct fs_sink_comp, 1);
-    if (!fs_sink) {
-        BT_COMP_LOG_CUR_LVL(BT_LOG_ERROR, log_level, self_comp,
-                            "Failed to allocate one CTF FS sink structure.");
-        BT_CURRENT_THREAD_ERROR_APPEND_CAUSE_FROM_COMPONENT(
-            self_comp, "Failed to allocate one CTF FS sink structure.");
-        status = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_MEMORY_ERROR;
-        goto end;
-    }
-
+    fs_sink = new fs_sink_comp;
     fs_sink->log_level = log_level;
     fs_sink->self_comp = self_comp;
     fs_sink->output_dir_path = g_string_new(NULL);
