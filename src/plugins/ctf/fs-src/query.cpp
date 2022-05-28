@@ -368,7 +368,7 @@ support_info_query(const bt_value *params, const bt2c::Logger& logger, const bt_
     bt_component_class_query_method_status status;
     bt_value_map_insert_entry_status insert_entry_status;
     double weight = 0;
-    gchar *metadata_path = NULL;
+    bt2c::GCharUP metadata_path;
     bt_value *result = NULL;
     struct ctf_metadata_decoder *metadata_decoder = NULL;
     FILE *metadata_file = NULL;
@@ -391,13 +391,13 @@ support_info_query(const bt_value *params, const bt2c::Logger& logger, const bt_
     BT_ASSERT(bt_value_get_type(input_value) == BT_VALUE_TYPE_STRING);
     input = bt_value_string_get(input_value);
 
-    metadata_path = g_build_filename(input, CTF_FS_METADATA_FILENAME, NULL);
+    metadata_path.reset(g_build_filename(input, CTF_FS_METADATA_FILENAME, NULL));
     if (!metadata_path) {
         status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_MEMORY_ERROR;
         goto end;
     }
 
-    metadata_file = g_fopen(metadata_path, "rb");
+    metadata_file = g_fopen(metadata_path.get(), "rb");
     if (metadata_file) {
         enum ctf_metadata_decoder_status decoder_status;
         bt_uuid_t uuid;
@@ -460,7 +460,6 @@ create_result:
     status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_OK;
 
 end:
-    g_free(metadata_path);
     bt_value_put_ref(result);
     ctf_metadata_decoder_destroy(metadata_decoder);
 
