@@ -927,15 +927,6 @@ void ctf_fs_ds_index_destroy(struct ctf_fs_ds_index *index)
     delete index;
 }
 
-void ctf_fs_ds_file_info_destroy(struct ctf_fs_ds_file_info *ds_file_info)
-{
-    if (!ds_file_info) {
-        return;
-    }
-
-    delete ds_file_info;
-}
-
 ctf_fs_ds_file_info::UP ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns)
 {
     ctf_fs_ds_file_info::UP ds_file_info = bt2s::make_unique<ctf_fs_ds_file_info>();
@@ -949,10 +940,6 @@ static void ctf_fs_ds_file_group_destroy(struct ctf_fs_ds_file_group *ds_file_gr
 {
     if (!ds_file_group) {
         return;
-    }
-
-    if (ds_file_group->ds_file_infos) {
-        g_ptr_array_free(ds_file_group->ds_file_infos, TRUE);
     }
 
     ctf_fs_ds_index_destroy(ds_file_group->index);
@@ -973,24 +960,12 @@ ctf_fs_ds_file_group::UP ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs
 {
     ctf_fs_ds_file_group::UP ds_file_group {new ctf_fs_ds_file_group};
 
-    ds_file_group->ds_file_infos =
-        g_ptr_array_new_with_free_func((GDestroyNotify) ctf_fs_ds_file_info_destroy);
-    if (!ds_file_group->ds_file_infos) {
-        goto error;
-    }
-
     ds_file_group->index = index;
 
     ds_file_group->stream_id = stream_instance_id;
     BT_ASSERT(sc);
     ds_file_group->sc = sc;
     ds_file_group->ctf_fs_trace = ctf_fs_trace;
-    goto end;
 
-error:
-    ds_file_group.reset();
-    ctf_fs_ds_index_destroy(index);
-
-end:
     return ds_file_group;
 }

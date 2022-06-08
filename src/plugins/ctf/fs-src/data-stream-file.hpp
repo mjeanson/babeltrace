@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <glib.h>
 #include <stdio.h>
@@ -121,15 +122,13 @@ struct ctf_fs_ds_file_group
     using UP = std::unique_ptr<ctf_fs_ds_file_group, ctf_fs_ds_file_group_deleter>;
 
     /*
-     * Array of struct ctf_fs_ds_file_info, owned by this.
-     *
      * This is an _ordered_ array of data stream file infos which
      * belong to this group (a single stream instance).
      *
      * You can call ctf_fs_ds_file_create() with one of those paths
      * and the trace IR stream below.
      */
-    GPtrArray *ds_file_infos = nullptr;
+    std::vector<ctf_fs_ds_file_info::UP> ds_file_infos;
 
     /* Owned by this */
     struct ctf_stream_class *sc = nullptr;
@@ -161,8 +160,6 @@ struct ctf_fs_ds_index *ctf_fs_ds_file_build_index(struct ctf_fs_ds_file *ds_fil
 struct ctf_fs_ds_index *ctf_fs_ds_index_create(const bt2c::Logger& logger);
 
 void ctf_fs_ds_index_destroy(struct ctf_fs_ds_index *index);
-
-void ctf_fs_ds_file_info_destroy(struct ctf_fs_ds_file_info *ds_file_info);
 
 ctf_fs_ds_file_info::UP ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns);
 
