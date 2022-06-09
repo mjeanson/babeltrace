@@ -896,20 +896,6 @@ ctf_fs_ds_file_info::UP ctf_fs_ds_file_info_create(const char *path, int64_t beg
     return ds_file_info;
 }
 
-static void ctf_fs_ds_file_group_destroy(struct ctf_fs_ds_file_group *ds_file_group)
-{
-    if (!ds_file_group) {
-        return;
-    }
-
-    delete ds_file_group;
-}
-
-void ctf_fs_ds_file_group_deleter::operator()(ctf_fs_ds_file_group *group) noexcept
-{
-    ctf_fs_ds_file_group_destroy(group);
-}
-
 ctf_fs_ds_file_group::UP ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs_trace,
                                                      struct ctf_stream_class *sc,
                                                      uint64_t stream_instance_id,

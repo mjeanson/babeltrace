@@ -116,14 +116,9 @@ struct ctf_fs_ds_index
     std::vector<ctf_fs_ds_index_entry::UP> entries;
 };
 
-struct ctf_fs_ds_file_group_deleter
-{
-    void operator()(struct ctf_fs_ds_file_group *group) noexcept;
-};
-
 struct ctf_fs_ds_file_group
 {
-    using UP = std::unique_ptr<ctf_fs_ds_file_group, ctf_fs_ds_file_group_deleter>;
+    using UP = std::unique_ptr<ctf_fs_ds_file_group>;
 
     /*
      * This is an _ordered_ array of data stream file infos which
