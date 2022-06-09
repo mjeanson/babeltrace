@@ -868,7 +868,7 @@ end:
 
 ctf_fs_ds_index::UP ctf_fs_ds_index_create()
 {
-    return ctf_fs_ds_index::UP {new ctf_fs_ds_index};
+    return bt2s::make_unique<ctf_fs_ds_index>();
 }
 
 void ctf_fs_ds_file_destroy(struct ctf_fs_ds_file *ds_file)
@@ -885,20 +885,6 @@ void ctf_fs_ds_file_destroy(struct ctf_fs_ds_file *ds_file)
     }
 
     delete ds_file;
-}
-
-void ctf_fs_ds_index_destroy(struct ctf_fs_ds_index *index)
-{
-    if (!index) {
-        return;
-    }
-
-    delete index;
-}
-
-void ctf_fs_ds_index_deleter::operator()(ctf_fs_ds_index * const index) noexcept
-{
-    ctf_fs_ds_index_destroy(index);
 }
 
 ctf_fs_ds_file_info::UP ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns)
