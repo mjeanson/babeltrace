@@ -2076,22 +2076,18 @@ static int create_streams_for_trace(struct ctf_fs_trace *ctf_fs_trace)
             goto error;
         }
 
-        if (ds_file_group->sc->ir_sc) {
-            BT_ASSERT(ctf_fs_trace->trace);
+        BT_ASSERT(ds_file_group->sc->ir_sc);
+        BT_ASSERT(ctf_fs_trace->trace);
 
-            if (ds_file_group->stream_id == UINT64_C(-1)) {
-                /* No stream ID: use 0 */
-                ds_file_group->stream = bt_stream_create_with_id(
-                    ds_file_group->sc->ir_sc, ctf_fs_trace->trace, ctf_fs_trace->next_stream_id);
-                ctf_fs_trace->next_stream_id++;
-            } else {
-                /* Specific stream ID */
-                ds_file_group->stream =
-                    bt_stream_create_with_id(ds_file_group->sc->ir_sc, ctf_fs_trace->trace,
-                                             (uint64_t) ds_file_group->stream_id);
-            }
+        if (ds_file_group->stream_id == UINT64_C(-1)) {
+            /* No stream ID: use 0 */
+            ds_file_group->stream = bt_stream_create_with_id(
+                ds_file_group->sc->ir_sc, ctf_fs_trace->trace, ctf_fs_trace->next_stream_id);
+            ctf_fs_trace->next_stream_id++;
         } else {
-            ds_file_group->stream = NULL;
+            /* Specific stream ID */
+            ds_file_group->stream = bt_stream_create_with_id(
+                ds_file_group->sc->ir_sc, ctf_fs_trace->trace, (uint64_t) ds_file_group->stream_id);
         }
 
         if (!ds_file_group->stream) {
