@@ -33,9 +33,6 @@ struct ctf_fs_metadata
     /* Weak (owned by `decoder` above) */
     struct ctf_trace_class *tc = nullptr;
 
-    /* Owned by this */
-    char *text = nullptr;
-
     int bo = 0;
 };
 

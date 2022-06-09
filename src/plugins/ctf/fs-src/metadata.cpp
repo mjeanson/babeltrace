@@ -108,8 +108,6 @@ int ctf_fs_metadata_init(struct ctf_fs_metadata *)
 
 void ctf_fs_metadata_fini(struct ctf_fs_metadata *metadata)
 {
-    free(metadata->text);
-
     if (metadata->trace_class) {
         BT_TRACE_CLASS_PUT_REF_AND_RESET(metadata->trace_class);
     }
