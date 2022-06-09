@@ -811,7 +811,7 @@ ctf_fs_ds_file::UP ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace,
     }
 
     ds_file->stream = std::move(stream);
-    ds_file->metadata = ctf_fs_trace->metadata;
+    ds_file->metadata = ctf_fs_trace->metadata.get();
     ds_file->file->path = path;
     ret = ctf_fs_file_open(ds_file->file.get(), "rb");
     if (ret) {
