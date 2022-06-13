@@ -384,8 +384,6 @@ static ctf_fs_ds_index_entry::UP ctf_fs_ds_index_entry_create(const bt2c::DataLe
 {
     ctf_fs_ds_index_entry::UP entry = bt2s::make_unique<ctf_fs_ds_index_entry>(offset, packetSize);
 
-    entry->packet_seq_num = UINT64_MAX;
-
     return entry;
 }
 

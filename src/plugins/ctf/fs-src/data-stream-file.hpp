@@ -111,7 +111,7 @@ struct ctf_fs_ds_index_entry
     /*
      * Packet sequence number, or UINT64_MAX if not present in the index.
      */
-    uint64_t packet_seq_num = 0;
+    uint64_t packet_seq_num = UINT64_MAX;
 };
 
 struct ctf_fs_ds_index
