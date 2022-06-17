@@ -745,3 +745,19 @@ ctf_fs_ds_file_group::UP ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs
 
     return ds_file_group;
 }
+
+void ctf_fs_ds_file_group::insert_ds_file_info_sorted(ctf_fs_ds_file_info::UP ds_file_info)
+{
+    /* Find the spot where to insert this ds_file_info. */
+    auto it = this->ds_file_infos.begin();
+
+    for (; it != this->ds_file_infos.end(); ++it) {
+        const ctf_fs_ds_file_info& other_ds_file_info = **it;
+
+        if (ds_file_info->begin_ns < other_ds_file_info.begin_ns) {
+            break;
+        }
+    }
+
+    this->ds_file_infos.insert(it, std::move(ds_file_info));
+}

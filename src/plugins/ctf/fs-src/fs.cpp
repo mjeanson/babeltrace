@@ -330,28 +330,6 @@ static int create_ports_for_trace(struct ctf_fs_component *ctf_fs,
     return 0;
 }
 
-/*
- * Insert ds_file_info in ds_file_group's list of ds_file_infos at the right
- * place to keep it sorted.
- */
-
-static void ds_file_group_insert_ds_file_info_sorted(struct ctf_fs_ds_file_group *ds_file_group,
-                                                     ctf_fs_ds_file_info::UP ds_file_info)
-{
-    /* Find the spot where to insert this ds_file_info. */
-    auto it = ds_file_group->ds_file_infos.begin();
-
-    for (; it != ds_file_group->ds_file_infos.end(); ++it) {
-        const ctf_fs_ds_file_info& other_ds_file_info = **it;
-
-        if (ds_file_info->begin_ns < other_ds_file_info.begin_ns) {
-            break;
-        }
-    }
-
-    ds_file_group->ds_file_infos.insert(it, std::move(ds_file_info));
-}
-
 static bool ds_index_entries_equal(const ctf_fs_ds_index_entry& left,
                                    const ctf_fs_ds_index_entry& right)
 {
@@ -499,7 +477,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
             return -1;
         }
 
-        ds_file_group_insert_ds_file_info_sorted(new_ds_file_group.get(), std::move(ds_file_info));
+        new_ds_file_group->insert_ds_file_info_sorted(std::move(ds_file_info));
         ctf_fs_trace->ds_file_groups.emplace_back(std::move(new_ds_file_group));
         return 0;
     }
@@ -531,7 +509,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
         merge_ctf_fs_ds_indexes(&ds_file_group->index, *index);
     }
 
-    ds_file_group_insert_ds_file_info_sorted(ds_file_group, std::move(ds_file_info));
+    ds_file_group->insert_ds_file_info_sorted(std::move(ds_file_info));
 
     return 0;
 }
@@ -753,7 +731,7 @@ static void merge_ctf_fs_ds_file_groups(struct ctf_fs_ds_file_group *dest,
                                         ctf_fs_ds_file_group::UP src)
 {
     for (auto& ds_file_info : src->ds_file_infos) {
-        ds_file_group_insert_ds_file_info_sorted(dest, std::move(ds_file_info));
+        dest->insert_ds_file_info_sorted(std::move(ds_file_info));
     }
 
     /* Merge both indexes. */

@@ -122,6 +122,12 @@ struct ctf_fs_ds_file_group
     using UP = std::unique_ptr<ctf_fs_ds_file_group>;
 
     /*
+     * Insert ds_file_info in the list of ds_file_infos at the right
+     * place to keep it sorted.
+     */
+    void insert_ds_file_info_sorted(ctf_fs_ds_file_info::UP ds_file_info);
+
+    /*
      * This is an _ordered_ array of data stream file infos which
      * belong to this group (a single stream instance).
      *
