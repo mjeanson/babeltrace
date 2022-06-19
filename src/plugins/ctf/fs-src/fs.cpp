@@ -358,12 +358,12 @@ static bool ds_index_entries_equal(const ctf_fs_ds_index_entry& left,
  * The entry is inserted only if there isn't an identical entry already.
  */
 
-static void ds_index_insert_ds_index_entry_sorted(struct ctf_fs_ds_index *index,
+static void ds_index_insert_ds_index_entry_sorted(ctf_fs_ds_index& index,
                                                   const ctf_fs_ds_index_entry& entry)
 {
     /* Find the spot where to insert this index entry. */
-    auto otherEntry = index->entries.begin();
-    for (; otherEntry != index->entries.end(); ++otherEntry) {
+    auto otherEntry = index.entries.begin();
+    for (; otherEntry != index.entries.end(); ++otherEntry) {
         if (entry.timestamp_begin_ns <= otherEntry->timestamp_begin_ns) {
             break;
         }
@@ -376,12 +376,12 @@ static void ds_index_insert_ds_index_entry_sorted(struct ctf_fs_ds_index *index,
      * snapshots of the same trace.  We then want the index to contain
      * a reference to only one copy of that packet.
      */
-    if (otherEntry == index->entries.end() || !ds_index_entries_equal(entry, *otherEntry)) {
-        index->entries.emplace(otherEntry, entry);
+    if (otherEntry == index.entries.end() || !ds_index_entries_equal(entry, *otherEntry)) {
+        index.entries.emplace(otherEntry, entry);
     }
 }
 
-static void merge_ctf_fs_ds_indexes(struct ctf_fs_ds_index *dest, const ctf_fs_ds_index& src)
+static void merge_ctf_fs_ds_indexes(ctf_fs_ds_index& dest, const ctf_fs_ds_index& src)
 {
     for (const auto& entry : src.entries) {
         ds_index_insert_ds_index_entry_sorted(dest, entry);
@@ -506,7 +506,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
         ds_file_group = new_ds_file_group.get();
         ctf_fs_trace->ds_file_groups.emplace_back(std::move(new_ds_file_group));
     } else {
-        merge_ctf_fs_ds_indexes(&ds_file_group->index, *index);
+        merge_ctf_fs_ds_indexes(ds_file_group->index, *index);
     }
 
     ds_file_group->insert_ds_file_info_sorted(std::move(ds_file_info));
@@ -728,7 +728,7 @@ static void merge_ctf_fs_ds_file_groups(struct ctf_fs_ds_file_group *dest,
     }
 
     /* Merge both indexes. */
-    merge_ctf_fs_ds_indexes(&dest->index, src->index);
+    merge_ctf_fs_ds_indexes(dest->index, src->index);
 }
 
 /* Merge src_trace's data stream file groups into dest_trace's. */
