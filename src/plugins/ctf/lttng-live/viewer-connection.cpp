@@ -510,7 +510,6 @@ static int list_append_session(bt_value *results, GString *base_url,
     bt_value_map_insert_entry_status insert_status;
     bt_value_array_append_element_status append_status;
     bt_value *map = NULL;
-    GString *url = NULL;
     bool found = false;
 
     /*
@@ -539,13 +538,10 @@ static int list_append_session(bt_value *results, GString *base_url,
      * key = "url",
      * value = <string>,
      */
-    url = g_string_new(base_url->str);
-    g_string_append(url, "/host/");
-    g_string_append(url, session->hostname);
-    g_string_append_c(url, '/');
-    g_string_append(url, session->session_name);
-
-    insert_status = bt_value_map_insert_string_entry(map, "url", url->str);
+    insert_status = bt_value_map_insert_string_entry(
+        map, "url",
+        fmt::format("{}/host/{}/{}", base_url->str, session->hostname, session->session_name)
+            .c_str());
     if (insert_status != BT_VALUE_MAP_INSERT_ENTRY_STATUS_OK) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(viewer_connection->logger, "Error inserting \"url\" entry.");
         ret = -1;
@@ -631,9 +627,6 @@ static int list_append_session(bt_value *results, GString *base_url,
     }
 
 end:
-    if (url) {
-        g_string_free(url, true);
-    }
     BT_VALUE_PUT_REF_AND_RESET(map);
     return ret;
 }
