@@ -1968,20 +1968,12 @@ end:
     }
 }
 
-static void lttng_live_component_destroy_data(struct lttng_live_component *lttng_live)
-{
-    delete lttng_live;
-}
-
 void lttng_live_component_finalize(bt_self_component_source *component)
 {
     lttng_live_component *data = (lttng_live_component *) bt_self_component_get_data(
         bt_self_component_source_as_self_component(component));
 
-    if (!data) {
-        return;
-    }
-    lttng_live_component_destroy_data(data);
+    delete data;
 }
 
 static enum session_not_found_action
@@ -2064,7 +2056,7 @@ lttng_live_component_create(const bt_value *params, bt_self_component_source *se
     goto end;
 
 error:
-    lttng_live_component_destroy_data(lttng_live);
+    delete lttng_live;
     lttng_live = NULL;
 end:
     g_free(validation_error);
@@ -2099,7 +2091,7 @@ lttng_live_component_init(bt_self_component_source *self_comp_src,
         goto end;
 
 error:
-        lttng_live_component_destroy_data(lttng_live);
+        delete lttng_live;
         lttng_live = NULL;
 end:
         return ret;
