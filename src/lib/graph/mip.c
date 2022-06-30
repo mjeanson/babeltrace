@@ -224,5 +224,5 @@ end:
 BT_EXPORT
 uint64_t bt_get_maximal_mip_version(void)
 {
-	return 0;
+	return 1;
 }

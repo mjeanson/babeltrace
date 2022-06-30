@@ -24,7 +24,7 @@ ALIASES                 =
 # Aliases: general
 ALIASES                += bt_version_min_maj="2.0"
 ALIASES                += bt_version="@PACKAGE_VERSION@"
-ALIASES                += bt_max_mip_version="0"
+ALIASES                += bt_max_mip_version="1"
 ALIASES                += bt_name="Babeltrace&nbsp;2"
 ALIASES                += bt_name_version_min_maj="Babeltrace&nbsp;\bt_version_min_maj"
 ALIASES                += bt_api="Babeltrace&nbsp;2&nbsp;C&nbsp;API"

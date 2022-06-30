@@ -100,7 +100,7 @@ class MipTestCase(unittest.TestCase):
             bt2.get_greatest_operative_mip_version(descriptors, 12345)
 
     def test_get_maximal_mip_version(self):
-        self.assertEqual(bt2.get_maximal_mip_version(), 0)
+        self.assertEqual(bt2.get_maximal_mip_version(), 1)
 
 
 if __name__ == "__main__":

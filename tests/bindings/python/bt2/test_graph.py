@@ -51,7 +51,7 @@ class GraphTestCase(unittest.TestCase):
 
     def test_create_unknown_mip_version(self):
         with self.assertRaisesRegex(ValueError, "unknown MIP version"):
-            bt2.Graph(1)
+            bt2.Graph(2)
 
     def test_default_interrupter(self):
         interrupter = self._graph.default_interrupter
