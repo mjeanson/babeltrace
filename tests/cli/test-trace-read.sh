@@ -25,15 +25,12 @@ plan_tests $NUM_TESTS
 
 for path in "${SUCCESS_TRACES[@]}"; do
 	trace=$(basename "${path}")
-	"${BT_TESTS_BT2_BIN}" "${path}" > /dev/null 2>&1
+	bt_cli /dev/null /dev/null "${path}"
 	ok $? "Run babeltrace2 with trace ${trace}"
 done
 
 for path in "${FAIL_TRACES[@]}"; do
 	trace=$(basename "${path}")
-	if "${BT_TESTS_BT2_BIN}" "${path}" > /dev/null 2>&1; then
-		fail "Run babeltrace2 with invalid trace ${trace}"
-	else
-		pass "Run babeltrace2 with invalid trace ${trace}"
-	fi
+	bt_cli /dev/null /dev/null "${path}"
+	isnt "$?" 0 "Run babeltrace2 with invalid trace ${trace}"
 done
