@@ -88,7 +88,7 @@ test_fail() {
 	done
 }
 
-plan_tests 56
+plan_tests 64
 
 test_fail \
 	"invalid-packet-size/trace" \
@@ -119,6 +119,12 @@ test_fail \
 	1 \
 	"/dev/null" \
 	"Variant field class's tag field class is not an enumeration field class: "
+
+test_fail \
+	"incomplete-packet-header" \
+	1 \
+	"/dev/null" \
+	"Insufficient data in file to fulfill request"
 
 test_fail \
 	"meta-no-trace-cls-no-stream-cls" \
