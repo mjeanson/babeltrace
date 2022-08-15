@@ -45,18 +45,24 @@ test_ctf_gen_single() {
 	ok $? "Generated trace '$name' gives the expected output"
 }
 
+# Parameters: <trace-name> <ctf-version>
+test_ctf_single_version() {
+	local name="$1"
+	local ctf_version="$2"
+	local trace_path
+
+	trace_path=$(succeed_trace_path "$name" "$ctf_version")
+
+	bt_diff_details_ctf_single "$expect_dir/trace-$name.expect" \
+		"$trace_path" "${test_ctf_common_details_args[@]}"
+	ok $? "Trace '$name' gives the expected output - CTF $ctf_version"
+}
+
 test_ctf_single() {
 	local name="$1"
 
-	for ctf_version in 1 2; do
-		local trace_path
-
-		trace_path=$(succeed_trace_path "$name" "$ctf_version")
-
-		bt_diff_details_ctf_single "$expect_dir/trace-$name.expect" \
-			"$trace_path" "${test_ctf_common_details_args[@]}"
-		ok $? "Trace '$name' gives the expected output - CTF $ctf_version"
-	done
+	test_ctf_single_version "$name" 1
+	test_ctf_single_version "$name" 2
 }
 
 test_packet_end() {
@@ -141,7 +147,7 @@ test_force_origin_unix_epoch() {
 	rm -f "$temp_stdout_output_file" "$temp_stderr_output_file"
 }
 
-plan_tests 23
+plan_tests 24
 
 test_force_origin_unix_epoch 2packets barectf-event-before-packet
 test_ctf_gen_single simple
@@ -153,5 +159,6 @@ test_ctf_single lttng-tracefile-rotation
 test_ctf_single array-align-elem
 test_ctf_single struct-array-align-elem
 test_ctf_single meta-ctx-sequence
+test_ctf_single_version meta-clk-cls-before-trace-cls 2
 test_packet_end lttng-event-after-packet
 test_packet_end lttng-crash
