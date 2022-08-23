@@ -109,9 +109,6 @@ test_force_origin_unix_epoch() {
 	local name1="$1"
 	local name2="$2"
 	local expected_stdout="$expect_dir/trace-$name1-$name2.expect"
-	local ret=0
-	local ret_stdout
-	local ret_stderr
 	local src_ctf_fs_args=("-p" "force-clock-class-origin-unix-epoch=true")
 	local details_comp=("-c" "sink.text.details")
 	local details_args=("-p" "with-trace-name=no,with-stream-name=no,with-metadata=yes,compact=yes")
@@ -121,33 +118,28 @@ test_force_origin_unix_epoch() {
 	temp_stdout_output_file="$(mktemp -t actual-stdout.XXXXXX)"
 	temp_stderr_output_file="$(mktemp -t actual-stderr.XXXXXX)"
 
-	bt_cli "$temp_stdout_output_file" "$temp_stderr_output_file" \
-		"$(succeed_trace_path "$name1" 1)" "${src_ctf_fs_args[@]}" \
-		"$(succeed_trace_path "$name2" 1)" "${src_ctf_fs_args[@]}" \
-		"${details_comp[@]}" "${details_args[@]}"
+	for ctf_version in 1 2; do
+		local trace_path
 
-	bt_diff "$expected_stdout" "$temp_stdout_output_file"
-	ret_stdout=$?
+		trace_1_path=$(succeed_trace_path "$name1" "$ctf_version")
+		trace_2_path=$(succeed_trace_path "$name2" "$ctf_version")
 
-	if ((ret_stdout != 0)); then
-		ret=1
-	fi
+		bt_cli "$temp_stdout_output_file" "$temp_stderr_output_file" \
+			"$trace_1_path" "${src_ctf_fs_args[@]}" \
+			"$trace_2_path" "${src_ctf_fs_args[@]}" \
+			"${details_comp[@]}" "${details_args[@]}"
 
-	ok $ret "Trace '$name1' and '$name2' give the expected stdout"
+		bt_diff "$expected_stdout" "$temp_stdout_output_file"
+		ok $? "Trace '$name1' and '$name2' give the expected stdout"
 
-	bt_diff /dev/null "$temp_stderr_output_file"
-	ret_stderr=$?
+		bt_diff /dev/null "$temp_stderr_output_file"
+		ok $? "Trace '$name1' and '$name2' give the expected stderr"
 
-	if ((ret_stderr != 0)); then
-		ret=1
-	fi
-
-	ok $ret "Trace '$name1' and '$name2' give the expected stderr"
-
-	rm -f "$temp_stdout_output_file" "$temp_stderr_output_file"
+		rm -f "$temp_stdout_output_file" "$temp_stderr_output_file"
+	done
 }
 
-plan_tests 24
+plan_tests 26
 
 test_force_origin_unix_epoch 2packets barectf-event-before-packet
 test_ctf_gen_single simple
