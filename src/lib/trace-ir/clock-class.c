@@ -251,6 +251,7 @@ BT_EXPORT
 bt_uuid bt_clock_class_get_uuid(const struct bt_clock_class *clock_class)
 {
 	BT_ASSERT_PRE_DEV_CLK_CLS_NON_NULL(clock_class);
+	BT_ASSERT_PRE_CC_MIP_VERSION_EQ(clock_class, 0);
 	return clock_class->uuid.value;
 }
 
@@ -261,6 +262,7 @@ void bt_clock_class_set_uuid(struct bt_clock_class *clock_class,
 	BT_ASSERT_PRE_CLK_CLS_NON_NULL(clock_class);
 	BT_ASSERT_PRE_UUID_NON_NULL(uuid);
 	BT_ASSERT_PRE_DEV_CLOCK_CLASS_HOT(clock_class);
+	BT_ASSERT_PRE_CC_MIP_VERSION_EQ(clock_class, 0);
 	bt_uuid_copy(clock_class->uuid.uuid, uuid);
 	clock_class->uuid.value = clock_class->uuid.uuid;
 	BT_LIB_LOGD("Set clock class's UUID: %!+K", clock_class);

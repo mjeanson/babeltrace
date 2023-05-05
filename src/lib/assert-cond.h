@@ -1011,6 +1011,12 @@
 		"MIP version is less than %" PRIu64, _val)
 
 /*
+ * Asserts that the effective MIP version for `_clock_class` is equal to `_val`.
+ */
+#define BT_ASSERT_PRE_CC_MIP_VERSION_EQ(_clock_class, _val)		\
+	BT_ASSERT_PRE_MIP_VERSION_EQ((_clock_class)->mip_version, _val)
+
+/*
  * Asserts that the effective MIP version for `_trace_class` is equal to `_val`.
  */
 #define BT_ASSERT_PRE_TC_MIP_VERSION_EQ(_trace_class, _val)		\
