@@ -22,6 +22,8 @@
 #include "common/assert.h"
 #include "lib/func-status.h"
 #include "lib/value.h"
+#include "lib/graph/component.h"
+#include "lib/graph/graph.h"
 
 #define BT_ASSERT_PRE_DEV_CLOCK_CLASS_HOT(_cc)				\
 	BT_ASSERT_PRE_DEV_HOT("clock-class", (_cc), "Clock class",	\
@@ -73,6 +75,9 @@ struct bt_clock_class *bt_clock_class_create(bt_self_component *self_comp)
 	}
 
 	bt_object_init_shared(&clock_class->base, destroy_clock_class);
+
+	clock_class->mip_version =
+		bt_component_borrow_graph((void *) self_comp)->mip_version;
 
 	clock_class->user_attributes = bt_value_map_create();
 	if (!clock_class->user_attributes) {

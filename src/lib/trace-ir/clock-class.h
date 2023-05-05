@@ -24,6 +24,9 @@
 struct bt_clock_class {
 	struct bt_object base;
 
+	/* Effective MIP version for this clock class */
+	uint64_t mip_version;
+
 	/* Owned by this */
 	struct bt_value *user_attributes;
 
