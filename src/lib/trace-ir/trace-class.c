@@ -330,6 +330,14 @@ const struct bt_value *bt_trace_class_borrow_user_attributes_const(
 }
 
 BT_EXPORT
+uint64_t bt_trace_class_get_graph_mip_version(
+		const bt_trace_class *trace_class)
+{
+	BT_ASSERT_PRE_DEV_TC_NON_NULL(trace_class);
+	return trace_class->mip_version;
+}
+
+BT_EXPORT
 struct bt_value *bt_trace_class_borrow_user_attributes(
 		struct bt_trace_class *trace_class)
 {

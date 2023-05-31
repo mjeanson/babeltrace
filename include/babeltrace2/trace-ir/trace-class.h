@@ -73,6 +73,10 @@ Add to and remove a destruction listener from a trace class with
 bt_trace_class_add_destruction_listener() and
 bt_trace_class_remove_destruction_listener().
 
+Get the effective \bt_mip version of the trace processing \bt_graph
+containing the \bt_comp from which a trace class was created with
+bt_trace_class_get_graph_mip_version().
+
 <h1>Properties</h1>
 
 A trace class has the following properties:
@@ -408,6 +412,27 @@ extern bt_value *bt_trace_class_borrow_user_attributes(
 See bt_trace_class_borrow_user_attributes().
 */
 extern const bt_value *bt_trace_class_borrow_user_attributes_const(
+		const bt_trace_class *trace_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the effective \bt_mip (MIP) version of the trace processing
+    \bt_graph containing the \bt_comp from which
+    \bt_p{trace_class} was created.
+
+@param[in] trace_class
+    Trace class of which to get the effective MIP version.
+
+@returns
+    Effective MIP version of \bt_p{trace_class}.
+
+@bt_pre_not_null{trace_class}
+
+@sa bt_self_component_get_graph_mip_version() &mdash;
+    Returns the effective MIP version of the trace processing
+    graph which contains a given component.
+*/
+extern uint64_t bt_trace_class_get_graph_mip_version(
 		const bt_trace_class *trace_class) __BT_NOEXCEPT;
 
 /*! @} */
