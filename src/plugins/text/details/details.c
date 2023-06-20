@@ -29,6 +29,7 @@
 #define WITH_STREAM_CLASS_NAMESPACE_PARAM_NAME "with-stream-class-namespace"
 #define WITH_STREAM_NAME_PARAM_NAME "with-stream-name"
 #define WITH_UUID_PARAM_NAME "with-uuid"
+#define WITH_UID_PARAM_NAME "with-uid"
 #define COMPACT_PARAM_NAME "compact"
 
 bt_component_class_get_supported_mip_versions_method_status
@@ -237,6 +238,7 @@ static const struct bt_param_validation_map_value_entry_descr details_params[] =
 	{ WITH_STREAM_CLASS_NAME_PARAM_NAME, BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_OPTIONAL, { .type = BT_VALUE_TYPE_BOOL } },
 	{ WITH_STREAM_NAME_PARAM_NAME, BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_OPTIONAL, { .type = BT_VALUE_TYPE_BOOL } },
 	{ WITH_UUID_PARAM_NAME, BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_OPTIONAL, { .type = BT_VALUE_TYPE_BOOL } },
+	{ WITH_UID_PARAM_NAME, BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_OPTIONAL, { .type = BT_VALUE_TYPE_BOOL } },
 	BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_END
 };
 
@@ -317,6 +319,10 @@ bt_component_class_initialize_method_status configure_details_comp(
 	configure_bool_opt(params, WITH_UUID_PARAM_NAME, true,
 		&details_comp->cfg.with_uuid);
 
+	/* With UID? */
+	configure_bool_opt(params, WITH_UID_PARAM_NAME, true,
+                    &details_comp->cfg.with_uid);
+
 	status = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK;
 	goto end;
 
@@ -344,6 +350,7 @@ void log_configuration(bt_self_component_sink *comp,
 		details_comp->cfg.with_stream_class_name);
 	BT_COMP_LOGI("  With stream name: %d", details_comp->cfg.with_stream_name);
 	BT_COMP_LOGI("  With UUID: %d", details_comp->cfg.with_uuid);
+	BT_COMP_LOGI("  With UID: %d", details_comp->cfg.with_uid);
 }
 
 bt_component_class_initialize_method_status details_init(

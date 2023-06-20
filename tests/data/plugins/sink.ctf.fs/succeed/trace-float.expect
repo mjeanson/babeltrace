@@ -11,9 +11,8 @@ Trace class:
       Name: default
       Frequency (Hz): 1,000,000,000
       Precision (cycles): 1
-      Offset (s): 0
-      Offset (cycles): 0
-      Origin is Unix epoch: No
+      Offset from origin (s): 0
+      Offset from origin (cycles): 0
     Event class `ev` (ID 0):
       Payload field class: Structure (1 member):
         flt: Single-precision real

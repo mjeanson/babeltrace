@@ -99,6 +99,9 @@ struct details_comp {
 
 		/* Write UUID */
 		bool with_uuid;
+
+		/* Write UID */
+		bool with_uid;
 	} cfg;
 
 	/*

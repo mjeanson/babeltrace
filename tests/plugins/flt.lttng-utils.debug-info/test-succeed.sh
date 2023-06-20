@@ -53,7 +53,7 @@ test_compare_to_ctf_fs() {
 	local debug_info_cli_args=("-c" "flt.lttng-utils.debug-info")
 	local details_cli_args=(
 		"-c" "sink.text.details"
-		"--params" "with-trace-name=false,with-stream-name=false,with-uuid=false"
+		"--params" "with-trace-name=false,with-stream-name=false,with-uuid=false,with-uid=false"
 	)
 	local actual_stdout
 	local actual_stderr

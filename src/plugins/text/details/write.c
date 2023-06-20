@@ -554,7 +554,7 @@ struct int_range {
 	} upper;
 };
 
-struct enum_field_class_mapping {
+struct field_class_mapping_or_flag {
 	/* Weak */
 	const char *label;
 
@@ -563,8 +563,9 @@ struct enum_field_class_mapping {
 };
 
 static
-gint compare_enum_field_class_mappings(struct enum_field_class_mapping **a,
-		struct enum_field_class_mapping **b)
+gint compare_field_class_mappings_or_flags(
+		struct field_class_mapping_or_flag **a,
+		struct field_class_mapping_or_flag **b)
 {
 	return strcmp((*a)->label, (*b)->label);
 }
@@ -659,14 +660,15 @@ end:
 }
 
 static
-void destroy_enum_field_class_mapping(struct enum_field_class_mapping *mapping)
+void destroy_field_class_mapping_or_flag(
+		struct field_class_mapping_or_flag *mapping_or_flag)
 {
-	if (mapping->ranges) {
-		g_array_free(mapping->ranges, TRUE);
-		mapping->ranges = NULL;
+	if (mapping_or_flag->ranges) {
+		g_array_free(mapping_or_flag->ranges, TRUE);
+		mapping_or_flag->ranges = NULL;
 	}
 
-	g_free(mapping);
+	g_free(mapping_or_flag);
 }
 
 static
@@ -711,7 +713,7 @@ void write_enum_field_class_mappings(struct details_write_ctx *ctx,
 		BT_FIELD_CLASS_TYPE_SIGNED_ENUMERATION;
 
 	mappings = g_ptr_array_new_with_free_func(
-		(GDestroyNotify) destroy_enum_field_class_mapping);
+		(GDestroyNotify) destroy_field_class_mapping_or_flag);
 	BT_ASSERT_DBG(mappings);
 
 	/*
@@ -721,8 +723,8 @@ void write_enum_field_class_mappings(struct details_write_ctx *ctx,
 	for (i = 0; i < bt_field_class_enumeration_get_mapping_count(fc); i++) {
 		const void *fc_mapping;
 		const void *fc_range_set;
-		struct enum_field_class_mapping *mapping = g_new0(
-			struct enum_field_class_mapping, 1);
+		struct field_class_mapping_or_flag *mapping = g_new0(
+			struct field_class_mapping_or_flag, 1);
 
 		BT_ASSERT_DBG(mapping);
 
@@ -749,11 +751,11 @@ void write_enum_field_class_mappings(struct details_write_ctx *ctx,
 
 	/* Sort mappings (ranges are already sorted within mappings) */
 	g_ptr_array_sort(mappings,
-		(GCompareFunc) compare_enum_field_class_mappings);
+		(GCompareFunc) compare_field_class_mappings_or_flags);
 
 	/* Write mappings */
 	for (i = 0; i < mappings->len; i++) {
-		struct enum_field_class_mapping *mapping = mappings->pdata[i];
+		struct field_class_mapping_or_flag *mapping = mappings->pdata[i];
 
 		write_nl(ctx);
 		write_prop_name_line(ctx, mapping->label);
@@ -767,6 +769,59 @@ void write_enum_field_class_mappings(struct details_write_ctx *ctx,
 	}
 
 	g_ptr_array_free(mappings, TRUE);
+}
+
+static
+void write_bit_array_field_class_flags(struct details_write_ctx *ctx,
+		const bt_field_class *fc)
+{
+	GPtrArray *flags;
+	uint64_t i;
+	uint64_t range_i;
+
+	flags = g_ptr_array_new_with_free_func(
+		(GDestroyNotify) destroy_field_class_mapping_or_flag);
+	BT_ASSERT_DBG(flags);
+
+	/*
+	 * Copy field class's flags to our own arrays and structures to
+	 * sort them.
+	 */
+	for (i = 0; i < bt_field_class_bit_array_get_flag_count(fc); i++) {
+		const bt_field_class_bit_array_flag *fc_flag;
+		struct field_class_mapping_or_flag *flag = g_new0(
+			struct field_class_mapping_or_flag, 1);
+
+		BT_ASSERT_DBG(flag);
+		fc_flag = bt_field_class_bit_array_borrow_flag_by_index_const(
+			fc, i);
+		flag->label = bt_field_class_bit_array_flag_get_label(fc_flag);
+		flag->ranges = range_set_to_int_ranges(
+			bt_field_class_bit_array_flag_borrow_index_ranges_const(
+				fc_flag), false);
+		BT_ASSERT_DBG(flag->ranges);
+		g_ptr_array_add(flags, flag);
+	}
+
+	/* Sort flags (ranges are already sorted within flags) */
+	g_ptr_array_sort(flags,
+		(GCompareFunc) compare_field_class_mappings_or_flags);
+
+	/* Write mappings */
+	for (i = 0; i < flags->len; i++) {
+		struct field_class_mapping_or_flag *flag = flags->pdata[i];
+
+		write_nl(ctx);
+		write_prop_name_line(ctx, flag->label);
+
+		for (range_i = 0; range_i < flag->ranges->len; range_i++) {
+			write_sp(ctx);
+			write_int_range(ctx,
+				int_range_at(flag->ranges, range_i), false);
+		}
+	}
+
+	g_ptr_array_free(flags, TRUE);
 }
 
 static const char *PACKET_CONTEXT_STR = "Packet context";
@@ -1040,7 +1095,17 @@ void write_field_class(struct details_write_ctx *ctx, const bt_field_class *fc)
 		color_fg_blue(ctx), type, color_reset(ctx));
 
 	/* Write field class's single-line properties */
-	if (bt_field_class_type_is(fc_type, BT_FIELD_CLASS_TYPE_ENUMERATION)) {
+	if (fc_type == BT_FIELD_CLASS_TYPE_BIT_ARRAY &&
+			ctx->details_comp->mip_version >= 1) {
+		uint64_t flag_count =
+			bt_field_class_bit_array_get_flag_count(fc);
+
+		write_sp(ctx);
+		write_uint_prop_value(ctx, flag_count);
+		g_string_append_printf(ctx->str, " flag%s)",
+			plural(flag_count));
+	} else if (bt_field_class_type_is(
+			fc_type, BT_FIELD_CLASS_TYPE_ENUMERATION)) {
 		uint64_t mapping_count =
 			bt_field_class_enumeration_get_mapping_count(fc);
 
@@ -1176,7 +1241,30 @@ void write_field_class(struct details_write_ctx *ctx, const bt_field_class *fc)
 	}
 
 	/* Write field class's complex properties */
-	if (bt_field_class_type_is(fc_type, BT_FIELD_CLASS_TYPE_ENUMERATION)) {
+	if (fc_type == BT_FIELD_CLASS_TYPE_BIT_ARRAY &&
+			ctx->details_comp->mip_version >= 1) {
+		uint64_t flag_count =
+			bt_field_class_bit_array_get_flag_count(fc);
+
+		if (flag_count > 0) {
+			if (wrote_user_attrs) {
+				write_nl(ctx);
+				write_indent(ctx);
+				write_prop_name(ctx, "Flags");
+				g_string_append_c(ctx->str, ':');
+				incr_indent(ctx);
+			} else {
+				/* Each flag starts with its own newline */
+				g_string_append_c(ctx->str, ':');
+			}
+
+			write_bit_array_field_class_flags(ctx, fc);
+
+			if (wrote_user_attrs) {
+				decr_indent(ctx);
+			}
+		}
+	} else if (bt_field_class_type_is(fc_type, BT_FIELD_CLASS_TYPE_ENUMERATION)) {
 		uint64_t mapping_count =
 			bt_field_class_enumeration_get_mapping_count(fc);
 
@@ -1362,7 +1450,7 @@ void write_event_class(struct details_write_ctx *ctx, const bt_event_class *ec)
 	write_indent(ctx);
 	write_obj_type_name(ctx, "Event class");
 
-	/* Write name, namespace and ID */
+	/* Write name, namespace, UID, and ID */
 	if (name) {
 		g_string_append_printf(ctx->str, " `%s%s%s`",
 			color_fg_green(ctx), name, color_reset(ctx));
@@ -1371,12 +1459,21 @@ void write_event_class(struct details_write_ctx *ctx, const bt_event_class *ec)
 	g_string_append(ctx->str, " (");
 
 	if (ctx->details_comp->mip_version >= 1) {
-		const char *ns = bt_event_class_get_namespace(ec);
+		const char *str = bt_event_class_get_namespace(ec);
 
-		if (ns) {
+		if (str) {
 			g_string_append(ctx->str, "Namespace `");
-			write_none_str(ctx, ns);
+			write_str_prop_value(ctx, str);
 			g_string_append(ctx->str, "`, ");
+		}
+
+		if (ctx->details_comp->cfg.with_uid) {
+			str = bt_event_class_get_uid(ec);
+			if (str) {
+				g_string_append(ctx->str, "UID `");
+				write_str_prop_value(ctx, str);
+				g_string_append(ctx->str, "`, ");
+			}
 		}
 	}
 
@@ -1476,11 +1573,36 @@ void write_clock_class_prop_lines(struct details_write_ctx *ctx,
 {
 	int64_t offset_seconds;
 	uint64_t offset_cycles;
+	uint64_t prec;
 	const char *str;
+
+	if (ctx->details_comp->mip_version >= 1) {
+		str = bt_clock_class_get_namespace(cc);
+		if (str) {
+			write_str_prop_line(ctx, "Namespace", str);
+		}
+	}
 
 	str = bt_clock_class_get_name(cc);
 	if (str) {
 		write_str_prop_line(ctx, "Name", str);
+	}
+
+	if (ctx->details_comp->mip_version >= 1 &&
+			ctx->details_comp->cfg.with_uid) {
+		str = bt_clock_class_get_uid(cc);
+		if (str) {
+			write_str_prop_line(ctx, "UID", str);
+		}
+	}
+
+	if (ctx->details_comp->mip_version == 0 &&
+			ctx->details_comp->cfg.with_uuid) {
+		bt_uuid uuid = bt_clock_class_get_uuid(cc);
+
+		if (uuid) {
+			write_uuid_prop_line(ctx, "UUID", uuid);
+		}
 	}
 
 	write_user_attributes(ctx,
@@ -1492,19 +1614,57 @@ void write_clock_class_prop_lines(struct details_write_ctx *ctx,
 
 	write_uint_prop_line(ctx, "Frequency (Hz)",
 		bt_clock_class_get_frequency(cc));
-	write_uint_prop_line(ctx, "Precision (cycles)",
-		bt_clock_class_get_precision(cc));
+
+	if (bt_clock_class_get_opt_precision(cc, &prec) ==
+			BT_PROPERTY_AVAILABILITY_AVAILABLE) {
+		write_uint_prop_line(ctx, "Precision (cycles)", prec);
+	}
+
+	if (ctx->details_comp->mip_version >= 1) {
+		uint64_t accuracy;
+
+		if (bt_clock_class_get_accuracy(cc, &accuracy) ==
+				BT_PROPERTY_AVAILABILITY_AVAILABLE) {
+			write_uint_prop_line(ctx, "Accuracy (cycles)", accuracy);
+		}
+	}
+
 	bt_clock_class_get_offset(cc, &offset_seconds, &offset_cycles);
-	write_int_prop_line(ctx, "Offset (s)", offset_seconds);
-	write_uint_prop_line(ctx, "Offset (cycles)", offset_cycles);
-	write_bool_prop_line(ctx, "Origin is Unix epoch",
-		bt_clock_class_origin_is_unix_epoch(cc));
+	write_int_prop_line(ctx, "Offset from origin (s)", offset_seconds);
+	write_uint_prop_line(ctx, "Offset from origin (cycles)", offset_cycles);
 
-	if (ctx->details_comp->cfg.with_uuid) {
-		bt_uuid uuid = bt_clock_class_get_uuid(cc);
+	if (!bt_clock_class_origin_is_unknown(cc)) {
+		write_prop_name_line(ctx, "Origin");
 
-		if (uuid) {
-			write_uuid_prop_line(ctx, "UUID", uuid);
+		if (bt_clock_class_origin_is_unix_epoch(cc)) {
+			/* Unix epoch */
+			write_sp(ctx);
+			write_str_prop_value(ctx, "Unix epoch");
+			write_nl(ctx);
+		} else {
+			/*
+			 * Producer-defined: namespace is optional, name
+			 * and UID always exist.
+			 */
+			const char *ns;
+
+			BT_ASSERT_DBG(ctx->details_comp->mip_version >= 1);
+			write_nl(ctx);
+			incr_indent(ctx);
+			ns = bt_clock_class_get_origin_namespace(cc);
+			if (ns) {
+				write_str_prop_line(ctx, "Namespace", ns);
+			}
+
+			write_str_prop_line(ctx, "Name",
+				bt_clock_class_get_origin_name(cc));
+
+			if (ctx->details_comp->cfg.with_uid) {
+				write_str_prop_line(ctx, "UID",
+					bt_clock_class_get_origin_uid(cc));
+			}
+
+			decr_indent(ctx);
 		}
 	}
 }
@@ -1535,7 +1695,7 @@ void write_stream_class(struct details_write_ctx *ctx,
 	write_indent(ctx);
 	write_obj_type_name(ctx, "Stream class");
 
-	/* Write name, namespace and ID */
+	/* Write name, namespace, UID, and ID */
 	if (ctx->details_comp->cfg.with_stream_class_name) {
 		const char *name = bt_stream_class_get_name(sc);
 
@@ -1550,12 +1710,21 @@ void write_stream_class(struct details_write_ctx *ctx,
 
 	if (ctx->details_comp->cfg.with_stream_class_ns
 			&& ctx->details_comp->mip_version >= 1) {
-		const char *ns = bt_stream_class_get_namespace(sc);
+		const char *str = bt_stream_class_get_namespace(sc);
 
-		if (ns) {
+		if (str) {
 			g_string_append(ctx->str, "Namespace `");
-			write_str_prop_value(ctx, ns);
+			write_str_prop_value(ctx, str);
 			g_string_append(ctx->str, "`, ");
+		}
+
+		if (ctx->details_comp->cfg.with_uid) {
+			str = bt_stream_class_get_uid(sc);
+			if (str) {
+				g_string_append(ctx->str, "UID `");
+				write_str_prop_value(ctx, str);
+				g_string_append(ctx->str, "`, ");
+			}
 		}
 	}
 
@@ -1666,7 +1835,6 @@ void write_trace_class(struct details_write_ctx *ctx, const bt_trace_class *tc)
 
 	write_indent(ctx);
 	write_obj_type_name(ctx, "Trace class");
-
 
 	for (i = 0; i < bt_trace_class_get_stream_class_count(tc); i++) {
 		g_ptr_array_add(stream_classes,
@@ -2239,9 +2407,10 @@ void write_trace(struct details_write_ctx *ctx, const bt_trace *trace)
 	write_indent(ctx);
 	write_obj_type_name(ctx, "Trace");
 
-	/* Write name */
+	/* Write name, namespace, and UID */
 	if (ctx->details_comp->cfg.with_trace_name) {
 		const char *name = bt_trace_get_name(trace);
+
 		if (name) {
 			g_string_append(ctx->str, " `");
 			write_str_prop_value(ctx, name);
@@ -2249,11 +2418,40 @@ void write_trace(struct details_write_ctx *ctx, const bt_trace *trace)
 		}
 	}
 
+	if (ctx->details_comp->mip_version >= 1) {
+		const char *ns = bt_trace_get_namespace(trace);
+		const char *uid = ctx->details_comp->cfg.with_uid ?
+			bt_trace_get_uid(trace) : NULL;
+
+		if (ns || uid) {
+			g_string_append(ctx->str, " (");
+
+			if (ns) {
+				g_string_append(ctx->str, "Namespace `");
+				write_str_prop_value(ctx, ns);
+				g_string_append_c(ctx->str, '`');
+			}
+
+			if (uid) {
+				if (ns) {
+					g_string_append(ctx->str, ", ");
+				}
+
+				g_string_append(ctx->str, "UID `");
+				write_str_prop_value(ctx, uid);
+				g_string_append_c(ctx->str, '`');
+			}
+
+			g_string_append(ctx->str, ")");
+		}
+	}
+
 	/* Write properties */
 	incr_indent(ctx);
 
 	/* Write UUID */
-	if (ctx->details_comp->cfg.with_uuid) {
+	if (ctx->details_comp->mip_version == 0 &&
+			ctx->details_comp->cfg.with_uuid) {
 		bt_uuid uuid = bt_trace_get_uuid(trace);
 
 		if (uuid) {

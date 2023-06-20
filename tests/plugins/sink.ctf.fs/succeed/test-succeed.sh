@@ -43,7 +43,7 @@ test_ctf_single() {
 	if [ $ret -eq 0 ]; then
 		bt_diff_details_ctf_single "$expect_dir/trace-$name.expect" \
 			"$temp_out_trace_dir" \
-			'-p' 'with-uuid=no,with-trace-name=no,with-stream-name=no'
+			'-p' 'with-uuid=no,with-uid=no,with-trace-name=no,with-stream-name=no'
 		ok $? "$converted_test_name"
 	else
 		fail "$converted_test_name"

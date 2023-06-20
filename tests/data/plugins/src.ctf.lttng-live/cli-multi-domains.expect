@@ -9,13 +9,13 @@ Trace class:
     Discarded packets have default clock snapshots: Yes
     Default clock class:
       Name: monotonic
+      UUID: 88cba016-36e2-48c2-aff8-3e4b9aefb05c
       Description: Monotonic Clock
       Frequency (Hz): 1,000,000,000
       Precision (cycles): 0
-      Offset (s): 1,564,079,206
-      Offset (cycles): 484,157,338
-      Origin is Unix epoch: Yes
-      UUID: 88cba016-36e2-48c2-aff8-3e4b9aefb05c
+      Offset from origin (s): 1,564,079,206
+      Offset from origin (cycles): 484,157,338
+      Origin: Unix epoch
     Packet context field class: Structure (1 member):
       cpu_id: Unsigned integer (32-bit, Base 10)
   Stream class (ID 1):
@@ -28,13 +28,13 @@ Trace class:
     Discarded packets have default clock snapshots: Yes
     Default clock class:
       Name: monotonic
+      UUID: 88cba016-36e2-48c2-aff8-3e4b9aefb05c
       Description: Monotonic Clock
       Frequency (Hz): 1,000,000,000
       Precision (cycles): 0
-      Offset (s): 1,564,079,206
-      Offset (cycles): 484,157,338
-      Origin is Unix epoch: Yes
-      UUID: 88cba016-36e2-48c2-aff8-3e4b9aefb05c
+      Offset from origin (s): 1,564,079,206
+      Offset from origin (cycles): 484,157,338
+      Origin: Unix epoch
     Packet context field class: Structure (1 member):
       cpu_id: Unsigned integer (32-bit, Base 10)
   Stream class (ID 2):
@@ -47,13 +47,13 @@ Trace class:
     Discarded packets have default clock snapshots: Yes
     Default clock class:
       Name: monotonic
+      UUID: 88cba016-36e2-48c2-aff8-3e4b9aefb05c
       Description: Monotonic Clock
       Frequency (Hz): 1,000,000,000
       Precision (cycles): 0
-      Offset (s): 1,564,079,206
-      Offset (cycles): 484,157,338
-      Origin is Unix epoch: Yes
-      UUID: 88cba016-36e2-48c2-aff8-3e4b9aefb05c
+      Offset from origin (s): 1,564,079,206
+      Offset from origin (cycles): 484,157,338
+      Origin: Unix epoch
     Packet context field class: Structure (1 member):
       cpu_id: Unsigned integer (32-bit, Base 10)
     Event class `sample_component:message` (ID 0):
@@ -140,13 +140,13 @@ Trace class:
     Discarded packets have default clock snapshots: Yes
     Default clock class:
       Name: monotonic
+      UUID: 88cba016-36e2-48c2-aff8-3e4b9aefb05c
       Description: Monotonic Clock
       Frequency (Hz): 1,000,000,000
       Precision (cycles): 0
-      Offset (s): 1,564,079,206
-      Offset (cycles): 484,157,378
-      Origin is Unix epoch: Yes
-      UUID: 88cba016-36e2-48c2-aff8-3e4b9aefb05c
+      Offset from origin (s): 1,564,079,206
+      Offset from origin (cycles): 484,157,378
+      Origin: Unix epoch
     Packet context field class: Structure (1 member):
       cpu_id: Unsigned integer (32-bit, Base 10)
     Event class `lttng_test_filter_event` (ID 0):

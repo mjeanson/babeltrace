@@ -41,7 +41,7 @@ test_ctf_gen_single() {
 	diag "Generating trace '$name'"
 	bt_diff_details_ctf_gen_single "$this_dir_build/gen-trace-$name" \
 		"$expect_dir/trace-$name.expect" \
-		"${test_ctf_common_details_args[@]}" "-p" "with-uuid=no"
+		"${test_ctf_common_details_args[@]}" "-p" "with-uuid=no,with-uid=no"
 	ok $? "Generated trace '$name' gives the expected output"
 }
 

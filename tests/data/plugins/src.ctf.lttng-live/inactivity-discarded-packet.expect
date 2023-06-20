@@ -10,9 +10,9 @@ Trace class:
       Name: default
       Frequency (Hz): 1,000,000,000
       Precision (cycles): 0
-      Offset (s): 0
-      Offset (cycles): 0
-      Origin is Unix epoch: Yes
+      Offset from origin (s): 0
+      Offset from origin (cycles): 0
+      Origin: Unix epoch
     Event class `my-event` (ID 0):
 
 [Unknown]
@@ -41,9 +41,9 @@ Message iterator inactivity:
     Name: default
     Frequency (Hz): 1,000,000,000
     Precision (cycles): 0
-    Offset (s): 0
-    Offset (cycles): 0
-    Origin is Unix epoch: Yes
+    Offset from origin (s): 0
+    Offset from origin (cycles): 0
+    Origin: Unix epoch
 
 [80 cycles, 80 ns from origin]
 [121 cycles, 121 ns from origin]
