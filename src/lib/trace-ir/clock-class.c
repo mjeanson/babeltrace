@@ -142,6 +142,12 @@ struct bt_clock_class *bt_clock_class_create(bt_self_component *self_comp)
 	}
 
 	clock_class->frequency = UINT64_C(1000000000);
+
+	if (clock_class->mip_version == 0) {
+		clock_class->precision.base.avail =
+			BT_PROPERTY_AVAILABILITY_AVAILABLE;
+	}
+
 	set_origin_unix_epoch(clock_class);
 	set_base_offset(clock_class);
 	ret = bt_object_pool_initialize(&clock_class->cs_pool,
@@ -288,7 +294,23 @@ BT_EXPORT
 uint64_t bt_clock_class_get_precision(const struct bt_clock_class *clock_class)
 {
 	BT_ASSERT_PRE_DEV_CLK_CLS_NON_NULL(clock_class);
-	return clock_class->precision;
+	BT_ASSERT_PRE_CC_MIP_VERSION_EQ(clock_class, 0);
+	BT_ASSERT_DBG(clock_class->precision.base.avail ==
+		BT_PROPERTY_AVAILABILITY_AVAILABLE);
+	return clock_class->precision.value;
+}
+
+BT_EXPORT
+bt_property_availability bt_clock_class_get_opt_precision(
+		const struct bt_clock_class *clock_class, uint64_t *precision)
+{
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_DEV_CLK_CLS_NON_NULL(clock_class);
+	BT_ASSERT_PRE_DEV_NON_NULL("precision-output", precision,
+		"Precision (output)");
+
+	*precision = clock_class->precision.value;
+	return clock_class->precision.base.avail;
 }
 
 BT_EXPORT
@@ -300,7 +322,8 @@ void bt_clock_class_set_precision(struct bt_clock_class *clock_class,
 	BT_ASSERT_PRE("valid-precision", precision != UINT64_C(-1),
 		"Invalid precision: %![cc-]+K, new-precision=%" PRIu64,
 		clock_class, precision);
-	clock_class->precision = precision;
+	clock_class->precision.value = precision;
+	clock_class->precision.base.avail = BT_PROPERTY_AVAILABILITY_AVAILABLE;
 	BT_LIB_LOGD("Set clock class's precision: %!+K", clock_class);
 }
 

@@ -208,7 +208,12 @@ A clock class has the following properties:
     Use bt_clock_class_set_offset() and bt_clock_class_get_offset().
   </dd>
 
-  <dt>\anchor api-tir-clock-cls-prop-precision Precision</dt>
+  <dt>
+    \anchor api-tir-clock-cls-prop-precision Precision
+    (optional when the clock class was created
+    from a \bt_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;1)
+  </dt>
   <dd>
     Precision of the clock class's instance (stream clocks) values
     (cycles).
@@ -218,7 +223,7 @@ A clock class has the following properties:
     anything between 35&nbsp;cycles and 49&nbsp;cycles.
 
     Use bt_clock_class_set_precision() and
-    bt_clock_class_get_precision().
+    bt_clock_class_get_opt_precision().
   </dd>
 
   <dt>
@@ -355,7 +360,17 @@ On success, the returned clock class has the following property values:
     <td>0&nbsp;cycles
   <tr>
     <td>\ref api-tir-clock-cls-prop-precision "Precision"
-    <td>0&nbsp;cycles
+    <td>
+      Depending on the effective \bt_mip (MIP) version of the trace
+      processing \bt_graph:
+
+      <dl>
+        <dt>MIP&nbsp;0</dt>
+        <dd>0&nbsp;cycles</dd>
+
+        <dt>MIP&nbsp;1</dt>
+        <dd>Unknown</dd>
+      </dl>
   <tr>
     <td>\ref api-tir-clock-cls-prop-origin "Origin"
     <td>Unix epoch
@@ -527,6 +542,14 @@ extern void bt_clock_class_set_precision(bt_clock_class *clock_class,
     Returns the precision (cycles) of the clock class
     \bt_p{clock_class}.
 
+@deprecated
+    Use bt_clock_class_get_opt_precision().
+
+@note
+    This function is only available when \bt_p{clock_class} was created
+    from a \bt_comp which belongs to a trace processing \bt_graph with
+    the effective \bt_mip (MIP) version&nbsp;0.
+
 See the \ref api-tir-clock-cls-prop-precision "precision" property.
 
 @param[in] clock_class
@@ -536,12 +559,45 @@ See the \ref api-tir-clock-cls-prop-precision "precision" property.
     Precision (cycles) of \bt_p{clock_class}.
 
 @bt_pre_not_null{clock_class}
+@bt_pre_clock_cls_with_mip{clock_class, 0}
 
 @sa bt_clock_class_set_precision() &mdash;
     Sets the precision of a clock class.
 */
 extern uint64_t bt_clock_class_get_precision(
 		const bt_clock_class *clock_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the precision of the clock class \bt_p{clock_class}.
+
+See the \ref api-tir-clock-cls-prop-precision "precision" property.
+
+@param[in] clock_class
+    Clock class of which to get the precision.
+@param[out] precision
+    @parblock
+    <strong>If this function returns
+    #BT_PROPERTY_AVAILABILITY_AVAILABLE</strong>, \bt_p{*precision} is
+    the precision (cycles) of \bt_p{clock_class}.
+
+    Otherwise, the precision of \bt_p{clock_class} is unknown.
+    @endparblock
+
+@retval #BT_PROPERTY_AVAILABILITY_AVAILABLE
+    The precision of \bt_p{clock_class} is known.
+@retval #BT_PROPERTY_AVAILABILITY_NOT_AVAILABLE
+    The precision of \bt_p{clock_class} is unknown.
+
+@bt_pre_not_null{clock_class}
+@bt_pre_not_null{precision}
+
+@sa bt_clock_class_set_precision() &mdash;
+    Sets the precision of a clock class.
+*/
+extern bt_property_availability bt_clock_class_get_opt_precision(
+		const struct bt_clock_class *clock_class,
+		uint64_t *precision) __BT_NOEXCEPT;
 
 /*!
 @brief

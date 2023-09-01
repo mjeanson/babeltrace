@@ -12,6 +12,7 @@
 #include "lib/object.h"
 #include "common/common.h"
 #include "lib/object-pool.h"
+#include "lib/property.h"
 #include "common/uuid.h"
 #include <babeltrace2/types.h>
 #include "common/assert.h"
@@ -36,7 +37,7 @@ struct bt_clock_class {
 	gchar *description;
 
 	uint64_t frequency;
-	uint64_t precision;
+	struct bt_property_uint precision;
 	int64_t offset_seconds;
 	uint64_t offset_cycles;
 

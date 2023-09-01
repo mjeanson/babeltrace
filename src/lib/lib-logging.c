@@ -923,14 +923,19 @@ static inline void format_clock_class(char **buf_ch, bool extended,
 		BUF_APPEND_UUID(clock_class->uuid.value);
 	}
 
-	BUF_APPEND(", %sis-frozen=%d, %sprecision=%" PRIu64 ", "
-		"%soffset-s=%" PRId64 ", "
+	BUF_APPEND(", %sis-frozen=%d", PRFIELD(clock_class->frozen));
+
+	if (clock_class->precision.base.avail) {
+		BUF_APPEND(", %sprecision=%" PRIu64,
+			PRFIELD(clock_class->precision.value));
+	}
+
+	BUF_APPEND(", %soffset-s=%" PRId64 ", "
 		"%soffset-cycles=%" PRIu64 ", "
 		"%sorigin-namespace=%s, "
 		"%sorigin-name=%s, "
 		"%sorigin-uid=%s, "
 		"%sbase-offset-ns=%" PRId64,
-		PRFIELD(clock_class->frozen), PRFIELD(clock_class->precision),
 		PRFIELD(clock_class->offset_seconds),
 		PRFIELD(clock_class->offset_cycles),
 		PRFIELD(clock_class->origin.ns),
