@@ -38,6 +38,7 @@ struct bt_clock_class {
 
 	uint64_t frequency;
 	struct bt_property_uint precision;
+	struct bt_property_uint accuracy;
 	int64_t offset_seconds;
 	uint64_t offset_cycles;
 

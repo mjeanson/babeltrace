@@ -328,6 +328,36 @@ void bt_clock_class_set_precision(struct bt_clock_class *clock_class,
 }
 
 BT_EXPORT
+void bt_clock_class_set_accuracy(bt_clock_class *clock_class,
+		uint64_t accuracy)
+{
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_CLK_CLS_NON_NULL(clock_class);
+	BT_ASSERT_PRE_DEV_CLOCK_CLASS_HOT(clock_class);
+	BT_ASSERT_PRE_CC_MIP_VERSION_GE(clock_class, 1);
+	BT_ASSERT_PRE("valid-accuracy", accuracy != UINT64_C(-1),
+		"Invalid accuracy: %![cc-]+K, new-accuracy=%" PRIu64,
+		clock_class, accuracy);
+	clock_class->accuracy.value = accuracy;
+	clock_class->accuracy.base.avail = BT_PROPERTY_AVAILABILITY_AVAILABLE;
+	BT_LIB_LOGD("Set clock class's accuracy: %!+K", clock_class);
+}
+
+BT_EXPORT
+bt_property_availability bt_clock_class_get_accuracy(
+		const struct bt_clock_class *clock_class, uint64_t *accuracy)
+{
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_DEV_CLK_CLS_NON_NULL(clock_class);
+	BT_ASSERT_PRE_CC_MIP_VERSION_GE(clock_class, 1);
+	BT_ASSERT_PRE_DEV_NON_NULL("accuracy-output", accuracy,
+		"Accuracy (output)");
+
+	*accuracy = clock_class->accuracy.value;
+	return clock_class->accuracy.base.avail;
+}
+
+BT_EXPORT
 void bt_clock_class_get_offset(const struct bt_clock_class *clock_class,
 		int64_t *seconds, uint64_t *cycles)
 {

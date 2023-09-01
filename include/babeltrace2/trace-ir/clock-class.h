@@ -218,12 +218,35 @@ A clock class has the following properties:
     Precision of the clock class's instance (stream clocks) values
     (cycles).
 
-    For example, considering a precision of 7&nbsp;cycles and the stream
+    For example, considering a precision of 7&nbsp;cycles, an
+    \link api-tir-clock-cls-prop-accuracy accuracy\endlink
+    of 0&nbsp;cycles, and the stream
     clock value 42&nbsp;cycles, the real stream clock value can be
     anything between 35&nbsp;cycles and 49&nbsp;cycles.
 
     Use bt_clock_class_set_precision() and
     bt_clock_class_get_opt_precision().
+  </dd>
+
+  <dt>
+    \anchor api-tir-clock-cls-prop-accuracy
+    \bt_dt_opt Accuracy
+    (only available when the clock class was created
+    from a \bt_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;1)
+  </dt>
+  <dd>
+    Accuracy of the clock class's instance (stream clocks) values
+    (cycles).
+
+    For example, considering an accuracy of 7&nbsp;cycles, a
+    \link api-tir-clock-cls-prop-precision precision\endlink
+    of 0&nbsp;cycles, and the stream
+    clock value 42&nbsp;cycles, the real stream clock value can be
+    anything between 35&nbsp;cycles and 49&nbsp;cycles.
+
+    Use bt_clock_class_set_accuracy() and
+    bt_clock_class_get_accuracy().
   </dd>
 
   <dt>
@@ -371,6 +394,11 @@ On success, the returned clock class has the following property values:
         <dt>MIP&nbsp;1</dt>
         <dd>Unknown</dd>
       </dl>
+  <tr>
+    <td>
+      \bt_mip version&nbsp;1:
+      \ref api-tir-stream-cls-prop-accuracy "accuracy"
+    <td>Unknown
   <tr>
     <td>\ref api-tir-clock-cls-prop-origin "Origin"
     <td>Unix epoch
@@ -598,6 +626,60 @@ See the \ref api-tir-clock-cls-prop-precision "precision" property.
 extern bt_property_availability bt_clock_class_get_opt_precision(
 		const struct bt_clock_class *clock_class,
 		uint64_t *precision) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Sets the accuracy (cycles) of the clock class \bt_p{clock_class} to
+    \bt_p{accuracy}.
+
+See the \ref api-tir-clock-cls-prop-accuracy "accuracy" property.
+
+@param[in] clock_class
+    Clock class of which to set the accuracy to \bt_p{accuracy}.
+@param[in] accuracy
+    New accuracy of \bt_p{clock_class}.
+
+@bt_pre_not_null{clock_class}
+@bt_pre_hot{clock_class}
+@bt_pre_clock_cls_with_mip{clock_class, 1}
+
+@sa bt_clock_class_get_accuracy() &mdash;
+    Returns the accuracy of a clock class.
+*/
+extern void bt_clock_class_set_accuracy(bt_clock_class *clock_class,
+		uint64_t accuracy) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the accuracy of the clock class \bt_p{clock_class}.
+
+See the \ref api-tir-clock-cls-prop-accuracy "accuracy" property.
+
+@param[in] clock_class
+    Clock class of which to get the accuracy.
+@param[out] accuracy
+    @parblock
+    <strong>If this function returns
+    #BT_PROPERTY_AVAILABILITY_AVAILABLE</strong>, \bt_p{*accuracy} is
+    the accuracy (cycles) of \bt_p{clock_class}.
+
+    Otherwise, the accuracy of \bt_p{clock_class} is unknown.
+    @endparblock
+
+@retval #BT_PROPERTY_AVAILABILITY_AVAILABLE
+    The accuracy of \bt_p{clock_class} is known.
+@retval #BT_PROPERTY_AVAILABILITY_NOT_AVAILABLE
+    The accuracy of \bt_p{clock_class} is unknown.
+
+@bt_pre_not_null{clock_class}
+@bt_pre_not_null{accuracy}
+
+@sa bt_clock_class_set_accuracy() &mdash;
+    Sets the accuracy of a clock class.
+*/
+extern bt_property_availability bt_clock_class_get_accuracy(
+		const struct bt_clock_class *clock_class,
+		uint64_t *accuracy) __BT_NOEXCEPT;
 
 /*!
 @brief

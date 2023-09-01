@@ -930,6 +930,11 @@ static inline void format_clock_class(char **buf_ch, bool extended,
 			PRFIELD(clock_class->precision.value));
 	}
 
+	if (clock_class->accuracy.base.avail) {
+		BUF_APPEND(", %saccuracy=%" PRIu64,
+			PRFIELD(clock_class->accuracy.value));
+	}
+
 	BUF_APPEND(", %soffset-s=%" PRId64 ", "
 		"%soffset-cycles=%" PRIu64 ", "
 		"%sorigin-namespace=%s, "
