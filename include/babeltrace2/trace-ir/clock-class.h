@@ -105,6 +105,9 @@ A clock's origin is one of, depending on its class:
     All stream clocks with a Unix epoch origin, whatever their
     \link api-tir-clock-cls-prop-iden identity\endlink,
     have a correlation.
+
+    Check whether or not two clock classes share the same identity
+    with bt_clock_class_has_same_identity().
   </dd>
 
   <dt>
@@ -123,6 +126,9 @@ A clock's origin is one of, depending on its class:
     All stream clocks with the same custom origin, whatever their
     \link api-tir-clock-cls-prop-iden identity\endlink,
     have a correlation.
+
+    Check whether or not two clock classes share the same identity
+    with bt_clock_class_has_same_identity().
   </dd>
 </dl>
 
@@ -1234,6 +1240,39 @@ If \bt_p{clock_class} has no UID, this function returns \c NULL.
 */
 extern const char *
 bt_clock_class_get_uid(const bt_clock_class *clock_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns whether or not the clock classes \bt_p{clock_class_a}
+    and \bt_p{clock_class_b} share the same identity.
+
+See the \ref api-tir-clock-cls-prop-iden "identity" property.
+
+Two clock classes share the same identity when all the following are
+true:
+
+- They both have a name and a UID.
+
+- The values of their namespace, name, and UID property tuples
+  are the same.
+
+@param[in] clock_class_a
+    Clock class A.
+@param[in] clock_class_b
+    Clock class B.
+
+@returns
+    #BT_TRUE if \bt_p{clock_class_a} and \bt_p{clock_class_b} share
+    the same identity
+
+@bt_pre_not_null{clock_class_a}
+@bt_pre_clock_cls_with_mip{clock_class_a, 1}
+@bt_pre_not_null{clock_class_b}
+@bt_pre_clock_cls_with_mip{clock_class_b, 1}
+*/
+extern bt_bool bt_clock_class_has_same_identity(
+		const bt_clock_class *clock_class_a,
+		const bt_clock_class *clock_class_b) __BT_NOEXCEPT;
 
 /*!
 @brief
