@@ -7,63 +7,69 @@ import os
 import unittest
 
 import bt2
-
-session_rotation_trace_path = os.path.join(
-    os.environ["BT_CTF_TRACES_PATH"], "1", "succeed", "session-rotation"
-)
+from test_all_ctf_versions import test_all_ctf_versions
 
 
-trace_10352_1 = os.path.join(
-    session_rotation_trace_path,
-    "a",
-    "1",
-    "ust",
-    "pid",
-    "10352",
-)
-trace_10353_1 = os.path.join(
-    session_rotation_trace_path,
-    "a",
-    "1",
-    "ust",
-    "pid",
-    "10353",
-)
-trace_10352_2 = os.path.join(
-    session_rotation_trace_path,
-    "a",
-    "2",
-    "ust",
-    "pid",
-    "10352",
-)
-trace_10353_2 = os.path.join(
-    session_rotation_trace_path,
-    "a",
-    "2",
-    "ust",
-    "pid",
-    "10353",
-)
-trace_10352_3 = os.path.join(
-    session_rotation_trace_path,
-    "3",
-    "ust",
-    "pid",
-    "10352",
-)
-trace_10353_3 = os.path.join(
-    session_rotation_trace_path,
-    "3",
-    "ust",
-    "pid",
-    "10353",
-)
-
-
+@test_all_ctf_versions
 class QuerySupportInfoTestCase(unittest.TestCase):
     def test_support_info_with_uuid(self):
         # Test that the right group is reported for each trace.
+        ctf = bt2.find_plugin("ctf")
+        fs = ctf.source_component_classes["fs"]
+
+        session_rotation_trace_path = os.path.join(
+            os.environ["BT_CTF_TRACES_PATH"],
+            str(self._ctf_version),
+            "succeed",
+            "session-rotation",
+        )
+
+        trace_10352_1 = os.path.join(
+            session_rotation_trace_path,
+            "a",
+            "1",
+            "ust",
+            "pid",
+            "10352",
+        )
+        trace_10353_1 = os.path.join(
+            session_rotation_trace_path,
+            "a",
+            "1",
+            "ust",
+            "pid",
+            "10353",
+        )
+        trace_10352_2 = os.path.join(
+            session_rotation_trace_path,
+            "a",
+            "2",
+            "ust",
+            "pid",
+            "10352",
+        )
+        trace_10353_2 = os.path.join(
+            session_rotation_trace_path,
+            "a",
+            "2",
+            "ust",
+            "pid",
+            "10353",
+        )
+        trace_10352_3 = os.path.join(
+            session_rotation_trace_path,
+            "3",
+            "ust",
+            "pid",
+            "10352",
+        )
+        trace_10353_3 = os.path.join(
+            session_rotation_trace_path,
+            "3",
+            "ust",
+            "pid",
+            "10353",
+        )
 
         def do_one_query(input, expected_group):
             qe = bt2.QueryExecutor(
@@ -72,9 +78,6 @@ class QuerySupportInfoTestCase(unittest.TestCase):
 
             result = qe.query()
             self.assertEqual(result["group"], expected_group)
-
-        ctf = bt2.find_plugin("ctf")
-        fs = ctf.source_component_classes["fs"]
 
         do_one_query(trace_10352_1, "21cdfa5e-9a64-490a-832c-53aca6c101ba")
         do_one_query(trace_10352_2, "21cdfa5e-9a64-490a-832c-53aca6c101ba")
