@@ -153,24 +153,20 @@ static void lttng_live_destroy_trace(struct lttng_live_trace *trace)
     BT_TRACE_CLASS_PUT_REF_AND_RESET(trace->trace_class);
 
     lttng_live_metadata_fini(trace);
-    g_free(trace);
+    delete trace;
 }
 
 static struct lttng_live_trace *lttng_live_create_trace(struct lttng_live_session *session,
                                                         uint64_t trace_id)
 {
-    struct lttng_live_trace *trace = NULL;
     bt_logging_level log_level = session->log_level;
     bt_self_component *self_comp = session->self_comp;
 
     BT_COMP_LOGD("Creating live trace: "
                  "session-id=%" PRIu64 ", trace-id=%" PRIu64,
                  session->id, trace_id);
-    trace = g_new0(struct lttng_live_trace, 1);
-    if (!trace) {
-        BT_COMP_LOGE_APPEND_CAUSE(self_comp, "Failed to allocate live trace");
-        goto error;
-    }
+
+    lttng_live_trace *trace = new lttng_live_trace;
     trace->log_level = session->log_level;
     trace->self_comp = session->self_comp;
     trace->session = session;
@@ -183,11 +179,6 @@ static struct lttng_live_trace *lttng_live_create_trace(struct lttng_live_sessio
     trace->metadata_stream_state = LTTNG_LIVE_METADATA_STREAM_STATE_NEEDED;
     g_ptr_array_add(session->traces, trace);
 
-    goto end;
-error:
-    g_free(trace);
-    trace = NULL;
-end:
     return trace;
 }
 
@@ -212,8 +203,6 @@ end:
 int lttng_live_add_session(struct lttng_live_msg_iter *lttng_live_msg_iter, uint64_t session_id,
                            const char *hostname, const char *session_name)
 {
-    int ret = 0;
-    struct lttng_live_session *session;
     bt_logging_level log_level = lttng_live_msg_iter->log_level;
     bt_self_component *self_comp = lttng_live_msg_iter->self_comp;
 
@@ -221,12 +210,7 @@ int lttng_live_add_session(struct lttng_live_msg_iter *lttng_live_msg_iter, uint
                  "session-id=%" PRIu64 ", hostname=\"%s\" session-name=\"%s\"",
                  session_id, hostname, session_name);
 
-    session = g_new0(struct lttng_live_session, 1);
-    if (!session) {
-        BT_COMP_LOGE_APPEND_CAUSE(self_comp, "Failed to allocate live session");
-        goto error;
-    }
-
+    lttng_live_session *session = new lttng_live_session;
     session->log_level = lttng_live_msg_iter->log_level;
     session->self_comp = lttng_live_msg_iter->self_comp;
     session->id = session_id;
@@ -241,12 +225,8 @@ int lttng_live_add_session(struct lttng_live_msg_iter *lttng_live_msg_iter, uint
     BT_ASSERT(session->session_name);
 
     g_ptr_array_add(lttng_live_msg_iter->sessions, session);
-    goto end;
-error:
-    g_free(session);
-    ret = -1;
-end:
-    return ret;
+
+    return 0;
 }
 
 static void lttng_live_destroy_session(struct lttng_live_session *session)
@@ -280,10 +260,12 @@ static void lttng_live_destroy_session(struct lttng_live_session *session)
     if (session->hostname) {
         g_string_free(session->hostname, TRUE);
     }
+
     if (session->session_name) {
         g_string_free(session->session_name, TRUE);
     }
-    g_free(session);
+
+    delete session;
 
 end:
     return;
@@ -309,7 +291,7 @@ static void lttng_live_msg_iter_destroy(struct lttng_live_msg_iter *lttng_live_m
     BT_ASSERT(lttng_live_msg_iter->active_stream_iter == 0);
     lttng_live_msg_iter->lttng_live_comp->has_msg_iter = false;
 
-    g_free(lttng_live_msg_iter);
+    delete lttng_live_msg_iter;
 
 end:
     return;
@@ -1749,15 +1731,7 @@ static struct lttng_live_msg_iter *
 lttng_live_msg_iter_create(struct lttng_live_component *lttng_live_comp,
                            bt_self_message_iterator *self_msg_it)
 {
-    bt_self_component *self_comp = lttng_live_comp->self_comp;
-    bt_logging_level log_level = lttng_live_comp->log_level;
-
-    struct lttng_live_msg_iter *lttng_live_msg_iter = g_new0(struct lttng_live_msg_iter, 1);
-    if (!lttng_live_msg_iter) {
-        BT_COMP_LOGE_APPEND_CAUSE(self_comp, "Failed to allocate lttng_live_msg_iter");
-        goto end;
-    }
-
+    lttng_live_msg_iter *lttng_live_msg_iter = new struct lttng_live_msg_iter;
     lttng_live_msg_iter->log_level = lttng_live_comp->log_level;
     lttng_live_msg_iter->self_comp = lttng_live_comp->self_comp;
     lttng_live_msg_iter->lttng_live_comp = lttng_live_comp;
@@ -1771,7 +1745,6 @@ lttng_live_msg_iter_create(struct lttng_live_component *lttng_live_comp,
         g_ptr_array_new_with_free_func((GDestroyNotify) lttng_live_destroy_session);
     BT_ASSERT(lttng_live_msg_iter->sessions);
 
-end:
     return lttng_live_msg_iter;
 }
 
@@ -2049,10 +2022,12 @@ static void lttng_live_component_destroy_data(struct lttng_live_component *lttng
     if (!lttng_live) {
         return;
     }
+
     if (lttng_live->params.url) {
         g_string_free(lttng_live->params.url, TRUE);
     }
-    g_free(lttng_live);
+
+    delete lttng_live;
 }
 
 void lttng_live_component_finalize(bt_self_component_source *component)
@@ -2123,11 +2098,7 @@ lttng_live_component_create(const bt_value *params, bt_logging_level log_level,
         goto error;
     }
 
-    lttng_live = g_new0(struct lttng_live_component, 1);
-    if (!lttng_live) {
-        status = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_MEMORY_ERROR;
-        goto end;
-    }
+    lttng_live = new lttng_live_component;
     lttng_live->log_level = log_level;
     lttng_live->self_comp = self_comp;
     lttng_live->max_query_size = MAX_QUERY_SIZE;

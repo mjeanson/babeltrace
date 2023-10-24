@@ -176,7 +176,6 @@ struct lttng_live_stream_iterator *
 lttng_live_stream_iterator_create(struct lttng_live_session *session, uint64_t ctf_trace_id,
                                   uint64_t stream_id, bt_self_message_iterator *self_msg_iter)
 {
-    struct lttng_live_stream_iterator *stream_iter;
     struct lttng_live_component *lttng_live;
     struct lttng_live_trace *trace;
     bt_logging_level log_level;
@@ -190,13 +189,7 @@ lttng_live_stream_iterator_create(struct lttng_live_session *session, uint64_t c
 
     lttng_live = session->lttng_live_msg_iter->lttng_live_comp;
 
-    stream_iter = g_new0(struct lttng_live_stream_iterator, 1);
-    if (!stream_iter) {
-        BT_COMP_LOGE_APPEND_CAUSE(self_comp,
-                                  "Failed to allocate struct lttng_live_stream_iterator");
-        goto error;
-    }
-
+    lttng_live_stream_iterator *stream_iter = new lttng_live_stream_iterator;
     stream_iter->log_level = log_level;
     stream_iter->self_comp = self_comp;
     trace = lttng_live_session_borrow_or_create_trace_by_id(session, ctf_trace_id);
@@ -278,5 +271,5 @@ void lttng_live_stream_iterator_destroy(struct lttng_live_stream_iterator *strea
     /* Track the number of active stream iterator. */
     stream_iter->trace->session->lttng_live_msg_iter->active_stream_iter--;
 
-    g_free(stream_iter);
+    delete stream_iter;
 }

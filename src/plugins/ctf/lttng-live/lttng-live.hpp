@@ -43,35 +43,35 @@ enum lttng_live_stream_state
 /* Iterator over a live stream. */
 struct lttng_live_stream_iterator
 {
-    bt_logging_level log_level;
-    bt_self_component *self_comp;
+    bt_logging_level log_level = (bt_logging_level) 0;
+    bt_self_component *self_comp = nullptr;
 
     /* Owned by this. */
-    bt_stream *stream;
+    bt_stream *stream = nullptr;
 
     /* Weak reference. */
-    struct lttng_live_trace *trace;
+    struct lttng_live_trace *trace = nullptr;
 
     /*
      * Since only a single iterator per viewer connection, we have
      * only a single message iterator per stream.
      */
-    struct ctf_msg_iter *msg_iter;
+    struct ctf_msg_iter *msg_iter = nullptr;
 
-    uint64_t viewer_stream_id;
+    uint64_t viewer_stream_id = 0;
 
     struct
     {
-        bool is_set;
-        uint64_t value;
+        bool is_set = false;
+        uint64_t value = 0;
     } ctf_stream_class_id;
 
     /* base offset in current index. */
-    uint64_t base_offset;
+    uint64_t base_offset = 0;
     /* len to read in current index. */
-    uint64_t len;
+    uint64_t len = 0;
     /* offset in current index. */
-    uint64_t offset;
+    uint64_t offset = 0;
 
     /*
      * Clock Snapshot value of the last message iterator inactivity message
@@ -79,45 +79,45 @@ struct lttng_live_stream_iterator
      */
     struct
     {
-        bool is_set;
-        uint64_t value;
+        bool is_set = false;
+        uint64_t value = 0;
     } last_inactivity_ts;
 
     /*
      * Clock Snapshot value of the current message iterator inactivity
      * message we might want to send downstream.
      */
-    uint64_t current_inactivity_ts;
+    uint64_t current_inactivity_ts = 0;
 
-    enum lttng_live_stream_state state;
+    enum lttng_live_stream_state state = LTTNG_LIVE_STREAM_QUIESCENT;
 
     /*
      * The current message produced by this live stream iterator. Owned by
      * this.
      */
-    const bt_message *current_msg;
+    const bt_message *current_msg = nullptr;
 
     /* Timestamp in nanoseconds of the current message (current_msg). */
-    int64_t current_msg_ts_ns;
+    int64_t current_msg_ts_ns = 0;
 
     /* Owned by this. */
-    uint8_t *buf;
-    size_t buflen;
+    uint8_t *buf = nullptr;
+    size_t buflen = 0;
 
     /* Owned by this. */
-    GString *name;
+    GString *name = nullptr;
 
-    bool has_stream_hung_up;
+    bool has_stream_hung_up = false;
 };
 
 struct lttng_live_metadata
 {
-    bt_logging_level log_level;
-    bt_self_component *self_comp;
+    bt_logging_level log_level = (bt_logging_level) 0;
+    bt_self_component *self_comp = nullptr;
 
-    uint64_t stream_id;
+    uint64_t stream_id = 0;
     /* Weak reference. */
-    struct ctf_metadata_decoder *decoder;
+    struct ctf_metadata_decoder *decoder = nullptr;
 };
 
 enum lttng_live_metadata_stream_state
@@ -144,55 +144,56 @@ enum lttng_live_metadata_stream_state
 
 struct lttng_live_trace
 {
-    bt_logging_level log_level;
-    bt_self_component *self_comp;
+    bt_logging_level log_level = (bt_logging_level) 0;
+    bt_self_component *self_comp = nullptr;
 
     /* Back reference to session. */
-    struct lttng_live_session *session;
+    struct lttng_live_session *session = nullptr;
 
     /* ctf trace ID within the session. */
-    uint64_t id;
+    uint64_t id = 0;
 
     /* Owned by this. */
-    bt_trace *trace;
+    bt_trace *trace = nullptr;
 
     /* Weak reference. */
-    bt_trace_class *trace_class;
+    bt_trace_class *trace_class = nullptr;
 
-    struct lttng_live_metadata *metadata;
+    struct lttng_live_metadata *metadata = nullptr;
 
-    const bt_clock_class *clock_class;
+    const bt_clock_class *clock_class = nullptr;
 
     /* Array of pointers to struct lttng_live_stream_iterator. */
     /* Owned by this. */
-    GPtrArray *stream_iterators;
+    GPtrArray *stream_iterators = nullptr;
 
-    enum lttng_live_metadata_stream_state metadata_stream_state;
+    enum lttng_live_metadata_stream_state metadata_stream_state =
+        LTTNG_LIVE_METADATA_STREAM_STATE_NEEDED;
 };
 
 struct lttng_live_session
 {
-    bt_logging_level log_level;
-    bt_self_component *self_comp;
+    bt_logging_level log_level = (bt_logging_level) 0;
+    bt_self_component *self_comp = nullptr;
 
     /* Weak reference. */
-    struct lttng_live_msg_iter *lttng_live_msg_iter;
+    struct lttng_live_msg_iter *lttng_live_msg_iter = nullptr;
 
     /* Owned by this. */
-    GString *hostname;
+    GString *hostname = nullptr;
 
     /* Owned by this. */
-    GString *session_name;
+    GString *session_name = nullptr;
 
-    uint64_t id;
+    uint64_t id = 0;
 
     /* Array of pointers to struct lttng_live_trace. */
-    GPtrArray *traces;
+    GPtrArray *traces = nullptr;
 
-    bool attached;
-    bool new_streams_needed;
-    bool lazy_stream_msg_init;
-    bool closed;
+    bool attached = false;
+    bool new_streams_needed = false;
+    bool lazy_stream_msg_init = false;
+    bool closed = false;
 };
 
 enum session_not_found_action
@@ -207,51 +208,51 @@ enum session_not_found_action
  */
 struct lttng_live_component
 {
-    bt_logging_level log_level;
+    bt_logging_level log_level = (bt_logging_level) 0;
 
     /* Weak reference. */
-    bt_self_component *self_comp;
+    bt_self_component *self_comp = nullptr;
 
     struct
     {
-        GString *url;
-        enum session_not_found_action sess_not_found_act;
+        GString *url = nullptr;
+        enum session_not_found_action sess_not_found_act = SESSION_NOT_FOUND_ACTION_CONTINUE;
     } params;
 
-    size_t max_query_size;
+    size_t max_query_size = 0;
 
     /*
      * Keeps track of whether the downstream component already has a
      * message iterator on this component.
      */
-    bool has_msg_iter;
+    bool has_msg_iter = false;
 };
 
 struct lttng_live_msg_iter
 {
-    bt_logging_level log_level;
-    bt_self_component *self_comp;
+    bt_logging_level log_level = (bt_logging_level) 0;
+    bt_self_component *self_comp = nullptr;
 
     /* Weak reference. */
-    struct lttng_live_component *lttng_live_comp;
+    struct lttng_live_component *lttng_live_comp = nullptr;
 
     /* Weak reference. */
-    bt_self_message_iterator *self_msg_iter;
+    bt_self_message_iterator *self_msg_iter = nullptr;
 
     /* Owned by this. */
-    struct live_viewer_connection *viewer_connection;
+    struct live_viewer_connection *viewer_connection = nullptr;
 
     /* Array of pointers to struct lttng_live_session. */
-    GPtrArray *sessions;
+    GPtrArray *sessions = nullptr;
 
     /* Number of live stream iterator this message iterator has.*/
-    uint64_t active_stream_iter;
+    uint64_t active_stream_iter = 0;
 
     /* Timestamp in nanosecond of the last message sent downstream. */
-    int64_t last_msg_ts_ns;
+    int64_t last_msg_ts_ns = 0;
 
     /* True if the iterator was interrupted. */
-    bool was_interrupted;
+    bool was_interrupted = false;
 };
 
 enum lttng_live_iterator_status

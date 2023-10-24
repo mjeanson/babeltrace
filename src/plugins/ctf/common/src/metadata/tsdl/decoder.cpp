@@ -34,15 +34,15 @@
 
 struct ctf_metadata_decoder
 {
-    struct ctf_scanner *scanner;
-    GString *text;
-    struct ctf_visitor_generate_ir *visitor;
-    bt_uuid_t uuid;
-    bool is_uuid_set;
-    int bo;
+    struct ctf_scanner *scanner = nullptr;
+    GString *text = nullptr;
+    struct ctf_visitor_generate_ir *visitor = nullptr;
+    bt_uuid_t uuid {};
+    bool is_uuid_set = false;
+    int bo = 0;
     struct ctf_metadata_decoder_config config;
     struct meta_log_config log_cfg;
-    bool has_checked_plaintext_signature;
+    bool has_checked_plaintext_signature = false;
 };
 
 struct packet_header
@@ -95,8 +95,6 @@ end:
 struct ctf_metadata_decoder *
 ctf_metadata_decoder_create(const struct ctf_metadata_decoder_config *config)
 {
-    struct ctf_metadata_decoder *mdec = g_new0(struct ctf_metadata_decoder, 1);
-
     BT_ASSERT(config);
     BT_COMP_LOG_CUR_LVL(BT_LOG_DEBUG, config->log_level, config->self_comp,
                         "Creating CTF metadata decoder: "
@@ -104,12 +102,7 @@ ctf_metadata_decoder_create(const struct ctf_metadata_decoder_config *config)
                         "clock-class-offset-ns=%" PRId64,
                         config->clock_class_offset_s, config->clock_class_offset_ns);
 
-    if (!mdec) {
-        BT_COMP_LOG_CUR_LVL(BT_LOG_ERROR, config->log_level, config->self_comp,
-                            "Failed to allocate one CTF metadata decoder.");
-        goto end;
-    }
-
+    ctf_metadata_decoder *mdec = new ctf_metadata_decoder;
     mdec->log_cfg.log_level = config->log_level;
     mdec->log_cfg.self_comp = config->self_comp;
     mdec->log_cfg.self_comp_class = config->self_comp_class;
@@ -169,7 +162,7 @@ void ctf_metadata_decoder_destroy(struct ctf_metadata_decoder *mdec)
 
     BT_COMP_LOGD("Destroying CTF metadata decoder: addr=%p", mdec);
     ctf_visitor_generate_ir_destroy(mdec->visitor);
-    g_free(mdec);
+    delete mdec;
 }
 
 enum ctf_metadata_decoder_status

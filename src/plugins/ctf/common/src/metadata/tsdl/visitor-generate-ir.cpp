@@ -186,19 +186,19 @@ struct ctf_visitor_generate_ir
     struct meta_log_config log_cfg;
 
     /* Trace IR trace class being filled (owned by this) */
-    bt_trace_class *trace_class;
+    bt_trace_class *trace_class = nullptr;
 
     /* CTF meta trace being filled (owned by this) */
-    struct ctf_trace_class *ctf_tc;
+    struct ctf_trace_class *ctf_tc = nullptr;
 
     /* Current declaration scope (top of the stack) (owned by this) */
-    struct ctx_decl_scope *current_scope;
+    struct ctx_decl_scope *current_scope = nullptr;
 
     /* True if trace declaration is visited */
-    bool is_trace_visited;
+    bool is_trace_visited = false;
 
     /* True if this is an LTTng trace */
-    bool is_lttng;
+    bool is_lttng = false;
 
     /* Config passed by the user */
     struct ctf_metadata_decoder_config decoder_config;
@@ -512,7 +512,7 @@ static void ctx_destroy(struct ctf_visitor_generate_ir *ctx)
         ctf_trace_class_destroy(ctx->ctf_tc);
     }
 
-    g_free(ctx);
+    delete ctx;
 
 end:
     return;
@@ -527,17 +527,9 @@ end:
 static struct ctf_visitor_generate_ir *
 ctx_create(const struct ctf_metadata_decoder_config *decoder_config)
 {
-    struct ctf_visitor_generate_ir *ctx = NULL;
-
     BT_ASSERT(decoder_config);
 
-    ctx = g_new0(struct ctf_visitor_generate_ir, 1);
-    if (!ctx) {
-        BT_COMP_LOG_CUR_LVL(BT_LOG_ERROR, decoder_config->log_level, decoder_config->self_comp,
-                            "Failed to allocate one visitor context.");
-        goto error;
-    }
-
+    ctf_visitor_generate_ir *ctx = new ctf_visitor_generate_ir;
     ctx->log_cfg.log_level = decoder_config->log_level;
     ctx->log_cfg.self_comp = decoder_config->self_comp;
     ctx->log_cfg.self_comp_class = decoder_config->self_comp_class;

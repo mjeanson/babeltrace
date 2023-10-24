@@ -46,25 +46,25 @@ enum lttng_live_get_one_metadata_status
 
 struct live_viewer_connection
 {
-    bt_logging_level log_level;
-    bt_self_component *self_comp;
-    bt_self_component_class *self_comp_class;
+    bt_logging_level log_level = (bt_logging_level) 0;
+    bt_self_component *self_comp = nullptr;
+    bt_self_component_class *self_comp_class = nullptr;
 
-    GString *url;
+    GString *url = nullptr;
 
-    GString *relay_hostname;
-    GString *target_hostname;
-    GString *session_name;
-    GString *proto;
+    GString *relay_hostname = nullptr;
+    GString *target_hostname = nullptr;
+    GString *session_name = nullptr;
+    GString *proto = nullptr;
 
-    BT_SOCKET control_sock;
-    int port;
+    BT_SOCKET control_sock {};
+    int port = 0;
 
-    int32_t major;
-    int32_t minor;
+    int32_t major = 0;
+    int32_t minor = 0;
 
-    bool in_query;
-    struct lttng_live_msg_iter *lttng_live_msg_iter;
+    bool in_query = false;
+    struct lttng_live_msg_iter *lttng_live_msg_iter = nullptr;
 };
 
 struct packet_index_time

@@ -48,7 +48,7 @@ metadata_info_query(bt_self_component_class_source *self_comp_class_src, const b
     const char *path;
     bool is_packetized;
     struct ctf_metadata_decoder *decoder = NULL;
-    ctf_metadata_decoder_config decoder_cfg {};
+    ctf_metadata_decoder_config decoder_cfg;
     enum ctf_metadata_decoder_status decoder_status;
     GString *g_metadata_text = NULL;
     const char *plaintext;
@@ -428,10 +428,10 @@ support_info_query(bt_self_component_class_source *comp_class, const bt_value *p
 
     metadata_file = g_fopen(metadata_path, "rb");
     if (metadata_file) {
-        ctf_metadata_decoder_config metadata_decoder_config {};
         enum ctf_metadata_decoder_status decoder_status;
         bt_uuid_t uuid;
 
+        ctf_metadata_decoder_config metadata_decoder_config;
         metadata_decoder_config.log_level = log_level;
         metadata_decoder_config.self_comp_class =
             bt_self_component_class_source_as_self_component_class(comp_class);

@@ -46,30 +46,30 @@ struct field_class_stack_frame
  */
 struct resolve_context
 {
-    bt_logging_level log_level;
+    bt_logging_level log_level = (bt_logging_level) 0;
 
     /* Weak, exactly one of these must be set */
-    bt_self_component *self_comp;
-    bt_self_component_class *self_comp_class;
+    bt_self_component *self_comp = nullptr;
+    bt_self_component_class *self_comp_class = nullptr;
 
-    struct ctf_trace_class *tc;
-    struct ctf_stream_class *sc;
-    struct ctf_event_class *ec;
+    struct ctf_trace_class *tc = nullptr;
+    struct ctf_stream_class *sc = nullptr;
+    struct ctf_event_class *ec = nullptr;
 
     struct
     {
-        struct ctf_field_class *packet_header;
-        struct ctf_field_class *packet_context;
-        struct ctf_field_class *event_header;
-        struct ctf_field_class *event_common_context;
-        struct ctf_field_class *event_spec_context;
-        struct ctf_field_class *event_payload;
+        struct ctf_field_class *packet_header = nullptr;
+        struct ctf_field_class *packet_context = nullptr;
+        struct ctf_field_class *event_header = nullptr;
+        struct ctf_field_class *event_common_context = nullptr;
+        struct ctf_field_class *event_spec_context = nullptr;
+        struct ctf_field_class *event_payload = nullptr;
     } scopes;
 
     /* Root scope being visited */
-    enum ctf_scope root_scope;
-    field_class_stack_t *field_class_stack;
-    struct ctf_field_class *cur_fc;
+    enum ctf_scope root_scope = CTF_SCOPE_PACKET_HEADER;
+    field_class_stack_t *field_class_stack = nullptr;
+    struct ctf_field_class *cur_fc = nullptr;
 };
 
 /* TSDL dynamic scope prefixes as defined in CTF Section 7.3.2 */

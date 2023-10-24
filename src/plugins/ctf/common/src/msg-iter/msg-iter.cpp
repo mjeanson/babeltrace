@@ -97,26 +97,26 @@ enum state
 
 struct end_of_packet_snapshots
 {
-    uint64_t discarded_events;
-    uint64_t packets;
-    uint64_t beginning_clock;
-    uint64_t end_clock;
+    uint64_t discarded_events = 0;
+    uint64_t packets = 0;
+    uint64_t beginning_clock = 0;
+    uint64_t end_clock = 0;
 };
 
 /* CTF message iterator */
 struct ctf_msg_iter
 {
     /* Visit stack */
-    struct stack *stack;
+    struct stack *stack = nullptr;
 
     /* Current message iterator to create messages (weak) */
-    bt_self_message_iterator *self_msg_iter;
+    bt_self_message_iterator *self_msg_iter = nullptr;
 
     /*
      * True if library objects are unavailable during the decoding and
      * should not be created/used.
      */
-    bool dry_run;
+    bool dry_run = false;
 
     /*
      * Current dynamic scope field pointer.
@@ -124,48 +124,48 @@ struct ctf_msg_iter
      * This is set by read_dscope_begin_state() and contains the
      * value of one of the pointers in `dscopes` below.
      */
-    bt_field *cur_dscope_field;
+    bt_field *cur_dscope_field = nullptr;
 
     /*
      * True if we're done filling a string field from a text
      * array/sequence payload.
      */
-    bool done_filling_string;
+    bool done_filling_string = false;
 
     /* Trace and classes */
     /* True to set IR fields */
-    bool set_ir_fields;
+    bool set_ir_fields = false;
 
     struct
     {
-        struct ctf_trace_class *tc;
-        struct ctf_stream_class *sc;
-        struct ctf_event_class *ec;
+        struct ctf_trace_class *tc = nullptr;
+        struct ctf_stream_class *sc = nullptr;
+        struct ctf_event_class *ec = nullptr;
     } meta;
 
     /* Current packet (NULL if not created yet) */
-    bt_packet *packet;
+    bt_packet *packet = nullptr;
 
     /* Current stream (NULL if not set yet) */
-    bt_stream *stream;
+    bt_stream *stream = nullptr;
 
     /* Current event (NULL if not created yet) */
-    bt_event *event;
+    bt_event *event = nullptr;
 
     /* Current event message (NULL if not created yet) */
-    bt_message *event_msg;
+    bt_message *event_msg = nullptr;
 
     /*
      * True if we need to emit a packet beginning message before we emit
      * the next event message or the packet end message.
      */
-    bool emit_delayed_packet_beginning_msg;
+    bool emit_delayed_packet_beginning_msg = false;
 
     /*
      * True if this is the first packet we are reading, and therefore if we
      * should emit a stream beginning message.
      */
-    bool emit_stream_beginning_message;
+    bool emit_stream_beginning_message = false;
 
     /*
      * True if we need to emit a stream end message at the end of the
@@ -173,73 +173,73 @@ struct ctf_msg_iter
      * never send a stream beginning message which removes the need to emit
      * a stream end message.
      */
-    bool emit_stream_end_message;
+    bool emit_stream_end_message = false;
 
     /* Database of current dynamic scopes */
     struct
     {
-        bt_field *stream_packet_context;
-        bt_field *event_common_context;
-        bt_field *event_spec_context;
-        bt_field *event_payload;
+        bt_field *stream_packet_context = nullptr;
+        bt_field *event_common_context = nullptr;
+        bt_field *event_spec_context = nullptr;
+        bt_field *event_payload = nullptr;
     } dscopes;
 
     /* Current state */
-    enum state state;
+    enum state state = STATE_INIT;
 
     /* Current medium buffer data */
     struct
     {
         /* Last address provided by medium */
-        const uint8_t *addr;
+        const uint8_t *addr = nullptr;
 
         /* Buffer size provided by medium (bytes) */
-        size_t sz;
+        size_t sz = 0;
 
         /* Offset within whole packet of addr (bits) */
-        size_t packet_offset;
+        size_t packet_offset = 0;
 
         /* Current position from addr (bits) */
-        size_t at;
+        size_t at = 0;
 
         /* Position of the last event header from addr (bits) */
-        size_t last_eh_at;
+        size_t last_eh_at = 0;
     } buf;
 
     /* Binary type reader */
-    struct bt_bfcr *bfcr;
+    struct bt_bfcr *bfcr = nullptr;
 
     /* Current medium data */
     struct
     {
         struct ctf_msg_iter_medium_ops medops;
-        size_t max_request_sz;
-        void *data;
+        size_t max_request_sz = 0;
+        void *data = nullptr;
     } medium;
 
     /* Current packet size (bits) (-1 if unknown) */
-    int64_t cur_exp_packet_total_size;
+    int64_t cur_exp_packet_total_size = 0;
 
     /* Current content size (bits) (-1 if unknown) */
-    int64_t cur_exp_packet_content_size;
+    int64_t cur_exp_packet_content_size = 0;
 
     /* Current stream class ID */
-    int64_t cur_stream_class_id;
+    int64_t cur_stream_class_id = 0;
 
     /* Current event class ID */
-    int64_t cur_event_class_id;
+    int64_t cur_event_class_id = 0;
 
     /* Current data stream ID */
-    int64_t cur_data_stream_id;
+    int64_t cur_data_stream_id = 0;
 
     /*
      * Offset, in the underlying media, of the current packet's
      * start (-1 if unknown).
      */
-    off_t cur_packet_offset;
+    off_t cur_packet_offset = 0;
 
     /* Default clock's current value */
-    uint64_t default_clock_snapshot;
+    uint64_t default_clock_snapshot = 0;
 
     /* End of current packet snapshots */
     struct end_of_packet_snapshots snapshots;
@@ -248,13 +248,13 @@ struct ctf_msg_iter
     struct end_of_packet_snapshots prev_packet_snapshots;
 
     /* Stored values (for sequence lengths, variant tags) */
-    GArray *stored_values;
+    GArray *stored_values = nullptr;
 
     /* Iterator's current log level */
-    bt_logging_level log_level;
+    bt_logging_level log_level = (bt_logging_level) 0;
 
     /* Iterator's owning self component, or `NULL` if none (query) */
-    bt_self_component *self_comp;
+    bt_self_component *self_comp = nullptr;
 };
 
 static inline const char *state_string(enum state state)
@@ -2594,7 +2594,6 @@ struct ctf_msg_iter *ctf_msg_iter_create(struct ctf_trace_class *tc, size_t max_
                                          bt_logging_level log_level, bt_self_component *self_comp,
                                          bt_self_message_iterator *self_msg_iter)
 {
-    struct ctf_msg_iter *msg_it = NULL;
     struct bt_bfcr_cbs cbs = {
         .classes =
             {
@@ -2624,12 +2623,8 @@ struct ctf_msg_iter *ctf_msg_iter_create(struct ctf_trace_class *tc, size_t max_
                         "trace-addr=%p, max-request-size=%zu, "
                         "data=%p, log-level=%s",
                         tc, max_request_sz, data, bt_common_logging_level_string(log_level));
-    msg_it = g_new0(struct ctf_msg_iter, 1);
-    if (!msg_it) {
-        BT_COMP_LOG_CUR_LVL(BT_LOG_ERROR, log_level, self_comp,
-                            "Failed to allocate one CTF plugin message iterator.");
-        goto end;
-    }
+
+    ctf_msg_iter *msg_it = new ctf_msg_iter;
     msg_it->self_comp = self_comp;
     msg_it->self_msg_iter = self_msg_iter;
     msg_it->log_level = log_level;
@@ -2690,7 +2685,7 @@ void ctf_msg_iter_destroy(struct ctf_msg_iter *msg_it)
         g_array_free(msg_it->stored_values, TRUE);
     }
 
-    g_free(msg_it);
+    delete msg_it;
 }
 
 enum ctf_msg_iter_status ctf_msg_iter_get_next_message(struct ctf_msg_iter *msg_it,

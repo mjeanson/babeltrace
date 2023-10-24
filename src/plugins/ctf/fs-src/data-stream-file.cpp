@@ -274,14 +274,14 @@ struct ctf_msg_iter_medium_ops ctf_fs_ds_file_medops = {
 struct ctf_fs_ds_group_medops_data
 {
     /* Weak, set once at creation time. */
-    struct ctf_fs_ds_file_group *ds_file_group;
+    struct ctf_fs_ds_file_group *ds_file_group = nullptr;
 
     /*
      * Index (as in element rank) of the index entry of ds_file_groups'
      * index we will read next (so, the one after the one we are reading
      * right now).
      */
-    guint next_index_entry_index;
+    guint next_index_entry_index = 0;
 
     /*
      * File we are currently reading.  Changes whenever we switch to
@@ -289,11 +289,11 @@ struct ctf_fs_ds_group_medops_data
      *
      * Owned by this.
      */
-    struct ctf_fs_ds_file *file;
+    struct ctf_fs_ds_file *file = nullptr;
 
     /* Weak, for context / logging / appending causes. */
-    bt_self_message_iterator *self_msg_iter;
-    bt_logging_level log_level;
+    bt_self_message_iterator *self_msg_iter = nullptr;
+    bt_logging_level log_level = (bt_logging_level) 0;
 };
 
 static enum ctf_msg_iter_medium_status medop_group_request_bytes(size_t request_sz,
@@ -400,7 +400,7 @@ void ctf_fs_ds_group_medops_data_destroy(struct ctf_fs_ds_group_medops_data *dat
 
     ctf_fs_ds_file_destroy(data->file);
 
-    g_free(data);
+    delete data;
 
 end:
     return;
@@ -410,22 +410,12 @@ enum ctf_msg_iter_medium_status ctf_fs_ds_group_medops_data_create(
     struct ctf_fs_ds_file_group *ds_file_group, bt_self_message_iterator *self_msg_iter,
     bt_logging_level log_level, struct ctf_fs_ds_group_medops_data **out)
 {
-    struct ctf_fs_ds_group_medops_data *data;
-    enum ctf_msg_iter_medium_status status;
-
     BT_ASSERT(self_msg_iter);
     BT_ASSERT(ds_file_group);
     BT_ASSERT(ds_file_group->index);
     BT_ASSERT(ds_file_group->index->entries->len > 0);
 
-    data = g_new0(struct ctf_fs_ds_group_medops_data, 1);
-    if (!data) {
-        BT_MSG_ITER_LOGE_APPEND_CAUSE(self_msg_iter,
-                                      "Failed to allocate a struct ctf_fs_ds_group_medops_data");
-        status = CTF_MSG_ITER_MEDIUM_STATUS_MEMORY_ERROR;
-        goto error;
-    }
-
+    ctf_fs_ds_group_medops_data *data = new ctf_fs_ds_group_medops_data;
     data->ds_file_group = ds_file_group;
     data->self_msg_iter = self_msg_iter;
     data->log_level = log_level;
@@ -437,14 +427,7 @@ enum ctf_msg_iter_medium_status ctf_fs_ds_group_medops_data_create(
      */
 
     *out = data;
-    status = CTF_MSG_ITER_MEDIUM_STATUS_OK;
-    goto end;
-
-error:
-    ctf_fs_ds_group_medops_data_destroy(data);
-
-end:
-    return status;
+    return CTF_MSG_ITER_MEDIUM_STATUS_OK;
 }
 
 void ctf_fs_ds_group_medops_data_reset(struct ctf_fs_ds_group_medops_data *data)
@@ -465,20 +448,16 @@ struct ctf_msg_iter_medium_ops ctf_fs_ds_group_medops = {
     .borrow_stream = medop_group_borrow_stream,
 };
 
-static struct ctf_fs_ds_index_entry *ctf_fs_ds_index_entry_create(bt_self_component *self_comp,
-                                                                  bt_logging_level log_level)
+static void ctf_fs_ds_index_entry_destroy(ctf_fs_ds_index_entry *entry)
 {
-    struct ctf_fs_ds_index_entry *entry;
+    delete entry;
+}
 
-    entry = g_new0(struct ctf_fs_ds_index_entry, 1);
-    if (!entry) {
-        BT_COMP_LOGE_APPEND_CAUSE(self_comp, "Failed to allocate a ctf_fs_ds_index_entry.");
-        goto end;
-    }
-
+static struct ctf_fs_ds_index_entry *ctf_fs_ds_index_entry_create()
+{
+    ctf_fs_ds_index_entry *entry = new ctf_fs_ds_index_entry;
     entry->packet_seq_num = UINT64_MAX;
 
-end:
     return entry;
 }
 
@@ -618,7 +597,7 @@ static struct ctf_fs_ds_index *build_index_from_idx_file(struct ctf_fs_ds_file *
             goto error;
         }
 
-        index_entry = ctf_fs_ds_index_entry_create(ds_file->self_comp, ds_file->log_level);
+        index_entry = ctf_fs_ds_index_entry_create();
         if (!index_entry) {
             BT_COMP_LOGE_APPEND_CAUSE(ds_file->self_comp,
                                       "Failed to create a ctf_fs_ds_index_entry.");
@@ -701,7 +680,7 @@ end:
     return index;
 error:
     ctf_fs_ds_index_destroy(index);
-    g_free(index_entry);
+    ctf_fs_ds_index_entry_destroy(index_entry);
     index = NULL;
     goto end;
 }
@@ -815,7 +794,7 @@ static struct ctf_fs_ds_index *build_index_from_stream_file(struct ctf_fs_ds_fil
             goto error;
         }
 
-        index_entry = ctf_fs_ds_index_entry_create(ds_file->self_comp, ds_file->log_level);
+        index_entry = ctf_fs_ds_index_entry_create();
         if (!index_entry) {
             BT_COMP_LOGE_APPEND_CAUSE(ds_file->self_comp,
                                       "Failed to create a ctf_fs_ds_index_entry.");
@@ -828,7 +807,7 @@ static struct ctf_fs_ds_index *build_index_from_stream_file(struct ctf_fs_ds_fil
         ret = init_index_entry(index_entry, ds_file, &props, current_packet_size_bytes,
                                current_packet_offset_bytes);
         if (ret) {
-            g_free(index_entry);
+            ctf_fs_ds_index_entry_destroy(index_entry);
             goto error;
         }
 
@@ -855,7 +834,7 @@ struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace, 
 {
     int ret;
     const size_t offset_align = bt_mmap_get_offset_align_size(log_level);
-    struct ctf_fs_ds_file *ds_file = g_new0(struct ctf_fs_ds_file, 1);
+    ctf_fs_ds_file *ds_file = new ctf_fs_ds_file;
 
     if (!ds_file) {
         goto error;
@@ -913,14 +892,8 @@ end:
 struct ctf_fs_ds_index *ctf_fs_ds_index_create(bt_logging_level log_level,
                                                bt_self_component *self_comp)
 {
-    struct ctf_fs_ds_index *index = g_new0(struct ctf_fs_ds_index, 1);
-
-    if (!index) {
-        BT_COMP_LOG_CUR_LVL(BT_LOG_ERROR, log_level, self_comp, "Failed to allocate index");
-        goto error;
-    }
-
-    index->entries = g_ptr_array_new_with_free_func((GDestroyNotify) g_free);
+    ctf_fs_ds_index *index = new ctf_fs_ds_index;
+    index->entries = g_ptr_array_new_with_free_func((GDestroyNotify) ctf_fs_ds_index_entry_destroy);
     if (!index->entries) {
         BT_COMP_LOG_CUR_LVL(BT_LOG_ERROR, log_level, self_comp,
                             "Failed to allocate index entries.");
@@ -949,7 +922,7 @@ void ctf_fs_ds_file_destroy(struct ctf_fs_ds_file *ds_file)
         ctf_fs_file_destroy(ds_file->file);
     }
 
-    g_free(ds_file);
+    delete ds_file;
 }
 
 void ctf_fs_ds_index_destroy(struct ctf_fs_ds_index *index)
@@ -961,5 +934,6 @@ void ctf_fs_ds_index_destroy(struct ctf_fs_ds_index *index)
     if (index->entries) {
         g_ptr_array_free(index->entries, TRUE);
     }
-    g_free(index);
+
+    delete index;
 }

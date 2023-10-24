@@ -29,28 +29,28 @@ enum ctf_metadata_decoder_status
 struct ctf_metadata_decoder_config
 {
     /* Active log level to use */
-    bt_logging_level log_level;
+    bt_logging_level log_level = (bt_logging_level) 0;
 
     /*
      * Component or component class to use for logging (exactly one of
      * them must be non-`NULL`); weak
      */
-    bt_self_component *self_comp;
-    bt_self_component_class *self_comp_class;
+    bt_self_component *self_comp = nullptr;
+    bt_self_component_class *self_comp_class = nullptr;
 
     /* Additional clock class offset to apply */
-    int64_t clock_class_offset_s;
-    int64_t clock_class_offset_ns;
-    bool force_clock_class_origin_unix_epoch;
+    int64_t clock_class_offset_s = 0;
+    int64_t clock_class_offset_ns = 0;
+    bool force_clock_class_origin_unix_epoch = false;
 
     /* True to create trace class objects */
-    bool create_trace_class;
+    bool create_trace_class = false;
 
     /*
      * True to keep the plain text when content is appended with
      * ctf_metadata_decoder_append_content().
      */
-    bool keep_plain_text;
+    bool keep_plain_text = false;
 };
 
 /*

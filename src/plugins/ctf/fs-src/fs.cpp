@@ -53,7 +53,7 @@ static void ctf_fs_msg_iter_data_destroy(struct ctf_fs_msg_iter_data *msg_iter_d
         ctf_fs_ds_group_medops_data_destroy(msg_iter_data->msg_iter_medops_data);
     }
 
-    g_free(msg_iter_data);
+    delete msg_iter_data;
 }
 
 static bt_message_iterator_class_next_method_status
@@ -204,7 +204,6 @@ ctf_fs_iterator_init(bt_self_message_iterator *self_msg_iter,
                      bt_self_component_port_output *self_port)
 {
     struct ctf_fs_port_data *port_data;
-    struct ctf_fs_msg_iter_data *msg_iter_data = NULL;
     bt_message_iterator_class_initialize_method_status status;
     bt_logging_level log_level;
     enum ctf_msg_iter_medium_status medium_status;
@@ -214,12 +213,8 @@ ctf_fs_iterator_init(bt_self_message_iterator *self_msg_iter,
         bt_self_component_port_output_as_self_component_port(self_port));
     BT_ASSERT(port_data);
     log_level = port_data->ctf_fs->log_level;
-    msg_iter_data = g_new0(struct ctf_fs_msg_iter_data, 1);
-    if (!msg_iter_data) {
-        status = BT_MESSAGE_ITERATOR_CLASS_INITIALIZE_METHOD_STATUS_MEMORY_ERROR;
-        goto error;
-    }
 
+    ctf_fs_msg_iter_data *msg_iter_data = new ctf_fs_msg_iter_data;
     msg_iter_data->log_level = log_level;
     msg_iter_data->self_comp = self_comp;
     msg_iter_data->self_msg_iter = self_msg_iter;
@@ -287,10 +282,10 @@ static void ctf_fs_trace_destroy(struct ctf_fs_trace *ctf_fs_trace)
 
     if (ctf_fs_trace->metadata) {
         ctf_fs_metadata_fini(ctf_fs_trace->metadata);
-        g_free(ctf_fs_trace->metadata);
+        delete ctf_fs_trace->metadata;
     }
 
-    g_free(ctf_fs_trace);
+    delete ctf_fs_trace;
 }
 
 void ctf_fs_destroy(struct ctf_fs_component *ctf_fs)
@@ -305,7 +300,7 @@ void ctf_fs_destroy(struct ctf_fs_component *ctf_fs)
         g_ptr_array_free(ctf_fs->port_data, TRUE);
     }
 
-    g_free(ctf_fs);
+    delete ctf_fs;
 }
 
 static void port_data_destroy(struct ctf_fs_port_data *port_data)
@@ -314,7 +309,7 @@ static void port_data_destroy(struct ctf_fs_port_data *port_data)
         return;
     }
 
-    g_free(port_data);
+    delete port_data;
 }
 
 static void port_data_destroy_notifier(void *data)
@@ -330,13 +325,7 @@ static void ctf_fs_trace_destroy_notifier(void *data)
 
 struct ctf_fs_component *ctf_fs_component_create(bt_logging_level log_level)
 {
-    struct ctf_fs_component *ctf_fs;
-
-    ctf_fs = g_new0(struct ctf_fs_component, 1);
-    if (!ctf_fs) {
-        goto error;
-    }
-
+    ctf_fs_component *ctf_fs = new ctf_fs_component;
     ctf_fs->log_level = log_level;
     ctf_fs->port_data = g_ptr_array_new_with_free_func(port_data_destroy_notifier);
     if (!ctf_fs->port_data) {
@@ -421,11 +410,7 @@ static int create_one_port_for_trace(struct ctf_fs_component *ctf_fs,
     BT_COMP_LOGI("Creating one port named `%s`", port_name);
 
     /* Create output port for this file */
-    port_data = g_new0(struct ctf_fs_port_data, 1);
-    if (!port_data) {
-        goto error;
-    }
-
+    port_data = new ctf_fs_port_data;
     port_data->ctf_fs = ctf_fs;
     port_data->ds_file_group = ds_file_group;
     ret = bt_self_component_source_add_output_port(self_comp_src, port_name, port_data, NULL);
@@ -482,18 +467,12 @@ static void ctf_fs_ds_file_info_destroy(struct ctf_fs_ds_file_info *ds_file_info
         g_string_free(ds_file_info->path, TRUE);
     }
 
-    g_free(ds_file_info);
+    delete ds_file_info;
 }
 
 static struct ctf_fs_ds_file_info *ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns)
 {
-    struct ctf_fs_ds_file_info *ds_file_info;
-
-    ds_file_info = g_new0(struct ctf_fs_ds_file_info, 1);
-    if (!ds_file_info) {
-        goto end;
-    }
-
+    ctf_fs_ds_file_info *ds_file_info = new ctf_fs_ds_file_info;
     ds_file_info->path = g_string_new(path);
     if (!ds_file_info->path) {
         ctf_fs_ds_file_info_destroy(ds_file_info);
@@ -520,7 +499,7 @@ static void ctf_fs_ds_file_group_destroy(struct ctf_fs_ds_file_group *ds_file_gr
     ctf_fs_ds_index_destroy(ds_file_group->index);
 
     bt_stream_put_ref(ds_file_group->stream);
-    g_free(ds_file_group);
+    delete ds_file_group;
 }
 
 static struct ctf_fs_ds_file_group *ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs_trace,
@@ -528,13 +507,7 @@ static struct ctf_fs_ds_file_group *ctf_fs_ds_file_group_create(struct ctf_fs_tr
                                                                 uint64_t stream_instance_id,
                                                                 struct ctf_fs_ds_index *index)
 {
-    struct ctf_fs_ds_file_group *ds_file_group;
-
-    ds_file_group = g_new0(struct ctf_fs_ds_file_group, 1);
-    if (!ds_file_group) {
-        goto error;
-    }
-
+    ctf_fs_ds_file_group *ds_file_group = new ctf_fs_ds_file_group;
     ds_file_group->ds_file_infos =
         g_ptr_array_new_with_free_func((GDestroyNotify) ctf_fs_ds_file_info_destroy);
     if (!ds_file_group->ds_file_infos) {
@@ -655,7 +628,7 @@ static void ds_index_insert_ds_index_entry_sorted(struct ctf_fs_ds_index *index,
     if (i == index->entries->len || !ds_index_entries_equal(entry, other_entry)) {
         array_insert(index->entries, entry, i);
     } else {
-        g_free(entry);
+        delete entry;
     }
 }
 
@@ -988,17 +961,12 @@ static struct ctf_fs_trace *ctf_fs_trace_create(bt_self_component *self_comp,
                                                 struct ctf_fs_metadata_config *metadata_config,
                                                 bt_logging_level log_level)
 {
-    struct ctf_fs_trace *ctf_fs_trace;
     int ret;
 
     /* Only one of them must be set. */
     BT_ASSERT(!self_comp != !self_comp_class);
 
-    ctf_fs_trace = g_new0(struct ctf_fs_trace, 1);
-    if (!ctf_fs_trace) {
-        goto end;
-    }
-
+    ctf_fs_trace *ctf_fs_trace = new struct ctf_fs_trace;
     ctf_fs_trace->log_level = log_level;
     ctf_fs_trace->self_comp = self_comp;
     ctf_fs_trace->self_comp_class = self_comp_class;
@@ -1007,11 +975,7 @@ static struct ctf_fs_trace *ctf_fs_trace_create(bt_self_component *self_comp,
         goto error;
     }
 
-    ctf_fs_trace->metadata = g_new0(struct ctf_fs_metadata, 1);
-    if (!ctf_fs_trace->metadata) {
-        goto error;
-    }
-
+    ctf_fs_trace->metadata = new ctf_fs_metadata;
     ctf_fs_metadata_init(ctf_fs_trace->metadata);
     ctf_fs_trace->ds_file_groups =
         g_ptr_array_new_with_free_func((GDestroyNotify) ctf_fs_ds_file_group_destroy);

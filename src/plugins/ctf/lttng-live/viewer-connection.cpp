@@ -1714,10 +1714,9 @@ enum lttng_live_viewer_status live_viewer_connection_create(
     bt_logging_level log_level, const char *url, bool in_query,
     struct lttng_live_msg_iter *lttng_live_msg_iter, struct live_viewer_connection **viewer)
 {
-    struct live_viewer_connection *viewer_connection;
     enum lttng_live_viewer_status status;
 
-    viewer_connection = g_new0(struct live_viewer_connection, 1);
+    live_viewer_connection *viewer_connection = new live_viewer_connection;
 
     if (bt_socket_init(log_level) != 0) {
         BT_COMP_OR_COMP_CLASS_LOGE_APPEND_CAUSE(self_comp, self_comp_class,
@@ -1810,7 +1809,7 @@ void live_viewer_connection_destroy(struct live_viewer_connection *viewer_connec
         g_string_free(viewer_connection->proto, true);
     }
 
-    g_free(viewer_connection);
+    delete viewer_connection;
 
     bt_socket_fini();
 

@@ -20,111 +20,111 @@ extern bool ctf_fs_debug;
 
 struct ctf_fs_file
 {
-    bt_logging_level log_level;
+    bt_logging_level log_level = (bt_logging_level) 0;
 
     /* Weak */
-    bt_self_component *self_comp;
+    bt_self_component *self_comp = nullptr;
 
     /* Owned by this */
-    GString *path;
+    GString *path = nullptr;
 
     /* Owned by this */
-    FILE *fp;
+    FILE *fp = nullptr;
 
-    off_t size;
+    off_t size = 0;
 };
 
 struct ctf_fs_metadata
 {
     /* Owned by this */
-    struct ctf_metadata_decoder *decoder;
+    struct ctf_metadata_decoder *decoder = nullptr;
 
     /* Owned by this */
-    bt_trace_class *trace_class;
+    bt_trace_class *trace_class = nullptr;
 
     /* Weak (owned by `decoder` above) */
-    struct ctf_trace_class *tc;
+    struct ctf_trace_class *tc = nullptr;
 
     /* Owned by this */
-    char *text;
+    char *text = nullptr;
 
-    int bo;
+    int bo = 0;
 };
 
 struct ctf_fs_component
 {
-    bt_logging_level log_level;
+    bt_logging_level log_level = (bt_logging_level) 0;
 
     /* Array of struct ctf_fs_port_data *, owned by this */
-    GPtrArray *port_data;
+    GPtrArray *port_data = nullptr;
 
     /* Owned by this */
-    struct ctf_fs_trace *trace;
+    struct ctf_fs_trace *trace = nullptr;
 
     struct ctf_fs_metadata_config metadata_config;
 };
 
 struct ctf_fs_trace
 {
-    bt_logging_level log_level;
+    bt_logging_level log_level = (bt_logging_level) 0;
 
     /*
      * Weak. These are mostly used to generate log messages or to append
      * error causes. They are mutually exclusive, only one of them must be
      * set.
      */
-    bt_self_component *self_comp;
-    bt_self_component_class *self_comp_class;
+    bt_self_component *self_comp = nullptr;
+    bt_self_component_class *self_comp_class = nullptr;
 
     /* Owned by this */
-    struct ctf_fs_metadata *metadata;
+    struct ctf_fs_metadata *metadata = nullptr;
 
     /* Owned by this */
-    bt_trace *trace;
+    bt_trace *trace = nullptr;
 
     /* Array of struct ctf_fs_ds_file_group *, owned by this */
-    GPtrArray *ds_file_groups;
+    GPtrArray *ds_file_groups = nullptr;
 
     /* Owned by this */
-    GString *path;
+    GString *path = nullptr;
 
     /* Next automatic stream ID when not provided by packet header */
-    uint64_t next_stream_id;
+    uint64_t next_stream_id = 0;
 };
 
 struct ctf_fs_ds_index_entry
 {
     /* Weak, belongs to ctf_fs_ds_file_info. */
-    const char *path;
+    const char *path = nullptr;
 
     /* Position, in bytes, of the packet from the beginning of the file. */
-    uint64_t offset;
+    uint64_t offset = 0;
 
     /* Size of the packet, in bytes. */
-    uint64_t packet_size;
+    uint64_t packet_size = 0;
 
     /*
      * Extracted from the packet context, relative to the respective fields'
      * mapped clock classes (in cycles).
      */
-    uint64_t timestamp_begin, timestamp_end;
+    uint64_t timestamp_begin = 0, timestamp_end = 0;
 
     /*
      * Converted from the packet context, relative to the trace's EPOCH
      * (in ns since EPOCH).
      */
-    int64_t timestamp_begin_ns, timestamp_end_ns;
+    int64_t timestamp_begin_ns = 0, timestamp_end_ns = 0;
 
     /*
      * Packet sequence number, or UINT64_MAX if not present in the index.
      */
-    uint64_t packet_seq_num;
+    uint64_t packet_seq_num = 0;
 };
 
 struct ctf_fs_ds_index
 {
     /* Array of pointer to struct ctf_fs_ds_index_entry. */
-    GPtrArray *entries;
+    GPtrArray *entries = nullptr;
 };
 
 struct ctf_fs_ds_file_group
@@ -138,60 +138,61 @@ struct ctf_fs_ds_file_group
      * You can call ctf_fs_ds_file_create() with one of those paths
      * and the trace IR stream below.
      */
-    GPtrArray *ds_file_infos;
+    GPtrArray *ds_file_infos = nullptr;
 
     /* Owned by this */
-    struct ctf_stream_class *sc;
+    struct ctf_stream_class *sc = nullptr;
 
     /* Owned by this */
-    bt_stream *stream;
+    bt_stream *stream = nullptr;
 
     /* Stream (instance) ID; -1ULL means none */
-    uint64_t stream_id;
+    uint64_t stream_id = 0;
 
     /* Weak, belongs to component */
-    struct ctf_fs_trace *ctf_fs_trace;
+    struct ctf_fs_trace *ctf_fs_trace = nullptr;
 
     /*
      * Owned by this.
      */
-    struct ctf_fs_ds_index *index;
+    struct ctf_fs_ds_index *index = nullptr;
 };
 
 struct ctf_fs_port_data
 {
     /* Weak, belongs to ctf_fs_trace */
-    struct ctf_fs_ds_file_group *ds_file_group;
+    struct ctf_fs_ds_file_group *ds_file_group = nullptr;
 
     /* Weak */
-    struct ctf_fs_component *ctf_fs;
+    struct ctf_fs_component *ctf_fs = nullptr;
 };
 
 struct ctf_fs_msg_iter_data
 {
-    bt_logging_level log_level;
+    bt_logging_level log_level = (bt_logging_level) 0;
 
     /* Weak */
-    bt_self_component *self_comp;
+    bt_self_component *self_comp = nullptr;
 
     /* Weak */
-    bt_self_message_iterator *self_msg_iter;
+    bt_self_message_iterator *self_msg_iter = nullptr;
 
     /* Weak, belongs to ctf_fs_trace */
-    struct ctf_fs_ds_file_group *ds_file_group;
+    struct ctf_fs_ds_file_group *ds_file_group = nullptr;
 
     /* Owned by this */
-    struct ctf_msg_iter *msg_iter;
+    struct ctf_msg_iter *msg_iter = nullptr;
 
     /*
      * Saved error.  If we hit an error in the _next method, but have some
      * messages ready to return, we save the error here and return it on
      * the next _next call.
      */
-    bt_message_iterator_class_next_method_status next_saved_status;
-    const struct bt_error *next_saved_error;
+    bt_message_iterator_class_next_method_status next_saved_status =
+        BT_MESSAGE_ITERATOR_CLASS_NEXT_METHOD_STATUS_OK;
+    const struct bt_error *next_saved_error = nullptr;
 
-    struct ctf_fs_ds_group_medops_data *msg_iter_medops_data;
+    struct ctf_fs_ds_group_medops_data *msg_iter_medops_data = nullptr;
 };
 
 bt_component_class_initialize_method_status

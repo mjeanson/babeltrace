@@ -82,13 +82,14 @@ int ctf_fs_metadata_set_trace_class(bt_self_component *self_comp, struct ctf_fs_
     struct ctf_fs_file *file = NULL;
     bt_logging_level log_level = ctf_fs_trace->log_level;
 
-    ctf_metadata_decoder_config decoder_config {};
-    decoder_config.log_level = ctf_fs_trace->log_level, decoder_config.self_comp = self_comp,
-    decoder_config.clock_class_offset_s = config ? config->clock_class_offset_s : 0,
-    decoder_config.clock_class_offset_ns = config ? config->clock_class_offset_ns : 0,
+    ctf_metadata_decoder_config decoder_config;
+    decoder_config.log_level = ctf_fs_trace->log_level;
+    decoder_config.self_comp = self_comp;
+    decoder_config.clock_class_offset_s = config ? config->clock_class_offset_s : 0;
+    decoder_config.clock_class_offset_ns = config ? config->clock_class_offset_ns : 0;
     decoder_config.force_clock_class_origin_unix_epoch =
-        config ? config->force_clock_class_origin_unix_epoch : false,
-    decoder_config.create_trace_class = true,
+        config ? config->force_clock_class_origin_unix_epoch : false;
+    decoder_config.create_trace_class = true;
 
     file = get_file(ctf_fs_trace->path->str, log_level, self_comp);
     if (!file) {

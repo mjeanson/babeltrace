@@ -15,9 +15,9 @@
 
 struct ctf_fs_metadata_config
 {
-    bool force_clock_class_origin_unix_epoch;
-    int64_t clock_class_offset_s;
-    int64_t clock_class_offset_ns;
+    bool force_clock_class_origin_unix_epoch = false;
+    int64_t clock_class_offset_s = 0;
+    int64_t clock_class_offset_ns = 0;
 };
 
 int ctf_fs_metadata_init(struct ctf_fs_metadata *metadata);

@@ -294,20 +294,16 @@ int lttng_live_metadata_create_stream(struct lttng_live_session *session, uint64
 {
     bt_self_component *self_comp = session->self_comp;
     bt_logging_level log_level = session->log_level;
-    struct lttng_live_metadata *metadata = NULL;
     struct lttng_live_trace *trace;
 
-    ctf_metadata_decoder_config cfg {};
+    ctf_metadata_decoder_config cfg;
     cfg.log_level = session->log_level;
     cfg.self_comp = session->self_comp;
     cfg.clock_class_offset_s = 0;
     cfg.clock_class_offset_ns = 0;
     cfg.create_trace_class = true;
 
-    metadata = g_new0(struct lttng_live_metadata, 1);
-    if (!metadata) {
-        return -1;
-    }
+    lttng_live_metadata *metadata = new lttng_live_metadata;
     metadata->log_level = session->log_level;
     metadata->self_comp = session->self_comp;
     metadata->stream_id = stream_id;
@@ -327,7 +323,7 @@ int lttng_live_metadata_create_stream(struct lttng_live_session *session, uint64
 
 error:
     ctf_metadata_decoder_destroy(metadata->decoder);
-    g_free(metadata);
+    delete metadata;
     return -1;
 }
 
@@ -340,5 +336,5 @@ void lttng_live_metadata_fini(struct lttng_live_trace *trace)
     }
     ctf_metadata_decoder_destroy(metadata->decoder);
     trace->metadata = NULL;
-    g_free(metadata);
+    delete metadata;
 }

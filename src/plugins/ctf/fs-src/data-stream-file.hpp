@@ -17,47 +17,47 @@
 struct ctf_fs_ds_file_info
 {
     /* Owned by this. */
-    GString *path;
+    GString *path = nullptr;
 
     /* Guaranteed to be set, as opposed to the index. */
-    int64_t begin_ns;
+    int64_t begin_ns = 0;
 };
 
 struct ctf_fs_ds_file
 {
-    bt_logging_level log_level;
+    bt_logging_level log_level = (bt_logging_level) 0;
 
     /* Weak */
-    bt_self_component *self_comp;
+    bt_self_component *self_comp = nullptr;
 
     /* Weak */
-    struct ctf_fs_metadata *metadata;
+    struct ctf_fs_metadata *metadata = nullptr;
 
     /* Owned by this */
-    struct ctf_fs_file *file;
+    struct ctf_fs_file *file = nullptr;
 
     /* Owned by this */
-    bt_stream *stream;
+    bt_stream *stream = nullptr;
 
-    void *mmap_addr;
+    void *mmap_addr = nullptr;
 
     /*
      * Max length of chunk to mmap() when updating the current mapping.
      * This value must be page-aligned.
      */
-    size_t mmap_max_len;
+    size_t mmap_max_len = 0;
 
     /* Length of the current mapping. Never exceeds the file's length. */
-    size_t mmap_len;
+    size_t mmap_len = 0;
 
     /* Offset in the file where the current mapping starts. */
-    off_t mmap_offset_in_file;
+    off_t mmap_offset_in_file = 0;
 
     /*
      * Offset, in the current mapping, of the address to return on the next
      * request.
      */
-    off_t request_offset_in_mapping;
+    off_t request_offset_in_mapping = 0;
 };
 
 struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace, bt_stream *stream,

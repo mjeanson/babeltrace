@@ -35,17 +35,12 @@ void ctf_fs_file_destroy(struct ctf_fs_file *file)
         g_string_free(file->path, TRUE);
     }
 
-    g_free(file);
+    delete file;
 }
 
 struct ctf_fs_file *ctf_fs_file_create(bt_logging_level log_level, bt_self_component *self_comp)
 {
-    struct ctf_fs_file *file = g_new0(struct ctf_fs_file, 1);
-
-    if (!file) {
-        goto error;
-    }
-
+    ctf_fs_file *file = new ctf_fs_file;
     file->log_level = log_level;
     file->self_comp = self_comp;
     file->path = g_string_new(NULL);

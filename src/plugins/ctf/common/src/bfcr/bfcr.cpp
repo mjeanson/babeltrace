@@ -80,19 +80,19 @@ enum bfcr_state
 /* Binary class reader */
 struct bt_bfcr
 {
-    bt_logging_level log_level;
+    bt_logging_level log_level = static_cast<bt_logging_level>(0);
 
     /* Weak */
-    bt_self_component *self_comp;
+    bt_self_component *self_comp = nullptr;
 
     /* BFCR stack */
-    struct stack *stack;
+    struct stack *stack = nullptr;
 
     /* Current basic field class */
-    struct ctf_field_class *cur_basic_field_class;
+    struct ctf_field_class *cur_basic_field_class = nullptr;
 
     /* Current state */
-    enum bfcr_state state;
+    enum bfcr_state state = static_cast<bfcr_state>(0);
 
     /*
      * Last basic field class's byte order.
@@ -104,54 +104,54 @@ struct bt_bfcr
      * This is set to CTF_BYTE_ORDER_UNKNOWN on reset and when the last
      * basic field class was a string class.
      */
-    enum ctf_byte_order last_bo;
+    enum ctf_byte_order last_bo = CTF_BYTE_ORDER_UNKNOWN;
 
     /* Current byte order (copied to last_bo after a successful read) */
-    enum ctf_byte_order cur_bo;
+    enum ctf_byte_order cur_bo = CTF_BYTE_ORDER_UNKNOWN;
 
     /* Stitch buffer infos */
     struct
     {
         /* Stitch buffer */
-        uint8_t buf[16];
+        uint8_t buf[16] {};
 
         /* Offset, within stitch buffer, of first bit */
-        size_t offset;
+        size_t offset = 0;
 
         /* Length (bits) of data in stitch buffer from offset */
-        size_t at;
+        size_t at = 0;
     } stitch;
 
     /* User buffer infos */
     struct
     {
         /* Address */
-        const uint8_t *addr;
+        const uint8_t *addr = nullptr;
 
         /* Offset of data from address (bits) */
-        size_t offset;
+        size_t offset = 0;
 
         /* Current position from offset (bits) */
-        size_t at;
+        size_t at = 0;
 
         /* Offset of offset within whole packet (bits) */
-        size_t packet_offset;
+        size_t packet_offset = 0;
 
         /* Data size in buffer (bits) */
-        size_t sz;
+        size_t sz = 0;
 
         /* Buffer size (bytes) */
-        size_t buf_sz;
+        size_t buf_sz = 0;
     } buf;
 
     /* User stuff */
     struct
     {
         /* Callback functions */
-        struct bt_bfcr_cbs cbs;
+        bt_bfcr_cbs cbs {};
 
         /* Private data */
-        void *data;
+        void *data = nullptr;
     } user;
 };
 
@@ -1103,17 +1103,10 @@ static inline enum bt_bfcr_status handle_state(struct bt_bfcr *bfcr)
 struct bt_bfcr *bt_bfcr_create(struct bt_bfcr_cbs cbs, void *data, bt_logging_level log_level,
                                bt_self_component *self_comp)
 {
-    struct bt_bfcr *bfcr;
-
     BT_COMP_LOG_CUR_LVL(BT_LOG_DEBUG, log_level, self_comp,
                         "Creating binary field class reader (BFCR).");
-    bfcr = g_new0(struct bt_bfcr, 1);
-    if (!bfcr) {
-        BT_COMP_LOG_CUR_LVL(BT_LOG_ERROR, log_level, self_comp,
-                            "Failed to allocate one binary class reader.");
-        goto end;
-    }
 
+    bt_bfcr *bfcr = new bt_bfcr;
     bfcr->log_level = log_level;
     bfcr->self_comp = self_comp;
     bfcr->stack = stack_new(bfcr);
@@ -1140,7 +1133,7 @@ void bt_bfcr_destroy(struct bt_bfcr *bfcr)
     }
 
     BT_COMP_LOGD("Destroying BFCR: addr=%p", bfcr);
-    g_free(bfcr);
+    delete bfcr;
 }
 
 static void reset(struct bt_bfcr *bfcr)
