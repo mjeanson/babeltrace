@@ -176,6 +176,8 @@ cpp_common_libcpp_common_la_SOURCES = \
 	cpp-common/bt2c/regex.hpp \
 	cpp-common/bt2c/safe-ops.hpp \
 	cpp-common/bt2c/std-int.hpp \
+	cpp-common/bt2c/str-scanner.cpp \
+	cpp-common/bt2c/str-scanner.hpp \
 	cpp-common/bt2c/text-loc.cpp \
 	cpp-common/bt2c/text-loc.hpp \
 	cpp-common/bt2c/text-loc-str.cpp \
