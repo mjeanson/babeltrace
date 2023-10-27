@@ -560,6 +560,15 @@
 	BT_ASSERT_PRE_DEV_NON_NULL(_BT_ASSERT_PRE_VAR_FC_OPT_ID, (_fc),	\
 		_BT_ASSERT_PRE_VAR_FC_OPT_NAME)
 
+/* Field location */
+#define _BT_ASSERT_PRE_FL_NAME	"Field location"
+#define _BT_ASSERT_PRE_FL_ID	"field-location"
+
+/* Asserts that `_fl` is non-NULL */
+#define BT_ASSERT_PRE_FL_NON_NULL(_fl)					\
+	BT_ASSERT_PRE_NON_NULL(_BT_ASSERT_PRE_FL_ID, (_fl),		\
+		_BT_ASSERT_PRE_FL_NAME)
+
 #define _BT_ASSERT_PRE_FP_NAME	"Field path"
 #define _BT_ASSERT_PRE_FP_ID	"field-path"
 
@@ -955,10 +964,26 @@
 		"MIP version is not equal to %" PRIu64, _val)
 
 /*
+ * Asserts that the given MIP version `_mip_version` is greater than or equal
+ * to `_val`.
+ */
+#define BT_ASSERT_PRE_MIP_VERSION_GE(_mip_version, _val)			\
+	BT_ASSERT_PRE(_BT_ASSERT_PRE_MIP_VERSION_VALID_ID,			\
+		_mip_version >= _val,						\
+		"MIP version is less than %" PRIu64, _val)
+
+/*
  * Asserts that the effective MIP version for `_trace_class` is equal to `_val`.
  */
 #define BT_ASSERT_PRE_TC_MIP_VERSION_EQ(_trace_class, _val)		\
 	BT_ASSERT_PRE_MIP_VERSION_EQ((_trace_class)->mip_version, _val)
+
+/*
+ * Asserts that the effective MIP version for `_trace_class` is greater than or
+ * equal to `_val`.
+ */
+#define BT_ASSERT_PRE_TC_MIP_VERSION_GE(_trace_class, _val)		\
+	BT_ASSERT_PRE_MIP_VERSION_GE((_trace_class)->mip_version, _val)
 
 /*
  * Asserts that the effective MIP version for `_field_class` is equal to `_val`.

@@ -33,6 +33,7 @@ ALIASES                += bt_dt_opt="<strong><em>Optional</em></strong>:"
 ALIASES                += bt_man{2}="<a href=\"https://babeltrace.org/docs/v\bt_version_min_maj/man\2/\1.\2/\"><code><strong>\1</strong>(\2)</code></a>"
 ALIASES                += bt_cli="<a href=\"https://babeltrace.org/docs/v\bt_version_min_maj/man1/babeltrace2.1\"><code>babeltrace2</code></a>"
 ALIASES                += bt_voidp="<code>void&nbsp;*</code>"
+ALIASES                += bt_var{1}="<strong><em>\1</em></strong>"
 
 # Aliases: preconditions: general
 ALIASES                += bt_pre_not_null{1}="@pre \bt_p{\1} is \em not \c NULL."
@@ -288,6 +289,7 @@ ALIASES                += bt_cs="\link api-tir-cs clock snapshot\endlink"
 ALIASES                += bt_ev_cls="\link api-tir-ev-cls event class\endlink"
 ALIASES                += bt_ev="\link api-tir-ev event\endlink"
 ALIASES                += bt_field_path="\link api-tir-field-path field path\endlink"
+ALIASES                += bt_field_loc="\link api-tir-field-loc field location\endlink"
 ALIASES                += bt_pkt="\link api-tir-pkt packet\endlink"
 ALIASES                += bt_stream_cls="\link api-tir-stream-cls stream class\endlink"
 ALIASES                += bt_stream="\link api-tir-stream stream\endlink"
@@ -300,6 +302,7 @@ ALIASES                += bt_c_cs="\link api-tir-cs Clock snapshot\endlink"
 ALIASES                += bt_c_ev_cls="\link api-tir-ev-cls Event class\endlink"
 ALIASES                += bt_c_ev="\link api-tir-ev Event\endlink"
 ALIASES                += bt_c_field_path="\link api-tir-field-path Field path\endlink"
+ALIASES                += bt_c_field_loc="\link api-tir-field-loc Field location\endlink"
 ALIASES                += bt_c_pkt="\link api-tir-pkt Packet\endlink"
 ALIASES                += bt_c_stream_cls="\link api-tir-stream-cls Stream class\endlink"
 ALIASES                += bt_c_stream="\link api-tir-stream Stream\endlink"
@@ -312,6 +315,7 @@ ALIASES                += bt_p_cs="\link api-tir-cs clock snapshots\endlink"
 ALIASES                += bt_p_ev_cls="\link api-tir-ev-cls event classes\endlink"
 ALIASES                += bt_p_ev="\link api-tir-ev events\endlink"
 ALIASES                += bt_p_field_path="\link api-tir-field-path field paths\endlink"
+ALIASES                += bt_p_field_loc="\link api-tir-field-loc field locations\endlink"
 ALIASES                += bt_p_pkt="\link api-tir-pkt packets\endlink"
 ALIASES                += bt_p_stream_cls="\link api-tir-stream-cls stream classes\endlink"
 ALIASES                += bt_p_stream="\link api-tir-stream streams\endlink"
@@ -324,6 +328,7 @@ ALIASES                += bt_cp_cs="\link api-tir-cs Clock snapshots\endlink"
 ALIASES                += bt_cp_ev_cls="\link api-tir-ev-cls event classes\endlink"
 ALIASES                += bt_cp_ev="\link api-tir-ev Events\endlink"
 ALIASES                += bt_cp_field_path="\link api-tir-field-path Field paths\endlink"
+ALIASES                += bt_cp_field_loc="\link api-tir-field-loc Field locations\endlink"
 ALIASES                += bt_cp_pkt="\link api-tir-pkt Packets\endlink"
 ALIASES                += bt_cp_stream_cls="\link api-tir-stream-cls Stream classes\endlink"
 ALIASES                += bt_cp_stream="\link api-tir-stream Streams\endlink"
@@ -674,6 +679,7 @@ INPUT                   = "@srcdir@/dox/main-page.dox" \
                           "@top_srcdir@/include/babeltrace2/trace-ir/field.h" \
                           "@top_srcdir@/include/babeltrace2/trace-ir/field-class.h" \
                           "@top_srcdir@/include/babeltrace2/trace-ir/field-path.h" \
+                          "@top_srcdir@/include/babeltrace2/trace-ir/field-location.h" \
                           "@top_srcdir@/include/babeltrace2/trace-ir/packet.h" \
                           "@top_srcdir@/include/babeltrace2/trace-ir/stream.h" \
                           "@top_srcdir@/include/babeltrace2/trace-ir/stream-class.h" \

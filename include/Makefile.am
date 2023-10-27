@@ -41,6 +41,7 @@ babeltrace2traceirinclude_HEADERS = \
 	babeltrace2/trace-ir/event-class.h \
 	babeltrace2/trace-ir/event.h \
 	babeltrace2/trace-ir/field-class.h \
+	babeltrace2/trace-ir/field-location.h \
 	babeltrace2/trace-ir/field-path.h \
 	babeltrace2/trace-ir/field.h \
 	babeltrace2/trace-ir/packet.h \

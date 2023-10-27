@@ -37,6 +37,12 @@ More specifically, a field path indicates how to reach:
 - The selector field of a \bt_opt_field (with a selector field).
 - The selector field of a \bt_var_field (with a selector field).
 
+@note
+    The field path API is only available within a trace processing
+    \bt_graph with the effective \bt_mip (MIP) version&nbsp;0: use the
+    similar \bt_field_loc API within a graph with
+    the effective MIP version&nbsp;1.
+
 You can borrow the field path from the \ref api-tir-fc "classes" of such
 fields with
 bt_field_class_array_dynamic_with_length_field_borrow_length_field_path_const(),

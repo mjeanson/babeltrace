@@ -78,6 +78,7 @@
 #include <babeltrace2/trace-ir/event-class.h>
 #include <babeltrace2/trace-ir/event.h>
 #include <babeltrace2/trace-ir/field-class.h>
+#include <babeltrace2/trace-ir/field-location.h>
 #include <babeltrace2/trace-ir/field-path.h>
 #include <babeltrace2/trace-ir/field.h>
 #include <babeltrace2/trace-ir/packet.h>
