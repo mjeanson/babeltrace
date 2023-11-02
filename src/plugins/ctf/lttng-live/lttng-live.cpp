@@ -1751,6 +1751,7 @@ lttng_live_query_support_info(const bt_value *params, const bt_value **result,
     const bt_value *input_value;
     double weight = 0;
     struct bt_common_lttng_live_url_parts parts = {};
+    bt_common_lttng_live_url_parts_deleter partsDeleter {parts};
 
     /* Used by the logging macros */
     __attribute__((unused)) bt_self_component *self_comp = NULL;
@@ -1809,7 +1810,6 @@ error:
     BT_ASSERT(!*result);
 
 end:
-    bt_common_destroy_lttng_live_url_parts(&parts);
     return status;
 }
 
