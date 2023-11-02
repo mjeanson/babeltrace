@@ -100,14 +100,3 @@ int ctf_fs_metadata_set_trace_class(bt_self_component *self_comp, struct ctf_fs_
 end:
     return ret;
 }
-
-int ctf_fs_metadata_init(struct ctf_fs_metadata *)
-{
-    /* Nothing to initialize for the moment. */
-    return 0;
-}
-
-void ctf_fs_metadata_fini(struct ctf_fs_metadata *metadata)
-{
-    metadata->decoder.reset();
-}

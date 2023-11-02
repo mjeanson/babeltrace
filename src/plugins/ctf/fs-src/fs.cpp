@@ -262,7 +262,6 @@ static void ctf_fs_trace_destroy(struct ctf_fs_trace *ctf_fs_trace)
     }
 
     if (ctf_fs_trace->metadata) {
-        ctf_fs_metadata_fini(ctf_fs_trace->metadata);
         delete ctf_fs_trace->metadata;
     }
 
@@ -747,7 +746,6 @@ static ctf_fs_trace::UP ctf_fs_trace_create(const char *path, const char *name,
 
     ctf_fs_trace->path = path;
     ctf_fs_trace->metadata = new ctf_fs_metadata;
-    ctf_fs_metadata_init(ctf_fs_trace->metadata);
 
     ret = ctf_fs_metadata_set_trace_class(selfComp, ctf_fs_trace.get(), clkClsCfg);
     if (ret) {

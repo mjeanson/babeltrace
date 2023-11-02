@@ -21,10 +21,6 @@ class Logger;
 
 #define CTF_FS_METADATA_FILENAME "metadata"
 
-int ctf_fs_metadata_init(struct ctf_fs_metadata *metadata);
-
-void ctf_fs_metadata_fini(struct ctf_fs_metadata *metadata);
-
 int ctf_fs_metadata_set_trace_class(bt_self_component *self_comp, struct ctf_fs_trace *ctf_fs_trace,
                                     const ctf::src::ClkClsCfg& clkClsCfg);
 
