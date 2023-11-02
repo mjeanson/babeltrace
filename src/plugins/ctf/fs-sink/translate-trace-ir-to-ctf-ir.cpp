@@ -35,7 +35,10 @@ struct field_path_elem
     struct fs_sink_ctf_field_class *parent_fc;
 };
 
-struct ctx
+namespace ctf {
+namespace sink {
+
+struct TraceIrToCtfIrCtx
 {
     bt_logging_level log_level;
     bt_self_component *self_comp;
@@ -53,13 +56,17 @@ struct ctx
     GArray *cur_path;
 };
 
-static inline struct field_path_elem *cur_path_stack_at(struct ctx *ctx, uint64_t i)
+} /* namespace sink */
+} /* namespace ctf */
+
+static inline struct field_path_elem *cur_path_stack_at(ctf::sink::TraceIrToCtfIrCtx *ctx,
+                                                        uint64_t i)
 {
     BT_ASSERT(i < ctx->cur_path->len);
     return &bt_g_array_index(ctx->cur_path, struct field_path_elem, i);
 }
 
-static inline struct field_path_elem *cur_path_stack_top(struct ctx *ctx)
+static inline struct field_path_elem *cur_path_stack_top(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     BT_ASSERT(ctx->cur_path->len > 0);
     return cur_path_stack_at(ctx, ctx->cur_path->len - 1);
@@ -151,8 +158,8 @@ end:
     return must_protect;
 }
 
-static inline int cur_path_stack_push(struct ctx *ctx, const char *name, bool force_protect_name,
-                                      const bt_field_class *ir_fc,
+static inline int cur_path_stack_push(ctf::sink::TraceIrToCtfIrCtx *ctx, const char *name,
+                                      bool force_protect_name, const bt_field_class *ir_fc,
                                       struct fs_sink_ctf_field_class *parent_fc)
 {
     int ret = 0;
@@ -200,7 +207,7 @@ end:
     return ret;
 }
 
-static inline void cur_path_stack_pop(struct ctx *ctx)
+static inline void cur_path_stack_pop(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     struct field_path_elem *field_path_elem;
 
@@ -227,8 +234,8 @@ static inline void cur_path_stack_pop(struct ctx *ctx)
  *
  * Returns a negative value if this resolving operation failed.
  */
-static int create_relative_field_ref(struct ctx *ctx, const bt_field_path *tgt_ir_field_path,
-                                     GString *tgt_field_ref,
+static int create_relative_field_ref(ctf::sink::TraceIrToCtfIrCtx *ctx,
+                                     const bt_field_path *tgt_ir_field_path, GString *tgt_field_ref,
                                      struct fs_sink_ctf_field_class **user_tgt_fc)
 {
     int ret = 0;
@@ -392,8 +399,8 @@ end:
  *
  * Returns a negative value if this resolving operation failed.
  */
-static int create_absolute_field_ref(struct ctx *ctx, const bt_field_path *tgt_ir_field_path,
-                                     GString *tgt_field_ref,
+static int create_absolute_field_ref(ctf::sink::TraceIrToCtfIrCtx *ctx,
+                                     const bt_field_path *tgt_ir_field_path, GString *tgt_field_ref,
                                      struct fs_sink_ctf_field_class **user_tgt_fc)
 {
     int ret = 0;
@@ -475,9 +482,9 @@ end:
  * created immediately before (in which case `tgt_field_ref` is
  * irrelevant).
  */
-static void resolve_field_class(struct ctx *ctx, const bt_field_path *tgt_ir_field_path,
-                                GString *tgt_field_ref, bool *create_before,
-                                struct fs_sink_ctf_field_class **user_tgt_fc)
+static void resolve_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx,
+                                const bt_field_path *tgt_ir_field_path, GString *tgt_field_ref,
+                                bool *create_before, struct fs_sink_ctf_field_class **user_tgt_fc)
 {
     int ret;
     bt_field_path_scope tgt_scope;
@@ -525,9 +532,10 @@ end:
     return;
 }
 
-static int translate_field_class(struct ctx *ctx);
+static int translate_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx);
 
-static inline void append_to_parent_field_class(struct ctx *ctx, struct fs_sink_ctf_field_class *fc)
+static inline void append_to_parent_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx,
+                                                struct fs_sink_ctf_field_class *fc)
 {
     struct fs_sink_ctf_field_class *parent_fc = cur_path_stack_top(ctx)->parent_fc;
 
@@ -566,7 +574,8 @@ static inline void append_to_parent_field_class(struct ctx *ctx, struct fs_sink_
     }
 }
 
-static inline void update_parent_field_class_alignment(struct ctx *ctx, unsigned int alignment)
+static inline void update_parent_field_class_alignment(ctf::sink::TraceIrToCtfIrCtx *ctx,
+                                                       unsigned int alignment)
 {
     struct fs_sink_ctf_field_class *parent_fc = cur_path_stack_top(ctx)->parent_fc;
 
@@ -589,8 +598,10 @@ static inline void update_parent_field_class_alignment(struct ctx *ctx, unsigned
     }
 }
 
-static inline int translate_structure_field_class_members(
-    struct ctx *ctx, struct fs_sink_ctf_field_class_struct *struct_fc, const bt_field_class *ir_fc)
+static inline int
+translate_structure_field_class_members(ctf::sink::TraceIrToCtfIrCtx *ctx,
+                                        struct fs_sink_ctf_field_class_struct *struct_fc,
+                                        const bt_field_class *ir_fc)
 {
     int ret = 0;
     uint64_t i;
@@ -626,7 +637,7 @@ end:
     return ret;
 }
 
-static inline int translate_structure_field_class(struct ctx *ctx)
+static inline int translate_structure_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     int ret;
     struct fs_sink_ctf_field_class_struct *fc =
@@ -840,7 +851,7 @@ end:
     return ret;
 }
 
-static inline int translate_option_field_class(struct ctx *ctx)
+static inline int translate_option_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     struct fs_sink_ctf_field_class_option *fc =
         fs_sink_ctf_field_class_option_create_empty(cur_path_stack_top(ctx)->ir_fc);
@@ -881,7 +892,7 @@ end:
     return ret;
 }
 
-static inline int translate_variant_field_class(struct ctx *ctx)
+static inline int translate_variant_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     int ret = 0;
     uint64_t i;
@@ -1041,7 +1052,7 @@ end:
     return ret;
 }
 
-static inline int translate_static_array_field_class(struct ctx *ctx)
+static inline int translate_static_array_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     struct fs_sink_ctf_field_class_array *fc =
         fs_sink_ctf_field_class_array_create_empty(cur_path_stack_top(ctx)->ir_fc);
@@ -1070,7 +1081,7 @@ end:
     return ret;
 }
 
-static inline int translate_dynamic_array_field_class(struct ctx *ctx)
+static inline int translate_dynamic_array_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     struct fs_sink_ctf_field_class_sequence *fc =
         fs_sink_ctf_field_class_sequence_create_empty(cur_path_stack_top(ctx)->ir_fc);
@@ -1110,7 +1121,7 @@ end:
     return ret;
 }
 
-static inline int translate_bool_field_class(struct ctx *ctx)
+static inline int translate_bool_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     struct fs_sink_ctf_field_class_bool *fc =
         fs_sink_ctf_field_class_bool_create(cur_path_stack_top(ctx)->ir_fc);
@@ -1120,7 +1131,7 @@ static inline int translate_bool_field_class(struct ctx *ctx)
     return 0;
 }
 
-static inline int translate_bit_array_field_class(struct ctx *ctx)
+static inline int translate_bit_array_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     struct fs_sink_ctf_field_class_bit_array *fc =
         fs_sink_ctf_field_class_bit_array_create(cur_path_stack_top(ctx)->ir_fc);
@@ -1130,7 +1141,7 @@ static inline int translate_bit_array_field_class(struct ctx *ctx)
     return 0;
 }
 
-static inline int translate_integer_field_class(struct ctx *ctx)
+static inline int translate_integer_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     struct fs_sink_ctf_field_class_int *fc =
         fs_sink_ctf_field_class_int_create(cur_path_stack_top(ctx)->ir_fc);
@@ -1140,7 +1151,7 @@ static inline int translate_integer_field_class(struct ctx *ctx)
     return 0;
 }
 
-static inline int translate_real_field_class(struct ctx *ctx)
+static inline int translate_real_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     struct fs_sink_ctf_field_class_float *fc =
         fs_sink_ctf_field_class_float_create(cur_path_stack_top(ctx)->ir_fc);
@@ -1150,7 +1161,7 @@ static inline int translate_real_field_class(struct ctx *ctx)
     return 0;
 }
 
-static inline int translate_string_field_class(struct ctx *ctx)
+static inline int translate_string_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     struct fs_sink_ctf_field_class_string *fc =
         fs_sink_ctf_field_class_string_create(cur_path_stack_top(ctx)->ir_fc);
@@ -1167,7 +1178,7 @@ static inline int translate_string_field_class(struct ctx *ctx)
  * within its parent are in the context's current path's top element
  * (cur_path_stack_top()).
  */
-static int translate_field_class(struct ctx *ctx)
+static int translate_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     int ret;
     bt_field_class_type ir_fc_type = bt_field_class_get_type(cur_path_stack_top(ctx)->ir_fc);
@@ -1417,7 +1428,7 @@ end:
  * class and then calls translate_structure_field_class_members() to
  * fill it.
  */
-static int translate_scope_field_class(struct ctx *ctx, bt_field_path_scope scope,
+static int translate_scope_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx, bt_field_path_scope scope,
                                        struct fs_sink_ctf_field_class **fc,
                                        const bt_field_class *ir_fc)
 {
@@ -1459,16 +1470,16 @@ end:
     return ret;
 }
 
-static inline void ctx_init(struct ctx *ctx, struct fs_sink_comp *fs_sink)
+static inline void ctx_init(ctf::sink::TraceIrToCtfIrCtx *ctx, struct fs_sink_comp *fs_sink)
 {
-    memset(ctx, 0, sizeof(struct ctx));
+    memset(ctx, 0, sizeof(*ctx));
     ctx->cur_path = g_array_new(FALSE, TRUE, sizeof(struct field_path_elem));
     BT_ASSERT(ctx->cur_path);
     ctx->log_level = fs_sink->log_level;
     ctx->self_comp = fs_sink->self_comp;
 }
 
-static inline void ctx_fini(struct ctx *ctx)
+static inline void ctx_fini(ctf::sink::TraceIrToCtfIrCtx *ctx)
 {
     if (ctx->cur_path) {
         g_array_free(ctx->cur_path, TRUE);
@@ -1481,7 +1492,7 @@ static int translate_event_class(struct fs_sink_comp *fs_sink, struct fs_sink_ct
                                  struct fs_sink_ctf_event_class **out_ec)
 {
     int ret = 0;
-    struct ctx ctx;
+    ctf::sink::TraceIrToCtfIrCtx ctx;
     struct fs_sink_ctf_event_class *ec;
 
     BT_ASSERT(sc);
@@ -1576,7 +1587,7 @@ static int translate_stream_class(struct fs_sink_comp *fs_sink, struct fs_sink_c
                                   struct fs_sink_ctf_stream_class **out_sc)
 {
     int ret = 0;
-    struct ctx ctx;
+    ctf::sink::TraceIrToCtfIrCtx ctx;
 
     BT_ASSERT(trace);
     BT_ASSERT(ir_sc);

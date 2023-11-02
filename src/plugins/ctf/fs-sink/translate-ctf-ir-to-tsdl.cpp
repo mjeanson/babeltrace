@@ -15,13 +15,19 @@
 #include "fs-sink-ctf-meta.hpp"
 #include "translate-ctf-ir-to-tsdl.hpp"
 
-struct ctx
+namespace ctf {
+namespace sink {
+
+struct CtfIrToTsdlCtx
 {
     unsigned int indent_level;
     GString *tsdl;
 };
 
-static inline void append_indent(struct ctx *ctx)
+} /* namespace sink */
+} /* namespace ctf */
+
+static inline void append_indent(ctf::sink::CtfIrToTsdlCtx *ctx)
 {
     unsigned int i;
 
@@ -30,12 +36,12 @@ static inline void append_indent(struct ctx *ctx)
     }
 }
 
-static void append_uuid(struct ctx *ctx, bt_uuid uuid)
+static void append_uuid(ctf::sink::CtfIrToTsdlCtx *ctx, bt_uuid uuid)
 {
     g_string_append_printf(ctx->tsdl, "\"" BT_UUID_FMT "\"", BT_UUID_FMT_VALUES(uuid));
 }
 
-static void append_quoted_string_content(struct ctx *ctx, const char *str)
+static void append_quoted_string_content(ctf::sink::CtfIrToTsdlCtx *ctx, const char *str)
 {
     const char *ch;
 
@@ -78,7 +84,7 @@ static void append_quoted_string_content(struct ctx *ctx, const char *str)
     }
 }
 
-static void append_quoted_string(struct ctx *ctx, const char *str)
+static void append_quoted_string(ctf::sink::CtfIrToTsdlCtx *ctx, const char *str)
 {
     g_string_append_c(ctx->tsdl, '"');
     append_quoted_string_content(ctx, str);
@@ -86,7 +92,7 @@ static void append_quoted_string(struct ctx *ctx, const char *str)
 }
 
 static void append_integer_field_class_from_props(
-    struct ctx *ctx, unsigned int size, unsigned int alignment, bool is_signed,
+    ctf::sink::CtfIrToTsdlCtx *ctx, unsigned int size, unsigned int alignment, bool is_signed,
     bt_field_class_integer_preferred_display_base disp_base, const char *mapped_clock_class_name,
     const char *field_name, bool end)
 {
@@ -131,27 +137,27 @@ static void append_integer_field_class_from_props(
     }
 }
 
-static void append_end_block(struct ctx *ctx)
+static void append_end_block(ctf::sink::CtfIrToTsdlCtx *ctx)
 {
     ctx->indent_level--;
     append_indent(ctx);
     g_string_append(ctx->tsdl, "}");
 }
 
-static void append_end_block_semi_nl(struct ctx *ctx)
+static void append_end_block_semi_nl(ctf::sink::CtfIrToTsdlCtx *ctx)
 {
     ctx->indent_level--;
     append_indent(ctx);
     g_string_append(ctx->tsdl, "};\n");
 }
 
-static void append_end_block_semi_nl_nl(struct ctx *ctx)
+static void append_end_block_semi_nl_nl(ctf::sink::CtfIrToTsdlCtx *ctx)
 {
     append_end_block_semi_nl(ctx);
     g_string_append_c(ctx->tsdl, '\n');
 }
 
-static void append_bool_field_class(struct ctx *ctx,
+static void append_bool_field_class(ctf::sink::CtfIrToTsdlCtx *ctx,
                                     __attribute__((unused)) struct fs_sink_ctf_field_class_bool *fc)
 {
     /*
@@ -163,7 +169,7 @@ static void append_bool_field_class(struct ctx *ctx,
                                           NULL, NULL, false);
 }
 
-static void append_bit_array_field_class(struct ctx *ctx,
+static void append_bit_array_field_class(ctf::sink::CtfIrToTsdlCtx *ctx,
                                          struct fs_sink_ctf_field_class_bit_array *fc)
 {
     /*
@@ -176,7 +182,8 @@ static void append_bit_array_field_class(struct ctx *ctx,
                                           NULL, NULL, false);
 }
 
-static void append_integer_field_class(struct ctx *ctx, struct fs_sink_ctf_field_class_int *fc)
+static void append_integer_field_class(ctf::sink::CtfIrToTsdlCtx *ctx,
+                                       struct fs_sink_ctf_field_class_int *fc)
 {
     const bt_field_class *ir_fc = fc->base.base.ir_fc;
     bt_field_class_type type = bt_field_class_get_type(ir_fc);
@@ -269,7 +276,8 @@ static void append_integer_field_class(struct ctx *ctx, struct fs_sink_ctf_field
     }
 }
 
-static void append_float_field_class(struct ctx *ctx, struct fs_sink_ctf_field_class_float *fc)
+static void append_float_field_class(ctf::sink::CtfIrToTsdlCtx *ctx,
+                                     struct fs_sink_ctf_field_class_float *fc)
 {
     unsigned int mant_dig, exp_dig;
 
@@ -285,14 +293,15 @@ static void append_float_field_class(struct ctx *ctx, struct fs_sink_ctf_field_c
                            mant_dig, exp_dig, fc->base.base.alignment);
 }
 
-static void append_string_field_class(struct ctx *ctx)
+static void append_string_field_class(ctf::sink::CtfIrToTsdlCtx *ctx)
 {
     g_string_append(ctx->tsdl, "string { encoding = UTF8; }");
 }
 
-static void append_field_class(struct ctx *ctx, struct fs_sink_ctf_field_class *fc);
+static void append_field_class(ctf::sink::CtfIrToTsdlCtx *ctx, struct fs_sink_ctf_field_class *fc);
 
-static void append_member(struct ctx *ctx, const char *name, struct fs_sink_ctf_field_class *fc)
+static void append_member(ctf::sink::CtfIrToTsdlCtx *ctx, const char *name,
+                          struct fs_sink_ctf_field_class *fc)
 {
     GString *lengths = NULL;
     const char *lengths_str = "";
@@ -333,7 +342,7 @@ static void append_member(struct ctx *ctx, const char *name, struct fs_sink_ctf_
     }
 }
 
-static void append_struct_field_class_members(struct ctx *ctx,
+static void append_struct_field_class_members(ctf::sink::CtfIrToTsdlCtx *ctx,
                                               struct fs_sink_ctf_field_class_struct *struct_fc)
 {
     uint64_t i;
@@ -431,7 +440,8 @@ static void append_struct_field_class_members(struct ctx *ctx,
     }
 }
 
-static void append_struct_field_class(struct ctx *ctx, struct fs_sink_ctf_field_class_struct *fc)
+static void append_struct_field_class(ctf::sink::CtfIrToTsdlCtx *ctx,
+                                      struct fs_sink_ctf_field_class_struct *fc)
 {
     g_string_append(ctx->tsdl, "struct {\n");
     ctx->indent_level++;
@@ -440,7 +450,7 @@ static void append_struct_field_class(struct ctx *ctx, struct fs_sink_ctf_field_
     g_string_append_printf(ctx->tsdl, " align(%u)", fc->base.alignment);
 }
 
-static void append_option_field_class(struct ctx *ctx,
+static void append_option_field_class(ctf::sink::CtfIrToTsdlCtx *ctx,
                                       struct fs_sink_ctf_field_class_option *opt_fc)
 {
     g_string_append_printf(ctx->tsdl, "variant <%s> {\n", opt_fc->tag_ref->str);
@@ -452,7 +462,7 @@ static void append_option_field_class(struct ctx *ctx,
     append_end_block(ctx);
 }
 
-static void append_variant_field_class(struct ctx *ctx,
+static void append_variant_field_class(ctf::sink::CtfIrToTsdlCtx *ctx,
                                        struct fs_sink_ctf_field_class_variant *var_fc)
 {
     uint64_t i;
@@ -471,7 +481,7 @@ static void append_variant_field_class(struct ctx *ctx,
     append_end_block(ctx);
 }
 
-static void append_field_class(struct ctx *ctx, struct fs_sink_ctf_field_class *fc)
+static void append_field_class(ctf::sink::CtfIrToTsdlCtx *ctx, struct fs_sink_ctf_field_class *fc)
 {
     switch (fc->type) {
     case FS_SINK_CTF_FIELD_CLASS_TYPE_BOOL:
@@ -503,7 +513,7 @@ static void append_field_class(struct ctx *ctx, struct fs_sink_ctf_field_class *
     }
 }
 
-static void append_event_class(struct ctx *ctx, struct fs_sink_ctf_event_class *ec)
+static void append_event_class(ctf::sink::CtfIrToTsdlCtx *ctx, struct fs_sink_ctf_event_class *ec)
 {
     const char *str;
     bt_event_class_log_level log_level;
@@ -615,7 +625,7 @@ static void append_event_class(struct ctx *ctx, struct fs_sink_ctf_event_class *
     append_end_block_semi_nl_nl(ctx);
 }
 
-static void append_stream_class(struct ctx *ctx, struct fs_sink_ctf_stream_class *sc)
+static void append_stream_class(ctf::sink::CtfIrToTsdlCtx *ctx, struct fs_sink_ctf_stream_class *sc)
 {
     uint64_t i;
 
@@ -776,7 +786,7 @@ static void append_stream_class(struct ctx *ctx, struct fs_sink_ctf_stream_class
 
 void translate_trace_ctf_ir_to_tsdl(struct fs_sink_ctf_trace *trace, GString *tsdl)
 {
-    struct ctx ctx = {
+    ctf::sink::CtfIrToTsdlCtx ctx = {
         .indent_level = 0,
         .tsdl = tsdl,
     };

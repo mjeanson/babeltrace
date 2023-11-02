@@ -13,7 +13,9 @@
 
 #include "ctf-meta-visitors.hpp"
 
-struct ctx
+namespace ctf {
+
+struct MetaTranslateCtx
 {
     bt_self_component *self_comp;
     bt_trace_class *ir_tc;
@@ -24,7 +26,10 @@ struct ctx
     enum ctf_scope scope;
 };
 
-static inline bt_field_class *ctf_field_class_to_ir(struct ctx *ctx, struct ctf_field_class *fc);
+} /* namespace ctf */
+
+static inline bt_field_class *ctf_field_class_to_ir(ctf::MetaTranslateCtx *ctx,
+                                                    struct ctf_field_class *fc);
 
 static inline void ctf_field_class_int_set_props(struct ctf_field_class_int *fc,
                                                  bt_field_class *ir_fc)
@@ -33,7 +38,7 @@ static inline void ctf_field_class_int_set_props(struct ctf_field_class_int *fc,
     bt_field_class_integer_set_preferred_display_base(ir_fc, fc->disp_base);
 }
 
-static inline bt_field_class *ctf_field_class_int_to_ir(struct ctx *ctx,
+static inline bt_field_class *ctf_field_class_int_to_ir(ctf::MetaTranslateCtx *ctx,
                                                         struct ctf_field_class_int *fc)
 {
     bt_field_class *ir_fc;
@@ -49,7 +54,7 @@ static inline bt_field_class *ctf_field_class_int_to_ir(struct ctx *ctx,
     return ir_fc;
 }
 
-static inline bt_field_class *ctf_field_class_enum_to_ir(struct ctx *ctx,
+static inline bt_field_class *ctf_field_class_enum_to_ir(ctf::MetaTranslateCtx *ctx,
                                                          struct ctf_field_class_enum *fc)
 {
     int ret;
@@ -111,7 +116,7 @@ static inline bt_field_class *ctf_field_class_enum_to_ir(struct ctx *ctx,
     return ir_fc;
 }
 
-static inline bt_field_class *ctf_field_class_float_to_ir(struct ctx *ctx,
+static inline bt_field_class *ctf_field_class_float_to_ir(ctf::MetaTranslateCtx *ctx,
                                                           struct ctf_field_class_float *fc)
 {
     bt_field_class *ir_fc;
@@ -126,8 +131,7 @@ static inline bt_field_class *ctf_field_class_float_to_ir(struct ctx *ctx,
     return ir_fc;
 }
 
-static inline bt_field_class *ctf_field_class_string_to_ir(struct ctx *ctx,
-                                                           struct ctf_field_class_string *)
+static inline bt_field_class *ctf_field_class_string_to_ir(ctf::MetaTranslateCtx *ctx)
 {
     bt_field_class *ir_fc = bt_field_class_string_create(ctx->ir_tc);
 
@@ -135,7 +139,7 @@ static inline bt_field_class *ctf_field_class_string_to_ir(struct ctx *ctx,
     return ir_fc;
 }
 
-static inline void translate_struct_field_class_members(struct ctx *ctx,
+static inline void translate_struct_field_class_members(ctf::MetaTranslateCtx *ctx,
                                                         struct ctf_field_class_struct *fc,
                                                         bt_field_class *ir_fc, bool,
                                                         struct ctf_field_class_struct *)
@@ -161,7 +165,7 @@ static inline void translate_struct_field_class_members(struct ctx *ctx,
     }
 }
 
-static inline bt_field_class *ctf_field_class_struct_to_ir(struct ctx *ctx,
+static inline bt_field_class *ctf_field_class_struct_to_ir(ctf::MetaTranslateCtx *ctx,
                                                            struct ctf_field_class_struct *fc)
 {
     bt_field_class *ir_fc = bt_field_class_structure_create(ctx->ir_tc);
@@ -171,7 +175,7 @@ static inline bt_field_class *ctf_field_class_struct_to_ir(struct ctx *ctx,
     return ir_fc;
 }
 
-static inline bt_field_class *borrow_ir_fc_from_field_path(struct ctx *ctx,
+static inline bt_field_class *borrow_ir_fc_from_field_path(ctf::MetaTranslateCtx *ctx,
                                                            struct ctf_field_path *field_path)
 {
     bt_field_class *ir_fc = NULL;
@@ -225,7 +229,7 @@ end:
     return mapping;
 }
 
-static inline bt_field_class *ctf_field_class_variant_to_ir(struct ctx *ctx,
+static inline bt_field_class *ctf_field_class_variant_to_ir(ctf::MetaTranslateCtx *ctx,
                                                             struct ctf_field_class_variant *fc)
 {
     int ret;
@@ -301,7 +305,7 @@ static inline bt_field_class *ctf_field_class_variant_to_ir(struct ctx *ctx,
     return ir_fc;
 }
 
-static inline bt_field_class *ctf_field_class_array_to_ir(struct ctx *ctx,
+static inline bt_field_class *ctf_field_class_array_to_ir(ctf::MetaTranslateCtx *ctx,
                                                           struct ctf_field_class_array *fc)
 {
     bt_field_class *ir_fc;
@@ -323,7 +327,7 @@ end:
     return ir_fc;
 }
 
-static inline bt_field_class *ctf_field_class_sequence_to_ir(struct ctx *ctx,
+static inline bt_field_class *ctf_field_class_sequence_to_ir(ctf::MetaTranslateCtx *ctx,
                                                              struct ctf_field_class_sequence *fc)
 {
     bt_field_class *ir_fc;
@@ -354,7 +358,8 @@ end:
     return ir_fc;
 }
 
-static inline bt_field_class *ctf_field_class_to_ir(struct ctx *ctx, struct ctf_field_class *fc)
+static inline bt_field_class *ctf_field_class_to_ir(ctf::MetaTranslateCtx *ctx,
+                                                    struct ctf_field_class *fc)
 {
     bt_field_class *ir_fc = NULL;
 
@@ -372,7 +377,7 @@ static inline bt_field_class *ctf_field_class_to_ir(struct ctx *ctx, struct ctf_
         ir_fc = ctf_field_class_float_to_ir(ctx, ctf_field_class_as_float(fc));
         break;
     case CTF_FIELD_CLASS_TYPE_STRING:
-        ir_fc = ctf_field_class_string_to_ir(ctx, ctf_field_class_as_string(fc));
+        ir_fc = ctf_field_class_string_to_ir(ctx);
         break;
     case CTF_FIELD_CLASS_TYPE_STRUCT:
         ir_fc = ctf_field_class_struct_to_ir(ctx, ctf_field_class_as_struct(fc));
@@ -424,7 +429,7 @@ end:
     return has_immediate_member_in_ir;
 }
 
-static inline bt_field_class *scope_ctf_field_class_to_ir(struct ctx *ctx)
+static inline bt_field_class *scope_ctf_field_class_to_ir(ctf::MetaTranslateCtx *ctx)
 {
     bt_field_class *ir_fc = NULL;
     struct ctf_field_class *fc = NULL;
@@ -453,7 +458,7 @@ static inline bt_field_class *scope_ctf_field_class_to_ir(struct ctx *ctx)
     return ir_fc;
 }
 
-static inline void ctf_event_class_to_ir(struct ctx *ctx)
+static inline void ctf_event_class_to_ir(ctf::MetaTranslateCtx *ctx)
 {
     int ret;
     bt_event_class *ir_ec = NULL;
@@ -507,7 +512,7 @@ end:
     return;
 }
 
-static inline void ctf_stream_class_to_ir(struct ctx *ctx)
+static inline void ctf_stream_class_to_ir(ctf::MetaTranslateCtx *ctx)
 {
     int ret;
     bt_field_class *ir_fc;
@@ -588,7 +593,7 @@ static inline void ctf_clock_class_to_ir(bt_clock_class *ir_cc, struct ctf_clock
     bt_clock_class_set_origin_is_unix_epoch(ir_cc, cc->is_absolute);
 }
 
-static inline int ctf_trace_class_to_ir(struct ctx *ctx)
+static inline int ctf_trace_class_to_ir(ctf::MetaTranslateCtx *ctx)
 {
     int ret = 0;
     uint64_t i;
@@ -620,7 +625,7 @@ int ctf_trace_class_translate(bt_self_component *self_comp, bt_trace_class *ir_t
 {
     int ret = 0;
     uint64_t i;
-    struct ctx ctx = {};
+    ctf::MetaTranslateCtx ctx = {};
 
     ctx.self_comp = self_comp;
     ctx.tc = tc;
