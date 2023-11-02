@@ -19,19 +19,30 @@ fi
 # shellcheck source=../../../utils/utils.sh
 source "$UTILSSH"
 
-fail_trace_dir="$BT_CTF_TRACES_PATH/1/fail"
-
 stdout_file=$(mktemp -t test-ctf-fail-stdout.XXXXXX)
 stderr_file=$(mktemp -t test-ctf-fail-stderr.XXXXXX)
 data_dir="${BT_TESTS_SRCDIR}/data/plugins/src.ctf.fs/fail"
 
+# Parameters: <trace-name> <ctf-version>
+fail_trace_path() {
+	local name="$1"
+	local ctf_version="$2"
+
+	echo "$BT_CTF_TRACES_PATH/$ctf_version/fail/$name"
+}
+
+# Parameters: <trace-name> <ctf-version> <expected-stdout-file> <expected-error-msg>
 test_fail() {
 	local name="$1"
-	local expected_stdout_file="$2"
-	local expected_error_msg="$3"
+	local ctf_version=$2
+	local expected_stdout_file="$3"
+	local expected_error_msg="$4"
+	local trace_path
+
+	trace_path=$(fail_trace_path "$name" "$ctf_version")
 
 	bt_cli "${stdout_file}" "${stderr_file}" \
-		-c sink.text.details -p "with-trace-name=no,with-stream-name=no" "${fail_trace_dir}/${name}"
+		-c sink.text.details -p "with-trace-name=no,with-stream-name=no" "$trace_path"
 	isnt $? 0 "Trace ${name}: babeltrace exits with an error"
 
 	bt_diff "${expected_stdout_file}" "${stdout_file}"
@@ -57,26 +68,31 @@ plan_tests 20
 
 test_fail \
 	"invalid-packet-size/trace" \
+	1 \
 	"/dev/null" \
 	"Failed to index CTF stream file '.*channel0_3'"
 
 test_fail \
 	"valid-events-then-invalid-events" \
+	1 \
 	"${data_dir}/valid-events-then-invalid-events.expect" \
 	"At 24 bits: no event record class exists with ID 255 within the data stream class with ID 0."
 
 test_fail \
 	"metadata-syntax-error" \
+	1 \
 	"/dev/null" \
 	"^  At line 3 in metadata stream: syntax error, unexpected CTF_RSBRAC: token=\"]\""
 
 test_fail \
 	"invalid-sequence-length-field-class" \
+	 1 \
 	"/dev/null" \
 	"Sequence field class's length field class is not an unsigned integer field class: "
 
 test_fail \
 	"invalid-variant-selector-field-class" \
+	 1 \
 	"/dev/null" \
 	"Variant field class's tag field class is not an enumeration field class: "
 
