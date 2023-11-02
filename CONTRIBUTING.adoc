@@ -631,6 +631,10 @@ The available format specifiers are:
 |Trace IR field path
 |`+const struct bt_field_path *+`
 
+|`L`
+|Trace IR field location
+|`+const struct bt_field_location *+`
+
 |`E`
 |Trace IR event class
 |`+const struct bt_event_class *+`

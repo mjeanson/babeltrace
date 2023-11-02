@@ -461,7 +461,7 @@ const char *bt_common_field_class_integer_preferred_display_base_string(enum bt_
 }
 
 static inline
-const char *bt_common_scope_string(enum bt_field_path_scope scope)
+const char *bt_common_field_path_scope_string(enum bt_field_path_scope scope)
 {
 	switch (scope) {
 	case BT_FIELD_PATH_SCOPE_PACKET_CONTEXT:
@@ -471,6 +471,23 @@ const char *bt_common_scope_string(enum bt_field_path_scope scope)
 	case BT_FIELD_PATH_SCOPE_EVENT_SPECIFIC_CONTEXT:
 		return "EVENT_SPECIFIC_CONTEXT";
 	case BT_FIELD_PATH_SCOPE_EVENT_PAYLOAD:
+		return "EVENT_PAYLOAD";
+	}
+
+	bt_common_abort();
+}
+
+static inline
+const char *bt_common_field_location_scope_string(enum bt_field_location_scope scope)
+{
+	switch (scope) {
+	case BT_FIELD_LOCATION_SCOPE_PACKET_CONTEXT:
+		return "PACKET_CONTEXT";
+	case BT_FIELD_LOCATION_SCOPE_EVENT_COMMON_CONTEXT:
+		return "EVENT_COMMON_CONTEXT";
+	case BT_FIELD_LOCATION_SCOPE_EVENT_SPECIFIC_CONTEXT:
+		return "EVENT_SPECIFIC_CONTEXT";
+	case BT_FIELD_LOCATION_SCOPE_EVENT_PAYLOAD:
 		return "EVENT_PAYLOAD";
 	}
 
@@ -543,6 +560,44 @@ const char *bt_common_value_type_string(enum bt_value_type type)
 
 	bt_common_abort();
 };
+
+static inline
+GString *bt_common_field_path_string(struct bt_field_path *path)
+{
+	GString *str = g_string_new(NULL);
+	uint64_t i;
+
+	BT_ASSERT_DBG(path);
+
+	if (!str) {
+		goto end;
+	}
+
+	g_string_append_printf(str, "[%s", bt_common_field_path_scope_string(
+		bt_field_path_get_root_scope(path)));
+
+	for (i = 0; i < bt_field_path_get_item_count(path); i++) {
+		const struct bt_field_path_item *fp_item =
+			bt_field_path_borrow_item_by_index_const(path, i);
+
+		switch (bt_field_path_item_get_type(fp_item)) {
+		case BT_FIELD_PATH_ITEM_TYPE_INDEX:
+			g_string_append_printf(str, ", %" PRIu64,
+				bt_field_path_item_index_get_index(fp_item));
+			break;
+		case BT_FIELD_PATH_ITEM_TYPE_CURRENT_ARRAY_ELEMENT:
+			g_string_append(str, ", <CUR>");
+			break;
+		default:
+			bt_common_abort();
+		}
+	}
+
+	g_string_append(str, "]");
+
+end:
+	return str;
+}
 
 static inline
 const char *bt_common_logging_level_string(
