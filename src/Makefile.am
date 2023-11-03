@@ -677,6 +677,8 @@ endif
 
 # ctf plugin
 plugins_ctf_babeltrace_plugin_ctf_la_SOURCES = \
+	plugins/ctf/common/metadata/ctf-ir.hpp \
+	plugins/ctf/common/metadata/ctf-ir.cpp \
 	plugins/ctf/common/metadata/int-range.hpp \
 	plugins/ctf/common/metadata/int-range-set.hpp \
 	plugins/ctf/common/src/bfcr/bfcr.cpp \
