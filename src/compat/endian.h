@@ -49,6 +49,7 @@
 
 #elif defined(__MINGW32__)
 #include <stdint.h>
+#include <stdlib.h>
 
 #ifndef __BIG_ENDIAN
 #define __BIG_ENDIAN 4321
