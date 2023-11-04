@@ -88,7 +88,7 @@ test_fail() {
 	done
 }
 
-plan_tests 40
+plan_tests 56
 
 test_fail \
 	"invalid-packet-size/trace" \
@@ -110,14 +110,26 @@ test_fail \
 
 test_fail \
 	"invalid-sequence-length-field-class" \
-	 1 \
+	1 \
 	"/dev/null" \
 	"Sequence field class's length field class is not an unsigned integer field class: "
 
 test_fail \
 	"invalid-variant-selector-field-class" \
-	 1 \
+	1 \
 	"/dev/null" \
 	"Variant field class's tag field class is not an enumeration field class: "
+
+test_fail \
+	"meta-no-trace-cls-no-stream-cls" \
+	2 \
+	"/dev/null" \
+	"Missing data stream class fragment in metadata stream."
+
+test_fail \
+	"meta-no-trace-cls-no-stream-cls" \
+	2 \
+	"/dev/null" \
+	"Missing data stream class fragment in metadata stream."
 
 rm -f "${stdout_file}" "${stderr_file}"
