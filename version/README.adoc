@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2019 EfficiOS Inc.
+//
+// SPDX-License-Identifier: CC-BY-SA-4.0
+
 = Babeltrace's version extra information
 
 This directory contains files and a directory to add information to the
