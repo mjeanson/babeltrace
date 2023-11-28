@@ -25,6 +25,8 @@ BT_PLUGIN_LICENSE("MIT");
 
 /* sink.utils.dummy */
 BT_PLUGIN_SINK_COMPONENT_CLASS(dummy, dummy_consume);
+BT_PLUGIN_SINK_COMPONENT_CLASS_GET_SUPPORTED_MIP_VERSIONS_METHOD(dummy,
+                                                                 dummy_supported_mip_versions);
 BT_PLUGIN_SINK_COMPONENT_CLASS_INITIALIZE_METHOD(dummy, dummy_init);
 BT_PLUGIN_SINK_COMPONENT_CLASS_FINALIZE_METHOD(dummy, dummy_finalize);
 BT_PLUGIN_SINK_COMPONENT_CLASS_GRAPH_IS_CONFIGURED_METHOD(dummy, dummy_graph_is_configured);
@@ -33,6 +35,8 @@ BT_PLUGIN_SINK_COMPONENT_CLASS_HELP(dummy, "See the babeltrace2-sink.utils.dummy
 
 /* sink.utils.counter */
 BT_PLUGIN_SINK_COMPONENT_CLASS(counter, counter_consume);
+BT_PLUGIN_SINK_COMPONENT_CLASS_GET_SUPPORTED_MIP_VERSIONS_METHOD(counter,
+                                                                 counter_supported_mip_versions);
 BT_PLUGIN_SINK_COMPONENT_CLASS_INITIALIZE_METHOD(counter, counter_init);
 BT_PLUGIN_SINK_COMPONENT_CLASS_FINALIZE_METHOD(counter, counter_finalize);
 BT_PLUGIN_SINK_COMPONENT_CLASS_GRAPH_IS_CONFIGURED_METHOD(counter, counter_graph_is_configured);
@@ -42,6 +46,8 @@ BT_PLUGIN_SINK_COMPONENT_CLASS_HELP(counter,
 
 /* flt.utils.trimmer */
 BT_PLUGIN_FILTER_COMPONENT_CLASS(trimmer, trimmer_msg_iter_next);
+BT_PLUGIN_FILTER_COMPONENT_CLASS_GET_SUPPORTED_MIP_VERSIONS_METHOD(trimmer,
+                                                                   trimmer_supported_mip_versions);
 BT_PLUGIN_FILTER_COMPONENT_CLASS_DESCRIPTION(
     trimmer, "Discard messages that occur outside a specific time range.");
 BT_PLUGIN_FILTER_COMPONENT_CLASS_HELP(trimmer,

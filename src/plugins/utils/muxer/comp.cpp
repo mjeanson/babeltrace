@@ -34,6 +34,12 @@ Comp::Comp(const bt2::SelfFilterComponent selfComp, const bt2::ConstMapValue par
     BT_CPPLOGI("Initialized component.");
 }
 
+void Comp::_getSupportedMipVersions(bt2::SelfComponentClass, bt2::ConstValue, bt2::LoggingLevel,
+                                    const bt2::UnsignedIntegerRangeSet ranges)
+{
+    ranges.addRange(0, 1);
+}
+
 void Comp::_inputPortConnected(const bt2::SelfComponentInputPort, const bt2::ConstOutputPort)
 {
     this->_addAvailInputPort();

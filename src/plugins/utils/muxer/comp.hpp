@@ -24,6 +24,10 @@ class Comp final : public bt2::UserFilterComponent<Comp, MsgIter>
 public:
     explicit Comp(bt2::SelfFilterComponent selfComp, bt2::ConstMapValue params, void *);
 
+protected:
+    static void _getSupportedMipVersions(bt2::SelfComponentClass, bt2::ConstValue,
+                                         bt2::LoggingLevel, bt2::UnsignedIntegerRangeSet ranges);
+
 private:
     void _inputPortConnected(bt2::SelfComponentInputPort selfPort, bt2::ConstOutputPort otherPort);
     void _addAvailInputPort();

@@ -31,6 +31,16 @@
 #define WITH_UUID_PARAM_NAME "with-uuid"
 #define COMPACT_PARAM_NAME "compact"
 
+bt_component_class_get_supported_mip_versions_method_status
+details_supported_mip_versions(
+		bt_self_component_class_sink *self_component_class __attribute__((unused)),
+		const bt_value *params __attribute__((unused)),
+		void *initialize_method_data __attribute__((unused)),
+		bt_logging_level logging_level __attribute__((unused)),
+		bt_integer_range_set_unsigned *supported_versions) {
+	return (int) bt_integer_range_set_unsigned_add_range(supported_versions, 0, 1);
+}
+
 void details_destroy_details_trace_class_meta(
 		struct details_trace_class_meta *details_tc_meta)
 {
