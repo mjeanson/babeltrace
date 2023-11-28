@@ -675,6 +675,16 @@ public:
         return bt2s::nullopt;
     }
 
+    void uid(const bt2c::CStringView uid) const noexcept
+    {
+        bt_trace_set_uid(this->libObjPtr(), uid);
+    }
+
+    bt2c::CStringView uid() const noexcept
+    {
+        return bt_trace_get_uid(this->libObjPtr());
+    }
+
     std::uint64_t length() const noexcept
     {
         return bt_trace_get_stream_count(this->libObjPtr());
