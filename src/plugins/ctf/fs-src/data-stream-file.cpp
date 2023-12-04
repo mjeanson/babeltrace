@@ -225,7 +225,7 @@ static bt_stream *medop_borrow_stream(bt_stream_class *stream_class, int64_t, vo
     bt_stream_class *ds_file_stream_class;
     bt_stream *stream = NULL;
 
-    ds_file_stream_class = bt_stream_borrow_class(ds_file->stream);
+    ds_file_stream_class = ds_file->stream->cls().libObjPtr();
 
     if (stream_class != ds_file_stream_class) {
         /*
@@ -235,7 +235,7 @@ static bt_stream *medop_borrow_stream(bt_stream_class *stream_class, int64_t, vo
         goto end;
     }
 
-    stream = ds_file->stream;
+    stream = ds_file->stream->libObjPtr();
 
 end:
     return stream;
@@ -327,9 +327,9 @@ ctf_fs_ds_group_medops_set_file(struct ctf_fs_ds_group_medops_data *data,
         ctf_fs_ds_file_destroy(data->file);
 
         /* Create the new file. */
-        data->file = ctf_fs_ds_file_create(data->ds_file_group->ctf_fs_trace,
-                                           data->ds_file_group->stream->libObjPtr(),
-                                           index_entry->path, data->logger);
+        data->file =
+            ctf_fs_ds_file_create(data->ds_file_group->ctf_fs_trace, data->ds_file_group->stream,
+                                  index_entry->path, data->logger);
         if (!data->file) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(data->logger, "failed to create ctf_fs_ds_file.");
             status = CTF_MSG_ITER_MEDIUM_STATUS_ERROR;
@@ -811,8 +811,9 @@ error:
     goto end;
 }
 
-struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace, bt_stream *stream,
-                                             const char *path, const bt2c::Logger& parentLogger)
+struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace,
+                                             bt2::Stream::Shared stream, const char *path,
+                                             const bt2c::Logger& parentLogger)
 {
     int ret;
     size_t offset_align;
@@ -827,8 +828,7 @@ struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace, 
         goto error;
     }
 
-    ds_file->stream = stream;
-    bt_stream_get_ref(ds_file->stream);
+    ds_file->stream = std::move(stream);
     ds_file->metadata = ctf_fs_trace->metadata;
     g_string_assign(ds_file->file->path, path);
     ret = ctf_fs_file_open(ds_file->file, "rb");
@@ -877,7 +877,6 @@ void ctf_fs_ds_file_destroy(struct ctf_fs_ds_file *ds_file)
         return;
     }
 
-    bt_stream_put_ref(ds_file->stream);
     (void) ds_file_munmap(ds_file);
 
     if (ds_file->file) {

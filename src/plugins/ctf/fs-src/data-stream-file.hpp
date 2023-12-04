@@ -47,8 +47,7 @@ struct ctf_fs_ds_file
     /* Owned by this */
     struct ctf_fs_file *file = nullptr;
 
-    /* Owned by this */
-    bt_stream *stream = nullptr;
+    bt2::Stream::Shared stream;
 
     void *mmap_addr = nullptr;
 
@@ -143,7 +142,7 @@ struct ctf_fs_ds_file_group
     ctf_fs_ds_index::UP index;
 };
 
-struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace, bt_stream *stream,
+struct ctf_fs_ds_file *ctf_fs_ds_file_create(ctf_fs_trace *ctf_fs_trace, bt2::Stream::Shared stream,
                                              const char *path, const bt2c::Logger& logger);
 
 void ctf_fs_ds_file_destroy(struct ctf_fs_ds_file *stream);
