@@ -335,12 +335,6 @@ static void port_data_destroy_notifier(void *data)
     port_data_destroy((struct ctf_fs_port_data *) data);
 }
 
-static void ctf_fs_trace_destroy_notifier(void *data)
-{
-    struct ctf_fs_trace *trace = (struct ctf_fs_trace *) data;
-    ctf_fs_trace_destroy(trace);
-}
-
 ctf_fs_component::UP ctf_fs_component_create(const bt2c::Logger& parentLogger)
 {
     ctf_fs_component::UP ctf_fs {new ctf_fs_component {parentLogger}};
@@ -1046,7 +1040,8 @@ end:
 
 static int ctf_fs_component_create_ctf_fs_trace_one_path(struct ctf_fs_component *ctf_fs,
                                                          const char *path_param,
-                                                         const char *trace_name, GPtrArray *traces,
+                                                         const char *trace_name,
+                                                         std::vector<ctf_fs_trace::UP>& traces,
                                                          bt_self_component *selfComp)
 {
     ctf_fs_trace::UP ctf_fs_trace;
@@ -1086,7 +1081,7 @@ static int ctf_fs_component_create_ctf_fs_trace_one_path(struct ctf_fs_component
         goto error;
     }
 
-    g_ptr_array_add(traces, ctf_fs_trace.release());
+    traces.emplace_back(std::move(ctf_fs_trace));
 
     ret = 0;
     goto end;
@@ -1148,10 +1143,11 @@ static void merge_ctf_fs_ds_file_groups(struct ctf_fs_ds_file_group *dest,
     /* Merge both indexes. */
     merge_ctf_fs_ds_indexes(dest->index, src->index);
 }
+
 /* Merge src_trace's data stream file groups into dest_trace's. */
 
 static int merge_matching_ctf_fs_ds_file_groups(struct ctf_fs_trace *dest_trace,
-                                                struct ctf_fs_trace *src_trace)
+                                                ctf_fs_trace::UP src_trace)
 {
     GPtrArray *dest = dest_trace->ds_file_groups;
     GPtrArray *src = src_trace->ds_file_groups;
@@ -1243,31 +1239,27 @@ end:
  * one.
  *
  * The trace with the most expansive metadata is chosen and all other traces
- * are merged into that one.  The array slots of all the traces that get merged
- * in the chosen one are set to NULL, so only the slot of the chosen trace
- * remains non-NULL.
+ * are merged into that one.  On return, the elements of `traces` are nullptr
+ * and the merged trace is placed in `out_trace`.
  */
 
-static int merge_ctf_fs_traces(struct ctf_fs_trace **traces, unsigned int num_traces,
-                               struct ctf_fs_trace **out_trace)
+static int merge_ctf_fs_traces(std::vector<ctf_fs_trace::UP> traces, ctf_fs_trace::UP& out_trace)
 {
     unsigned int winner_count;
     struct ctf_fs_trace *winner;
     guint i, winner_i;
     int ret = 0;
 
-    BT_ASSERT(num_traces >= 2);
+    BT_ASSERT(traces.size() >= 2);
 
-    winner_count = metadata_count_stream_and_event_classes(traces[0]);
-    winner = traces[0];
+    winner_count = metadata_count_stream_and_event_classes(traces[0].get());
+    winner = traces[0].get();
     winner_i = 0;
 
     /* Find the trace with the largest metadata. */
-    for (i = 1; i < num_traces; i++) {
-        struct ctf_fs_trace *candidate;
+    for (i = 1; i < traces.size(); i++) {
+        ctf_fs_trace *candidate = traces[i].get();
         unsigned int candidate_count;
-
-        candidate = traces[i];
 
         /* A bit of sanity check. */
         BT_ASSERT(bt_uuid_compare(winner->metadata->tc->uuid, candidate->metadata->tc->uuid) == 0);
@@ -1282,16 +1274,14 @@ static int merge_ctf_fs_traces(struct ctf_fs_trace **traces, unsigned int num_tr
     }
 
     /* Merge all the other traces in the winning trace. */
-    for (i = 0; i < num_traces; i++) {
-        struct ctf_fs_trace *trace = traces[i];
-
+    for (ctf_fs_trace::UP& trace : traces) {
         /* Don't merge the winner into itself. */
-        if (trace == winner) {
+        if (trace.get() == winner) {
             continue;
         }
 
         /* Merge trace's data stream file groups into winner's. */
-        ret = merge_matching_ctf_fs_ds_file_groups(winner, trace);
+        ret = merge_matching_ctf_fs_ds_file_groups(winner, std::move(trace));
         if (ret) {
             goto end;
         }
@@ -1300,8 +1290,7 @@ static int merge_ctf_fs_traces(struct ctf_fs_trace **traces, unsigned int num_tr
     /*
      * Move the winner out of the array, into `*out_trace`.
      */
-    *out_trace = winner;
-    traces[winner_i] = NULL;
+    out_trace = std::move(traces[winner_i]);
 
 end:
     return ret;
@@ -1900,17 +1889,11 @@ int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
     int ret = 0;
     uint64_t i;
     GPtrArray *paths = NULL;
-    GPtrArray *traces;
+    std::vector<ctf_fs_trace::UP> traces;
     const char *trace_name;
 
     BT_ASSERT(bt_value_get_type(paths_value) == BT_VALUE_TYPE_ARRAY);
     BT_ASSERT(!bt_value_array_is_empty(paths_value));
-
-    traces = g_ptr_array_new_with_free_func(ctf_fs_trace_destroy_notifier);
-    if (!traces) {
-        BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs->logger, "Failed to allocate a GPtrArray.");
-        goto error;
-    }
 
     paths = g_ptr_array_new_with_free_func(g_free);
     if (!paths) {
@@ -1951,17 +1934,16 @@ int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
         }
     }
 
-    if (traces->len > 1) {
-        struct ctf_fs_trace *first_trace = (struct ctf_fs_trace *) traces->pdata[0];
+    if (traces.size() > 1) {
+        ctf_fs_trace *first_trace = traces[0].get();
         const uint8_t *first_trace_uuid = first_trace->metadata->tc->uuid;
-        struct ctf_fs_trace *trace;
 
         /*
          * We have more than one trace, they must all share the same
          * UUID, verify that.
          */
-        for (i = 0; i < traces->len; i++) {
-            struct ctf_fs_trace *this_trace = (struct ctf_fs_trace *) traces->pdata[i];
+        for (i = 0; i < traces.size(); i++) {
+            ctf_fs_trace *this_trace = traces[i].get();
             const uint8_t *this_trace_uuid = this_trace->metadata->tc->uuid;
 
             if (!this_trace->metadata->tc->is_uuid_set) {
@@ -1989,18 +1971,15 @@ int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
             }
         }
 
-        ret = merge_ctf_fs_traces((struct ctf_fs_trace **) traces->pdata, traces->len, &trace);
+        ret = merge_ctf_fs_traces(std::move(traces), ctf_fs->trace);
         if (ret) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs->logger,
                                          "Failed to merge traces with the same UUID.");
             goto error;
         }
-
-        ctf_fs->trace.reset(trace);
     } else {
         /* Just one trace, it may or may not have a UUID, both are fine. */
-        ctf_fs->trace.reset((ctf_fs_trace *) traces->pdata[0]);
-        traces->pdata[0] = NULL;
+        ctf_fs->trace = std::move(traces[0]);
     }
 
     ret = fix_packet_index_tracer_bugs(ctf_fs->trace.get());
@@ -2026,10 +2005,6 @@ error:
     ret = -1;
 
 end:
-    if (traces) {
-        g_ptr_array_free(traces, TRUE);
-    }
-
     if (paths) {
         g_ptr_array_free(paths, TRUE);
     }
