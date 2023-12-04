@@ -8,6 +8,7 @@
 #define CTF_FS_DS_FILE_H
 
 #include <memory>
+#include <string>
 
 #include <glib.h>
 #include <stdio.h>
@@ -21,8 +22,7 @@
 
 struct ctf_fs_ds_file_info
 {
-    /* Owned by this. */
-    GString *path = nullptr;
+    std::string path;
 
     /* Guaranteed to be set, as opposed to the index. */
     int64_t begin_ns = 0;

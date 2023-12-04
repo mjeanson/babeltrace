@@ -363,7 +363,7 @@ bt2c::GCharUP ctf_fs_make_port_name(struct ctf_fs_ds_file_group *ds_file_group)
         BT_ASSERT(ds_file_group->ds_file_infos->len == 1);
         struct ctf_fs_ds_file_info *ds_file_info =
             (struct ctf_fs_ds_file_info *) g_ptr_array_index(ds_file_group->ds_file_infos, 0);
-        g_string_append_printf(name, " | %s", ds_file_info->path->str);
+        g_string_append_printf(name, " | %s", ds_file_info->path.c_str());
     }
 
     return bt2c::GCharUP {g_string_free(name, FALSE)};
@@ -1724,7 +1724,7 @@ static bool compare_ds_file_groups_by_first_path(const ctf_fs_ds_file_group::UP&
     const ctf_fs_ds_file_info *first_ds_file_info_b =
         (const ctf_fs_ds_file_info *) ds_file_group_b->ds_file_infos->pdata[0];
 
-    return strcmp(first_ds_file_info_a->path->str, first_ds_file_info_b->path->str) < 0;
+    return first_ds_file_info_a->path < first_ds_file_info_b->path;
 }
 
 static gint compare_strings(gconstpointer p_a, gconstpointer p_b)
@@ -1884,7 +1884,7 @@ static GString *get_stream_instance_unique_name(struct ctf_fs_ds_file_group *ds_
      */
     BT_ASSERT(ds_file_group->ds_file_infos->len > 0);
     ds_file_info = (ctf_fs_ds_file_info *) g_ptr_array_index(ds_file_group->ds_file_infos, 0);
-    g_string_assign(name, ds_file_info->path->str);
+    g_string_assign(name, ds_file_info->path.c_str());
 
 end:
     return name;
