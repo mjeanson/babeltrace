@@ -16,6 +16,7 @@
 
 #include <babeltrace2/babeltrace.h>
 
+#include "cpp-common/bt2/trace-ir.hpp"
 #include "cpp-common/bt2c/data-len.hpp"
 #include "cpp-common/bt2c/logging.hpp"
 
@@ -136,8 +137,7 @@ struct ctf_fs_ds_file_group
     /* Owned by this */
     struct ctf_stream_class *sc = nullptr;
 
-    /* Owned by this */
-    bt_stream *stream = nullptr;
+    bt2::Stream::Shared stream;
 
     /* Stream (instance) ID; -1ULL means none */
     uint64_t stream_id = 0;

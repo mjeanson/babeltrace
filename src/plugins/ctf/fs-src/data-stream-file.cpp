@@ -327,9 +327,9 @@ ctf_fs_ds_group_medops_set_file(struct ctf_fs_ds_group_medops_data *data,
         ctf_fs_ds_file_destroy(data->file);
 
         /* Create the new file. */
-        data->file =
-            ctf_fs_ds_file_create(data->ds_file_group->ctf_fs_trace, data->ds_file_group->stream,
-                                  index_entry->path, data->logger);
+        data->file = ctf_fs_ds_file_create(data->ds_file_group->ctf_fs_trace,
+                                           data->ds_file_group->stream->libObjPtr(),
+                                           index_entry->path, data->logger);
         if (!data->file) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(data->logger, "failed to create ctf_fs_ds_file.");
             status = CTF_MSG_ITER_MEDIUM_STATUS_ERROR;
@@ -902,7 +902,6 @@ static void ctf_fs_ds_file_group_destroy(struct ctf_fs_ds_file_group *ds_file_gr
         return;
     }
 
-    bt_stream_put_ref(ds_file_group->stream);
     delete ds_file_group;
 }
 
