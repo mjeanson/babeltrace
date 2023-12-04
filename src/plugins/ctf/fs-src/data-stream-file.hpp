@@ -106,8 +106,15 @@ struct ctf_fs_ds_index_entry
     uint64_t packet_seq_num = 0;
 };
 
+struct ctf_fs_ds_index_deleter
+{
+    void operator()(struct ctf_fs_ds_index *index) noexcept;
+};
+
 struct ctf_fs_ds_index
 {
+    using UP = std::unique_ptr<ctf_fs_ds_index, ctf_fs_ds_index_deleter>;
+
     /* Array of pointer to struct ctf_fs_ds_index_entry. */
     GPtrArray *entries = nullptr;
 };
@@ -153,11 +160,11 @@ struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace, 
 
 void ctf_fs_ds_file_destroy(struct ctf_fs_ds_file *stream);
 
-struct ctf_fs_ds_index *ctf_fs_ds_file_build_index(struct ctf_fs_ds_file *ds_file,
-                                                   struct ctf_fs_ds_file_info *ds_file_info,
-                                                   struct ctf_msg_iter *msg_iter);
+ctf_fs_ds_index::UP ctf_fs_ds_file_build_index(struct ctf_fs_ds_file *ds_file,
+                                               struct ctf_fs_ds_file_info *ds_file_info,
+                                               struct ctf_msg_iter *msg_iter);
 
-struct ctf_fs_ds_index *ctf_fs_ds_index_create(const bt2c::Logger& logger);
+ctf_fs_ds_index::UP ctf_fs_ds_index_create(const bt2c::Logger& logger);
 
 void ctf_fs_ds_index_destroy(struct ctf_fs_ds_index *index);
 
