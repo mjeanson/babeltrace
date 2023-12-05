@@ -802,9 +802,8 @@ static int ctf_fs_component_create_ctf_fs_trace_one_path(struct ctf_fs_component
 {
     ctf_fs_trace::UP ctf_fs_trace;
     int ret;
-    GString *norm_path;
 
-    norm_path = bt_common_normalize_path(path_param, NULL);
+    bt2c::GStringUP norm_path {bt_common_normalize_path(path_param, NULL)};
     if (!norm_path) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs->logger, "Failed to normalize path: `{}`.", path_param);
         goto error;
@@ -846,10 +845,6 @@ error:
     ret = -1;
 
 end:
-    if (norm_path) {
-        g_string_free(norm_path, TRUE);
-    }
-
     return ret;
 }
 
