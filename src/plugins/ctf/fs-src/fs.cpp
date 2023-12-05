@@ -491,7 +491,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
     int ret;
     ctf_fs_ds_file_info::UP ds_file_info;
     ctf_fs_ds_index::UP index;
-    struct ctf_msg_iter *msg_iter = NULL;
+    ctf_msg_iter_up msg_iter;
     struct ctf_stream_class *sc = NULL;
     struct ctf_msg_iter_packet_properties props;
 
@@ -507,18 +507,17 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
 
     /* Create a temporary iterator to read the ds_file. */
     msg_iter = ctf_msg_iter_create(
-                   ctf_fs_trace->metadata->tc,
-                   bt_common_get_page_size(static_cast<int>(ctf_fs_trace->logger.level())) * 8,
-                   ctf_fs_ds_file_medops, ds_file.get(), nullptr, ctf_fs_trace->logger)
-                   .release();
+        ctf_fs_trace->metadata->tc,
+        bt_common_get_page_size(static_cast<int>(ctf_fs_trace->logger.level())) * 8,
+        ctf_fs_ds_file_medops, ds_file.get(), nullptr, ctf_fs_trace->logger);
     if (!msg_iter) {
         BT_CPPLOGE_STR_SPEC(ctf_fs_trace->logger, "Cannot create a CTF message iterator.");
         goto error;
     }
 
-    ctf_msg_iter_set_dry_run(msg_iter, true);
+    ctf_msg_iter_set_dry_run(msg_iter.get(), true);
 
-    ret = ctf_msg_iter_get_packet_properties(msg_iter, &props);
+    ret = ctf_msg_iter_get_packet_properties(msg_iter.get(), &props);
     if (ret) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(
             ctf_fs_trace->logger,
@@ -549,7 +548,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
         goto error;
     }
 
-    index = ctf_fs_ds_file_build_index(ds_file.get(), ds_file_info.get(), msg_iter);
+    index = ctf_fs_ds_file_build_index(ds_file.get(), ds_file_info.get(), msg_iter.get());
     if (!index) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger, "Failed to index CTF stream file \'{}\'",
                                      ds_file->file->path);
@@ -617,10 +616,6 @@ error:
     ret = -1;
 
 end:
-    if (msg_iter) {
-        ctf_msg_iter_destroy(msg_iter);
-    }
-
     return ret;
 }
 
