@@ -158,8 +158,8 @@ static void populate_trace_info(const struct ctf_fs_trace *trace, const bt2::Map
 {
     /* Add trace range info only if it contains streams. */
     if (trace->ds_file_groups.empty()) {
-        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(
-            logger, bt2::Error, "Trace has no streams: trace-path={}", trace->path->str);
+        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2::Error,
+                                               "Trace has no streams: trace-path={}", trace->path);
     }
 
     const auto fileGroups = traceInfo.insertEmptyArray("stream-infos");

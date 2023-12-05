@@ -62,8 +62,7 @@ struct ctf_fs_trace
 
     std::vector<ctf_fs_ds_file_group::UP> ds_file_groups;
 
-    /* Owned by this */
-    GString *path = nullptr;
+    std::string path;
 
     /* Next automatic stream ID when not provided by packet header */
     uint64_t next_stream_id = 0;

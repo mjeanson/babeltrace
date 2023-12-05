@@ -261,10 +261,6 @@ static void ctf_fs_trace_destroy(struct ctf_fs_trace *ctf_fs_trace)
         return;
     }
 
-    if (ctf_fs_trace->path) {
-        g_string_free(ctf_fs_trace->path, TRUE);
-    }
-
     if (ctf_fs_trace->metadata) {
         ctf_fs_metadata_fini(ctf_fs_trace->metadata);
         delete ctf_fs_trace->metadata;
@@ -309,7 +305,7 @@ bt2c::GCharUP ctf_fs_make_port_name(struct ctf_fs_ds_file_group *ds_file_group)
         bt_uuid_to_str(ds_file_group->ctf_fs_trace->metadata->tc->uuid, uuid_str);
         g_string_assign(name, uuid_str);
     } else {
-        g_string_assign(name, ds_file_group->ctf_fs_trace->path->str);
+        g_string_assign(name, ds_file_group->ctf_fs_trace->path.c_str());
     }
 
     /*
@@ -614,11 +610,11 @@ static int create_ds_file_groups(struct ctf_fs_trace *ctf_fs_trace)
     GDir *dir = NULL;
 
     /* Check each file in the path directory, except specific ones */
-    dir = g_dir_open(ctf_fs_trace->path->str, 0, &error);
+    dir = g_dir_open(ctf_fs_trace->path.c_str(), 0, &error);
     if (!dir) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger,
-                                     "Cannot open directory `{}`: {} (code {})",
-                                     ctf_fs_trace->path->str, error->message, error->code);
+                                     "Cannot open directory `{}`: {} (code {})", ctf_fs_trace->path,
+                                     error->message, error->code);
         goto error;
     }
 
@@ -627,14 +623,14 @@ static int create_ds_file_groups(struct ctf_fs_trace *ctf_fs_trace)
             /* Ignore the metadata stream. */
             BT_CPPLOGI_SPEC(ctf_fs_trace->logger,
                             "Ignoring metadata file `{}" G_DIR_SEPARATOR_S "{}`",
-                            ctf_fs_trace->path->str, basename);
+                            ctf_fs_trace->path, basename);
             continue;
         }
 
         if (basename[0] == '.') {
             BT_CPPLOGI_SPEC(ctf_fs_trace->logger,
-                            "Ignoring hidden file `{}" G_DIR_SEPARATOR_S "{}`",
-                            ctf_fs_trace->path->str, basename);
+                            "Ignoring hidden file `{}" G_DIR_SEPARATOR_S "{}`", ctf_fs_trace->path,
+                            basename);
             continue;
         }
 
@@ -644,12 +640,12 @@ static int create_ds_file_groups(struct ctf_fs_trace *ctf_fs_trace)
             BT_CPPLOGE_APPEND_CAUSE_SPEC(
                 ctf_fs_trace->logger,
                 "Cannot create stream file object for file `{}" G_DIR_SEPARATOR_S "{}`",
-                ctf_fs_trace->path->str, basename);
+                ctf_fs_trace->path, basename);
             goto error;
         }
 
         /* Create full path string. */
-        file->path = fmt::format("{}" G_DIR_SEPARATOR_S "{}", ctf_fs_trace->path->str, basename);
+        file->path = fmt::format("{}" G_DIR_SEPARATOR_S "{}", ctf_fs_trace->path, basename);
 
         if (!g_file_test(file->path.c_str(), G_FILE_TEST_IS_REGULAR)) {
             BT_CPPLOGI_SPEC(ctf_fs_trace->logger, "Ignoring non-regular file `{}`", file->path);
@@ -747,13 +743,9 @@ static ctf_fs_trace::UP ctf_fs_trace_create(const char *path, const char *name,
                                             const bt2c::Logger& parentLogger)
 {
     int ret;
-
     ctf_fs_trace::UP ctf_fs_trace {new struct ctf_fs_trace(parentLogger)};
-    ctf_fs_trace->path = g_string_new(path);
-    if (!ctf_fs_trace->path) {
-        goto error;
-    }
 
+    ctf_fs_trace->path = path;
     ctf_fs_trace->metadata = new ctf_fs_metadata;
     ctf_fs_metadata_init(ctf_fs_trace->metadata);
 
@@ -1677,7 +1669,7 @@ int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
                 BT_CPPLOGE_APPEND_CAUSE_SPEC(
                     ctf_fs->logger,
                     "Multiple traces given, but a trace does not have a UUID: path={}",
-                    this_trace->path->str);
+                    this_trace->path);
                 goto error;
             }
 
@@ -1692,8 +1684,8 @@ int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
                                              "Multiple traces given, but UUIDs don't match: "
                                              "first-trace-uuid={}, first-trace-path={}, "
                                              "trace-uuid={}, trace-path={}",
-                                             first_trace_uuid_str, first_trace->path->str,
-                                             this_trace_uuid_str, this_trace->path->str);
+                                             first_trace_uuid_str, first_trace->path,
+                                             this_trace_uuid_str, this_trace->path);
                 goto error;
             }
         }
