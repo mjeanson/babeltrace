@@ -132,7 +132,7 @@ struct ctf_fs_msg_iter_data
         BT_MESSAGE_ITERATOR_CLASS_NEXT_METHOD_STATUS_OK;
     const struct bt_error *next_saved_error = nullptr;
 
-    struct ctf_fs_ds_group_medops_data *msg_iter_medops_data = nullptr;
+    ctf_fs_ds_group_medops_data_up msg_iter_medops_data;
 };
 
 bt_component_class_initialize_method_status

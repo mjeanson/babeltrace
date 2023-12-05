@@ -45,10 +45,6 @@ static void ctf_fs_msg_iter_data_destroy(struct ctf_fs_msg_iter_data *msg_iter_d
         ctf_msg_iter_destroy(msg_iter_data->msg_iter);
     }
 
-    if (msg_iter_data->msg_iter_medops_data) {
-        ctf_fs_ds_group_medops_data_destroy(msg_iter_data->msg_iter_medops_data);
-    }
-
     delete msg_iter_data;
 }
 
@@ -173,7 +169,7 @@ ctf_fs_iterator_seek_beginning(bt_self_message_iterator *it)
         BT_ASSERT(msg_iter_data);
 
         ctf_msg_iter_reset(msg_iter_data->msg_iter);
-        ctf_fs_ds_group_medops_data_reset(msg_iter_data->msg_iter_medops_data);
+        ctf_fs_ds_group_medops_data_reset(msg_iter_data->msg_iter_medops_data.get());
 
         return BT_MESSAGE_ITERATOR_CLASS_SEEK_BEGINNING_METHOD_STATUS_OK;
     } catch (const std::bad_alloc&) {
@@ -225,7 +221,7 @@ ctf_fs_iterator_init(bt_self_message_iterator *self_msg_iter,
 
         medium_status = ctf_fs_ds_group_medops_data_create(msg_iter_data->ds_file_group,
                                                            self_msg_iter, msg_iter_data->logger,
-                                                           &msg_iter_data->msg_iter_medops_data);
+                                                           msg_iter_data->msg_iter_medops_data);
         BT_ASSERT(medium_status == CTF_MSG_ITER_MEDIUM_STATUS_OK ||
                   medium_status == CTF_MSG_ITER_MEDIUM_STATUS_ERROR ||
                   medium_status == CTF_MSG_ITER_MEDIUM_STATUS_MEMORY_ERROR);
@@ -239,7 +235,7 @@ ctf_fs_iterator_init(bt_self_message_iterator *self_msg_iter,
         msg_iter_data->msg_iter = ctf_msg_iter_create(
             msg_iter_data->ds_file_group->ctf_fs_trace->metadata->tc,
             bt_common_get_page_size(static_cast<int>(msg_iter_data->logger.level())) * 8,
-            ctf_fs_ds_group_medops, msg_iter_data->msg_iter_medops_data, self_msg_iter,
+            ctf_fs_ds_group_medops, msg_iter_data->msg_iter_medops_data.get(), self_msg_iter,
             msg_iter_data->logger);
         if (!msg_iter_data->msg_iter) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(msg_iter_data->logger,
