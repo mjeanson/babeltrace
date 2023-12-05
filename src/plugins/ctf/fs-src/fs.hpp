@@ -27,8 +27,7 @@ struct ctf_fs_metadata
     /* Owned by this */
     ctf_metadata_decoder_up decoder;
 
-    /* Owned by this */
-    bt_trace_class *trace_class = nullptr;
+    bt2::TraceClass::Shared trace_class;
 
     /* Weak (owned by `decoder` above) */
     struct ctf_trace_class *tc = nullptr;

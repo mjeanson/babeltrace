@@ -62,7 +62,6 @@ int ctf_fs_metadata_set_trace_class(bt_self_component *self_comp, struct ctf_fs_
                                     const ctf::src::ClkClsCfg& clkClsCfg)
 {
     int ret = 0;
-    bt2::TraceClass::Shared traceCls;
     ctf_metadata_decoder_config decoder_config {ctf_fs_trace->logger};
 
     decoder_config.self_comp = self_comp;
@@ -90,10 +89,8 @@ int ctf_fs_metadata_set_trace_class(bt_self_component *self_comp, struct ctf_fs_
         goto end;
     }
 
-    traceCls = ctf_metadata_decoder_get_ir_trace_class(ctf_fs_trace->metadata->decoder.get());
-    if (traceCls) {
-        ctf_fs_trace->metadata->trace_class = traceCls.release().libObjPtr();
-    }
+    ctf_fs_trace->metadata->trace_class =
+        ctf_metadata_decoder_get_ir_trace_class(ctf_fs_trace->metadata->decoder.get());
     BT_ASSERT(!self_comp || ctf_fs_trace->metadata->trace_class);
 
     ctf_fs_trace->metadata->tc =
@@ -112,9 +109,5 @@ int ctf_fs_metadata_init(struct ctf_fs_metadata *)
 
 void ctf_fs_metadata_fini(struct ctf_fs_metadata *metadata)
 {
-    if (metadata->trace_class) {
-        BT_TRACE_CLASS_PUT_REF_AND_RESET(metadata->trace_class);
-    }
-
     metadata->decoder.reset();
 }

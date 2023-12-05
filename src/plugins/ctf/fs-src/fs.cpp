@@ -755,7 +755,7 @@ static ctf_fs_trace::UP ctf_fs_trace_create(const char *path, const char *name,
     }
 
     if (ctf_fs_trace->metadata->trace_class) {
-        bt_trace *trace = bt_trace_create(ctf_fs_trace->metadata->trace_class);
+        bt_trace *trace = bt_trace_create(ctf_fs_trace->metadata->trace_class->libObjPtr());
         if (!trace) {
             goto error;
         }
