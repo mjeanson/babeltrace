@@ -58,8 +58,7 @@ struct ctf_fs_trace
     /* Owned by this */
     struct ctf_fs_metadata *metadata = nullptr;
 
-    /* Owned by this */
-    bt_trace *trace = nullptr;
+    bt2::Trace::Shared trace;
 
     std::vector<ctf_fs_ds_file_group::UP> ds_file_groups;
 
