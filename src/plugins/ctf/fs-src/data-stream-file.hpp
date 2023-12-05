@@ -155,8 +155,6 @@ ctf_fs_ds_index::UP ctf_fs_ds_file_build_index(struct ctf_fs_ds_file *ds_file,
                                                struct ctf_fs_ds_file_info *ds_file_info,
                                                struct ctf_msg_iter *msg_iter);
 
-ctf_fs_ds_index::UP ctf_fs_ds_index_create();
-
 ctf_fs_ds_file_info::UP ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns);
 
 ctf_fs_ds_file_group::UP ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs_trace,

@@ -561,10 +561,7 @@ static ctf_fs_ds_index::UP build_index_from_idx_file(struct ctf_fs_ds_file *ds_f
         goto error;
     }
 
-    index = ctf_fs_ds_index_create();
-    if (!index) {
-        goto error;
-    }
+    index = bt2s::make_unique<ctf_fs_ds_index>();
 
     for (i = 0; i < file_entry_count; i++) {
         struct ctf_packet_index *file_index = (struct ctf_packet_index *) file_pos;
@@ -712,16 +709,12 @@ static ctf_fs_ds_index::UP build_index_from_stream_file(struct ctf_fs_ds_file *d
                                                         struct ctf_msg_iter *msg_iter)
 {
     int ret;
-    ctf_fs_ds_index::UP index;
     enum ctf_msg_iter_status iter_status = CTF_MSG_ITER_STATUS_OK;
     auto currentPacketOffset = bt2c::DataLen::fromBytes(0);
 
     BT_CPPLOGI_SPEC(ds_file->logger, "Indexing stream file {}", ds_file->file->path);
 
-    index = ctf_fs_ds_index_create();
-    if (!index) {
-        goto error;
-    }
+    ctf_fs_ds_index::UP index = bt2s::make_unique<ctf_fs_ds_index>();
 
     while (true) {
         struct ctf_msg_iter_packet_properties props;
@@ -841,11 +834,6 @@ ctf_fs_ds_index::UP ctf_fs_ds_file_build_index(struct ctf_fs_ds_file *ds_file,
     index = build_index_from_stream_file(ds_file, file_info, msg_iter);
 end:
     return index;
-}
-
-ctf_fs_ds_index::UP ctf_fs_ds_index_create()
-{
-    return bt2s::make_unique<ctf_fs_ds_index>();
 }
 
 ctf_fs_ds_file::~ctf_fs_ds_file()

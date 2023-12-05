@@ -898,14 +898,8 @@ static int merge_matching_ctf_fs_ds_file_groups(struct ctf_fs_trace *dest_trace,
                                                            src_group->sc->id);
             BT_ASSERT(sc);
 
-            auto index = ctf_fs_ds_index_create();
-            if (!index) {
-                ret = -1;
-                goto end;
-            }
-
-            auto new_dest_group =
-                ctf_fs_ds_file_group_create(dest_trace, sc, src_group->stream_id, std::move(index));
+            auto new_dest_group = ctf_fs_ds_file_group_create(dest_trace, sc, src_group->stream_id,
+                                                              bt2s::make_unique<ctf_fs_ds_index>());
 
             if (!new_dest_group) {
                 ret = -1;
