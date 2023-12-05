@@ -1540,33 +1540,18 @@ static bool compare_ds_file_groups_by_first_path(const ctf_fs_ds_file_group::UP&
     return first_ds_file_info_a.path < first_ds_file_info_b.path;
 }
 
-static gint compare_strings(gconstpointer p_a, gconstpointer p_b)
-{
-    const char *a = *((const char **) p_a);
-    const char *b = *((const char **) p_b);
-
-    return strcmp(a, b);
-}
-
 int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
                                          const bt_value *paths_value,
                                          const bt_value *trace_name_value,
                                          bt_self_component *selfComp)
 {
     int ret = 0;
-    uint64_t i;
-    GPtrArray *paths = NULL;
+    std::vector<std::string> paths;
     std::vector<ctf_fs_trace::UP> traces;
     const char *trace_name;
 
     BT_ASSERT(bt_value_get_type(paths_value) == BT_VALUE_TYPE_ARRAY);
     BT_ASSERT(!bt_value_array_is_empty(paths_value));
-
-    paths = g_ptr_array_new_with_free_func(g_free);
-    if (!paths) {
-        BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs->logger, "Failed to allocate a GPtrArray.");
-        goto error;
-    }
 
     trace_name = trace_name_value ? bt_value_string_get(trace_name_value) : NULL;
 
@@ -1574,28 +1559,18 @@ int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
      * Create a sorted array of the paths, to make the execution of this
      * component deterministic.
      */
-    for (i = 0; i < bt_value_array_get_length(paths_value); i++) {
+    for (std::uint64_t i = 0; i < bt_value_array_get_length(paths_value); i++) {
         const bt_value *path_value = bt_value_array_borrow_element_by_index_const(paths_value, i);
         const char *input = bt_value_string_get(path_value);
-        gchar *input_copy;
-
-        input_copy = g_strdup(input);
-        if (!input_copy) {
-            BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs->logger, "Failed to copy a string.");
-            goto error;
-        }
-
-        g_ptr_array_add(paths, input_copy);
+        paths.emplace_back(input);
     }
 
-    g_ptr_array_sort(paths, compare_strings);
+    std::sort(paths.begin(), paths.end());
 
     /* Create a separate ctf_fs_trace object for each path. */
-    for (i = 0; i < paths->len; i++) {
-        const char *path = (const char *) g_ptr_array_index(paths, i);
-
-        ret = ctf_fs_component_create_ctf_fs_trace_one_path(ctf_fs, path, trace_name, traces,
-                                                            selfComp);
+    for (const auto& path : paths) {
+        ret = ctf_fs_component_create_ctf_fs_trace_one_path(ctf_fs, path.c_str(), trace_name,
+                                                            traces, selfComp);
         if (ret) {
             goto end;
         }
@@ -1609,7 +1584,7 @@ int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
          * We have more than one trace, they must all share the same
          * UUID, verify that.
          */
-        for (i = 0; i < traces.size(); i++) {
+        for (size_t i = 0; i < traces.size(); i++) {
             ctf_fs_trace *this_trace = traces[i].get();
             const uint8_t *this_trace_uuid = this_trace->metadata->tc->uuid;
 
@@ -1669,14 +1644,11 @@ int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
     std::sort(ctf_fs->trace->ds_file_groups.begin(), ctf_fs->trace->ds_file_groups.end(),
               compare_ds_file_groups_by_first_path);
     goto end;
+
 error:
     ret = -1;
 
 end:
-    if (paths) {
-        g_ptr_array_free(paths, TRUE);
-    }
-
     return ret;
 }
 
