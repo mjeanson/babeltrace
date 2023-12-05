@@ -15,14 +15,9 @@
 #include "cpp-common/bt2c/libc-up.hpp"
 #include "cpp-common/bt2c/logging.hpp"
 
-struct ctf_fs_file_deleter
-{
-    void operator()(struct ctf_fs_file *file) noexcept;
-};
-
 struct ctf_fs_file
 {
-    using UP = std::unique_ptr<ctf_fs_file, ctf_fs_file_deleter>;
+    using UP = std::unique_ptr<ctf_fs_file>;
 
     explicit ctf_fs_file(const bt2c::Logger& parentLogger) :
         logger {parentLogger, "PLUGIN/SRC.CTF.FS/FILE"}
@@ -37,8 +32,6 @@ struct ctf_fs_file
 
     off_t size = 0;
 };
-
-void ctf_fs_file_destroy(struct ctf_fs_file *file);
 
 ctf_fs_file::UP ctf_fs_file_create(const bt2c::Logger& parentLogger);
 
