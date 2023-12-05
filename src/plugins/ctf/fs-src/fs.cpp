@@ -255,20 +255,6 @@ end:
     }
 }
 
-static void ctf_fs_trace_destroy(struct ctf_fs_trace *ctf_fs_trace)
-{
-    if (!ctf_fs_trace) {
-        return;
-    }
-
-    delete ctf_fs_trace;
-}
-
-void ctf_fs_trace_deleter::operator()(ctf_fs_trace * const trace) noexcept
-{
-    ctf_fs_trace_destroy(trace);
-}
-
 ctf_fs_component::UP ctf_fs_component_create(const bt2c::Logger& parentLogger)
 {
     return bt2s::make_unique<ctf_fs_component>(parentLogger);
