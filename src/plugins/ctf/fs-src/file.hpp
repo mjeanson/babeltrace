@@ -8,6 +8,7 @@
 #define CTF_FS_FILE_H
 
 #include <memory>
+#include <string>
 
 #include <babeltrace2/babeltrace.h>
 
@@ -30,8 +31,7 @@ struct ctf_fs_file
 
     bt2c::Logger logger;
 
-    /* Owned by this */
-    GString *path = nullptr;
+    std::string path;
 
     bt2c::FileUP fp;
 

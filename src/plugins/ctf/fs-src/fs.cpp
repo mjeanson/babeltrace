@@ -575,7 +575,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
     index = ctf_fs_ds_file_build_index(ds_file, ds_file_info.get(), msg_iter);
     if (!index) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger, "Failed to index CTF stream file \'{}\'",
-                                     ds_file->file->path->str);
+                                     ds_file->file->path);
         goto error;
     }
 
@@ -692,32 +692,31 @@ static int create_ds_file_groups(struct ctf_fs_trace *ctf_fs_trace)
         }
 
         /* Create full path string. */
-        g_string_append_printf(file->path, "%s" G_DIR_SEPARATOR_S "%s", ctf_fs_trace->path->str,
-                               basename);
-        if (!g_file_test(file->path->str, G_FILE_TEST_IS_REGULAR)) {
-            BT_CPPLOGI_SPEC(ctf_fs_trace->logger, "Ignoring non-regular file `{}`",
-                            file->path->str);
+        file->path = fmt::format("{}" G_DIR_SEPARATOR_S "{}", ctf_fs_trace->path->str, basename);
+
+        if (!g_file_test(file->path.c_str(), G_FILE_TEST_IS_REGULAR)) {
+            BT_CPPLOGI_SPEC(ctf_fs_trace->logger, "Ignoring non-regular file `{}`", file->path);
             continue;
         }
 
         ret = ctf_fs_file_open(file.get(), "rb");
         if (ret) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger, "Cannot open stream file `{}`",
-                                         file->path->str);
+                                         file->path);
             goto error;
         }
 
         if (file->size == 0) {
             /* Skip empty stream. */
-            BT_CPPLOGI_SPEC(ctf_fs_trace->logger, "Ignoring empty file `{}`", file->path->str);
+            BT_CPPLOGI_SPEC(ctf_fs_trace->logger, "Ignoring empty file `{}`", file->path);
             continue;
         }
 
-        ret = add_ds_file_to_ds_file_group(ctf_fs_trace, file->path->str);
+        ret = add_ds_file_to_ds_file_group(ctf_fs_trace, file->path.c_str());
         if (ret) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger,
                                          "Cannot add stream file `{}` to stream file group",
-                                         file->path->str);
+                                         file->path);
             goto error;
         }
     }

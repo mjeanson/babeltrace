@@ -18,10 +18,6 @@ void ctf_fs_file_destroy(struct ctf_fs_file *file)
         return;
     }
 
-    if (file->path) {
-        g_string_free(file->path, TRUE);
-    }
-
     delete file;
 }
 
@@ -32,20 +28,7 @@ void ctf_fs_file_deleter::operator()(ctf_fs_file * const file) noexcept
 
 ctf_fs_file::UP ctf_fs_file_create(const bt2c::Logger& parentLogger)
 {
-    ctf_fs_file::UP file {new ctf_fs_file {parentLogger}};
-
-    file->path = g_string_new(NULL);
-    if (!file->path) {
-        goto error;
-    }
-
-    goto end;
-
-error:
-    file.reset();
-
-end:
-    return file;
+    return ctf_fs_file::UP {new ctf_fs_file {parentLogger}};
 }
 
 int ctf_fs_file_open(struct ctf_fs_file *file, const char *mode)
@@ -53,11 +36,11 @@ int ctf_fs_file_open(struct ctf_fs_file *file, const char *mode)
     int ret = 0;
     struct stat stat;
 
-    BT_CPPLOGI_SPEC(file->logger, "Opening file \"{}\" with mode \"{}\"", file->path->str, mode);
-    file->fp.reset(fopen(file->path->str, mode));
+    BT_CPPLOGI_SPEC(file->logger, "Opening file \"{}\" with mode \"{}\"", file->path, mode);
+    file->fp.reset(fopen(file->path.c_str(), mode));
     if (!file->fp) {
         BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(file->logger, "Cannot open file", ": path={}, mode={}",
-                                           file->path->str, mode);
+                                           file->path, mode);
         goto error;
     }
 
@@ -65,7 +48,7 @@ int ctf_fs_file_open(struct ctf_fs_file *file, const char *mode)
 
     if (fstat(fileno(file->fp.get()), &stat)) {
         BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(file->logger, "Cannot get file information", ": path={}",
-                                           file->path->str);
+                                           file->path);
         goto error;
     }
 

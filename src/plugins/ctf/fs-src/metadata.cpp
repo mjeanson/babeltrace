@@ -43,8 +43,7 @@ static ctf_fs_file::UP get_file(const char *trace_path, const bt2c::Logger& logg
         goto error;
     }
 
-    g_string_append(file->path, trace_path);
-    g_string_append(file->path, G_DIR_SEPARATOR_S CTF_FS_METADATA_FILENAME);
+    file->path = fmt::format("{}" G_DIR_SEPARATOR_S CTF_FS_METADATA_FILENAME, trace_path);
 
     if (ctf_fs_file_open(file.get(), "rb")) {
         goto error;
