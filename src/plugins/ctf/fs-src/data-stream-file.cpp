@@ -324,7 +324,7 @@ ctf_fs_ds_group_medops_set_file(struct ctf_fs_ds_group_medops_data *data,
     /* Check if that file is already the one mapped. */
     if (!data->file || data->file->file->path != index_entry->path) {
         /* Destroy the previously used file. */
-        ctf_fs_ds_file_destroy(data->file);
+        delete data->file;
 
         /* Create the new file. */
         data->file =
@@ -388,7 +388,7 @@ void ctf_fs_ds_group_medops_data_destroy(struct ctf_fs_ds_group_medops_data *dat
         goto end;
     }
 
-    ctf_fs_ds_file_destroy(data->file);
+    delete data->file;
 
     delete data;
 
@@ -843,7 +843,7 @@ struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace,
 
 error:
     /* Do not touch "borrowed" file. */
-    ctf_fs_ds_file_destroy(ds_file);
+    delete ds_file;
     ds_file = NULL;
 
 end:
@@ -871,15 +871,9 @@ ctf_fs_ds_index::UP ctf_fs_ds_index_create()
     return bt2s::make_unique<ctf_fs_ds_index>();
 }
 
-void ctf_fs_ds_file_destroy(struct ctf_fs_ds_file *ds_file)
+ctf_fs_ds_file::~ctf_fs_ds_file()
 {
-    if (!ds_file) {
-        return;
-    }
-
-    (void) ds_file_munmap(ds_file);
-
-    delete ds_file;
+    (void) ds_file_munmap(this);
 }
 
 ctf_fs_ds_file_info::UP ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns)

@@ -40,6 +40,10 @@ struct ctf_fs_ds_file
     {
     }
 
+    ctf_fs_ds_file(const ctf_fs_ds_file&) = delete;
+    ctf_fs_ds_file& operator=(const ctf_fs_ds_file&) = delete;
+    ~ctf_fs_ds_file();
+
     bt2c::Logger logger;
 
     /* Weak */
@@ -144,8 +148,6 @@ struct ctf_fs_ds_file_group
 
 struct ctf_fs_ds_file *ctf_fs_ds_file_create(ctf_fs_trace *ctf_fs_trace, bt2::Stream::Shared stream,
                                              const char *path, const bt2c::Logger& logger);
-
-void ctf_fs_ds_file_destroy(struct ctf_fs_ds_file *stream);
 
 ctf_fs_ds_index::UP ctf_fs_ds_file_build_index(struct ctf_fs_ds_file *ds_file,
                                                struct ctf_fs_ds_file_info *ds_file_info,
