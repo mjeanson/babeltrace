@@ -823,7 +823,7 @@ struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace,
         goto error;
     }
 
-    ds_file->file = ctf_fs_file_create(parentLogger).release();
+    ds_file->file = ctf_fs_file_create(parentLogger);
     if (!ds_file->file) {
         goto error;
     }
@@ -831,7 +831,7 @@ struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace,
     ds_file->stream = std::move(stream);
     ds_file->metadata = ctf_fs_trace->metadata;
     g_string_assign(ds_file->file->path, path);
-    ret = ctf_fs_file_open(ds_file->file, "rb");
+    ret = ctf_fs_file_open(ds_file->file.get(), "rb");
     if (ret) {
         goto error;
     }
@@ -878,10 +878,6 @@ void ctf_fs_ds_file_destroy(struct ctf_fs_ds_file *ds_file)
     }
 
     (void) ds_file_munmap(ds_file);
-
-    if (ds_file->file) {
-        ctf_fs_file_destroy(ds_file->file);
-    }
 
     delete ds_file;
 }

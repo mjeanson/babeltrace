@@ -21,6 +21,7 @@
 #include "cpp-common/bt2c/logging.hpp"
 
 #include "../common/src/msg-iter/msg-iter.hpp"
+#include "file.hpp"
 
 struct ctf_fs_ds_file_info
 {
@@ -44,8 +45,7 @@ struct ctf_fs_ds_file
     /* Weak */
     struct ctf_fs_metadata *metadata = nullptr;
 
-    /* Owned by this */
-    struct ctf_fs_file *file = nullptr;
+    ctf_fs_file::UP file;
 
     bt2::Stream::Shared stream;
 
