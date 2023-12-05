@@ -116,7 +116,7 @@ static enum ctf_msg_iter_medium_status ds_file_mmap(struct ctf_fs_ds_file *ds_fi
     BT_ASSERT(ds_file->mmap_len > 0);
 
     ds_file->mmap_addr =
-        bt_mmap(ds_file->mmap_len, PROT_READ, MAP_PRIVATE, fileno(ds_file->file->fp),
+        bt_mmap(ds_file->mmap_len, PROT_READ, MAP_PRIVATE, fileno(ds_file->file->fp.get()),
                 ds_file->mmap_offset_in_file, static_cast<int>(ds_file->logger.level()));
     if (ds_file->mmap_addr == MAP_FAILED) {
         BT_CPPLOGE_SPEC(ds_file->logger,

@@ -11,6 +11,7 @@
 
 #include <babeltrace2/babeltrace.h>
 
+#include "cpp-common/bt2c/libc-up.hpp"
 #include "cpp-common/bt2c/logging.hpp"
 
 struct ctf_fs_file_deleter
@@ -32,8 +33,7 @@ struct ctf_fs_file
     /* Owned by this */
     GString *path = nullptr;
 
-    /* Owned by this */
-    FILE *fp = nullptr;
+    bt2c::FileUP fp;
 
     off_t size = 0;
 };

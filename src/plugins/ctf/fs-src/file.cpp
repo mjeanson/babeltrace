@@ -18,16 +18,6 @@ void ctf_fs_file_destroy(struct ctf_fs_file *file)
         return;
     }
 
-    if (file->fp) {
-        BT_CPPLOGD_SPEC(file->logger, "Closing file \"{}\" ({})",
-                        file->path ? file->path->str : NULL, fmt::ptr(file->fp));
-
-        if (fclose(file->fp)) {
-            BT_CPPLOGE_SPEC(file->logger, "Cannot close file \"{}\": {}",
-                            file->path ? file->path->str : "NULL", strerror(errno));
-        }
-    }
-
     if (file->path) {
         g_string_free(file->path, TRUE);
     }
@@ -64,7 +54,7 @@ int ctf_fs_file_open(struct ctf_fs_file *file, const char *mode)
     struct stat stat;
 
     BT_CPPLOGI_SPEC(file->logger, "Opening file \"{}\" with mode \"{}\"", file->path->str, mode);
-    file->fp = fopen(file->path->str, mode);
+    file->fp.reset(fopen(file->path->str, mode));
     if (!file->fp) {
         BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(file->logger, "Cannot open file", ": path={}, mode={}",
                                            file->path->str, mode);
@@ -73,7 +63,7 @@ int ctf_fs_file_open(struct ctf_fs_file *file, const char *mode)
 
     BT_CPPLOGI_SPEC(file->logger, "Opened file: {}", fmt::ptr(file->fp));
 
-    if (fstat(fileno(file->fp), &stat)) {
+    if (fstat(fileno(file->fp.get()), &stat)) {
         BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(file->logger, "Cannot get file information", ": path={}",
                                            file->path->str);
         goto error;
@@ -85,13 +75,6 @@ int ctf_fs_file_open(struct ctf_fs_file *file, const char *mode)
 
 error:
     ret = -1;
-
-    if (file->fp) {
-        if (fclose(file->fp)) {
-            BT_CPPLOGE_SPEC(file->logger, "Cannot close file \"{}\": {}", file->path->str,
-                            strerror(errno));
-        }
-    }
 
 end:
     return ret;
