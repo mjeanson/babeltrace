@@ -12,6 +12,7 @@
 
 #include "compat/endian.h" /* IWYU pragma: keep  */
 #include "compat/mman.h"   /* IWYU: pragma keep  */
+#include "cpp-common/bt2c/glib-up.hpp"
 #include "cpp-common/bt2s/make-unique.hpp"
 #include "cpp-common/vendor/fmt/format.h"
 
@@ -445,10 +446,10 @@ static ctf_fs_ds_index::UP build_index_from_idx_file(struct ctf_fs_ds_file *ds_f
                                                      struct ctf_msg_iter *msg_iter)
 {
     int ret;
-    gchar *directory = NULL;
-    gchar *basename = NULL;
+    bt2c::GCharUP directory;
+    bt2c::GCharUP basename;
     GString *index_basename = NULL;
-    gchar *index_file_path = NULL;
+    bt2c::GCharUP index_file_path;
     GMappedFile *mapped_file = NULL;
     gsize filesize;
     const char *mmap_begin = NULL, *file_pos = NULL;
@@ -481,31 +482,31 @@ static ctf_fs_ds_index::UP build_index_from_idx_file(struct ctf_fs_ds_file *ds_f
     }
 
     /* Look for index file in relative path index/name.idx. */
-    basename = g_path_get_basename(ds_file->file->path.c_str());
+    basename.reset(g_path_get_basename(ds_file->file->path.c_str()));
     if (!basename) {
         BT_CPPLOGE_SPEC(ds_file->logger, "Cannot get the basename of datastream file {}",
                         ds_file->file->path);
         goto error;
     }
 
-    directory = g_path_get_dirname(ds_file->file->path.c_str());
+    directory.reset(g_path_get_dirname(ds_file->file->path.c_str()));
     if (!directory) {
         BT_CPPLOGE_SPEC(ds_file->logger, "Cannot get dirname of datastream file {}",
                         ds_file->file->path);
         goto error;
     }
 
-    index_basename = g_string_new(basename);
+    index_basename = g_string_new(basename.get());
     if (!index_basename) {
         BT_CPPLOGE_STR_SPEC(ds_file->logger, "Cannot allocate index file basename string");
         goto error;
     }
 
     g_string_append(index_basename, ".idx");
-    index_file_path = g_build_filename(directory, "index", index_basename->str, NULL);
-    mapped_file = g_mapped_file_new(index_file_path, FALSE, NULL);
+    index_file_path.reset(g_build_filename(directory.get(), "index", index_basename->str, NULL));
+    mapped_file = g_mapped_file_new(index_file_path.get(), FALSE, NULL);
     if (!mapped_file) {
-        BT_CPPLOGD_SPEC(ds_file->logger, "Cannot create new mapped file {}", index_file_path);
+        BT_CPPLOGD_SPEC(ds_file->logger, "Cannot create new mapped file {}", index_file_path.get());
         goto error;
     }
 
@@ -644,9 +645,6 @@ static ctf_fs_ds_index::UP build_index_from_idx_file(struct ctf_fs_ds_file *ds_f
         goto error;
     }
 end:
-    g_free(directory);
-    g_free(basename);
-    g_free(index_file_path);
     if (index_basename) {
         g_string_free(index_basename, TRUE);
     }
