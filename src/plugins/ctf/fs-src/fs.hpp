@@ -81,14 +81,9 @@ struct ctf_fs_port_data
     struct ctf_fs_component *ctf_fs = nullptr;
 };
 
-struct ctf_fs_component_deleter
-{
-    void operator()(ctf_fs_component *);
-};
-
 struct ctf_fs_component
 {
-    using UP = std::unique_ptr<ctf_fs_component, ctf_fs_component_deleter>;
+    using UP = std::unique_ptr<ctf_fs_component>;
 
     explicit ctf_fs_component(const bt2c::Logger& parentLogger) noexcept :
         logger {parentLogger, "PLUGIN/SRC.CTF.FS/COMP"}
@@ -180,10 +175,6 @@ int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
                                          const bt_value *paths_value,
                                          const bt_value *trace_name_value,
                                          bt_self_component *selfComp);
-
-/* Free `ctf_fs` and everything it owns. */
-
-void ctf_fs_destroy(struct ctf_fs_component *ctf_fs);
 
 /*
  * Read and validate parameters taken by the src.ctf.fs plugin.

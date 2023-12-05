@@ -296,29 +296,15 @@ void ctf_fs_trace_deleter::operator()(ctf_fs_trace * const trace) noexcept
     ctf_fs_trace_destroy(trace);
 }
 
-void ctf_fs_destroy(struct ctf_fs_component *ctf_fs)
-{
-    if (!ctf_fs) {
-        return;
-    }
-
-    delete ctf_fs;
-}
-
-void ctf_fs_component_deleter::operator()(ctf_fs_component *comp)
-{
-    ctf_fs_destroy(comp);
-}
-
 ctf_fs_component::UP ctf_fs_component_create(const bt2c::Logger& parentLogger)
 {
-    return ctf_fs_component::UP {new ctf_fs_component {parentLogger}};
+    return bt2s::make_unique<ctf_fs_component>(parentLogger);
 }
 
 void ctf_fs_finalize(bt_self_component_source *component)
 {
-    ctf_fs_destroy((struct ctf_fs_component *) bt_self_component_get_data(
-        bt_self_component_source_as_self_component(component)));
+    ctf_fs_component::UP {static_cast<ctf_fs_component *>(
+        bt_self_component_get_data(bt_self_component_source_as_self_component(component)))};
 }
 
 bt2c::GCharUP ctf_fs_make_port_name(struct ctf_fs_ds_file_group *ds_file_group)
