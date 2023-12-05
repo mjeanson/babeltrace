@@ -280,10 +280,8 @@ struct ctf_fs_ds_group_medops_data
     /*
      * File we are currently reading.  Changes whenever we switch to
      * reading another data file.
-     *
-     * Owned by this.
      */
-    struct ctf_fs_ds_file *file = nullptr;
+    ctf_fs_ds_file::UP file;
 
     /* Weak, for context / logging / appending causes. */
     bt_self_message_iterator *self_msg_iter = nullptr;
@@ -296,7 +294,7 @@ static enum ctf_msg_iter_medium_status medop_group_request_bytes(size_t request_
     struct ctf_fs_ds_group_medops_data *data = (struct ctf_fs_ds_group_medops_data *) void_data;
 
     /* Return bytes from the current file. */
-    return medop_request_bytes(request_sz, buffer_addr, buffer_sz, data->file);
+    return medop_request_bytes(request_sz, buffer_addr, buffer_sz, data->file.get());
 }
 
 static bt_stream *medop_group_borrow_stream(bt_stream_class *stream_class, int64_t stream_id,
@@ -304,7 +302,7 @@ static bt_stream *medop_group_borrow_stream(bt_stream_class *stream_class, int64
 {
     struct ctf_fs_ds_group_medops_data *data = (struct ctf_fs_ds_group_medops_data *) void_data;
 
-    return medop_borrow_stream(stream_class, stream_id, data->file);
+    return medop_borrow_stream(stream_class, stream_id, data->file.get());
 }
 
 /*
@@ -323,14 +321,10 @@ ctf_fs_ds_group_medops_set_file(struct ctf_fs_ds_group_medops_data *data,
 
     /* Check if that file is already the one mapped. */
     if (!data->file || data->file->file->path != index_entry->path) {
-        /* Destroy the previously used file. */
-        delete data->file;
-
         /* Create the new file. */
         data->file =
             ctf_fs_ds_file_create(data->ds_file_group->ctf_fs_trace, data->ds_file_group->stream,
-                                  index_entry->path, data->logger)
-                .release();
+                                  index_entry->path, data->logger);
         if (!data->file) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(data->logger, "failed to create ctf_fs_ds_file.");
             status = CTF_MSG_ITER_MEDIUM_STATUS_ERROR;
@@ -342,7 +336,7 @@ ctf_fs_ds_group_medops_set_file(struct ctf_fs_ds_group_medops_data *data,
      * Ensure the right portion of the file will be returned on the next
      * request_bytes call.
      */
-    status = ds_file_mmap(data->file, index_entry->offset.bytes());
+    status = ds_file_mmap(data->file.get(), index_entry->offset.bytes());
     if (status != CTF_MSG_ITER_MEDIUM_STATUS_OK) {
         goto end;
     }
@@ -388,8 +382,6 @@ void ctf_fs_ds_group_medops_data_destroy(struct ctf_fs_ds_group_medops_data *dat
     if (!data) {
         goto end;
     }
-
-    delete data->file;
 
     delete data;
 
