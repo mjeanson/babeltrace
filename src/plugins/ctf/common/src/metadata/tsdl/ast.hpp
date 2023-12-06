@@ -478,14 +478,9 @@ struct ctf_ast
 
 const char *node_type(struct ctf_node *node);
 
-struct ctf_visitor_generate_ir_deleter
-{
-    void operator()(struct ctf_visitor_generate_ir *visitor);
-};
-
 struct ctf_visitor_generate_ir
 {
-    using UP = std::unique_ptr<ctf_visitor_generate_ir, ctf_visitor_generate_ir_deleter>;
+    using UP = std::unique_ptr<ctf_visitor_generate_ir>;
 
     explicit ctf_visitor_generate_ir(ctf_metadata_decoder_config decoderConfig,
                                      bt2c::Logger loggerParam) :
@@ -493,6 +488,8 @@ struct ctf_visitor_generate_ir
         logger {std::move(loggerParam)}
     {
     }
+
+    ~ctf_visitor_generate_ir();
 
     /* Trace IR trace class being filled (owned by this) */
     bt2::TraceClass::Shared trace_class;
