@@ -506,11 +506,7 @@ build_index_from_idx_file(struct ctf_fs_ds_file *ds_file, struct ctf_fs_ds_file_
             return bt2s::nullopt;
         }
 
-        ctf_fs_ds_index_entry index_entry {offset, packetSize};
-
-        /* Set path to stream file. */
-        index_entry.path = file_info->path.c_str();
-
+        ctf_fs_ds_index_entry index_entry {file_info->path.c_str(), offset, packetSize};
         index_entry.timestamp_begin = be64toh(file_index->timestamp_begin);
         index_entry.timestamp_end = be64toh(file_index->timestamp_end);
         if (index_entry.timestamp_end < index_entry.timestamp_begin) {
@@ -656,10 +652,7 @@ build_index_from_stream_file(struct ctf_fs_ds_file *ds_file, struct ctf_fs_ds_fi
             return bt2s::nullopt;
         }
 
-        ctf_fs_ds_index_entry index_entry {currentPacketOffset, currentPacketSize};
-
-        /* Set path to stream file. */
-        index_entry.path = file_info->path.c_str();
+        ctf_fs_ds_index_entry index_entry {file_info->path, currentPacketOffset, currentPacketSize};
 
         int ret = init_index_entry(index_entry, ds_file, &props);
         if (ret) {

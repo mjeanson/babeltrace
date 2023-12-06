@@ -78,15 +78,15 @@ struct ctf_fs_ds_file
 
 struct ctf_fs_ds_index_entry
 {
-    explicit ctf_fs_ds_index_entry(const bt2c::DataLen offsetParam,
-                                   const bt2c::DataLen packetSizeParam) noexcept :
-        offset(offsetParam),
-        packetSize(packetSizeParam)
+    ctf_fs_ds_index_entry(const bt2c::CStringView pathParam, const bt2c::DataLen offsetParam,
+                          const bt2c::DataLen packetSizeParam) noexcept :
+        path {pathParam},
+        offset {offsetParam}, packetSize {packetSizeParam}
     {
     }
 
     /* Weak, belongs to ctf_fs_ds_file_info. */
-    const char *path = nullptr;
+    const char *path;
 
     /* Position of the packet from the beginning of the file. */
     bt2c::DataLen offset;
