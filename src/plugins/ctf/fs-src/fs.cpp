@@ -355,22 +355,22 @@ static void ds_file_group_insert_ds_file_info_sorted(struct ctf_fs_ds_file_group
     ds_file_group->ds_file_infos.insert(it, std::move(ds_file_info));
 }
 
-static bool ds_index_entries_equal(const struct ctf_fs_ds_index_entry *left,
-                                   const struct ctf_fs_ds_index_entry *right)
+static bool ds_index_entries_equal(const ctf_fs_ds_index_entry& left,
+                                   const ctf_fs_ds_index_entry& right)
 {
-    if (left->packetSize != right->packetSize) {
+    if (left.packetSize != right.packetSize) {
         return false;
     }
 
-    if (left->timestamp_begin != right->timestamp_begin) {
+    if (left.timestamp_begin != right.timestamp_begin) {
         return false;
     }
 
-    if (left->timestamp_end != right->timestamp_end) {
+    if (left.timestamp_end != right.timestamp_end) {
         return false;
     }
 
-    if (left->packet_seq_num != right->packet_seq_num) {
+    if (left.packet_seq_num != right.packet_seq_num) {
         return false;
     }
 
@@ -381,18 +381,15 @@ static bool ds_index_entries_equal(const struct ctf_fs_ds_index_entry *left,
  * Insert `entry` into `index`, without duplication.
  *
  * The entry is inserted only if there isn't an identical entry already.
- *
- * In any case, the ownership of `entry` is transferred to this function.  So if
- * the entry is not inserted, it is freed.
  */
 
 static void ds_index_insert_ds_index_entry_sorted(struct ctf_fs_ds_index *index,
-                                                  ctf_fs_ds_index_entry::UP entry)
+                                                  const ctf_fs_ds_index_entry& entry)
 {
     /* Find the spot where to insert this index entry. */
     auto otherEntry = index->entries.begin();
     for (; otherEntry != index->entries.end(); ++otherEntry) {
-        if (entry->timestamp_begin_ns <= (*otherEntry)->timestamp_begin_ns) {
+        if (entry.timestamp_begin_ns <= otherEntry->timestamp_begin_ns) {
             break;
         }
     }
@@ -404,16 +401,15 @@ static void ds_index_insert_ds_index_entry_sorted(struct ctf_fs_ds_index *index,
      * snapshots of the same trace.  We then want the index to contain
      * a reference to only one copy of that packet.
      */
-    if (otherEntry == index->entries.end() ||
-        !ds_index_entries_equal(entry.get(), otherEntry->get())) {
-        index->entries.insert(otherEntry, std::move(entry));
+    if (otherEntry == index->entries.end() || !ds_index_entries_equal(entry, *otherEntry)) {
+        index->entries.emplace(otherEntry, entry);
     }
 }
 
-static void merge_ctf_fs_ds_indexes(struct ctf_fs_ds_index *dest, ctf_fs_ds_index::UP src)
+static void merge_ctf_fs_ds_indexes(struct ctf_fs_ds_index *dest, const ctf_fs_ds_index& src)
 {
-    for (auto& entry : src->entries) {
-        ds_index_insert_ds_index_entry_sorted(dest, std::move(entry));
+    for (const auto& entry : src.entries) {
+        ds_index_insert_ds_index_entry_sorted(dest, entry);
     }
 }
 
@@ -539,7 +535,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
         ds_file_group = new_ds_file_group.get();
         ctf_fs_trace->ds_file_groups.emplace_back(std::move(new_ds_file_group));
     } else {
-        merge_ctf_fs_ds_indexes(ds_file_group->index.get(), std::move(index));
+        merge_ctf_fs_ds_indexes(ds_file_group->index.get(), *index);
     }
 
     ds_file_group_insert_ds_file_info_sorted(ds_file_group, std::move(ds_file_info));
@@ -775,7 +771,7 @@ static void merge_ctf_fs_ds_file_groups(struct ctf_fs_ds_file_group *dest,
     }
 
     /* Merge both indexes. */
-    merge_ctf_fs_ds_indexes(dest->index.get(), std::move(src->index));
+    merge_ctf_fs_ds_indexes(dest->index.get(), *src->index);
 }
 
 /* Merge src_trace's data stream file groups into dest_trace's. */
@@ -921,7 +917,7 @@ enum target_event
 
 static int decode_clock_snapshot_after_event(struct ctf_fs_trace *ctf_fs_trace,
                                              struct ctf_clock_class *default_cc,
-                                             struct ctf_fs_ds_index_entry *index_entry,
+                                             const ctf_fs_ds_index_entry& index_entry,
                                              enum target_event target_event, uint64_t *cs,
                                              int64_t *ts_ns)
 {
@@ -929,11 +925,10 @@ static int decode_clock_snapshot_after_event(struct ctf_fs_trace *ctf_fs_trace,
     ctf_msg_iter_up msg_iter;
 
     BT_ASSERT(ctf_fs_trace);
-    BT_ASSERT(index_entry);
-    BT_ASSERT(index_entry->path);
+    BT_ASSERT(index_entry.path);
 
     const auto ds_file = ctf_fs_ds_file_create(ctf_fs_trace, bt2::Stream::Shared {},
-                                               index_entry->path, ctf_fs_trace->logger);
+                                               index_entry.path, ctf_fs_trace->logger);
     if (!ds_file) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger, "Failed to create a ctf_fs_ds_file");
         return -1;
@@ -958,7 +953,7 @@ static int decode_clock_snapshot_after_event(struct ctf_fs_trace *ctf_fs_trace,
     ctf_msg_iter_set_dry_run(msg_iter.get(), true);
 
     /* Seek to the beginning of the target packet. */
-    iter_status = ctf_msg_iter_seek(msg_iter.get(), index_entry->offset.bytes());
+    iter_status = ctf_msg_iter_seek(msg_iter.get(), index_entry.offset.bytes());
     if (iter_status) {
         /* ctf_msg_iter_seek() logs errors. */
         return -1;
@@ -998,7 +993,7 @@ static int decode_clock_snapshot_after_event(struct ctf_fs_trace *ctf_fs_trace,
 
 static int decode_packet_first_event_timestamp(struct ctf_fs_trace *ctf_fs_trace,
                                                struct ctf_clock_class *default_cc,
-                                               struct ctf_fs_ds_index_entry *index_entry,
+                                               const ctf_fs_ds_index_entry& index_entry,
                                                uint64_t *cs, int64_t *ts_ns)
 {
     return decode_clock_snapshot_after_event(ctf_fs_trace, default_cc, index_entry, FIRST_EVENT, cs,
@@ -1007,7 +1002,7 @@ static int decode_packet_first_event_timestamp(struct ctf_fs_trace *ctf_fs_trace
 
 static int decode_packet_last_event_timestamp(struct ctf_fs_trace *ctf_fs_trace,
                                               struct ctf_clock_class *default_cc,
-                                              struct ctf_fs_ds_index_entry *index_entry,
+                                              const ctf_fs_ds_index_entry& index_entry,
                                               uint64_t *cs, int64_t *ts_ns)
 {
     return decode_clock_snapshot_after_event(ctf_fs_trace, default_cc, index_entry, LAST_EVENT, cs,
@@ -1048,23 +1043,22 @@ static int fix_index_lttng_event_after_packet_bug(struct ctf_fs_trace *trace)
          * fixed differently after.
          */
         for (size_t entry_i = 0; entry_i < index->entries.size() - 1; ++entry_i) {
-            ctf_fs_ds_index_entry *curr_entry = index->entries[entry_i].get();
-            ctf_fs_ds_index_entry *next_entry = index->entries[entry_i + 1].get();
+            auto& curr_entry = index->entries[entry_i];
+            const auto& next_entry = index->entries[entry_i + 1];
 
             /*
              * 1. Set the current index entry `end` timestamp to
              * the next index entry `begin` timestamp.
              */
-            curr_entry->timestamp_end = next_entry->timestamp_begin;
-            curr_entry->timestamp_end_ns = next_entry->timestamp_begin_ns;
+            curr_entry.timestamp_end = next_entry.timestamp_begin;
+            curr_entry.timestamp_end_ns = next_entry.timestamp_begin_ns;
         }
 
         /*
          * 2. Fix the last entry by decoding the last event of the last
          * packet.
          */
-        const auto last_entry = index->entries.back().get();
-        BT_ASSERT(last_entry);
+        auto& last_entry = index->entries.back();
 
         BT_ASSERT(ds_file_group->sc->default_clock_class);
         default_cc = ds_file_group->sc->default_clock_class;
@@ -1073,9 +1067,8 @@ static int fix_index_lttng_event_after_packet_bug(struct ctf_fs_trace *trace)
          * Decode packet to read the timestamp of the last event of the
          * entry.
          */
-        int ret = decode_packet_last_event_timestamp(trace, default_cc, last_entry,
-                                                     &last_entry->timestamp_end,
-                                                     &last_entry->timestamp_end_ns);
+        int ret = decode_packet_last_event_timestamp(
+            trace, default_cc, last_entry, &last_entry.timestamp_end, &last_entry.timestamp_end_ns);
         if (ret) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(
                 trace->logger,
@@ -1118,15 +1111,15 @@ static int fix_index_barectf_event_before_packet_bug(struct ctf_fs_trace *trace)
          * (index = 1).
          */
         for (size_t entry_i = 1; entry_i < index->entries.size(); ++entry_i) {
-            ctf_fs_ds_index_entry *prev_entry = index->entries[entry_i - 1].get();
-            ctf_fs_ds_index_entry *curr_entry = index->entries[entry_i].get();
+            auto& prev_entry = index->entries[entry_i - 1];
+            auto& curr_entry = index->entries[entry_i];
             /*
              * 2. Set the current entry `begin` timestamp to the
              * timestamp of the first event of the current packet.
              */
             int ret = decode_packet_first_event_timestamp(trace, default_cc, curr_entry,
-                                                          &curr_entry->timestamp_begin,
-                                                          &curr_entry->timestamp_begin_ns);
+                                                          &curr_entry.timestamp_begin,
+                                                          &curr_entry.timestamp_begin_ns);
             if (ret) {
                 BT_CPPLOGE_APPEND_CAUSE_SPEC(trace->logger,
                                              "Failed to decode first event's clock snapshot");
@@ -1137,8 +1130,8 @@ static int fix_index_barectf_event_before_packet_bug(struct ctf_fs_trace *trace)
              * 3. Set the previous entry `end` timestamp to the
              * timestamp of the first event of the current packet.
              */
-            prev_entry->timestamp_end = curr_entry->timestamp_begin;
-            prev_entry->timestamp_end_ns = curr_entry->timestamp_begin_ns;
+            prev_entry.timestamp_end = curr_entry.timestamp_begin;
+            prev_entry.timestamp_end_ns = curr_entry.timestamp_begin_ns;
         }
     }
 
@@ -1176,18 +1169,17 @@ static int fix_index_lttng_crash_quirk(struct ctf_fs_trace *trace)
         BT_ASSERT(index);
         BT_ASSERT(!index->entries.empty());
 
-        const auto last_entry = index->entries.back().get();
-        BT_ASSERT(last_entry);
+        auto& last_entry = index->entries.back();
 
         /* 1. Fix the last entry first. */
-        if (last_entry->timestamp_end == 0 && last_entry->timestamp_begin != 0) {
+        if (last_entry.timestamp_end == 0 && last_entry.timestamp_begin != 0) {
             /*
              * Decode packet to read the timestamp of the
              * last event of the stream file.
              */
             int ret = decode_packet_last_event_timestamp(trace, default_cc, last_entry,
-                                                         &last_entry->timestamp_end,
-                                                         &last_entry->timestamp_end_ns);
+                                                         &last_entry.timestamp_end,
+                                                         &last_entry.timestamp_end_ns);
             if (ret) {
                 BT_CPPLOGE_APPEND_CAUSE_SPEC(trace->logger,
                                              "Failed to decode last event's clock snapshot");
@@ -1197,16 +1189,16 @@ static int fix_index_lttng_crash_quirk(struct ctf_fs_trace *trace)
 
         /* Iterate over all entries but the last one. */
         for (size_t entry_idx = 0; entry_idx < index->entries.size() - 1; ++entry_idx) {
-            ctf_fs_ds_index_entry *curr_entry = index->entries[entry_idx].get();
-            ctf_fs_ds_index_entry *next_entry = index->entries[entry_idx + 1].get();
+            auto& curr_entry = index->entries[entry_idx];
+            const auto& next_entry = index->entries[entry_idx + 1];
 
-            if (curr_entry->timestamp_end == 0 && curr_entry->timestamp_begin != 0) {
+            if (curr_entry.timestamp_end == 0 && curr_entry.timestamp_begin != 0) {
                 /*
                  * 2. Set the current index entry `end` timestamp to
                  * the next index entry `begin` timestamp.
                  */
-                curr_entry->timestamp_end = next_entry->timestamp_begin;
-                curr_entry->timestamp_end_ns = next_entry->timestamp_begin_ns;
+                curr_entry.timestamp_end = next_entry.timestamp_begin;
+                curr_entry.timestamp_end_ns = next_entry.timestamp_begin_ns;
             }
         }
     }

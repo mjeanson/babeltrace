@@ -310,7 +310,6 @@ ctf_fs_ds_group_medops_set_file(struct ctf_fs_ds_group_medops_data *data,
 static enum ctf_msg_iter_medium_status medop_group_switch_packet(void *void_data)
 {
     struct ctf_fs_ds_group_medops_data *data = (struct ctf_fs_ds_group_medops_data *) void_data;
-    struct ctf_fs_ds_index_entry *index_entry;
 
     /* If we have gone through all index entries, we are done. */
     if (data->next_index_entry_index >= data->ds_file_group->index->entries.size()) {
@@ -321,9 +320,8 @@ static enum ctf_msg_iter_medium_status medop_group_switch_packet(void *void_data
      * Otherwise, look up the next index entry / packet and prepare it
      *  for reading.
      */
-    index_entry = data->ds_file_group->index->entries[data->next_index_entry_index].get();
-
-    ctf_msg_iter_medium_status status = ctf_fs_ds_group_medops_set_file(data, index_entry);
+    ctf_msg_iter_medium_status status = ctf_fs_ds_group_medops_set_file(
+        data, &data->ds_file_group->index->entries[data->next_index_entry_index]);
     if (status != CTF_MSG_ITER_MEDIUM_STATUS_OK) {
         return status;
     }
@@ -399,7 +397,6 @@ static ctf_fs_ds_index::UP build_index_from_idx_file(struct ctf_fs_ds_file *ds_f
     const char *mmap_begin = NULL, *file_pos = NULL;
     const struct ctf_packet_index_file_hdr *header = NULL;
     ctf_fs_ds_index::UP index;
-    ctf_fs_ds_index_entry::UP index_entry;
     ctf_fs_ds_index_entry *prev_index_entry = NULL;
     auto totalPacketsSize = bt2c::DataLen::fromBytes(0);
     size_t file_index_entry_size;
@@ -523,38 +520,33 @@ static ctf_fs_ds_index::UP build_index_from_idx_file(struct ctf_fs_ds_file *ds_f
             return nullptr;
         }
 
-        index_entry = bt2s::make_unique<ctf_fs_ds_index_entry>(offset, packetSize);
-        if (!index_entry) {
-            BT_CPPLOGE_APPEND_CAUSE_SPEC(ds_file->logger,
-                                         "Failed to create a ctf_fs_ds_index_entry.");
-            return nullptr;
-        }
+        ctf_fs_ds_index_entry index_entry {offset, packetSize};
 
         /* Set path to stream file. */
-        index_entry->path = file_info->path.c_str();
+        index_entry.path = file_info->path.c_str();
 
-        index_entry->timestamp_begin = be64toh(file_index->timestamp_begin);
-        index_entry->timestamp_end = be64toh(file_index->timestamp_end);
-        if (index_entry->timestamp_end < index_entry->timestamp_begin) {
+        index_entry.timestamp_begin = be64toh(file_index->timestamp_begin);
+        index_entry.timestamp_end = be64toh(file_index->timestamp_end);
+        if (index_entry.timestamp_end < index_entry.timestamp_begin) {
             BT_CPPLOGW_SPEC(
                 ds_file->logger,
                 "Invalid packet time bounds encountered in LTTng trace index file (begin > end): "
                 "timestamp_begin={}, timestamp_end={}",
-                index_entry->timestamp_begin, index_entry->timestamp_end);
+                index_entry.timestamp_begin, index_entry.timestamp_end);
             return nullptr;
         }
 
         /* Convert the packet's bound to nanoseconds since Epoch. */
-        ret = convert_cycles_to_ns(sc->default_clock_class, index_entry->timestamp_begin,
-                                   &index_entry->timestamp_begin_ns);
+        ret = convert_cycles_to_ns(sc->default_clock_class, index_entry.timestamp_begin,
+                                   &index_entry.timestamp_begin_ns);
         if (ret) {
             BT_CPPLOGI_STR_SPEC(
                 ds_file->logger,
                 "Failed to convert raw timestamp to nanoseconds since Epoch during index parsing");
             return nullptr;
         }
-        ret = convert_cycles_to_ns(sc->default_clock_class, index_entry->timestamp_end,
-                                   &index_entry->timestamp_end_ns);
+        ret = convert_cycles_to_ns(sc->default_clock_class, index_entry.timestamp_end,
+                                   &index_entry.timestamp_end_ns);
         if (ret) {
             BT_CPPLOGI_STR_SPEC(
                 ds_file->logger,
@@ -563,15 +555,15 @@ static ctf_fs_ds_index::UP build_index_from_idx_file(struct ctf_fs_ds_file *ds_f
         }
 
         if (version_minor >= 1) {
-            index_entry->packet_seq_num = be64toh(file_index->packet_seq_num);
+            index_entry.packet_seq_num = be64toh(file_index->packet_seq_num);
         }
 
         totalPacketsSize += packetSize;
         file_pos += file_index_entry_size;
 
-        prev_index_entry = index_entry.get();
+        index->entries.emplace_back(index_entry);
 
-        index->entries.emplace_back(std::move(index_entry));
+        prev_index_entry = &index->entries.back();
     }
 
     /* Validate that the index addresses the complete stream. */
@@ -586,7 +578,7 @@ static ctf_fs_ds_index::UP build_index_from_idx_file(struct ctf_fs_ds_file *ds_f
     return index;
 }
 
-static int init_index_entry(struct ctf_fs_ds_index_entry *entry, struct ctf_fs_ds_file *ds_file,
+static int init_index_entry(ctf_fs_ds_index_entry& entry, struct ctf_fs_ds_file *ds_file,
                             struct ctf_msg_iter_packet_properties *props)
 {
     struct ctf_stream_class *sc;
@@ -595,35 +587,35 @@ static int init_index_entry(struct ctf_fs_ds_index_entry *entry, struct ctf_fs_d
     BT_ASSERT(sc);
 
     if (props->snapshots.beginning_clock != UINT64_C(-1)) {
-        entry->timestamp_begin = props->snapshots.beginning_clock;
+        entry.timestamp_begin = props->snapshots.beginning_clock;
 
         /* Convert the packet's bound to nanoseconds since Epoch. */
         int ret = convert_cycles_to_ns(sc->default_clock_class, props->snapshots.beginning_clock,
-                                       &entry->timestamp_begin_ns);
+                                       &entry.timestamp_begin_ns);
         if (ret) {
             BT_CPPLOGI_STR_SPEC(ds_file->logger,
                                 "Failed to convert raw timestamp to nanoseconds since Epoch.");
             return ret;
         }
     } else {
-        entry->timestamp_begin = UINT64_C(-1);
-        entry->timestamp_begin_ns = UINT64_C(-1);
+        entry.timestamp_begin = UINT64_C(-1);
+        entry.timestamp_begin_ns = UINT64_C(-1);
     }
 
     if (props->snapshots.end_clock != UINT64_C(-1)) {
-        entry->timestamp_end = props->snapshots.end_clock;
+        entry.timestamp_end = props->snapshots.end_clock;
 
         /* Convert the packet's bound to nanoseconds since Epoch. */
         int ret = convert_cycles_to_ns(sc->default_clock_class, props->snapshots.end_clock,
-                                       &entry->timestamp_end_ns);
+                                       &entry.timestamp_end_ns);
         if (ret) {
             BT_CPPLOGI_STR_SPEC(ds_file->logger,
                                 "Failed to convert raw timestamp to nanoseconds since Epoch.");
             return ret;
         }
     } else {
-        entry->timestamp_end = UINT64_C(-1);
-        entry->timestamp_end_ns = UINT64_C(-1);
+        entry.timestamp_end = UINT64_C(-1);
+        entry.timestamp_end_ns = UINT64_C(-1);
     }
 
     return 0;
@@ -682,23 +674,17 @@ static ctf_fs_ds_index::UP build_index_from_stream_file(struct ctf_fs_ds_file *d
             return nullptr;
         }
 
-        auto index_entry =
-            bt2s::make_unique<ctf_fs_ds_index_entry>(currentPacketOffset, currentPacketSize);
-        if (!index_entry) {
-            BT_CPPLOGE_APPEND_CAUSE_SPEC(ds_file->logger,
-                                         "Failed to create a ctf_fs_ds_index_entry.");
-            return nullptr;
-        }
+        ctf_fs_ds_index_entry index_entry {currentPacketOffset, currentPacketSize};
 
         /* Set path to stream file. */
-        index_entry->path = file_info->path.c_str();
+        index_entry.path = file_info->path.c_str();
 
-        ret = init_index_entry(index_entry.get(), ds_file, &props);
+        ret = init_index_entry(index_entry, ds_file, &props);
         if (ret) {
             return nullptr;
         }
 
-        index->entries.emplace_back(std::move(index_entry));
+        index->entries.emplace_back(index_entry);
 
         currentPacketOffset += currentPacketSize;
         BT_CPPLOGD_SPEC(ds_file->logger,
