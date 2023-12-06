@@ -208,10 +208,8 @@ enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_tra
             struct ctf_trace_class *tc =
                 ctf_metadata_decoder_borrow_ctf_trace_class(metadata->decoder.get());
 
-            trace->trace_class = ctf_metadata_decoder_get_ir_trace_class(metadata->decoder.get())
-                                     .release()
-                                     .libObjPtr();
-            trace->trace = bt_trace_create(trace->trace_class);
+            trace->trace_class = ctf_metadata_decoder_get_ir_trace_class(metadata->decoder.get());
+            trace->trace = bt_trace_create(trace->trace_class->libObjPtr());
             if (!trace->trace) {
                 BT_CPPLOGE_APPEND_CAUSE_SPEC(metadata->logger, "Failed to create bt_trace");
                 goto error;
@@ -221,12 +219,12 @@ enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_tra
                                              "Failed to configure ctf trace class");
                 goto error;
             }
-            if (!stream_classes_all_have_default_clock_class(trace->trace_class,
+            if (!stream_classes_all_have_default_clock_class(trace->trace_class->libObjPtr(),
                                                              metadata->logger)) {
                 /* Error logged in function. */
                 goto error;
             }
-            trace->clock_class = borrow_any_clock_class(trace->trace_class);
+            trace->clock_class = borrow_any_clock_class(trace->trace_class->libObjPtr());
         }
 
         /* The metadata was updated successfully. */
