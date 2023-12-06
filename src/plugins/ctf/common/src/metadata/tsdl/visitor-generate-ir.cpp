@@ -19,6 +19,7 @@
 #include "common/uuid.h"
 #include "compat/endian.h" /* IWYU pragma: keep  */
 #include "cpp-common/bt2c/logging.hpp"
+#include "cpp-common/bt2s/make-unique.hpp"
 
 #include "../normalize-clk-offset.hpp"
 #include "ast.hpp"
@@ -474,7 +475,8 @@ ctx_create(const ctf::src::ClkClsCfg clkClsCfg,
            const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
            const bt2c::Logger& logger)
 {
-    ctf_visitor_generate_ir::UP ctx {new ctf_visitor_generate_ir {clkClsCfg, selfComp, logger}};
+    ctf_visitor_generate_ir::UP ctx =
+        bt2s::make_unique<ctf_visitor_generate_ir>(clkClsCfg, selfComp, logger);
 
     if (selfComp) {
         bt_trace_class *trace_class = bt_trace_class_create(selfComp->libObjPtr());
