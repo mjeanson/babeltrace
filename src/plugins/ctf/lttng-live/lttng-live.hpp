@@ -190,8 +190,7 @@ struct lttng_live_trace
     /* ctf trace ID within the session. */
     uint64_t id = 0;
 
-    /* Owned by this. */
-    bt_trace *trace = nullptr;
+    bt2::Trace::Shared trace;
 
     bt2::TraceClass::Shared trace_class;
 
