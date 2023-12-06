@@ -7,6 +7,7 @@
  */
 
 #include "compat/memstream.h"
+#include "cpp-common/bt2c/libc-up.hpp"
 
 #include "../common/src/metadata/tsdl/ctf-meta-configure-ir-trace.hpp"
 #include "../common/src/metadata/tsdl/decoder.hpp"
@@ -87,10 +88,9 @@ enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_tra
 {
     struct lttng_live_session *session = trace->session;
     struct lttng_live_metadata *metadata = trace->metadata;
-    size_t size, len_read = 0;
-    char *metadata_buf = NULL;
+    std::vector<char> metadataBuf;
     bool keep_receiving;
-    FILE *fp = NULL;
+    bt2c::FileUP fp;
     enum ctf_metadata_decoder_status decoder_status;
     enum lttng_live_iterator_status status = LTTNG_LIVE_ITERATOR_STATUS_OK;
     enum lttng_live_get_one_metadata_status metadata_status;
@@ -120,26 +120,9 @@ enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_tra
         goto end;
     }
 
-    /*
-     * Open a new write only file handle to populate the `metadata_buf`
-     * memory buffer so we can write in loop in it easily.
-     */
-    fp = bt_open_memstream(&metadata_buf, &size);
-    if (!fp) {
-        if (errno == EINTR && lttng_live_graph_is_canceled(session->lttng_live_msg_iter)) {
-            session->lttng_live_msg_iter->was_interrupted = true;
-            status = LTTNG_LIVE_ITERATOR_STATUS_AGAIN;
-        } else {
-            BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(metadata->logger, "Metadata open_memstream", ".");
-            status = LTTNG_LIVE_ITERATOR_STATUS_ERROR;
-        }
-        goto end;
-    }
-
     keep_receiving = true;
     /* Grab all available metadata. */
     while (keep_receiving) {
-        size_t reply_len = 0;
         /*
          * lttng_live_get_one_metadata_packet() asks the Relay Daemon
          * for new metadata. If new metadata is received, the function
@@ -152,11 +135,10 @@ enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_tra
          * If we receive an _ERROR status, it means there was a
          * networking, allocating, or some other unrecoverable error.
          */
-        metadata_status = lttng_live_get_one_metadata_packet(trace, fp, &reply_len);
+        metadata_status = lttng_live_get_one_metadata_packet(trace, metadataBuf);
 
         switch (metadata_status) {
         case LTTNG_LIVE_GET_ONE_METADATA_STATUS_OK:
-            len_read += reply_len;
             break;
         case LTTNG_LIVE_GET_ONE_METADATA_STATUS_END:
             keep_receiving = false;
@@ -186,14 +168,7 @@ enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_tra
         }
     }
 
-    /* The memory buffer `metadata_buf` contains all the metadata. */
-    if (bt_close_memstream(&metadata_buf, &size, fp)) {
-        BT_CPPLOGW_ERRNO_SPEC(metadata->logger, "Metadata bt_close_memstream", ".");
-    }
-
-    fp = NULL;
-
-    if (len_read == 0) {
+    if (metadataBuf.empty()) {
         if (!trace->trace) {
             status = LTTNG_LIVE_ITERATOR_STATUS_AGAIN;
             goto end;
@@ -208,7 +183,7 @@ enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_tra
      * Open a new reading file handle on the `metadata_buf` and pass it to
      * the metadata decoder.
      */
-    fp = bt_fmemopen(metadata_buf, len_read, "rb");
+    fp.reset(bt_fmemopen(metadataBuf.data(), metadataBuf.size(), "rb"));
     if (!fp) {
         if (errno == EINTR && lttng_live_graph_is_canceled(session->lttng_live_msg_iter)) {
             session->lttng_live_msg_iter->was_interrupted = true;
@@ -226,7 +201,7 @@ enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_tra
      * new metadata to our current trace class.
      */
     BT_CPPLOGD_SPEC(metadata->logger, "Appending new metadata to the ctf_trace class");
-    decoder_status = ctf_metadata_decoder_append_content(metadata->decoder.get(), fp);
+    decoder_status = ctf_metadata_decoder_append_content(metadata->decoder.get(), fp.get());
     switch (decoder_status) {
     case CTF_METADATA_DECODER_STATUS_OK:
         if (!trace->trace_class) {
@@ -267,15 +242,6 @@ enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_tra
 error:
     status = LTTNG_LIVE_ITERATOR_STATUS_ERROR;
 end:
-    if (fp) {
-        int closeret;
-
-        closeret = fclose(fp);
-        if (closeret) {
-            BT_CPPLOGW_ERRNO_SPEC(metadata->logger, "Error on fclose", ".");
-        }
-    }
-    free(metadata_buf);
     return status;
 }
 
