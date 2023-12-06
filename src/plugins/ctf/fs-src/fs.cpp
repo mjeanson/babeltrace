@@ -1462,30 +1462,17 @@ static int create_streams_for_trace(struct ctf_fs_trace *ctf_fs_trace)
         BT_ASSERT(ds_file_group->sc->ir_sc);
         BT_ASSERT(ctf_fs_trace->trace);
 
-        bt_stream *stream;
+        const bt2::StreamClass sc {ds_file_group->sc->ir_sc};
 
         if (ds_file_group->stream_id == UINT64_C(-1)) {
             /* No stream ID: use 0 */
-            stream =
-                bt_stream_create_with_id(ds_file_group->sc->ir_sc, ctf_fs_trace->trace->libObjPtr(),
-                                         ctf_fs_trace->next_stream_id);
+            ds_file_group->stream =
+                sc.instantiate(*ctf_fs_trace->trace, ctf_fs_trace->next_stream_id);
             ctf_fs_trace->next_stream_id++;
         } else {
             /* Specific stream ID */
-            stream =
-                bt_stream_create_with_id(ds_file_group->sc->ir_sc, ctf_fs_trace->trace->libObjPtr(),
-                                         (uint64_t) ds_file_group->stream_id);
+            ds_file_group->stream = sc.instantiate(*ctf_fs_trace->trace, ds_file_group->stream_id);
         }
-
-        if (!stream) {
-            BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger,
-                                         "Cannot create stream for DS file group: "
-                                         "addr={}, stream-name=\"{}\"",
-                                         fmt::ptr(ds_file_group), name);
-            return -1;
-        }
-
-        ds_file_group->stream = bt2::Stream::Shared::createWithoutRef(stream);
 
         int ret = bt_stream_set_name(ds_file_group->stream->libObjPtr(), name.c_str());
         if (ret) {
