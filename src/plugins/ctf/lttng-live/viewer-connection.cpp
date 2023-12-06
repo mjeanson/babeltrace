@@ -1100,7 +1100,7 @@ lttng_live_get_one_metadata_packet(struct lttng_live_trace *trace, std::vector<c
     struct lttng_viewer_cmd cmd;
     struct lttng_viewer_get_metadata rq;
     struct lttng_viewer_metadata_packet rp;
-    gchar *data = NULL;
+    std::vector<char> data;
     struct lttng_live_session *session = trace->session;
     struct lttng_live_msg_iter *lttng_live_msg_iter = session->lttng_live_msg_iter;
     struct lttng_live_metadata *metadata = trace->metadata;
@@ -1183,15 +1183,9 @@ lttng_live_get_one_metadata_packet(struct lttng_live_trace *trace, std::vector<c
         goto end;
     }
 
-    data = g_new0(gchar, len);
-    if (!data) {
-        BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(viewer_connection->logger,
-                                           "Failed to allocate data buffer", ".");
-        status = LTTNG_LIVE_GET_ONE_METADATA_STATUS_ERROR;
-        goto end;
-    }
+    data.resize(len);
 
-    viewer_status = lttng_live_recv(viewer_connection, data, len);
+    viewer_status = lttng_live_recv(viewer_connection, data.data(), len);
     if (viewer_status != LTTNG_LIVE_VIEWER_STATUS_OK) {
         viewer_handle_recv_status(viewer_status, "get metadata packet");
         status = (enum lttng_live_get_one_metadata_status) viewer_status;
@@ -1201,13 +1195,12 @@ lttng_live_get_one_metadata_packet(struct lttng_live_trace *trace, std::vector<c
     /*
      * Write the metadata to the file handle.
      */
-    buf.insert(buf.end(), data, data + len);
+    buf.insert(buf.end(), data.begin(), data.end());
 
 empty_metadata_packet_retry:
     status = LTTNG_LIVE_GET_ONE_METADATA_STATUS_OK;
 
 end:
-    g_free(data);
     return status;
 }
 
