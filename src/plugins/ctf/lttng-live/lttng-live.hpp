@@ -177,6 +177,8 @@ enum lttng_live_metadata_stream_state
 
 struct lttng_live_trace
 {
+    using UP = std::unique_ptr<lttng_live_trace>;
+
     explicit lttng_live_trace(const bt2c::Logger& parentLogger) :
         logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/TRACE"}
     {

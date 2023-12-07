@@ -102,13 +102,15 @@ static struct lttng_live_trace *lttng_live_create_trace(struct lttng_live_sessio
     BT_CPPLOGD_SPEC(session->logger, "Creating live trace: session-id={}, trace-id={}", session->id,
                     trace_id);
 
-    lttng_live_trace *trace = new lttng_live_trace {session->logger};
+    auto trace = bt2s::make_unique<lttng_live_trace>(session->logger);
+
     trace->session = session;
     trace->id = trace_id;
     trace->metadata_stream_state = LTTNG_LIVE_METADATA_STREAM_STATE_NEEDED;
-    g_ptr_array_add(session->traces, trace);
 
-    return trace;
+    const auto ret = trace.get();
+    g_ptr_array_add(session->traces, trace.release());
+    return ret;
 }
 
 struct lttng_live_trace *
