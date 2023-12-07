@@ -228,8 +228,7 @@ struct lttng_live_session
 
     uint64_t id = 0;
 
-    /* Array of pointers to struct lttng_live_trace. */
-    GPtrArray *traces = nullptr;
+    std::vector<lttng_live_trace::UP> traces;
 
     bool attached = false;
     bool new_streams_needed = false;
