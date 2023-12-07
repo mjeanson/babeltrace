@@ -28,7 +28,6 @@
 static enum ctf_msg_iter_medium_status medop_request_bytes(size_t request_sz, uint8_t **buffer_addr,
                                                            size_t *buffer_sz, void *data)
 {
-    enum ctf_msg_iter_medium_status status = CTF_MSG_ITER_MEDIUM_STATUS_OK;
     lttng_live_stream_iterator *stream = (lttng_live_stream_iterator *) data;
     struct lttng_live_trace *trace = stream->trace;
     struct lttng_live_session *session = trace->session;
@@ -40,26 +39,30 @@ static enum ctf_msg_iter_medium_status medop_request_bytes(size_t request_sz, ui
     BT_ASSERT(request_sz);
 
     if (stream->has_stream_hung_up) {
-        status = CTF_MSG_ITER_MEDIUM_STATUS_EOF;
-        goto end;
+        return CTF_MSG_ITER_MEDIUM_STATUS_EOF;
     }
 
     len_left = stream->base_offset + stream->len - stream->offset;
     if (!len_left) {
         lttng_live_stream_iterator_set_state(stream, LTTNG_LIVE_STREAM_ACTIVE_NO_DATA);
-        status = CTF_MSG_ITER_MEDIUM_STATUS_AGAIN;
-        goto end;
+        return CTF_MSG_ITER_MEDIUM_STATUS_AGAIN;
     }
 
     read_len = MIN(request_sz, stream->buf.size());
     read_len = MIN(read_len, len_left);
-    status = lttng_live_get_stream_bytes(live_msg_iter, stream, stream->buf.data(), stream->offset,
-                                         read_len, &recv_len);
+
+    const auto status = lttng_live_get_stream_bytes(live_msg_iter, stream, stream->buf.data(),
+                                                    stream->offset, read_len, &recv_len);
+
+    if (status != CTF_MSG_ITER_MEDIUM_STATUS_OK) {
+        return status;
+    }
+
     *buffer_addr = stream->buf.data();
     *buffer_sz = recv_len;
     stream->offset += recv_len;
-end:
-    return status;
+
+    return CTF_MSG_ITER_MEDIUM_STATUS_OK;
 }
 
 static bt_stream *medop_borrow_stream(bt_stream_class *stream_class, int64_t stream_id, void *data)
@@ -147,7 +150,7 @@ enum lttng_live_iterator_status lttng_live_lazy_msg_init(struct lttng_live_sessi
             if (!stream_iter->msg_iter) {
                 BT_CPPLOGE_APPEND_CAUSE_SPEC(stream_iter->logger,
                                              "Failed to create CTF message iterator");
-                goto error;
+                return LTTNG_LIVE_ITERATOR_STATUS_ERROR;
             }
         }
     }
@@ -155,9 +158,6 @@ enum lttng_live_iterator_status lttng_live_lazy_msg_init(struct lttng_live_sessi
     session->lazy_stream_msg_init = false;
 
     return LTTNG_LIVE_ITERATOR_STATUS_OK;
-
-error:
-    return LTTNG_LIVE_ITERATOR_STATUS_ERROR;
 }
 
 struct lttng_live_stream_iterator *
