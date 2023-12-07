@@ -19,6 +19,7 @@
 #include "borrowed-object-iterator.hpp"
 #include "borrowed-object.hpp"
 #include "exc.hpp"
+#include "field-location.hpp"
 #include "field-path.hpp"
 #include "integer-range-set.hpp"
 #include "internal/utils.hpp"
@@ -1422,6 +1423,13 @@ public:
     {
         return ConstFieldPath {
             bt_field_class_array_dynamic_with_length_field_borrow_length_field_path_const(
+                this->libObjPtr())};
+    }
+
+    ConstFieldLocation lengthFieldLocation() const noexcept
+    {
+        return ConstFieldLocation {
+            bt_field_class_array_dynamic_with_length_field_borrow_length_field_location_const(
                 this->libObjPtr())};
     }
 

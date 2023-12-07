@@ -1852,6 +1852,30 @@ public:
         return DynamicArrayWithLengthFieldClass::Shared::createWithoutRef(libObjPtr);
     }
 
+    ArrayFieldClass::Shared
+    createDynamicArrayWithoutLengthFieldLocationFieldClass(const FieldClass elementFieldClass) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTraceClass`.");
+
+        const auto libObjPtr = bt_field_class_array_dynamic_without_length_field_location_create(
+            this->libObjPtr(), elementFieldClass.libObjPtr());
+
+        internal::validateCreatedObjPtr(libObjPtr);
+        return ArrayFieldClass::Shared::createWithoutRef(libObjPtr);
+    }
+
+    DynamicArrayWithLengthFieldClass::Shared createDynamicArrayWithLengthFieldLocationFieldClass(
+        const FieldClass elementFieldClass, const ConstFieldLocation lengthFieldLocation) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTraceClass`.");
+
+        const auto libObjPtr = bt_field_class_array_dynamic_with_length_field_location_create(
+            this->libObjPtr(), elementFieldClass.libObjPtr(), lengthFieldLocation.libObjPtr());
+
+        internal::validateCreatedObjPtr(libObjPtr);
+        return DynamicArrayWithLengthFieldClass::Shared::createWithoutRef(libObjPtr);
+    }
+
     StructureFieldClass::Shared createStructureFieldClass() const
     {
         static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTraceClass`.");
