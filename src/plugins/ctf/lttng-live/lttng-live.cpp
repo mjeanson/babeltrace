@@ -125,7 +125,8 @@ int lttng_live_add_session(struct lttng_live_msg_iter *lttng_live_msg_iter, uint
                     "session-id={}, hostname=\"{}\", session-name=\"{}\"",
                     session_id, hostname, session_name);
 
-    lttng_live_session *session = new lttng_live_session {lttng_live_msg_iter->logger};
+    auto session = bt2s::make_unique<lttng_live_session>(lttng_live_msg_iter->logger);
+
     session->self_comp = lttng_live_msg_iter->self_comp;
     session->id = session_id;
     session->lttng_live_msg_iter = lttng_live_msg_iter;
@@ -133,7 +134,7 @@ int lttng_live_add_session(struct lttng_live_msg_iter *lttng_live_msg_iter, uint
     session->hostname = hostname;
     session->session_name = session_name;
 
-    g_ptr_array_add(lttng_live_msg_iter->sessions, session);
+    g_ptr_array_add(lttng_live_msg_iter->sessions, session.release());
 
     return 0;
 }

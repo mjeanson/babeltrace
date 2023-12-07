@@ -208,6 +208,8 @@ struct lttng_live_trace
 
 struct lttng_live_session
 {
+    using UP = std::unique_ptr<lttng_live_session>;
+
     explicit lttng_live_session(const bt2c::Logger& parentLogger) :
         logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/SESSION"}
     {
