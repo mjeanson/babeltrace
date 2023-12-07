@@ -83,7 +83,7 @@ struct lttng_live_stream_iterator
      * Since only a single iterator per viewer connection, we have
      * only a single message iterator per stream.
      */
-    struct ctf_msg_iter *msg_iter = nullptr;
+    ctf_msg_iter_up msg_iter;
 
     uint64_t viewer_stream_id = 0;
 

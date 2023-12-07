@@ -741,7 +741,7 @@ static enum lttng_live_iterator_status lttng_live_iterator_next_handle_one_activ
         goto end;
     }
 
-    status = ctf_msg_iter_get_next_message(lttng_live_stream->msg_iter, message);
+    status = ctf_msg_iter_get_next_message(lttng_live_stream->msg_iter.get(), message);
     switch (status) {
     case CTF_MSG_ITER_STATUS_EOF:
         ret = LTTNG_LIVE_ITERATOR_STATUS_END;
@@ -789,7 +789,7 @@ lttng_live_iterator_close_stream(struct lttng_live_msg_iter *lttng_live_msg_iter
      * stream properly by emitting the necessary stream end message.
      */
     enum ctf_msg_iter_status status =
-        ctf_msg_iter_get_next_message(stream_iter->msg_iter, curr_msg);
+        ctf_msg_iter_get_next_message(stream_iter->msg_iter.get(), curr_msg);
 
     if (status == CTF_MSG_ITER_STATUS_ERROR) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(lttng_live_msg_iter->logger,
