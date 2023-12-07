@@ -13,6 +13,7 @@
 
 #include "common/assert.h"
 #include "cpp-common/bt2c/fmt.hpp"
+#include "cpp-common/bt2c/glib-up.hpp"
 #include "cpp-common/vendor/fmt/format.h"
 
 #include "plugins/common/muxing/muxing.h"
@@ -2028,6 +2029,7 @@ lttng_live_component_create(const bt_value *params, bt_self_component_source *se
         status = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_MEMORY_ERROR;
         goto error;
     } else if (validation_status == BT_PARAM_VALIDATION_STATUS_VALIDATION_ERROR) {
+        bt2c::GCharUP errorFreer {validation_error};
         BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "{}", validation_error);
         status = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_ERROR;
         goto error;
@@ -2059,8 +2061,6 @@ error:
     delete lttng_live;
     lttng_live = NULL;
 end:
-    g_free(validation_error);
-
     *component = lttng_live;
     return status;
 }
