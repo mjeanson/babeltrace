@@ -14,6 +14,7 @@
 
 #include "common/assert.h"
 #include "cpp-common/bt2c/c-string-view.hpp"
+#include "cpp-common/bt2s/span.hpp"
 
 #include "borrowed-object.hpp"
 #include "field-class.hpp"
@@ -49,6 +50,12 @@ class CommonDoublePrecisionRealField;
 
 template <typename LibObjT>
 class CommonStringField;
+
+template <typename LibObjT>
+class CommonBlobField;
+
+template <typename LibObjT>
+class CommonDynamicBlobField;
 
 template <typename LibObjT>
 class CommonStructureField;
@@ -181,6 +188,16 @@ public:
         return this->cls().isString();
     }
 
+    bool isBlob() const noexcept
+    {
+        return this->cls().isBlob();
+    }
+
+    bool isDynamicBlob() const noexcept
+    {
+        return this->cls().isDynamicBlob();
+    }
+
     bool isStructure() const noexcept
     {
         return this->cls().isStructure();
@@ -221,6 +238,8 @@ public:
     CommonSinglePrecisionRealField<LibObjT> asSinglePrecisionReal() const noexcept;
     CommonDoublePrecisionRealField<LibObjT> asDoublePrecisionReal() const noexcept;
     CommonStringField<LibObjT> asString() const noexcept;
+    CommonBlobField<LibObjT> asBlob() const noexcept;
+    CommonDynamicBlobField<LibObjT> asDynamicBlob() const noexcept;
     CommonStructureField<LibObjT> asStructure() const noexcept;
     CommonArrayField<LibObjT> asArray() const noexcept;
     CommonDynamicArrayField<LibObjT> asDynamicArray() const noexcept;
@@ -1048,6 +1067,171 @@ struct TypeDescr<ConstStringField> : public StringFieldTypeDescr
 };
 
 template <typename LibObjT>
+struct CommonBlobFieldSpec;
+
+template <>
+struct CommonBlobFieldSpec<bt_field> final
+{
+    using Data = std::uint8_t;
+
+    static Data *data(bt_field * const libObjPtr) noexcept
+    {
+        return bt_field_blob_get_data(libObjPtr);
+    }
+};
+
+template <>
+struct CommonBlobFieldSpec<const bt_field> final
+{
+    using Data = const std::uint8_t;
+
+    static Data *data(const bt_field * const libObjPtr) noexcept
+    {
+        return bt_field_blob_get_data_const(libObjPtr);
+    }
+};
+
+} /* namespace internal */
+
+template <typename LibObjT>
+class CommonBlobField : public CommonField<LibObjT>
+{
+private:
+    using typename CommonField<LibObjT>::_ThisCommonField;
+
+protected:
+    using _ThisCommonBlobField = CommonBlobField<LibObjT>;
+
+public:
+    using typename CommonField<LibObjT>::LibObjPtr;
+
+public:
+    explicit CommonBlobField(const LibObjPtr libObjPtr) noexcept : _ThisCommonField {libObjPtr}
+    {
+        BT_ASSERT_DBG(this->isBlob());
+    }
+
+    template <typename OtherLibObjT>
+    CommonBlobField(const CommonBlobField<OtherLibObjT> val) noexcept : _ThisCommonField {val}
+    {
+    }
+
+    template <typename OtherLibObjT>
+    CommonBlobField operator=(const CommonBlobField<OtherLibObjT> val) noexcept
+    {
+        _ThisCommonField::operator=(val);
+        return *this;
+    }
+
+    CommonBlobField<const bt_field> asConst() const noexcept
+    {
+        return CommonBlobField<const bt_field> {*this};
+    }
+
+    bt2s::span<typename internal::CommonBlobFieldSpec<LibObjT>::Data> data() const noexcept
+    {
+        return {internal::CommonBlobFieldSpec<LibObjT>::data(this->libObjPtr()), this->length()};
+    }
+
+    std::uint64_t length() const noexcept
+    {
+        return bt_field_blob_get_length(this->libObjPtr());
+    }
+};
+
+using BlobField = CommonBlobField<bt_field>;
+using ConstBlobField = CommonBlobField<const bt_field>;
+
+namespace internal {
+
+struct BlobFieldTypeDescr
+{
+    using Const = ConstBlobField;
+    using NonConst = BlobField;
+};
+
+template <>
+struct TypeDescr<BlobField> : public BlobFieldTypeDescr
+{
+};
+
+template <>
+struct TypeDescr<ConstBlobField> : public BlobFieldTypeDescr
+{
+};
+
+} /* namespace internal */
+
+template <typename LibObjT>
+class CommonDynamicBlobField final : public CommonBlobField<LibObjT>
+{
+private:
+    using typename CommonBlobField<LibObjT>::_ThisCommonBlobField;
+
+public:
+    using typename CommonBlobField<LibObjT>::LibObjPtr;
+
+public:
+    explicit CommonDynamicBlobField(const LibObjPtr libObjPtr) noexcept :
+        _ThisCommonBlobField {libObjPtr}
+    {
+        BT_ASSERT_DBG(this->isDynamicBlob());
+    }
+
+    template <typename OtherLibObjT>
+    CommonDynamicBlobField(const CommonDynamicBlobField<OtherLibObjT> val) noexcept :
+        _ThisCommonBlobField {val}
+    {
+    }
+
+    template <typename OtherLibObjT>
+    CommonDynamicBlobField operator=(const CommonDynamicBlobField<OtherLibObjT> val) noexcept
+    {
+        _ThisCommonBlobField::operator=(val);
+        return *this;
+    }
+
+    std::uint64_t length() const noexcept
+    {
+        return _ThisCommonBlobField::length();
+    }
+
+    CommonDynamicBlobField length(const std::uint64_t length) const
+    {
+        static_assert(!std::is_const<LibObjT>::value,
+                      "Not available with `bt2::ConstDynamicBlobField`.");
+
+        if (bt_field_blob_dynamic_set_length(this->libObjPtr(), length) ==
+            BT_FIELD_DYNAMIC_BLOB_SET_LENGTH_STATUS_MEMORY_ERROR) {
+            throw MemoryError {};
+        }
+
+        return *this;
+    }
+};
+
+using DynamicBlobField = CommonDynamicBlobField<bt_field>;
+using ConstDynamicBlobField = CommonDynamicBlobField<const bt_field>;
+
+namespace internal {
+
+struct DynamicBlobFieldTypeDescr
+{
+    using Const = ConstDynamicBlobField;
+    using NonConst = DynamicBlobField;
+};
+
+template <>
+struct TypeDescr<DynamicBlobField> : public DynamicBlobFieldTypeDescr
+{
+};
+
+template <>
+struct TypeDescr<ConstDynamicBlobField> : public DynamicBlobFieldTypeDescr
+{
+};
+
+template <typename LibObjT>
 struct CommonStructureFieldSpec;
 
 /* Functions specific to mutable structure fields */
@@ -1603,6 +1787,20 @@ template <typename LibObjT>
 CommonStringField<LibObjT> CommonField<LibObjT>::asString() const noexcept
 {
     return CommonStringField<LibObjT> {this->libObjPtr()};
+}
+
+template <typename LibObjT>
+CommonBlobField<LibObjT> CommonField<LibObjT>::asBlob() const noexcept
+{
+    BT_ASSERT_DBG(this->isBlob());
+    return CommonBlobField<LibObjT> {this->libObjPtr()};
+}
+
+template <typename LibObjT>
+CommonDynamicBlobField<LibObjT> CommonField<LibObjT>::asDynamicBlob() const noexcept
+{
+    BT_ASSERT_DBG(this->isDynamicBlob());
+    return CommonDynamicBlobField<LibObjT> {this->libObjPtr()};
 }
 
 template <typename LibObjT>
