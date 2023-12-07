@@ -109,6 +109,6 @@ lttng_live_create_viewer_session(struct lttng_live_msg_iter *lttng_live_msg_iter
 
 bt_component_class_query_method_status
 live_viewer_connection_list_sessions(struct live_viewer_connection *viewer_connection,
-                                     const bt_value **user_result);
+                                     bt2::Value::Shared& user_result);
 
 #endif /* LTTNG_LIVE_VIEWER_CONNECTION_H */
