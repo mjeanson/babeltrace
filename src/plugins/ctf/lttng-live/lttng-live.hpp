@@ -213,6 +213,8 @@ struct lttng_live_session
     {
     }
 
+    ~lttng_live_session();
+
     bt2c::Logger logger;
 
     bt_self_component *self_comp = nullptr;

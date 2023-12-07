@@ -138,29 +138,26 @@ int lttng_live_add_session(struct lttng_live_msg_iter *lttng_live_msg_iter, uint
     return 0;
 }
 
-static void lttng_live_destroy_session(struct lttng_live_session *session)
+lttng_live_session::~lttng_live_session()
 {
-    if (!session) {
-        goto end;
-    }
+    BT_CPPLOGD_SPEC(this->logger, "Destroying live session: session-id={}, session-name=\"{}\"",
+                    this->id, this->session_name);
 
-    BT_CPPLOGD_SPEC(session->logger, "Destroying live session: session-id={}, session-name=\"{}\"",
-                    session->id, session->session_name);
-    if (session->id != -1ULL) {
-        if (lttng_live_session_detach(session)) {
-            if (!lttng_live_graph_is_canceled(session->lttng_live_msg_iter)) {
+    if (this->id != -1ULL) {
+        if (lttng_live_session_detach(this)) {
+            if (!lttng_live_graph_is_canceled(this->lttng_live_msg_iter)) {
                 /* Old relayd cannot detach sessions. */
-                BT_CPPLOGD_SPEC(session->logger, "Unable to detach lttng live session {}",
-                                session->id);
+                BT_CPPLOGD_SPEC(this->logger, "Unable to detach lttng live session {}", this->id);
             }
         }
-        session->id = -1ULL;
+
+        this->id = -1ULL;
     }
+}
 
+static void lttng_live_destroy_session(struct lttng_live_session *session)
+{
     delete session;
-
-end:
-    return;
 }
 
 static void lttng_live_msg_iter_destroy(struct lttng_live_msg_iter *lttng_live_msg_iter)
