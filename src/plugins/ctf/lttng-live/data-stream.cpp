@@ -49,11 +49,11 @@ static enum ctf_msg_iter_medium_status medop_request_bytes(size_t request_sz, ui
         goto end;
     }
 
-    read_len = MIN(request_sz, stream->buflen);
+    read_len = MIN(request_sz, stream->buf.size());
     read_len = MIN(read_len, len_left);
-    status = lttng_live_get_stream_bytes(live_msg_iter, stream, stream->buf, stream->offset,
+    status = lttng_live_get_stream_bytes(live_msg_iter, stream, stream->buf.data(), stream->offset,
                                          read_len, &recv_len);
-    *buffer_addr = stream->buf;
+    *buffer_addr = stream->buf.data();
     *buffer_sz = recv_len;
     stream->offset += recv_len;
 end:
@@ -206,14 +206,7 @@ lttng_live_stream_iterator_create(struct lttng_live_session *session, uint64_t c
             goto error;
         }
     }
-    stream_iter->buf = g_new0(uint8_t, lttng_live->max_query_size);
-    if (!stream_iter->buf) {
-        BT_CPPLOGE_APPEND_CAUSE_SPEC(stream_iter->logger,
-                                     "Failed to allocate live stream iterator buffer");
-        goto error;
-    }
-
-    stream_iter->buflen = lttng_live->max_query_size;
+    stream_iter->buf.resize(lttng_live->max_query_size);
     stream_iter->name = g_string_new(NULL);
     if (!stream_iter->name) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(stream_iter->logger,
@@ -242,7 +235,6 @@ void lttng_live_stream_iterator_destroy(struct lttng_live_stream_iterator *strea
         return;
     }
 
-    g_free(stream_iter->buf);
     if (stream_iter->name) {
         g_string_free(stream_iter->name, TRUE);
     }

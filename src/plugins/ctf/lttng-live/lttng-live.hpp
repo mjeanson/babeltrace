@@ -127,9 +127,7 @@ struct lttng_live_stream_iterator
     /* Timestamp in nanoseconds of the current message (current_msg). */
     int64_t current_msg_ts_ns = 0;
 
-    /* Owned by this. */
-    uint8_t *buf = nullptr;
-    size_t buflen = 0;
+    std::vector<uint8_t> buf;
 
     /* Owned by this. */
     GString *name = nullptr;
