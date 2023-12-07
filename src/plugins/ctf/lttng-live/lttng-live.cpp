@@ -1713,7 +1713,7 @@ lttng_live_msg_iter_init(bt_self_message_iterator *self_msg_it,
         }
 
         viewer_status = live_viewer_connection_create(
-            lttng_live->params.url->str, false, lttng_live_msg_iter, lttng_live_msg_iter->logger,
+            lttng_live->params.url.c_str(), false, lttng_live_msg_iter, lttng_live_msg_iter->logger,
             &lttng_live_msg_iter->viewer_connection);
         if (viewer_status != LTTNG_LIVE_VIEWER_STATUS_OK) {
             if (viewer_status == LTTNG_LIVE_VIEWER_STATUS_ERROR) {
@@ -1758,7 +1758,7 @@ lttng_live_msg_iter_init(bt_self_message_iterator *self_msg_it,
                     "Unable to connect to the requested live viewer session. "
                     "Keep trying to connect because of {}=\"{}\" component parameter: url=\"{}\"",
                     SESS_NOT_FOUND_ACTION_PARAM, SESS_NOT_FOUND_ACTION_CONTINUE_STR,
-                    lttng_live->params.url->str);
+                    lttng_live->params.url);
                 break;
             case SESSION_NOT_FOUND_ACTION_FAIL:
                 BT_CPPLOGE_APPEND_CAUSE_SPEC(
@@ -1767,7 +1767,7 @@ lttng_live_msg_iter_init(bt_self_message_iterator *self_msg_it,
                     "Fail the message iterator initialization because of {}=\"{}\" "
                     "component parameter: url =\"{}\"",
                     SESS_NOT_FOUND_ACTION_PARAM, SESS_NOT_FOUND_ACTION_FAIL_STR,
-                    lttng_live->params.url->str);
+                    lttng_live->params.url);
                 status = BT_MESSAGE_ITERATOR_CLASS_INITIALIZE_METHOD_STATUS_ERROR;
                 goto error;
             case SESSION_NOT_FOUND_ACTION_END:
@@ -1776,7 +1776,7 @@ lttng_live_msg_iter_init(bt_self_message_iterator *self_msg_it,
                                 "End gracefully at the first _next() call because of {}=\"{}\""
                                 " component parameter: url=\"{}\"",
                                 SESS_NOT_FOUND_ACTION_PARAM, SESS_NOT_FOUND_ACTION_END_STR,
-                                lttng_live->params.url->str);
+                                lttng_live->params.url);
                 break;
             default:
                 bt_common_abort();
@@ -1970,14 +1970,6 @@ end:
 
 static void lttng_live_component_destroy_data(struct lttng_live_component *lttng_live)
 {
-    if (!lttng_live) {
-        return;
-    }
-
-    if (lttng_live->params.url) {
-        g_string_free(lttng_live->params.url, TRUE);
-    }
-
     delete lttng_live;
 }
 
@@ -2034,7 +2026,6 @@ lttng_live_component_create(const bt_value *params, bt_self_component_source *se
     const bt_value *inputs_value;
     const bt_value *url_value;
     const bt_value *value;
-    const char *url;
     enum bt_param_validation_status validation_status;
     gchar *validation_error = NULL;
     bt_component_class_initialize_method_status status;
@@ -2057,13 +2048,7 @@ lttng_live_component_create(const bt_value *params, bt_self_component_source *se
 
     inputs_value = bt_value_map_borrow_entry_value_const(params, INPUTS_PARAM);
     url_value = bt_value_array_borrow_element_by_index_const(inputs_value, 0);
-    url = bt_value_string_get(url_value);
-
-    lttng_live->params.url = g_string_new(url);
-    if (!lttng_live->params.url) {
-        status = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_MEMORY_ERROR;
-        goto error;
-    }
+    lttng_live->params.url = bt_value_string_get(url_value);
 
     value = bt_value_map_borrow_entry_value_const(params, SESS_NOT_FOUND_ACTION_PARAM);
     if (value) {

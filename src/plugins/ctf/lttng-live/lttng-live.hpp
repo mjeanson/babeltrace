@@ -261,7 +261,7 @@ struct lttng_live_component
 
     struct
     {
-        GString *url = nullptr;
+        std::string url;
         enum session_not_found_action sess_not_found_act = SESSION_NOT_FOUND_ACTION_CONTINUE;
     } params;
 
