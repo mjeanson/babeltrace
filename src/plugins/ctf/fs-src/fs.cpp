@@ -582,7 +582,7 @@ static void ds_file_group_insert_ds_file_info_sorted(struct ctf_fs_ds_file_group
 static bool ds_index_entries_equal(const struct ctf_fs_ds_index_entry *left,
                                    const struct ctf_fs_ds_index_entry *right)
 {
-    if (left->packet_size != right->packet_size) {
+    if (left->packetSize != right->packetSize) {
         return false;
     }
 
@@ -1354,7 +1354,7 @@ static int decode_clock_snapshot_after_event(struct ctf_fs_trace *ctf_fs_trace,
     ctf_msg_iter_set_dry_run(msg_iter, true);
 
     /* Seek to the beginning of the target packet. */
-    iter_status = ctf_msg_iter_seek(msg_iter, index_entry->offset);
+    iter_status = ctf_msg_iter_seek(msg_iter, index_entry->offset.bytes());
     if (iter_status) {
         /* ctf_msg_iter_seek() logs errors. */
         ret = -1;
