@@ -220,20 +220,19 @@ lttng_live_stream_iterator_create(struct lttng_live_session *session, uint64_t c
 
     goto end;
 error:
-    lttng_live_stream_iterator_destroy(stream_iter);
+    delete stream_iter;
     stream_iter = NULL;
 end:
     return stream_iter;
 }
 
+lttng_live_stream_iterator::~lttng_live_stream_iterator()
+{
+    /* Track the number of active stream iterator. */
+    this->trace->session->lttng_live_msg_iter->active_stream_iter--;
+}
+
 void lttng_live_stream_iterator_destroy(struct lttng_live_stream_iterator *stream_iter)
 {
-    if (!stream_iter) {
-        return;
-    }
-
-    /* Track the number of active stream iterator. */
-    stream_iter->trace->session->lttng_live_msg_iter->active_stream_iter--;
-
     delete stream_iter;
 }

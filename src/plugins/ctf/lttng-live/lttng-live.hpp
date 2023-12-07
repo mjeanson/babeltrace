@@ -73,6 +73,8 @@ struct lttng_live_stream_iterator
     {
     }
 
+    ~lttng_live_stream_iterator();
+
     bt2c::Logger logger;
 
     bt2::Stream::Shared stream;
