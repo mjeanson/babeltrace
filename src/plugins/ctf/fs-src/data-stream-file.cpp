@@ -971,12 +971,18 @@ void ctf_fs_ds_file_group_destroy(struct ctf_fs_ds_file_group *ds_file_group)
     delete ds_file_group;
 }
 
-struct ctf_fs_ds_file_group *ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs_trace,
-                                                         struct ctf_stream_class *sc,
-                                                         uint64_t stream_instance_id,
-                                                         struct ctf_fs_ds_index *index)
+void ctf_fs_ds_file_group_deleter::operator()(ctf_fs_ds_file_group *group) noexcept
 {
-    ctf_fs_ds_file_group *ds_file_group = new ctf_fs_ds_file_group;
+    ctf_fs_ds_file_group_destroy(group);
+}
+
+ctf_fs_ds_file_group::UP ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs_trace,
+                                                     struct ctf_stream_class *sc,
+                                                     uint64_t stream_instance_id,
+                                                     struct ctf_fs_ds_index *index)
+{
+    ctf_fs_ds_file_group::UP ds_file_group {new ctf_fs_ds_file_group};
+
     ds_file_group->ds_file_infos =
         g_ptr_array_new_with_free_func((GDestroyNotify) ctf_fs_ds_file_info_destroy);
     if (!ds_file_group->ds_file_infos) {
@@ -992,9 +998,8 @@ struct ctf_fs_ds_file_group *ctf_fs_ds_file_group_create(struct ctf_fs_trace *ct
     goto end;
 
 error:
-    ctf_fs_ds_file_group_destroy(ds_file_group);
+    ds_file_group.reset();
     ctf_fs_ds_index_destroy(index);
-    ds_file_group = NULL;
 
 end:
     return ds_file_group;

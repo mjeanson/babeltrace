@@ -7,6 +7,8 @@
 #ifndef CTF_FS_DS_FILE_H
 #define CTF_FS_DS_FILE_H
 
+#include <memory>
+
 #include <glib.h>
 #include <stdio.h>
 
@@ -107,8 +109,15 @@ struct ctf_fs_ds_index
     GPtrArray *entries = nullptr;
 };
 
+struct ctf_fs_ds_file_group_deleter
+{
+    void operator()(struct ctf_fs_ds_file_group *group) noexcept;
+};
+
 struct ctf_fs_ds_file_group
 {
+    using UP = std::unique_ptr<ctf_fs_ds_file_group, ctf_fs_ds_file_group_deleter>;
+
     /*
      * Array of struct ctf_fs_ds_file_info, owned by this.
      *
@@ -155,10 +164,10 @@ void ctf_fs_ds_file_info_destroy(struct ctf_fs_ds_file_info *ds_file_info);
 
 struct ctf_fs_ds_file_info *ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns);
 
-struct ctf_fs_ds_file_group *ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs_trace,
-                                                         struct ctf_stream_class *sc,
-                                                         uint64_t stream_instance_id,
-                                                         struct ctf_fs_ds_index *index);
+ctf_fs_ds_file_group::UP ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs_trace,
+                                                     struct ctf_stream_class *sc,
+                                                     uint64_t stream_instance_id,
+                                                     struct ctf_fs_ds_index *index);
 
 void ctf_fs_ds_file_group_destroy(struct ctf_fs_ds_file_group *ds_file_group);
 

@@ -553,7 +553,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
     int64_t stream_instance_id = -1;
     int64_t begin_ns = -1;
     struct ctf_fs_ds_file_group *ds_file_group = NULL;
-    bool add_group = false;
+    ctf_fs_ds_file_group::UP new_ds_file_group;
     int ret;
     size_t i;
     struct ctf_fs_ds_file *ds_file = NULL;
@@ -639,17 +639,17 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
          * there's no timestamp to order the file within its
          * group.
          */
-        ds_file_group = ctf_fs_ds_file_group_create(ctf_fs_trace, sc, UINT64_C(-1), index);
+        new_ds_file_group = ctf_fs_ds_file_group_create(ctf_fs_trace, sc, UINT64_C(-1), index);
+
         /* Ownership of index is transferred. */
         index = NULL;
 
-        if (!ds_file_group) {
+        if (!new_ds_file_group) {
             goto error;
         }
 
-        ds_file_group_insert_ds_file_info_sorted(ds_file_group, BT_MOVE_REF(ds_file_info));
-
-        add_group = true;
+        ds_file_group_insert_ds_file_info_sorted(new_ds_file_group.get(),
+                                                 BT_MOVE_REF(ds_file_info));
         goto end;
     }
 
@@ -669,14 +669,15 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
     }
 
     if (!ds_file_group) {
-        ds_file_group = ctf_fs_ds_file_group_create(ctf_fs_trace, sc, stream_instance_id, index);
+        new_ds_file_group =
+            ctf_fs_ds_file_group_create(ctf_fs_trace, sc, stream_instance_id, index);
         /* Ownership of index is transferred. */
         index = NULL;
-        if (!ds_file_group) {
+        if (!new_ds_file_group) {
             goto error;
         }
 
-        add_group = true;
+        ds_file_group = new_ds_file_group.get();
     } else {
         merge_ctf_fs_ds_indexes(ds_file_group->index, index);
     }
@@ -686,13 +687,11 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
     goto end;
 
 error:
-    ctf_fs_ds_file_group_destroy(ds_file_group);
-    ds_file_group = NULL;
     ret = -1;
 
 end:
-    if (add_group && ds_file_group) {
-        g_ptr_array_add(ctf_fs_trace->ds_file_groups, ds_file_group);
+    if (new_ds_file_group) {
+        g_ptr_array_add(ctf_fs_trace->ds_file_groups, new_ds_file_group.release());
     }
 
     ctf_fs_ds_file_destroy(ds_file);
@@ -1110,15 +1109,19 @@ static int merge_matching_ctf_fs_ds_file_groups(struct ctf_fs_trace *dest_trace,
                 goto end;
             }
 
-            dest_group = ctf_fs_ds_file_group_create(dest_trace, sc, src_group->stream_id, index);
+            auto new_dest_group =
+                ctf_fs_ds_file_group_create(dest_trace, sc, src_group->stream_id, index);
+
             /* Ownership of index is transferred. */
             index = NULL;
-            if (!dest_group) {
+            if (!new_dest_group) {
                 ret = -1;
                 goto end;
             }
 
-            g_ptr_array_add(dest_trace->ds_file_groups, dest_group);
+            dest_group = new_dest_group.get();
+
+            g_ptr_array_add(dest_trace->ds_file_groups, new_dest_group.release());
         }
 
         BT_ASSERT(dest_group);
