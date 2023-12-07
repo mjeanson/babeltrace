@@ -95,7 +95,6 @@ static void lttng_live_destroy_trace(struct lttng_live_trace *trace)
     BT_ASSERT(trace->stream_iterators);
     g_ptr_array_free(trace->stream_iterators, TRUE);
 
-    lttng_live_metadata_fini(trace);
     delete trace;
 }
 

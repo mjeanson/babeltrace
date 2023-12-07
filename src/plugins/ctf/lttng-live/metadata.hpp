@@ -16,6 +16,4 @@ int lttng_live_metadata_create_stream(struct lttng_live_session *session, uint64
 
 enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_trace *trace);
 
-void lttng_live_metadata_fini(struct lttng_live_trace *trace);
-
 #endif /* LTTNG_LIVE_METADATA_H */

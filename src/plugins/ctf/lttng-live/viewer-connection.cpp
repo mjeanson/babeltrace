@@ -1096,7 +1096,7 @@ lttng_live_get_one_metadata_packet(struct lttng_live_trace *trace, std::vector<c
     std::vector<char> data;
     struct lttng_live_session *session = trace->session;
     struct lttng_live_msg_iter *lttng_live_msg_iter = session->lttng_live_msg_iter;
-    struct lttng_live_metadata *metadata = trace->metadata;
+    struct lttng_live_metadata *metadata = trace->metadata.get();
     struct live_viewer_connection *viewer_connection = lttng_live_msg_iter->viewer_connection;
     const size_t cmd_buf_len = sizeof(cmd) + sizeof(rq);
     char cmd_buf[cmd_buf_len];
