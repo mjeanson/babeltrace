@@ -117,7 +117,7 @@ enum lttng_live_iterator_status lttng_live_lazy_msg_init(struct lttng_live_sessi
                                                          bt_self_message_iterator *self_msg_iter)
 {
     struct lttng_live_component *lttng_live = session->lttng_live_msg_iter->lttng_live_comp;
-    uint64_t trace_idx, stream_iter_idx;
+    uint64_t trace_idx;
 
     if (!session->lazy_stream_msg_init) {
         return LTTNG_LIVE_ITERATOR_STATUS_OK;
@@ -132,16 +132,13 @@ enum lttng_live_iterator_status lttng_live_lazy_msg_init(struct lttng_live_sessi
         struct lttng_live_trace *trace =
             (lttng_live_trace *) g_ptr_array_index(session->traces, trace_idx);
 
-        for (stream_iter_idx = 0; stream_iter_idx < trace->stream_iterators->len;
-             stream_iter_idx++) {
+        for (lttng_live_stream_iterator::UP& stream_iter : trace->stream_iterators) {
             struct ctf_trace_class *ctf_tc;
-            struct lttng_live_stream_iterator *stream_iter =
-                (lttng_live_stream_iterator *) g_ptr_array_index(trace->stream_iterators,
-                                                                 stream_iter_idx);
 
             if (stream_iter->msg_iter) {
                 continue;
             }
+
             ctf_tc = ctf_metadata_decoder_borrow_ctf_trace_class(trace->metadata->decoder.get());
             BT_CPPLOGD_SPEC(stream_iter->logger,
                             "Creating CTF message iterator: session-id={}, ctf-tc-addr={}, "
@@ -149,7 +146,7 @@ enum lttng_live_iterator_status lttng_live_lazy_msg_init(struct lttng_live_sessi
                             session->id, fmt::ptr(ctf_tc), stream_iter->name,
                             fmt::ptr(self_msg_iter));
             stream_iter->msg_iter =
-                ctf_msg_iter_create(ctf_tc, lttng_live->max_query_size, medops, stream_iter,
+                ctf_msg_iter_create(ctf_tc, lttng_live->max_query_size, medops, stream_iter.get(),
                                     self_msg_iter, stream_iter->logger);
             if (!stream_iter->msg_iter) {
                 BT_CPPLOGE_APPEND_CAUSE_SPEC(stream_iter->logger,
@@ -216,7 +213,7 @@ lttng_live_stream_iterator_create(struct lttng_live_session *session, uint64_t c
     stream_iter->name = nameSs.str();
 
     const auto ret = stream_iter.get();
-    g_ptr_array_add(trace->stream_iterators, stream_iter.release());
+    trace->stream_iterators.emplace_back(std::move(stream_iter));
 
     /* Track the number of active stream iterator. */
     session->lttng_live_msg_iter->active_stream_iter++;
@@ -228,9 +225,4 @@ lttng_live_stream_iterator::~lttng_live_stream_iterator()
 {
     /* Track the number of active stream iterator. */
     this->trace->session->lttng_live_msg_iter->active_stream_iter--;
-}
-
-void lttng_live_stream_iterator_destroy(struct lttng_live_stream_iterator *stream_iter)
-{
-    delete stream_iter;
 }

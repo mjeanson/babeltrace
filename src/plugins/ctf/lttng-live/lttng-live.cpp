@@ -14,6 +14,7 @@
 #include "common/assert.h"
 #include "cpp-common/bt2c/fmt.hpp"
 #include "cpp-common/bt2c/glib-up.hpp"
+#include "cpp-common/bt2c/vector.hpp"
 #include "cpp-common/bt2s/make-unique.hpp"
 #include "cpp-common/vendor/fmt/format.h"
 
@@ -92,9 +93,6 @@ static void lttng_live_destroy_trace(struct lttng_live_trace *trace)
 {
     BT_CPPLOGD_SPEC(trace->logger, "Destroying live trace: trace-id={}", trace->id);
 
-    BT_ASSERT(trace->stream_iterators);
-    g_ptr_array_free(trace->stream_iterators, TRUE);
-
     delete trace;
 }
 
@@ -107,9 +105,6 @@ static struct lttng_live_trace *lttng_live_create_trace(struct lttng_live_sessio
     lttng_live_trace *trace = new lttng_live_trace {session->logger};
     trace->session = session;
     trace->id = trace_id;
-    trace->stream_iterators =
-        g_ptr_array_new_with_free_func((GDestroyNotify) lttng_live_stream_iterator_destroy);
-    BT_ASSERT(trace->stream_iterators);
     trace->metadata_stream_state = LTTNG_LIVE_METADATA_STREAM_STATE_NEEDED;
     g_ptr_array_add(session->traces, trace);
 
@@ -1130,7 +1125,6 @@ next_stream_iterator_for_trace(struct lttng_live_msg_iter *lttng_live_msg_iter,
     uint64_t stream_iter_idx;
 
     BT_ASSERT_DBG(live_trace);
-    BT_ASSERT_DBG(live_trace->stream_iterators);
 
     BT_CPPLOGD_SPEC(lttng_live_msg_iter->logger,
                     "Finding the next stream iterator for trace: "
@@ -1143,11 +1137,10 @@ next_stream_iterator_for_trace(struct lttng_live_msg_iter *lttng_live_msg_iter,
      * ensure monotonicity.
      */
     stream_iter_idx = 0;
-    while (stream_iter_idx < live_trace->stream_iterators->len) {
+    while (stream_iter_idx < live_trace->stream_iterators.size()) {
         bool stream_iter_is_ended = false;
-        struct lttng_live_stream_iterator *stream_iter =
-            (lttng_live_stream_iterator *) g_ptr_array_index(live_trace->stream_iterators,
-                                                             stream_iter_idx);
+        lttng_live_stream_iterator *stream_iter =
+            live_trace->stream_iterators[stream_iter_idx].get();
 
         /*
          * If there is no current message for this stream, go fetch
@@ -1268,7 +1261,7 @@ next_stream_iterator_for_trace(struct lttng_live_msg_iter *lttng_live_msg_iter,
              * removed element with the array's last
              * element.
              */
-            g_ptr_array_remove_index_fast(live_trace->stream_iterators, stream_iter_idx);
+            bt2c::vectorFastRemove(live_trace->stream_iterators, stream_iter_idx);
         }
     }
 
@@ -1280,7 +1273,7 @@ next_stream_iterator_for_trace(struct lttng_live_msg_iter *lttng_live_msg_iter,
          * The only case where we don't have a candidate for this trace
          * is if we reached the end of all the iterators.
          */
-        BT_ASSERT(live_trace->stream_iterators->len == 0);
+        BT_ASSERT(live_trace->stream_iterators.empty());
         stream_iter_status = LTTNG_LIVE_ITERATOR_STATUS_END;
     }
 

@@ -198,9 +198,7 @@ struct lttng_live_trace
 
     const bt_clock_class *clock_class = nullptr;
 
-    /* Array of pointers to struct lttng_live_stream_iterator. */
-    /* Owned by this. */
-    GPtrArray *stream_iterators = nullptr;
+    std::vector<lttng_live_stream_iterator::UP> stream_iterators;
 
     enum lttng_live_metadata_stream_state metadata_stream_state =
         LTTNG_LIVE_METADATA_STREAM_STATE_NEEDED;
