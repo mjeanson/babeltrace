@@ -220,11 +220,9 @@ struct lttng_live_session
     /* Weak reference. */
     struct lttng_live_msg_iter *lttng_live_msg_iter = nullptr;
 
-    /* Owned by this. */
-    GString *hostname = nullptr;
+    std::string hostname;
 
-    /* Owned by this. */
-    GString *session_name = nullptr;
+    std::string session_name;
 
     uint64_t id = 0;
 
