@@ -279,6 +279,8 @@ struct lttng_live_component
 
 struct lttng_live_msg_iter
 {
+    using UP = std::unique_ptr<lttng_live_msg_iter>;
+
     explicit lttng_live_msg_iter(const bt2c::Logger& parentLogger) :
         logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/MSG-ITER"}
     {
