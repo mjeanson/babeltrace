@@ -71,6 +71,8 @@ static bt_stream *medop_borrow_stream(bt_stream_class *stream_class, int64_t str
                         "Creating stream {} (ID: {}) out of stream class {}",
                         lttng_live_stream->name->str, stream_id, stream_class_id);
 
+        bt_stream *stream;
+
         if (stream_id < 0) {
             /*
              * No stream instance ID in the stream. It's possible
@@ -78,27 +80,27 @@ static bt_stream *medop_borrow_stream(bt_stream_class *stream_class, int64_t str
              * LTTng. In these cases, use the viewer_stream_id that
              * is unique for a live viewer session.
              */
-            lttng_live_stream->stream =
+            stream =
                 bt_stream_create_with_id(stream_class, lttng_live_stream->trace->trace->libObjPtr(),
                                          lttng_live_stream->viewer_stream_id);
         } else {
-            lttng_live_stream->stream = bt_stream_create_with_id(
+            stream = bt_stream_create_with_id(
                 stream_class, lttng_live_stream->trace->trace->libObjPtr(), (uint64_t) stream_id);
         }
 
-        if (!lttng_live_stream->stream) {
+        if (!stream) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(
                 lttng_live_stream->logger,
                 "Cannot create stream {} (stream class ID {}, stream ID {})",
                 lttng_live_stream->name->str, stream_class_id, stream_id);
-            goto end;
+            return nullptr;
         }
 
-        bt_stream_set_name(lttng_live_stream->stream, lttng_live_stream->name->str);
+        lttng_live_stream->stream = bt2::Stream::Shared::createWithoutRef(stream);
+        lttng_live_stream->stream->name(lttng_live_stream->name->str);
     }
 
-end:
-    return lttng_live_stream->stream;
+    return lttng_live_stream->stream->libObjPtr();
 }
 
 static struct ctf_msg_iter_medium_ops medops = {
@@ -239,10 +241,6 @@ void lttng_live_stream_iterator_destroy(struct lttng_live_stream_iterator *strea
 {
     if (!stream_iter) {
         return;
-    }
-
-    if (stream_iter->stream) {
-        BT_STREAM_PUT_REF_AND_RESET(stream_iter->stream);
     }
 
     if (stream_iter->msg_iter) {

@@ -1069,7 +1069,7 @@ handle_late_message(struct lttng_live_msg_iter *lttng_live_msg_iter,
         goto end;
     }
 
-    stream_class = bt_stream_borrow_class_const(stream_iter->stream);
+    stream_class = bt_stream_borrow_class_const(stream_iter->stream->libObjPtr());
     clock_class = bt_stream_class_borrow_default_clock_class_const(stream_class);
 
     ts_ns_status = bt_clock_class_cycles_to_ns_from_origin(
@@ -1105,13 +1105,13 @@ handle_late_message(struct lttng_live_msg_iter *lttng_live_msg_iter,
     switch (bt_message_get_type(late_msg)) {
     case BT_MESSAGE_TYPE_DISCARDED_EVENTS:
         adjust_status = adjust_discarded_events_message(
-            lttng_live_msg_iter->self_msg_iter, stream_iter->stream, late_msg, &adjusted_message,
-            stream_iter->last_inactivity_ts.value);
+            lttng_live_msg_iter->self_msg_iter, stream_iter->stream->libObjPtr(), late_msg,
+            &adjusted_message, stream_iter->last_inactivity_ts.value);
         break;
     case BT_MESSAGE_TYPE_DISCARDED_PACKETS:
         adjust_status = adjust_discarded_packets_message(
-            lttng_live_msg_iter->self_msg_iter, stream_iter->stream, late_msg, &adjusted_message,
-            stream_iter->last_inactivity_ts.value);
+            lttng_live_msg_iter->self_msg_iter, stream_iter->stream->libObjPtr(), late_msg,
+            &adjusted_message, stream_iter->last_inactivity_ts.value);
         break;
     default:
         bt_common_abort();

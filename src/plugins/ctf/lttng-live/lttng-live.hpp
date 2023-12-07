@@ -74,8 +74,7 @@ struct lttng_live_stream_iterator
 
     bt2c::Logger logger;
 
-    /* Owned by this. */
-    bt_stream *stream = nullptr;
+    bt2::Stream::Shared stream;
 
     /* Weak reference. */
     struct lttng_live_trace *trace = nullptr;
