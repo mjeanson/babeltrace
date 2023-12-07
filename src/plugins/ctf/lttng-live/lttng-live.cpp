@@ -156,23 +156,14 @@ lttng_live_session::~lttng_live_session()
     }
 }
 
-static void lttng_live_msg_iter_destroy(struct lttng_live_msg_iter *lttng_live_msg_iter)
+lttng_live_msg_iter::~lttng_live_msg_iter()
 {
-    if (!lttng_live_msg_iter) {
-        goto end;
-    }
-
-    BT_ASSERT(lttng_live_msg_iter->lttng_live_comp);
-    BT_ASSERT(lttng_live_msg_iter->lttng_live_comp->has_msg_iter);
+    BT_ASSERT(this->lttng_live_comp);
+    BT_ASSERT(this->lttng_live_comp->has_msg_iter);
 
     /* All stream iterators must be destroyed at this point. */
-    BT_ASSERT(lttng_live_msg_iter->active_stream_iter == 0);
-    lttng_live_msg_iter->lttng_live_comp->has_msg_iter = false;
-
-    delete lttng_live_msg_iter;
-
-end:
-    return;
+    BT_ASSERT(this->active_stream_iter == 0);
+    this->lttng_live_comp->has_msg_iter = false;
 }
 
 void lttng_live_msg_iter_finalize(bt_self_message_iterator *self_msg_iter)
@@ -184,7 +175,7 @@ void lttng_live_msg_iter_finalize(bt_self_message_iterator *self_msg_iter)
     lttng_live_msg_iter =
         (struct lttng_live_msg_iter *) bt_self_message_iterator_get_data(self_msg_iter);
     BT_ASSERT(lttng_live_msg_iter);
-    lttng_live_msg_iter_destroy(lttng_live_msg_iter);
+    delete lttng_live_msg_iter;
 }
 
 static enum lttng_live_iterator_status
@@ -1695,7 +1686,7 @@ lttng_live_msg_iter_init(bt_self_message_iterator *self_msg_it,
         goto end;
 
 error:
-        lttng_live_msg_iter_destroy(lttng_live_msg_iter);
+        delete lttng_live_msg_iter;
 end:
         return status;
     } catch (const std::bad_alloc&) {

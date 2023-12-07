@@ -284,6 +284,8 @@ struct lttng_live_msg_iter
     {
     }
 
+    ~lttng_live_msg_iter();
+
     bt2c::Logger logger;
 
     bt_self_component *self_comp = nullptr;
