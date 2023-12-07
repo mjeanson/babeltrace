@@ -79,6 +79,10 @@ viewer_status_to_ctf_msg_iter_medium_status(enum lttng_live_viewer_status viewer
 
 static inline void viewer_connection_close_socket(struct live_viewer_connection *viewer_connection)
 {
+    if (viewer_connection->control_sock == BT_INVALID_SOCKET) {
+        return;
+    }
+
     int ret = bt_socket_close(viewer_connection->control_sock);
     if (ret == -1) {
         BT_CPPLOGW_ERRNO_SPEC(viewer_connection->logger,
@@ -404,27 +408,10 @@ lttng_live_connect_viewer(struct live_viewer_connection *viewer_connection)
     goto end;
 
 error:
-    if (viewer_connection->control_sock != BT_INVALID_SOCKET) {
-        if (bt_socket_close(viewer_connection->control_sock) == BT_SOCKET_ERROR) {
-            BT_CPPLOGW_SPEC(viewer_connection->logger, "Error closing socket: {}.",
-                            bt_socket_errormsg());
-        }
-    }
-    viewer_connection->control_sock = BT_INVALID_SOCKET;
+    viewer_connection_close_socket(viewer_connection);
+
 end:
     return status;
-}
-
-static void lttng_live_disconnect_viewer(struct live_viewer_connection *viewer_connection)
-{
-    if (viewer_connection->control_sock == BT_INVALID_SOCKET) {
-        return;
-    }
-    if (bt_socket_close(viewer_connection->control_sock) == BT_SOCKET_ERROR) {
-        BT_CPPLOGW_SPEC(viewer_connection->logger, "Error closing socket: {}",
-                        bt_socket_errormsg());
-        viewer_connection->control_sock = BT_INVALID_SOCKET;
-    }
 }
 
 static int list_update_session(const bt2::ArrayValue results,
@@ -1548,7 +1535,7 @@ live_viewer_connection::~live_viewer_connection()
 {
     BT_CPPLOGD_SPEC(this->logger, "Closing connection to relay: relay-url=\"{}\"", this->url);
 
-    lttng_live_disconnect_viewer(this);
+    viewer_connection_close_socket(this);
 
     bt_socket_fini();
 }
