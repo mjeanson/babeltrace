@@ -9,16 +9,20 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <vector>
 
 #include <babeltrace2/babeltrace.h>
 
 #include "common/macros.h"
 #include "cpp-common/bt2c/c-string-view.hpp"
+#include "cpp-common/bt2c/call.hpp"
 #include "cpp-common/bt2s/optional.hpp"
+#include "cpp-common/bt2s/span.hpp"
 
 #include "borrowed-object.hpp"
 #include "clock-class.hpp"
 #include "field-class.hpp"
+#include "field-location.hpp"
 #include "field.hpp"
 #include "internal/utils.hpp"
 #include "optional-borrowed-object.hpp"
@@ -1669,6 +1673,37 @@ public:
 
         internal::validateCreatedObjPtr(libObjPtr);
         return Trace::Shared::createWithoutRef(libObjPtr);
+    }
+
+    ConstFieldLocation::Shared createFieldLocation(const ConstFieldLocation::Scope scope,
+                                                   const bt2s::span<const char * const> items) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTraceClass`.");
+
+        const auto libObjPtr =
+            bt_field_location_create(this->libObjPtr(), static_cast<bt_field_location_scope>(scope),
+                                     items.data(), items.size());
+
+        internal::validateCreatedObjPtr(libObjPtr);
+        return ConstFieldLocation::Shared::createWithoutRef(libObjPtr);
+    }
+
+    ConstFieldLocation::Shared createFieldLocation(const ConstFieldLocation::Scope scope,
+                                                   const bt2s::span<const std::string> items) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTraceClass`.");
+
+        const auto ptrItems = bt2c::call([items] {
+            std::vector<const char *> v;
+
+            for (auto& item : items) {
+                v.push_back(item.data());
+            }
+
+            return v;
+        });
+
+        return this->createFieldLocation(scope, ptrItems);
     }
 
     StreamClass::Shared createStreamClass() const

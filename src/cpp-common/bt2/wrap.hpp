@@ -14,6 +14,7 @@
 #include "component-port.hpp"
 #include "error.hpp"
 #include "field-class.hpp"
+#include "field-location.hpp"
 #include "field.hpp"
 #include "graph.hpp"
 #include "integer-range-set.hpp"
@@ -136,6 +137,11 @@ inline ConstFieldClass wrap(const bt_field_class * const libObjPtr) noexcept
 inline ConstFieldPathItem wrap(const bt_field_path_item * const libObjPtr) noexcept
 {
     return ConstFieldPathItem {libObjPtr};
+}
+
+inline ConstFieldLocation wrap(const bt_field_location * const libObjPtr) noexcept
+{
+    return ConstFieldLocation {libObjPtr};
 }
 
 inline ConstFieldPath wrap(const bt_field_path * const libObjPtr) noexcept
