@@ -177,6 +177,8 @@ cpp_common_libcpp_common_la_SOURCES = \
 	cpp-common/bt2c/std-int.hpp \
 	cpp-common/bt2c/text-loc.cpp \
 	cpp-common/bt2c/text-loc.hpp \
+	cpp-common/bt2c/text-loc-str.cpp \
+	cpp-common/bt2c/text-loc-str.hpp \
 	cpp-common/bt2c/type-traits.hpp \
 	cpp-common/bt2c/uuid.hpp \
 	cpp-common/bt2c/vector.hpp \
