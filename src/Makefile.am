@@ -177,6 +177,7 @@ cpp_common_libcpp_common_la_SOURCES = \
 	cpp-common/bt2c/libc-up.hpp \
 	cpp-common/bt2c/logging.hpp \
 	cpp-common/bt2c/make-span.hpp \
+	cpp-common/bt2c/observable.hpp \
 	cpp-common/bt2c/parse-json.hpp \
 	cpp-common/bt2c/parse-json-as-val.cpp \
 	cpp-common/bt2c/parse-json-as-val.hpp \
