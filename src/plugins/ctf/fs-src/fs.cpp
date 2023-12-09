@@ -1120,7 +1120,6 @@ static int decode_clock_snapshot_after_event(struct ctf_fs_trace *ctf_fs_trace,
                                              int64_t *ts_ns)
 {
     enum ctf_msg_iter_status iter_status = CTF_MSG_ITER_STATUS_OK;
-    struct ctf_fs_ds_file *ds_file = NULL;
     struct ctf_msg_iter *msg_iter = NULL;
     int ret = 0;
 
@@ -1128,9 +1127,8 @@ static int decode_clock_snapshot_after_event(struct ctf_fs_trace *ctf_fs_trace,
     BT_ASSERT(index_entry);
     BT_ASSERT(index_entry->path);
 
-    ds_file = ctf_fs_ds_file_create(ctf_fs_trace, bt2::Stream::Shared {}, index_entry->path,
-                                    ctf_fs_trace->logger)
-                  .release();
+    const auto ds_file = ctf_fs_ds_file_create(ctf_fs_trace, bt2::Stream::Shared {},
+                                               index_entry->path, ctf_fs_trace->logger);
     if (!ds_file) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger, "Failed to create a ctf_fs_ds_file");
         ret = -1;
@@ -1143,7 +1141,7 @@ static int decode_clock_snapshot_after_event(struct ctf_fs_trace *ctf_fs_trace,
     msg_iter = ctf_msg_iter_create(
         ctf_fs_trace->metadata->tc,
         bt_common_get_page_size(static_cast<int>(ctf_fs_trace->logger.level())) * 8,
-        ctf_fs_ds_file_medops, ds_file, NULL, ctf_fs_trace->logger);
+        ctf_fs_ds_file_medops, ds_file.get(), NULL, ctf_fs_trace->logger);
     if (!msg_iter) {
         /* ctf_msg_iter_create() logs errors. */
         ret = -1;
@@ -1195,8 +1193,6 @@ static int decode_clock_snapshot_after_event(struct ctf_fs_trace *ctf_fs_trace,
     }
 
 end:
-    delete ds_file;
-
     if (msg_iter) {
         ctf_msg_iter_destroy(msg_iter);
     }
