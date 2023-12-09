@@ -115,8 +115,7 @@ struct ctf_fs_msg_iter_data
     /* Weak, belongs to ctf_fs_trace */
     struct ctf_fs_ds_file_group *ds_file_group = nullptr;
 
-    /* Owned by this */
-    struct ctf_msg_iter *msg_iter = nullptr;
+    ctf_msg_iter_up msg_iter;
 
     /*
      * Saved error.  If we hit an error in the _next method, but have some
