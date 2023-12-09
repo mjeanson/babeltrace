@@ -329,7 +329,8 @@ ctf_fs_ds_group_medops_set_file(struct ctf_fs_ds_group_medops_data *data,
         /* Create the new file. */
         data->file =
             ctf_fs_ds_file_create(data->ds_file_group->ctf_fs_trace, data->ds_file_group->stream,
-                                  index_entry->path, data->logger);
+                                  index_entry->path, data->logger)
+                .release();
         if (!data->file) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(data->logger, "failed to create ctf_fs_ds_file.");
             status = CTF_MSG_ITER_MEDIUM_STATUS_ERROR;
@@ -811,17 +812,13 @@ error:
     goto end;
 }
 
-struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace,
-                                             bt2::Stream::Shared stream, const char *path,
-                                             const bt2c::Logger& parentLogger)
+ctf_fs_ds_file::UP ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace,
+                                         bt2::Stream::Shared stream, const char *path,
+                                         const bt2c::Logger& parentLogger)
 {
     int ret;
+    auto ds_file = bt2s::make_unique<ctf_fs_ds_file>(parentLogger);
     size_t offset_align;
-    ctf_fs_ds_file *ds_file = new ctf_fs_ds_file {parentLogger};
-
-    if (!ds_file) {
-        goto error;
-    }
 
     ds_file->file = ctf_fs_file_create(parentLogger);
     if (!ds_file->file) {
@@ -843,8 +840,7 @@ struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace,
 
 error:
     /* Do not touch "borrowed" file. */
-    delete ds_file;
-    ds_file = NULL;
+    ds_file.reset();
 
 end:
     return ds_file;

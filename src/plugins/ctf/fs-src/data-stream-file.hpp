@@ -35,6 +35,8 @@ struct ctf_fs_ds_file_info
 
 struct ctf_fs_ds_file
 {
+    using UP = std::unique_ptr<ctf_fs_ds_file>;
+
     explicit ctf_fs_ds_file(const bt2c::Logger& parentLogger) :
         logger {parentLogger, "PLUGIN/SRC.CTF.FS/DS"}
     {
@@ -146,8 +148,8 @@ struct ctf_fs_ds_file_group
     ctf_fs_ds_index::UP index;
 };
 
-struct ctf_fs_ds_file *ctf_fs_ds_file_create(ctf_fs_trace *ctf_fs_trace, bt2::Stream::Shared stream,
-                                             const char *path, const bt2c::Logger& logger);
+ctf_fs_ds_file::UP ctf_fs_ds_file_create(ctf_fs_trace *ctf_fs_trace, bt2::Stream::Shared stream,
+                                         const char *path, const bt2c::Logger& logger);
 
 ctf_fs_ds_index::UP ctf_fs_ds_file_build_index(struct ctf_fs_ds_file *ds_file,
                                                struct ctf_fs_ds_file_info *ds_file_info,

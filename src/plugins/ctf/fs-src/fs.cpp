@@ -524,7 +524,8 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
      * stream file.
      */
     ds_file =
-        ctf_fs_ds_file_create(ctf_fs_trace, bt2::Stream::Shared {}, path, ctf_fs_trace->logger);
+        ctf_fs_ds_file_create(ctf_fs_trace, bt2::Stream::Shared {}, path, ctf_fs_trace->logger)
+            .release();
     if (!ds_file) {
         goto error;
     }
@@ -1128,7 +1129,8 @@ static int decode_clock_snapshot_after_event(struct ctf_fs_trace *ctf_fs_trace,
     BT_ASSERT(index_entry->path);
 
     ds_file = ctf_fs_ds_file_create(ctf_fs_trace, bt2::Stream::Shared {}, index_entry->path,
-                                    ctf_fs_trace->logger);
+                                    ctf_fs_trace->logger)
+                  .release();
     if (!ds_file) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger, "Failed to create a ctf_fs_ds_file");
         ret = -1;
