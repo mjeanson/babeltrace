@@ -129,8 +129,7 @@ struct lttng_live_stream_iterator
 
     std::vector<uint8_t> buf;
 
-    /* Owned by this. */
-    GString *name = nullptr;
+    std::string name;
 
     bool has_stream_hung_up = false;
 };

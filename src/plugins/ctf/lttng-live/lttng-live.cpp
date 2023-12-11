@@ -276,21 +276,19 @@ static enum lttng_live_iterator_status lttng_live_iterator_next_handle_one_no_da
 
     if (lttng_live_stream->trace->metadata_stream_state ==
         LTTNG_LIVE_METADATA_STREAM_STATE_NEEDED) {
-        BT_CPPLOGD_SPEC(
-            lttng_live_msg_iter->logger,
-            "Need to get an update for the metadata stream before proceeding further with this stream: "
-            "stream-name=\"{}\"",
-            lttng_live_stream->name->str);
+        BT_CPPLOGD_SPEC(lttng_live_msg_iter->logger,
+                        "Need to get an update for the metadata stream before proceeding "
+                        "further with this stream: stream-name=\"{}\"",
+                        lttng_live_stream->name);
         ret = LTTNG_LIVE_ITERATOR_STATUS_CONTINUE;
         goto end;
     }
 
     if (lttng_live_stream->trace->session->new_streams_needed) {
-        BT_CPPLOGD_SPEC(
-            lttng_live_msg_iter->logger,
-            "Need to get an update of all streams before proceeding further with this stream: "
-            "stream-name=\"{}\"",
-            lttng_live_stream->name->str);
+        BT_CPPLOGD_SPEC(lttng_live_msg_iter->logger,
+                        "Need to get an update of all streams before proceeding further "
+                        "with this stream: stream-name=\"{}\"",
+                        lttng_live_stream->name);
         ret = LTTNG_LIVE_ITERATOR_STATUS_CONTINUE;
         goto end;
     }
@@ -333,7 +331,7 @@ static enum lttng_live_iterator_status lttng_live_iterator_next_handle_one_no_da
     BT_CPPLOGD_SPEC(lttng_live_msg_iter->logger,
                     "Setting live stream reading info: stream-name=\"{}\", "
                     "viewer-stream-id={}, stream-base-offset={}, stream-offset={}, stream-len={}",
-                    lttng_live_stream->name->str, lttng_live_stream->viewer_stream_id,
+                    lttng_live_stream->name, lttng_live_stream->viewer_stream_id,
                     lttng_live_stream->base_offset, lttng_live_stream->offset,
                     lttng_live_stream->len);
 
@@ -781,7 +779,7 @@ lttng_live_iterator_close_stream(struct lttng_live_msg_iter *lttng_live_msg_iter
     BT_CPPLOGD_SPEC(lttng_live_msg_iter->logger,
                     "Closing live stream iterator: stream-name=\"{}\", "
                     "viewer-stream-id={}",
-                    stream_iter->name->str, stream_iter->viewer_stream_id);
+                    stream_iter->name, stream_iter->viewer_stream_id);
 
     /*
      * The viewer has hung up on us so we are closing the stream. The
@@ -867,7 +865,7 @@ lttng_live_iterator_next_msg_on_stream(struct lttng_live_msg_iter *lttng_live_ms
     BT_CPPLOGD_SPEC(lttng_live_msg_iter->logger,
                     "Advancing live stream iterator until next message if possible: "
                     "stream-name=\"{}\", viewer-stream-id={}",
-                    stream_iter->name->str, stream_iter->viewer_stream_id);
+                    stream_iter->name, stream_iter->viewer_stream_id);
 
     if (stream_iter->has_stream_hung_up) {
         /*
@@ -932,7 +930,7 @@ end:
     BT_CPPLOGD_SPEC(lttng_live_msg_iter->logger,
                     "Returning from advancing live stream iterator: status={}, "
                     "stream-name=\"{}\", viewer-stream-id={}",
-                    live_status, stream_iter->name->str, stream_iter->viewer_stream_id);
+                    live_status, stream_iter->name, stream_iter->viewer_stream_id);
 
     return live_status;
 }
@@ -1048,7 +1046,7 @@ handle_late_message(struct lttng_live_msg_iter *lttng_live_msg_iter,
     BT_CPPLOGD_SPEC(lttng_live_msg_iter->logger,
                     "Handling late message on live stream iterator: "
                     "stream-name=\"{}\", viewer-stream-id={}",
-                    stream_iter->name->str, stream_iter->viewer_stream_id);
+                    stream_iter->name, stream_iter->viewer_stream_id);
 
     if (!stream_iter->last_inactivity_ts.is_set) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(lttng_live_msg_iter->logger,
@@ -1187,7 +1185,7 @@ next_stream_iterator_for_trace(struct lttng_live_msg_iter *lttng_live_msg_iter,
                             "Live stream iterator returned message: msg-type={}, "
                             "stream-name=\"{}\", viewer-stream-id={}",
                             static_cast<bt2::MessageType>(bt_message_get_type(msg)),
-                            stream_iter->name->str, stream_iter->viewer_stream_id);
+                            stream_iter->name, stream_iter->viewer_stream_id);
 
             /*
              * Get the timestamp in nanoseconds from origin of this
@@ -1218,8 +1216,8 @@ next_stream_iterator_for_trace(struct lttng_live_msg_iter *lttng_live_msg_iter,
                                                  "lttng-live-msg-iter-addr={}, "
                                                  "stream-name=\"{}\", "
                                                  "curr-msg-ts={}, last-msg-ts={}",
-                                                 fmt::ptr(lttng_live_msg_iter),
-                                                 stream_iter->name->str, curr_msg_ts_ns,
+                                                 fmt::ptr(lttng_live_msg_iter), stream_iter->name,
+                                                 curr_msg_ts_ns,
                                                  lttng_live_msg_iter->last_msg_ts_ns);
                     stream_iter_status = LTTNG_LIVE_ITERATOR_STATUS_ERROR;
                     goto end;
