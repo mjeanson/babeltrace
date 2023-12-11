@@ -214,11 +214,9 @@ enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_tra
                 BT_CPPLOGE_APPEND_CAUSE_SPEC(metadata->logger, "Failed to create bt_trace");
                 goto error;
             }
-            if (ctf_trace_class_configure_ir_trace(tc, trace->trace->libObjPtr())) {
-                BT_CPPLOGE_APPEND_CAUSE_SPEC(metadata->logger,
-                                             "Failed to configure ctf trace class");
-                goto error;
-            }
+
+            ctf_trace_class_configure_ir_trace(tc, *trace->trace);
+
             if (!stream_classes_all_have_default_clock_class(trace->trace_class->libObjPtr(),
                                                              metadata->logger)) {
                 /* Error logged in function. */

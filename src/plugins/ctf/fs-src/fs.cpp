@@ -629,11 +629,7 @@ static ctf_fs_trace::UP ctf_fs_trace_create(const char *path, const char *name,
     }
 
     if (ctf_fs_trace->trace) {
-        ret = ctf_trace_class_configure_ir_trace(ctf_fs_trace->metadata->tc,
-                                                 ctf_fs_trace->trace->libObjPtr());
-        if (ret) {
-            return nullptr;
-        }
+        ctf_trace_class_configure_ir_trace(ctf_fs_trace->metadata->tc, *ctf_fs_trace->trace);
 
         ret = set_trace_name(ctf_fs_trace->trace->libObjPtr(), name);
         if (ret) {
