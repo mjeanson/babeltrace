@@ -294,8 +294,7 @@ struct lttng_live_msg_iter
     /* Weak reference. */
     bt_self_message_iterator *self_msg_iter = nullptr;
 
-    /* Owned by this. */
-    struct live_viewer_connection *viewer_connection = nullptr;
+    live_viewer_connection::UP viewer_connection;
 
     std::vector<lttng_live_session::UP> sessions;
 

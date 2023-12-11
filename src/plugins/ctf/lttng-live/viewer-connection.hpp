@@ -50,6 +50,8 @@ enum lttng_live_get_one_metadata_status
 
 struct live_viewer_connection
 {
+    using UP = std::unique_ptr<live_viewer_connection>;
+
     explicit live_viewer_connection(const bt2c::Logger& parentLogger) :
         logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/VIEWER"}
     {
@@ -97,9 +99,10 @@ struct packet_index
     uint64_t packet_seq_num;     /* packet sequence number */
 };
 
-enum lttng_live_viewer_status live_viewer_connection_create(
-    const char *url, bool in_query, struct lttng_live_msg_iter *lttng_live_msg_iter,
-    const bt2c::Logger& parentLogger, struct live_viewer_connection **viewer);
+enum lttng_live_viewer_status
+live_viewer_connection_create(const char *url, bool in_query,
+                              struct lttng_live_msg_iter *lttng_live_msg_iter,
+                              const bt2c::Logger& parentLogger, live_viewer_connection::UP& viewer);
 
 enum lttng_live_viewer_status
 lttng_live_create_viewer_session(struct lttng_live_msg_iter *lttng_live_msg_iter);
