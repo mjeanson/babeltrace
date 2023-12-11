@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <babeltrace2/babeltrace.h>
+
 #include "logging.hpp"
 
 #include "common/assert.h"
@@ -18,8 +20,11 @@
 #include "compat/endian.h" /* IWYU pragma: keep  */
 #include "cpp-common/bt2c/logging.hpp"
 
+#include "../normalize-clk-offset.hpp"
 #include "ast.hpp"
 #include "ctf-meta-visitors.hpp"
+#include "ctf-meta.hpp"
+#include "decoder.hpp"
 
 /* Bit value (left shift) */
 #define _BV(_val) (1 << (_val))
@@ -4178,17 +4183,6 @@ static inline uint64_t cycles_from_ns(uint64_t frequency, uint64_t ns)
     return cycles;
 }
 
-static void calibrate_clock_class_offsets(int64_t *offset_seconds, uint64_t *offset_cycles,
-                                          uint64_t freq)
-{
-    if (*offset_cycles >= freq) {
-        const uint64_t s_in_offset_cycles = *offset_cycles / freq;
-
-        *offset_seconds += (int64_t) s_in_offset_cycles;
-        *offset_cycles -= (s_in_offset_cycles * freq);
-    }
-}
-
 static void apply_clock_class_is_absolute(struct ctf_visitor_generate_ir *ctx,
                                           struct ctf_clock_class *clock)
 {
@@ -4207,6 +4201,8 @@ static void apply_clock_class_offset(struct ctf_visitor_generate_ir *ctx,
     uint64_t offset_ns_to_apply;
     int64_t cur_offset_s;
     uint64_t cur_offset_cycles;
+    long long offsetSecLL;
+    unsigned long long offsetCyclesULL;
 
     if (ctx->decoder_config.clkClsCfg.offsetSec == 0 &&
         ctx->decoder_config.clkClsCfg.offsetNanoSec == 0) {
@@ -4246,11 +4242,16 @@ static void apply_clock_class_offset(struct ctf_visitor_generate_ir *ctx,
      * Recalibrate offsets because the part in cycles can be greater
      * than the frequency at this point.
      */
-    calibrate_clock_class_offsets(&cur_offset_s, &cur_offset_cycles, freq);
+    {
+        offsetSecLL = cur_offset_s;
+        offsetCyclesULL = cur_offset_cycles;
 
-    /* Set final offsets */
-    clock->offset_seconds = cur_offset_s;
-    clock->offset_cycles = cur_offset_cycles;
+        const auto offsetParts = ctf::src::normalizeClkOffset(offsetSecLL, offsetCyclesULL, freq);
+
+        /* Set final offsets */
+        clock->offset_seconds = offsetParts.first;
+        clock->offset_cycles = offsetParts.second;
+    }
 
 end:
     return;
@@ -4266,7 +4267,8 @@ static int visit_clock_decl(struct ctf_visitor_generate_ir *ctx, struct ctf_node
     const char *clock_class_name;
     int64_t offset_seconds = 0;
     uint64_t offset_cycles = 0;
-    uint64_t freq;
+    long long offsetSecLL;
+    unsigned long long offsetCyclesULL;
 
     if (clock_node->visited) {
         return 0;
@@ -4313,11 +4315,18 @@ static int visit_clock_decl(struct ctf_visitor_generate_ir *ctx, struct ctf_node
      * Adjust offsets so that the part in cycles is less than the
      * frequency (move to the part in seconds).
      */
-    freq = clock->frequency;
-    calibrate_clock_class_offsets(&offset_seconds, &offset_cycles, freq);
-    BT_ASSERT(offset_cycles < clock->frequency);
-    clock->offset_seconds = offset_seconds;
-    clock->offset_cycles = offset_cycles;
+    {
+        offsetSecLL = offset_seconds;
+        offsetCyclesULL = offset_cycles;
+        const auto normalized =
+            ctf::src::normalizeClkOffset(offsetSecLL, offsetCyclesULL, clock->frequency);
+        offsetSecLL = normalized.first;
+        offsetCyclesULL = normalized.second;
+        BT_ASSERT(offsetCyclesULL < clock->frequency);
+        clock->offset_seconds = offsetSecLL;
+        clock->offset_cycles = offsetCyclesULL;
+    }
+
     apply_clock_class_offset(ctx, clock);
     apply_clock_class_is_absolute(ctx, clock);
     g_ptr_array_add(ctx->ctf_tc->clock_classes, clock);

@@ -706,6 +706,8 @@ plugins_ctf_babeltrace_plugin_ctf_la_SOURCES = \
 	plugins/ctf/common/src/metadata/json/strings.hpp \
 	plugins/ctf/common/src/metadata/json/val-req.cpp \
 	plugins/ctf/common/src/metadata/json/val-req.hpp \
+	plugins/ctf/common/src/metadata/normalize-clk-offset.cpp \
+	plugins/ctf/common/src/metadata/normalize-clk-offset.hpp \
 	plugins/ctf/common/src/metadata/tsdl/metadata-stream-decoder.cpp \
 	plugins/ctf/common/src/metadata/tsdl/metadata-stream-decoder.hpp \
 	plugins/ctf/common/src/msg-iter.cpp \
