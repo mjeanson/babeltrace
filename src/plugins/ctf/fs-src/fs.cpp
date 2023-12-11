@@ -601,7 +601,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
         }
     }
 
-    ds_file_info = ctf_fs_ds_file_info_create(path, begin_ns);
+    ds_file_info = ctf_fs_ds_file_info_create(path, begin_ns).release();
     if (!ds_file_info) {
         goto error;
     }

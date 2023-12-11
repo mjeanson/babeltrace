@@ -22,6 +22,8 @@
 
 struct ctf_fs_ds_file_info
 {
+    using UP = std::unique_ptr<ctf_fs_ds_file_info>;
+
     std::string path;
 
     /* Guaranteed to be set, as opposed to the index. */
@@ -162,7 +164,7 @@ void ctf_fs_ds_index_destroy(struct ctf_fs_ds_index *index);
 
 void ctf_fs_ds_file_info_destroy(struct ctf_fs_ds_file_info *ds_file_info);
 
-struct ctf_fs_ds_file_info *ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns);
+ctf_fs_ds_file_info::UP ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns);
 
 ctf_fs_ds_file_group::UP ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs_trace,
                                                      struct ctf_stream_class *sc,

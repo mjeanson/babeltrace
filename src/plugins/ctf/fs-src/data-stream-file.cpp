@@ -12,6 +12,7 @@
 
 #include "compat/endian.h" /* IWYU pragma: keep  */
 #include "compat/mman.h"   /* IWYU: pragma keep  */
+#include "cpp-common/bt2s/make-unique.hpp"
 #include "cpp-common/vendor/fmt/format.h"
 
 #include "../common/src/msg-iter/msg-iter.hpp"
@@ -935,9 +936,9 @@ void ctf_fs_ds_file_info_destroy(struct ctf_fs_ds_file_info *ds_file_info)
     delete ds_file_info;
 }
 
-struct ctf_fs_ds_file_info *ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns)
+ctf_fs_ds_file_info::UP ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns)
 {
-    ctf_fs_ds_file_info *ds_file_info = new ctf_fs_ds_file_info;
+    ctf_fs_ds_file_info::UP ds_file_info = bt2s::make_unique<ctf_fs_ds_file_info>();
 
     ds_file_info->path = path;
     ds_file_info->begin_ns = begin_ns;
