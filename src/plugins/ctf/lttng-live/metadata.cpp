@@ -284,8 +284,6 @@ int lttng_live_metadata_create_stream(struct lttng_live_session *session, uint64
 
     ctf_metadata_decoder_config cfg {session->logger};
     cfg.self_comp = session->self_comp;
-    cfg.clock_class_offset_s = 0;
-    cfg.clock_class_offset_ns = 0;
     cfg.create_trace_class = true;
 
     lttng_live_metadata *metadata = new lttng_live_metadata {session->logger};

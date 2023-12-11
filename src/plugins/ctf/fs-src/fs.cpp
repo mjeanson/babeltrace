@@ -959,7 +959,7 @@ end:
 }
 
 static struct ctf_fs_trace *ctf_fs_trace_create(const char *path, const char *name,
-                                                struct ctf_fs_metadata_config *metadata_config,
+                                                const ctf::src::ClkClsCfg& clkClsCfg,
                                                 bt_self_component *selfComp,
                                                 const bt2c::Logger& parentLogger)
 {
@@ -979,7 +979,7 @@ static struct ctf_fs_trace *ctf_fs_trace_create(const char *path, const char *na
         goto error;
     }
 
-    ret = ctf_fs_metadata_set_trace_class(selfComp, ctf_fs_trace, metadata_config);
+    ret = ctf_fs_metadata_set_trace_class(selfComp, ctf_fs_trace, clkClsCfg);
     if (ret) {
         goto error;
     }
@@ -1076,8 +1076,8 @@ static int ctf_fs_component_create_ctf_fs_trace_one_path(struct ctf_fs_component
         goto end;
     }
 
-    ctf_fs_trace = ctf_fs_trace_create(norm_path->str, trace_name, &ctf_fs->metadata_config,
-                                       selfComp, ctf_fs->logger);
+    ctf_fs_trace = ctf_fs_trace_create(norm_path->str, trace_name, ctf_fs->clkClsCfg, selfComp,
+                                       ctf_fs->logger);
     if (!ctf_fs_trace) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs->logger, "Cannot create trace for `{}`.",
                                      norm_path->str);
@@ -2163,19 +2163,19 @@ bool read_src_fs_parameters(const bt_value *params, const bt_value **inputs,
     /* clock-class-offset-s parameter */
     value = bt_value_map_borrow_entry_value_const(params, "clock-class-offset-s");
     if (value) {
-        ctf_fs->metadata_config.clock_class_offset_s = bt_value_integer_signed_get(value);
+        ctf_fs->clkClsCfg.offsetSec = bt_value_integer_signed_get(value);
     }
 
     /* clock-class-offset-ns parameter */
     value = bt_value_map_borrow_entry_value_const(params, "clock-class-offset-ns");
     if (value) {
-        ctf_fs->metadata_config.clock_class_offset_ns = bt_value_integer_signed_get(value);
+        ctf_fs->clkClsCfg.offsetNanoSec = bt_value_integer_signed_get(value);
     }
 
     /* force-clock-class-origin-unix-epoch parameter */
     value = bt_value_map_borrow_entry_value_const(params, "force-clock-class-origin-unix-epoch");
     if (value) {
-        ctf_fs->metadata_config.force_clock_class_origin_unix_epoch = bt_value_bool_get(value);
+        ctf_fs->clkClsCfg.forceOriginIsUnixEpoch = bt_value_bool_get(value);
     }
 
     /* trace-name parameter */

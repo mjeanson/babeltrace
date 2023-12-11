@@ -7,7 +7,6 @@
 #ifndef _METADATA_DECODER_H
 #define _METADATA_DECODER_H
 
-#include <stdint.h>
 #include <stdio.h>
 
 #include <babeltrace2/babeltrace.h>
@@ -15,6 +14,11 @@
 #include "common/uuid.h"
 #include "cpp-common/bt2c/logging.hpp"
 #include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
+
+#include "../../../src/clk-cls-cfg.hpp"
+
+/* A CTF metadata decoder object */
+struct ctf_metadata_decoder;
 
 /* CTF metadata decoder status */
 enum ctf_metadata_decoder_status
@@ -65,10 +69,7 @@ struct ctf_metadata_decoder_config
     /* Weak, used to create a bt_trace_class, if not nullptr. */
     bt_self_component *self_comp = nullptr;
 
-    /* Additional clock class offset to apply */
-    int64_t clock_class_offset_s = 0;
-    int64_t clock_class_offset_ns = 0;
-    bool force_clock_class_origin_unix_epoch = false;
+    ctf::src::ClkClsCfg clkClsCfg;
 
     /* True to create trace class objects */
     bool create_trace_class = false;

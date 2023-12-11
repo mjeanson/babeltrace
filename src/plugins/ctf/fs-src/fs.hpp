@@ -79,7 +79,7 @@ struct ctf_fs_component
     /* Owned by this */
     struct ctf_fs_trace *trace = nullptr;
 
-    struct ctf_fs_metadata_config metadata_config;
+    ctf::src::ClkClsCfg clkClsCfg;
 };
 
 struct ctf_fs_trace

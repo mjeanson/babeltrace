@@ -17,21 +17,16 @@ class Logger;
 
 } /* namespace bt2c */
 
-#define CTF_FS_METADATA_FILENAME "metadata"
+#include "../common/src/clk-cls-cfg.hpp"
 
-struct ctf_fs_metadata_config
-{
-    bool force_clock_class_origin_unix_epoch = false;
-    int64_t clock_class_offset_s = 0;
-    int64_t clock_class_offset_ns = 0;
-};
+#define CTF_FS_METADATA_FILENAME "metadata"
 
 int ctf_fs_metadata_init(struct ctf_fs_metadata *metadata);
 
 void ctf_fs_metadata_fini(struct ctf_fs_metadata *metadata);
 
 int ctf_fs_metadata_set_trace_class(bt_self_component *self_comp, struct ctf_fs_trace *ctf_fs_trace,
-                                    struct ctf_fs_metadata_config *config);
+                                    const ctf::src::ClkClsCfg& clkClsCfg);
 
 FILE *ctf_fs_metadata_open_file(const char *trace_path, const bt2c::Logger& logger);
 

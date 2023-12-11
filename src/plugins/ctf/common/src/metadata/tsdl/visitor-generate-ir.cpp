@@ -4208,7 +4208,7 @@ static void calibrate_clock_class_offsets(int64_t *offset_seconds, uint64_t *off
 static void apply_clock_class_is_absolute(struct ctf_visitor_generate_ir *ctx,
                                           struct ctf_clock_class *clock)
 {
-    if (ctx->decoder_config.force_clock_class_origin_unix_epoch) {
+    if (ctx->decoder_config.clkClsCfg.forceOriginIsUnixEpoch) {
         clock->is_absolute = true;
     }
 
@@ -4219,31 +4219,31 @@ static void apply_clock_class_offset(struct ctf_visitor_generate_ir *ctx,
                                      struct ctf_clock_class *clock)
 {
     uint64_t freq;
-    int64_t offset_s_to_apply = ctx->decoder_config.clock_class_offset_s;
+    int64_t offset_s_to_apply = ctx->decoder_config.clkClsCfg.offsetSec;
     uint64_t offset_ns_to_apply;
     int64_t cur_offset_s;
     uint64_t cur_offset_cycles;
 
-    if (ctx->decoder_config.clock_class_offset_s == 0 &&
-        ctx->decoder_config.clock_class_offset_ns == 0) {
+    if (ctx->decoder_config.clkClsCfg.offsetSec == 0 &&
+        ctx->decoder_config.clkClsCfg.offsetNanoSec == 0) {
         goto end;
     }
 
     /* Transfer nanoseconds to seconds as much as possible */
-    if (ctx->decoder_config.clock_class_offset_ns < 0) {
-        const int64_t abs_ns = -ctx->decoder_config.clock_class_offset_ns;
+    if (ctx->decoder_config.clkClsCfg.offsetNanoSec < 0) {
+        const int64_t abs_ns = -ctx->decoder_config.clkClsCfg.offsetNanoSec;
         const int64_t abs_extra_s = abs_ns / INT64_C(1000000000) + 1;
         const int64_t extra_s = -abs_extra_s;
         const int64_t offset_ns =
-            ctx->decoder_config.clock_class_offset_ns - (extra_s * INT64_C(1000000000));
+            ctx->decoder_config.clkClsCfg.offsetNanoSec - (extra_s * INT64_C(1000000000));
 
         BT_ASSERT(offset_ns > 0);
         offset_ns_to_apply = (uint64_t) offset_ns;
         offset_s_to_apply += extra_s;
     } else {
-        const int64_t extra_s = ctx->decoder_config.clock_class_offset_ns / INT64_C(1000000000);
+        const int64_t extra_s = ctx->decoder_config.clkClsCfg.offsetNanoSec / INT64_C(1000000000);
         const int64_t offset_ns =
-            ctx->decoder_config.clock_class_offset_ns - (extra_s * INT64_C(1000000000));
+            ctx->decoder_config.clkClsCfg.offsetNanoSec - (extra_s * INT64_C(1000000000));
 
         BT_ASSERT(offset_ns >= 0);
         offset_ns_to_apply = (uint64_t) offset_ns;

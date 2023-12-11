@@ -90,12 +90,11 @@ ctf_metadata_decoder_up
 ctf_metadata_decoder_create(const struct ctf_metadata_decoder_config *config)
 {
     BT_ASSERT(config);
-
     BT_CPPLOGD_SPEC(config->logger,
                     "Creating CTF metadata decoder: "
                     "clock-class-offset-s={}, "
                     "clock-class-offset-ns={}",
-                    config->clock_class_offset_s, config->clock_class_offset_ns);
+                    config->clkClsCfg.offsetSec, config->clkClsCfg.offsetNanoSec);
 
     ctf_metadata_decoder *mdec = new ctf_metadata_decoder {config->logger};
     mdec->scanner = ctf_scanner_alloc(mdec->logger);
@@ -131,7 +130,7 @@ ctf_metadata_decoder_create(const struct ctf_metadata_decoder_config *config)
                     "Creating CTF metadata decoder: "
                     "clock-class-offset-s={}, "
                     "clock-class-offset-ns={}, addr={}",
-                    config->clock_class_offset_s, config->clock_class_offset_ns, fmt::ptr(mdec));
+                    config->clkClsCfg.offsetSec, config->clkClsCfg.offsetNanoSec, fmt::ptr(mdec));
     goto end;
 
 error:
