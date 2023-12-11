@@ -313,6 +313,11 @@ void ctf_fs_destroy(struct ctf_fs_component *ctf_fs)
     delete ctf_fs;
 }
 
+void ctf_fs_component_deleter::operator()(ctf_fs_component *comp)
+{
+    ctf_fs_destroy(comp);
+}
+
 static void port_data_destroy(struct ctf_fs_port_data *port_data)
 {
     if (!port_data) {
@@ -333,9 +338,10 @@ static void ctf_fs_trace_destroy_notifier(void *data)
     ctf_fs_trace_destroy(trace);
 }
 
-ctf_fs_component *ctf_fs_component_create(const bt2c::Logger& parentLogger)
+ctf_fs_component::UP ctf_fs_component_create(const bt2c::Logger& parentLogger)
 {
-    ctf_fs_component *ctf_fs = new ctf_fs_component {parentLogger};
+    ctf_fs_component::UP ctf_fs {new ctf_fs_component {parentLogger}};
+
     ctf_fs->port_data = g_ptr_array_new_with_free_func(port_data_destroy_notifier);
     if (!ctf_fs->port_data) {
         goto error;
@@ -344,8 +350,7 @@ ctf_fs_component *ctf_fs_component_create(const bt2c::Logger& parentLogger)
     goto end;
 
 error:
-    ctf_fs_destroy(ctf_fs);
-    ctf_fs = NULL;
+    ctf_fs.reset();
 
 end:
     return ctf_fs;
@@ -2190,46 +2195,36 @@ end:
     return ret;
 }
 
-static struct ctf_fs_component *ctf_fs_create(const bt_value *params,
-                                              bt_self_component_source *self_comp_src)
+static ctf_fs_component::UP ctf_fs_create(const bt_value *params,
+                                          bt_self_component_source *self_comp_src)
 {
-    struct ctf_fs_component *ctf_fs = NULL;
     const bt_value *inputs_value;
     const bt_value *trace_name_value;
     bt_self_component *self_comp = bt_self_component_source_as_self_component(self_comp_src);
 
-    ctf_fs = ctf_fs_component_create(
+    ctf_fs_component::UP ctf_fs = ctf_fs_component_create(
         bt2c::Logger {bt2::SelfSourceComponent {self_comp_src}, "PLUGIN/SRC.CTF.FS/COMP"});
     if (!ctf_fs) {
-        goto error;
+        return nullptr;
     }
 
-    if (!read_src_fs_parameters(params, &inputs_value, &trace_name_value, ctf_fs)) {
-        goto error;
+    if (!read_src_fs_parameters(params, &inputs_value, &trace_name_value, ctf_fs.get())) {
+        return nullptr;
     }
 
-    bt_self_component_set_data(self_comp, ctf_fs);
-
-    if (ctf_fs_component_create_ctf_fs_trace(ctf_fs, inputs_value, trace_name_value, self_comp)) {
-        goto error;
+    if (ctf_fs_component_create_ctf_fs_trace(ctf_fs.get(), inputs_value, trace_name_value,
+                                             self_comp)) {
+        return nullptr;
     }
 
     if (create_streams_for_trace(ctf_fs->trace)) {
-        goto error;
+        return nullptr;
     }
 
-    if (create_ports_for_trace(ctf_fs, ctf_fs->trace, self_comp_src)) {
-        goto error;
+    if (create_ports_for_trace(ctf_fs.get(), ctf_fs->trace, self_comp_src)) {
+        return nullptr;
     }
 
-    goto end;
-
-error:
-    ctf_fs_destroy(ctf_fs);
-    ctf_fs = NULL;
-    bt_self_component_set_data(self_comp, NULL);
-
-end:
     return ctf_fs;
 }
 
@@ -2238,15 +2233,16 @@ bt_component_class_initialize_method_status ctf_fs_init(bt_self_component_source
                                                         const bt_value *params, void *)
 {
     try {
-        struct ctf_fs_component *ctf_fs;
         bt_component_class_initialize_method_status ret =
             BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK;
 
-        ctf_fs = ctf_fs_create(params, self_comp_src);
+        ctf_fs_component::UP ctf_fs = ctf_fs_create(params, self_comp_src);
         if (!ctf_fs) {
             ret = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_ERROR;
         }
 
+        bt_self_component_set_data(bt_self_component_source_as_self_component(self_comp_src),
+                                   ctf_fs.release());
         return ret;
     } catch (const std::bad_alloc&) {
         return BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_MEMORY_ERROR;

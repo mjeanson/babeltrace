@@ -299,7 +299,7 @@ end:
 bt_component_class_query_method_status
 trace_infos_query(const bt_value *params, const bt2c::Logger& logger, const bt_value **user_result)
 {
-    struct ctf_fs_component *ctf_fs = NULL;
+    ctf_fs_component::UP ctf_fs;
     bt_component_class_query_method_status status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_OK;
     bt_value *result = NULL;
     const bt_value *inputs_value = NULL;
@@ -321,12 +321,12 @@ trace_infos_query(const bt_value *params, const bt2c::Logger& logger, const bt_v
         goto error;
     }
 
-    if (!read_src_fs_parameters(params, &inputs_value, &trace_name_value, ctf_fs)) {
+    if (!read_src_fs_parameters(params, &inputs_value, &trace_name_value, ctf_fs.get())) {
         status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_ERROR;
         goto error;
     }
 
-    if (ctf_fs_component_create_ctf_fs_trace(ctf_fs, inputs_value, trace_name_value, NULL)) {
+    if (ctf_fs_component_create_ctf_fs_trace(ctf_fs.get(), inputs_value, trace_name_value, NULL)) {
         goto error;
     }
 
@@ -357,11 +357,6 @@ error:
     }
 
 end:
-    if (ctf_fs) {
-        ctf_fs_destroy(ctf_fs);
-        ctf_fs = NULL;
-    }
-
     *user_result = result;
     return status;
 }
