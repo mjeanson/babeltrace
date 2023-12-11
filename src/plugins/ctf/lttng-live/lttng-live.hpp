@@ -68,6 +68,8 @@ inline const char *format_as(const lttng_live_stream_state state) noexcept
 /* Iterator over a live stream. */
 struct lttng_live_stream_iterator
 {
+    using UP = std::unique_ptr<lttng_live_stream_iterator>;
+
     explicit lttng_live_stream_iterator(const bt2c::Logger& parentLogger) :
         logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/STREAM-ITER"}
     {

@@ -17,6 +17,7 @@
 
 #include "common/assert.h"
 #include "compat/mman.h" /* IWYU pragma: keep  */
+#include "cpp-common/bt2s/make-unique.hpp"
 #include "cpp-common/vendor/fmt/format.h"
 
 #include "../common/src/msg-iter/msg-iter.hpp"
@@ -170,7 +171,6 @@ struct lttng_live_stream_iterator *
 lttng_live_stream_iterator_create(struct lttng_live_session *session, uint64_t ctf_trace_id,
                                   uint64_t stream_id, bt_self_message_iterator *self_msg_iter)
 {
-    lttng_live_stream_iterator *stream_iter = nullptr;
     std::stringstream nameSs;
 
     BT_ASSERT(session);
@@ -182,10 +182,11 @@ lttng_live_stream_iterator_create(struct lttng_live_session *session, uint64_t c
         lttng_live_session_borrow_or_create_trace_by_id(session, ctf_trace_id);
     if (!trace) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(session->logger, "Failed to borrow CTF trace.");
-        goto error;
+        return nullptr;
     }
 
-    stream_iter = new lttng_live_stream_iterator {session->logger};
+    auto stream_iter = bt2s::make_unique<lttng_live_stream_iterator>(session->logger);
+
     stream_iter->trace = trace;
     stream_iter->state = LTTNG_LIVE_STREAM_ACTIVE_NO_DATA;
     stream_iter->viewer_stream_id = stream_id;
@@ -201,29 +202,26 @@ lttng_live_stream_iterator_create(struct lttng_live_session *session, uint64_t c
             ctf_metadata_decoder_borrow_ctf_trace_class(trace->metadata->decoder.get());
         BT_ASSERT(!stream_iter->msg_iter);
         stream_iter->msg_iter =
-            ctf_msg_iter_create(ctf_tc, lttng_live->max_query_size, medops, stream_iter,
+            ctf_msg_iter_create(ctf_tc, lttng_live->max_query_size, medops, stream_iter.get(),
                                 self_msg_iter, stream_iter->logger);
         if (!stream_iter->msg_iter) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(stream_iter->logger,
                                          "Failed to create CTF message iterator");
-            goto error;
+            return nullptr;
         }
     }
     stream_iter->buf.resize(lttng_live->max_query_size);
 
     nameSs << STREAM_NAME_PREFIX << stream_iter->viewer_stream_id;
     stream_iter->name = nameSs.str();
-    g_ptr_array_add(trace->stream_iterators, stream_iter);
+
+    const auto ret = stream_iter.get();
+    g_ptr_array_add(trace->stream_iterators, stream_iter.release());
 
     /* Track the number of active stream iterator. */
     session->lttng_live_msg_iter->active_stream_iter++;
 
-    goto end;
-error:
-    delete stream_iter;
-    stream_iter = NULL;
-end:
-    return stream_iter;
+    return ret;
 }
 
 lttng_live_stream_iterator::~lttng_live_stream_iterator()
