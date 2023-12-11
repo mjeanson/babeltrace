@@ -613,41 +613,34 @@ static int create_ds_file_groups(struct ctf_fs_trace *ctf_fs_trace)
         }
 
         /* Create the file. */
-        const auto file = ctf_fs_file_create(ctf_fs_trace->logger);
-        if (!file) {
-            BT_CPPLOGE_APPEND_CAUSE_SPEC(
-                ctf_fs_trace->logger,
-                "Cannot create stream file object for file `{}" G_DIR_SEPARATOR_S "{}`",
-                ctf_fs_trace->path, basename);
-            goto error;
-        }
+        ctf_fs_file file {ctf_fs_trace->logger};
 
         /* Create full path string. */
-        file->path = fmt::format("{}" G_DIR_SEPARATOR_S "{}", ctf_fs_trace->path, basename);
+        file.path = fmt::format("{}" G_DIR_SEPARATOR_S "{}", ctf_fs_trace->path, basename);
 
-        if (!g_file_test(file->path.c_str(), G_FILE_TEST_IS_REGULAR)) {
-            BT_CPPLOGI_SPEC(ctf_fs_trace->logger, "Ignoring non-regular file `{}`", file->path);
+        if (!g_file_test(file.path.c_str(), G_FILE_TEST_IS_REGULAR)) {
+            BT_CPPLOGI_SPEC(ctf_fs_trace->logger, "Ignoring non-regular file `{}`", file.path);
             continue;
         }
 
-        ret = ctf_fs_file_open(file.get(), "rb");
+        ret = ctf_fs_file_open(&file, "rb");
         if (ret) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger, "Cannot open stream file `{}`",
-                                         file->path);
+                                         file.path);
             goto error;
         }
 
-        if (file->size == 0) {
+        if (file.size == 0) {
             /* Skip empty stream. */
-            BT_CPPLOGI_SPEC(ctf_fs_trace->logger, "Ignoring empty file `{}`", file->path);
+            BT_CPPLOGI_SPEC(ctf_fs_trace->logger, "Ignoring empty file `{}`", file.path);
             continue;
         }
 
-        ret = add_ds_file_to_ds_file_group(ctf_fs_trace, file->path.c_str());
+        ret = add_ds_file_to_ds_file_group(ctf_fs_trace, file.path.c_str());
         if (ret) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger,
                                          "Cannot add stream file `{}` to stream file group",
-                                         file->path);
+                                         file.path);
             goto error;
         }
     }

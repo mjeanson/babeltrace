@@ -8,15 +8,9 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
-#include "cpp-common/bt2s/make-unique.hpp"
 #include "cpp-common/vendor/fmt/format.h"
 
 #include "file.hpp"
-
-ctf_fs_file::UP ctf_fs_file_create(const bt2c::Logger& parentLogger)
-{
-    return bt2s::make_unique<ctf_fs_file>(parentLogger);
-}
 
 int ctf_fs_file_open(struct ctf_fs_file *file, const char *mode)
 {

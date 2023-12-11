@@ -805,11 +805,7 @@ ctf_fs_ds_file::UP ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace,
     auto ds_file = bt2s::make_unique<ctf_fs_ds_file>(parentLogger);
     size_t offset_align;
 
-    ds_file->file = ctf_fs_file_create(parentLogger);
-    if (!ds_file->file) {
-        goto error;
-    }
-
+    ds_file->file = bt2s::make_unique<ctf_fs_file>(parentLogger);
     ds_file->stream = std::move(stream);
     ds_file->metadata = ctf_fs_trace->metadata.get();
     ds_file->file->path = path;

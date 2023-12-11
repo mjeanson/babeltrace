@@ -6,6 +6,7 @@
  */
 
 #include "common/assert.h"
+#include "cpp-common/bt2s/make-unique.hpp"
 
 #include "../common/src/metadata/tsdl/decoder.hpp"
 #include "file.hpp"
@@ -37,7 +38,7 @@ end:
 
 static ctf_fs_file::UP get_file(const bt2c::CStringView trace_path, const bt2c::Logger& logger)
 {
-    auto file = ctf_fs_file_create(logger);
+    auto file = bt2s::make_unique<ctf_fs_file>(logger);
 
     if (!file) {
         goto error;
