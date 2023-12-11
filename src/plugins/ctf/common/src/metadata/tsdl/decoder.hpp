@@ -12,6 +12,7 @@
 #include <babeltrace2/babeltrace.h>
 
 #include "common/uuid.h"
+#include "cpp-common/bt2/trace-ir.hpp"
 #include "cpp-common/bt2c/logging.hpp"
 #include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 
@@ -133,7 +134,7 @@ ctf_metadata_decoder_append_content(struct ctf_metadata_decoder *metadata_decode
  * Returns `NULL` if there's none yet or if the metadata decoder is not
  * configured to create trace classes.
  */
-bt_trace_class *ctf_metadata_decoder_get_ir_trace_class(struct ctf_metadata_decoder *mdec);
+bt2::TraceClass::Shared ctf_metadata_decoder_get_ir_trace_class(struct ctf_metadata_decoder *mdec);
 
 /*
  * Returns the CTF IR trace class of this metadata decoder.

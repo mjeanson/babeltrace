@@ -233,7 +233,9 @@ enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_tra
             struct ctf_trace_class *tc =
                 ctf_metadata_decoder_borrow_ctf_trace_class(metadata->decoder.get());
 
-            trace->trace_class = ctf_metadata_decoder_get_ir_trace_class(metadata->decoder.get());
+            trace->trace_class = ctf_metadata_decoder_get_ir_trace_class(metadata->decoder.get())
+                                     .release()
+                                     .libObjPtr();
             trace->trace = bt_trace_create(trace->trace_class);
             if (!trace->trace) {
                 BT_CPPLOGE_APPEND_CAUSE_SPEC(metadata->logger, "Failed to create bt_trace");

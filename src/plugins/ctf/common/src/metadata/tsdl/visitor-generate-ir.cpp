@@ -465,8 +465,6 @@ static void ctx_destroy(struct ctf_visitor_generate_ir *ctx)
         scope = parent_scope;
     }
 
-    bt_trace_class_put_ref(ctx->trace_class);
-
     if (ctx->ctf_tc) {
         ctf_trace_class_destroy(ctx->ctf_tc);
     }
@@ -491,11 +489,13 @@ ctx_create(const struct ctf_metadata_decoder_config *decoder_config, const bt2c:
     ctf_visitor_generate_ir::UP ctx {new ctf_visitor_generate_ir {*decoder_config, logger}};
 
     if (decoder_config->self_comp) {
-        ctx->trace_class = bt_trace_class_create(decoder_config->self_comp);
-        if (!ctx->trace_class) {
+        bt_trace_class *trace_class = bt_trace_class_create(decoder_config->self_comp);
+        if (!trace_class) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(ctx->logger, "Cannot create empty trace class.");
             goto error;
         }
+
+        ctx->trace_class = bt2::TraceClass::Shared::createWithoutRef(trace_class);
     }
 
     ctx->ctf_tc = ctf_trace_class_create();
@@ -4442,13 +4442,10 @@ void ctf_visitor_generate_ir_deleter::operator()(ctf_visitor_generate_ir *visito
     ctf_visitor_generate_ir_destroy(visitor);
 }
 
-bt_trace_class *ctf_visitor_generate_ir_get_ir_trace_class(struct ctf_visitor_generate_ir *ctx)
+bt2::TraceClass::Shared
+ctf_visitor_generate_ir_get_ir_trace_class(struct ctf_visitor_generate_ir *ctx)
 {
     BT_ASSERT_DBG(ctx);
-
-    if (ctx->trace_class) {
-        bt_trace_class_get_ref(ctx->trace_class);
-    }
 
     return ctx->trace_class;
 }
@@ -4683,8 +4680,8 @@ int ctf_visitor_generate_ir_visit_node(struct ctf_visitor_generate_ir *ctx, stru
 
     if (ctx->trace_class) {
         /* Copy new CTF metadata -> new IR metadata */
-        ret =
-            ctf_trace_class_translate(ctx->decoder_config.self_comp, ctx->trace_class, ctx->ctf_tc);
+        ret = ctf_trace_class_translate(ctx->decoder_config.self_comp,
+                                        ctx->trace_class->libObjPtr(), ctx->ctf_tc);
         if (ret) {
             ret = -EINVAL;
             goto end;

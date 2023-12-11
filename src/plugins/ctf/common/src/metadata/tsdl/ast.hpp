@@ -17,6 +17,7 @@
 
 #include "common/assert.h"
 #include "common/list.h"
+#include "cpp-common/bt2/trace-ir.hpp"
 #include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 
 #include "ctf-meta.hpp"
@@ -494,7 +495,7 @@ struct ctf_visitor_generate_ir
     }
 
     /* Trace IR trace class being filled (owned by this) */
-    bt_trace_class *trace_class = nullptr;
+    bt2::TraceClass::Shared trace_class;
 
     /* CTF meta trace being filled (owned by this) */
     struct ctf_trace_class *ctf_tc = nullptr;
@@ -517,7 +518,8 @@ struct ctf_visitor_generate_ir
 ctf_visitor_generate_ir::UP
 ctf_visitor_generate_ir_create(const struct ctf_metadata_decoder_config *config);
 
-bt_trace_class *ctf_visitor_generate_ir_get_ir_trace_class(struct ctf_visitor_generate_ir *visitor);
+bt2::TraceClass::Shared
+ctf_visitor_generate_ir_get_ir_trace_class(struct ctf_visitor_generate_ir *visitor);
 
 struct ctf_trace_class *
 ctf_visitor_generate_ir_borrow_ctf_trace_class(struct ctf_visitor_generate_ir *visitor);
