@@ -362,7 +362,7 @@ void ctf_fs_finalize(bt_self_component_source *component)
         bt_self_component_source_as_self_component(component)));
 }
 
-gchar *ctf_fs_make_port_name(struct ctf_fs_ds_file_group *ds_file_group)
+bt2c::GCharUP ctf_fs_make_port_name(struct ctf_fs_ds_file_group *ds_file_group)
 {
     GString *name = g_string_new(NULL);
 
@@ -403,7 +403,7 @@ gchar *ctf_fs_make_port_name(struct ctf_fs_ds_file_group *ds_file_group)
         g_string_append_printf(name, " | %s", ds_file_info->path->str);
     }
 
-    return g_string_free(name, FALSE);
+    return bt2c::GCharUP {g_string_free(name, FALSE)};
 }
 
 static int create_one_port_for_trace(struct ctf_fs_component *ctf_fs,
@@ -412,20 +412,19 @@ static int create_one_port_for_trace(struct ctf_fs_component *ctf_fs,
 {
     int ret = 0;
     struct ctf_fs_port_data *port_data = NULL;
-    gchar *port_name;
 
-    port_name = ctf_fs_make_port_name(ds_file_group);
+    bt2c::GCharUP port_name = ctf_fs_make_port_name(ds_file_group);
     if (!port_name) {
         goto error;
     }
 
-    BT_CPPLOGI_SPEC(ctf_fs->logger, "Creating one port named `{}`", port_name);
+    BT_CPPLOGI_SPEC(ctf_fs->logger, "Creating one port named `{}`", port_name.get());
 
     /* Create output port for this file */
     port_data = new ctf_fs_port_data;
     port_data->ctf_fs = ctf_fs;
     port_data->ds_file_group = ds_file_group;
-    ret = bt_self_component_source_add_output_port(self_comp_src, port_name, port_data, NULL);
+    ret = bt_self_component_source_add_output_port(self_comp_src, port_name.get(), port_data, NULL);
     if (ret) {
         goto error;
     }
@@ -438,8 +437,6 @@ error:
     ret = -1;
 
 end:
-    g_free(port_name);
-
     port_data_destroy(port_data);
     return ret;
 }
