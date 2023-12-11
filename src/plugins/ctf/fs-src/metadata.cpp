@@ -90,17 +90,17 @@ int ctf_fs_metadata_set_trace_class(bt_self_component *self_comp, struct ctf_fs_
         goto end;
     }
 
-    ret = ctf_metadata_decoder_append_content(ctf_fs_trace->metadata->decoder, file->fp);
+    ret = ctf_metadata_decoder_append_content(ctf_fs_trace->metadata->decoder.get(), file->fp);
     if (ret) {
         BT_CPPLOGE_SPEC(ctf_fs_trace->logger, "Cannot update metadata decoder's content.");
         goto end;
     }
 
     ctf_fs_trace->metadata->trace_class =
-        ctf_metadata_decoder_get_ir_trace_class(ctf_fs_trace->metadata->decoder);
+        ctf_metadata_decoder_get_ir_trace_class(ctf_fs_trace->metadata->decoder.get());
     BT_ASSERT(!self_comp || ctf_fs_trace->metadata->trace_class);
     ctf_fs_trace->metadata->tc =
-        ctf_metadata_decoder_borrow_ctf_trace_class(ctf_fs_trace->metadata->decoder);
+        ctf_metadata_decoder_borrow_ctf_trace_class(ctf_fs_trace->metadata->decoder.get());
     BT_ASSERT(ctf_fs_trace->metadata->tc);
 
 end:
@@ -122,7 +122,5 @@ void ctf_fs_metadata_fini(struct ctf_fs_metadata *metadata)
         BT_TRACE_CLASS_PUT_REF_AND_RESET(metadata->trace_class);
     }
 
-    if (metadata->decoder) {
-        ctf_metadata_decoder_destroy(metadata->decoder);
-    }
+    metadata->decoder.reset();
 }

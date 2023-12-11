@@ -226,14 +226,14 @@ enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_tra
      * new metadata to our current trace class.
      */
     BT_CPPLOGD_SPEC(metadata->logger, "Appending new metadata to the ctf_trace class");
-    decoder_status = ctf_metadata_decoder_append_content(metadata->decoder, fp);
+    decoder_status = ctf_metadata_decoder_append_content(metadata->decoder.get(), fp);
     switch (decoder_status) {
     case CTF_METADATA_DECODER_STATUS_OK:
         if (!trace->trace_class) {
             struct ctf_trace_class *tc =
-                ctf_metadata_decoder_borrow_ctf_trace_class(metadata->decoder);
+                ctf_metadata_decoder_borrow_ctf_trace_class(metadata->decoder.get());
 
-            trace->trace_class = ctf_metadata_decoder_get_ir_trace_class(metadata->decoder);
+            trace->trace_class = ctf_metadata_decoder_get_ir_trace_class(metadata->decoder.get());
             trace->trace = bt_trace_create(trace->trace_class);
             if (!trace->trace) {
                 BT_CPPLOGE_APPEND_CAUSE_SPEC(metadata->logger, "Failed to create bt_trace");
@@ -305,7 +305,6 @@ int lttng_live_metadata_create_stream(struct lttng_live_session *session, uint64
     return 0;
 
 error:
-    ctf_metadata_decoder_destroy(metadata->decoder);
     delete metadata;
     return -1;
 }
@@ -317,7 +316,6 @@ void lttng_live_metadata_fini(struct lttng_live_trace *trace)
     if (!metadata) {
         return;
     }
-    ctf_metadata_decoder_destroy(metadata->decoder);
     trace->metadata = NULL;
     delete metadata;
 }

@@ -136,7 +136,7 @@ enum lttng_live_iterator_status lttng_live_lazy_msg_init(struct lttng_live_sessi
             if (stream_iter->msg_iter) {
                 continue;
             }
-            ctf_tc = ctf_metadata_decoder_borrow_ctf_trace_class(trace->metadata->decoder);
+            ctf_tc = ctf_metadata_decoder_borrow_ctf_trace_class(trace->metadata->decoder.get());
             BT_CPPLOGD_SPEC(stream_iter->logger,
                             "Creating CTF message iterator: session-id={}, ctf-tc-addr={}, "
                             "stream-iter-name={}, self-msg-iter-addr={}",
@@ -192,7 +192,7 @@ lttng_live_stream_iterator_create(struct lttng_live_session *session, uint64_t c
 
     if (trace->trace) {
         struct ctf_trace_class *ctf_tc =
-            ctf_metadata_decoder_borrow_ctf_trace_class(trace->metadata->decoder);
+            ctf_metadata_decoder_borrow_ctf_trace_class(trace->metadata->decoder.get());
         BT_ASSERT(!stream_iter->msg_iter);
         stream_iter->msg_iter =
             ctf_msg_iter_create(ctf_tc, lttng_live->max_query_size, medops, stream_iter,

@@ -18,6 +18,7 @@
 #include "cpp-common/bt2c/logging.hpp"
 
 #include "metadata.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/decoder.hpp"
 
 extern bool ctf_fs_debug;
 
@@ -42,7 +43,7 @@ struct ctf_fs_file
 struct ctf_fs_metadata
 {
     /* Owned by this */
-    struct ctf_metadata_decoder *decoder = nullptr;
+    ctf_metadata_decoder_up decoder;
 
     /* Owned by this */
     bt_trace_class *trace_class = nullptr;

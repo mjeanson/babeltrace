@@ -148,8 +148,9 @@ struct lttng_live_metadata
     bt2c::Logger logger;
 
     uint64_t stream_id = 0;
+
     /* Weak reference. */
-    struct ctf_metadata_decoder *decoder = nullptr;
+    ctf_metadata_decoder_up decoder;
 };
 
 enum lttng_live_metadata_stream_state

@@ -86,7 +86,7 @@ end:
     return ret;
 }
 
-struct ctf_metadata_decoder *
+ctf_metadata_decoder_up
 ctf_metadata_decoder_create(const struct ctf_metadata_decoder_config *config)
 {
     BT_ASSERT(config);
@@ -139,7 +139,7 @@ error:
     mdec = NULL;
 
 end:
-    return mdec;
+    return ctf_metadata_decoder_up {mdec};
 }
 
 void ctf_metadata_decoder_destroy(struct ctf_metadata_decoder *mdec)
@@ -159,6 +159,11 @@ void ctf_metadata_decoder_destroy(struct ctf_metadata_decoder *mdec)
     BT_CPPLOGD_SPEC(mdec->logger, "Destroying CTF metadata decoder: addr={}", fmt::ptr(mdec));
 
     delete mdec;
+}
+
+void ctf_metadata_decoder_deleter::operator()(ctf_metadata_decoder *decoder)
+{
+    ctf_metadata_decoder_destroy(decoder);
 }
 
 enum ctf_metadata_decoder_status
