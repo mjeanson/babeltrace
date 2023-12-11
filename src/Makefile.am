@@ -243,14 +243,14 @@ AM_YFLAGS = \
 	-t -d -v -Wno-yacc
 
 plugins_ctf_common_metadata_libctf_parser_la_SOURCES = \
-	plugins/ctf/common/metadata/lexer.lpp \
-	plugins/ctf/common/metadata/parser.ypp \
-	plugins/ctf/common/metadata/objstack.cpp
+	plugins/ctf/common/src/metadata/tsdl/lexer.lpp \
+	plugins/ctf/common/src/metadata/tsdl/parser.ypp \
+	plugins/ctf/common/src/metadata/tsdl/objstack.cpp
 
 # scanner-symbols.h is included to prefix generated yy_* symbols with bt_.
 plugins_ctf_common_metadata_libctf_parser_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
-	-include $(srcdir)/plugins/ctf/common/metadata/scanner-symbols.hpp
+	-include $(srcdir)/plugins/ctf/common/src/metadata/tsdl/scanner-symbols.hpp
 
 # This library contains (mostly) generated code, silence some warnings that it
 # produces.
@@ -262,52 +262,52 @@ plugins_ctf_common_metadata_libctf_parser_la_CXXFLAGS = \
 	-Wno-unused-parameter
 
 plugins_ctf_common_metadata_libctf_ast_la_SOURCES = \
-	plugins/ctf/common/metadata/visitor-generate-ir.cpp \
-	plugins/ctf/common/metadata/visitor-semantic-validator.cpp \
-	plugins/ctf/common/metadata/visitor-parent-links.cpp \
-	plugins/ctf/common/metadata/ast.hpp \
-	plugins/ctf/common/metadata/objstack.hpp \
-	plugins/ctf/common/metadata/parser.hpp \
-	plugins/ctf/common/metadata/parser-wrap.hpp \
-	plugins/ctf/common/metadata/scanner.hpp \
-	plugins/ctf/common/metadata/scanner-symbols.hpp \
-	plugins/ctf/common/metadata/decoder.cpp \
-	plugins/ctf/common/metadata/decoder.hpp \
-	plugins/ctf/common/metadata/decoder-packetized-file-stream-to-buf.cpp \
-	plugins/ctf/common/metadata/decoder-packetized-file-stream-to-buf.hpp \
-	plugins/ctf/common/metadata/logging.cpp \
-	plugins/ctf/common/metadata/logging.hpp \
-	plugins/ctf/common/metadata/ctf-meta.hpp \
-	plugins/ctf/common/metadata/ctf-meta-visitors.hpp \
-	plugins/ctf/common/metadata/ctf-meta-validate.cpp \
-	plugins/ctf/common/metadata/ctf-meta-update-meanings.cpp \
-	plugins/ctf/common/metadata/ctf-meta-update-in-ir.cpp \
-	plugins/ctf/common/metadata/ctf-meta-update-default-clock-classes.cpp \
-	plugins/ctf/common/metadata/ctf-meta-update-text-array-sequence.cpp \
-	plugins/ctf/common/metadata/ctf-meta-update-alignments.cpp \
-	plugins/ctf/common/metadata/ctf-meta-update-value-storing-indexes.cpp \
-	plugins/ctf/common/metadata/ctf-meta-update-stream-class-config.cpp \
-	plugins/ctf/common/metadata/ctf-meta-warn-meaningless-header-fields.cpp \
-	plugins/ctf/common/metadata/ctf-meta-translate.cpp \
-	plugins/ctf/common/metadata/ctf-meta-resolve.cpp \
-	plugins/ctf/common/metadata/ctf-meta-configure-ir-trace.cpp \
-	plugins/ctf/common/metadata/ctf-meta-configure-ir-trace.hpp
+	plugins/ctf/common/src/metadata/tsdl/visitor-generate-ir.cpp \
+	plugins/ctf/common/src/metadata/tsdl/visitor-semantic-validator.cpp \
+	plugins/ctf/common/src/metadata/tsdl/visitor-parent-links.cpp \
+	plugins/ctf/common/src/metadata/tsdl/ast.hpp \
+	plugins/ctf/common/src/metadata/tsdl/objstack.hpp \
+	plugins/ctf/common/src/metadata/tsdl/parser.hpp \
+	plugins/ctf/common/src/metadata/tsdl/parser-wrap.hpp \
+	plugins/ctf/common/src/metadata/tsdl/scanner.hpp \
+	plugins/ctf/common/src/metadata/tsdl/scanner-symbols.hpp \
+	plugins/ctf/common/src/metadata/tsdl/decoder.cpp \
+	plugins/ctf/common/src/metadata/tsdl/decoder.hpp \
+	plugins/ctf/common/src/metadata/tsdl/decoder-packetized-file-stream-to-buf.cpp \
+	plugins/ctf/common/src/metadata/tsdl/decoder-packetized-file-stream-to-buf.hpp \
+	plugins/ctf/common/src/metadata/tsdl/logging.cpp \
+	plugins/ctf/common/src/metadata/tsdl/logging.hpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta.hpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-visitors.hpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-validate.cpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-meanings.cpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-in-ir.cpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-default-clock-classes.cpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-text-array-sequence.cpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-alignments.cpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-value-storing-indexes.cpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-stream-class-config.cpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-warn-meaningless-header-fields.cpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-translate.cpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-resolve.cpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-configure-ir-trace.cpp \
+	plugins/ctf/common/src/metadata/tsdl/ctf-meta-configure-ir-trace.hpp
 
 if BABELTRACE_BUILD_WITH_MINGW
 plugins_ctf_common_metadata_libctf_ast_la_LIBADD = -lintl -liconv -lole32
 endif
 
 BUILT_SOURCES += \
-	plugins/ctf/common/metadata/parser.hpp
+	plugins/ctf/common/src/metadata/tsdl/parser.hpp
 
 ALL_LOCAL =
 
 if HAVE_BISON
 # We have bison: we can clean the generated parser files
 CLEANFILES += \
-	plugins/ctf/common/metadata/parser.cpp \
-	plugins/ctf/common/metadata/parser.hpp \
-	plugins/ctf/common/metadata/parser.output
+	plugins/ctf/common/src/metadata/tsdl/parser.cpp \
+	plugins/ctf/common/src/metadata/tsdl/parser.hpp \
+	plugins/ctf/common/src/metadata/tsdl/parser.output
 else # HAVE_BISON
 # Create target used to stop the build if we want to build the parser,
 # but we don't have the necessary tool to do so
@@ -648,11 +648,10 @@ endif
 
 # ctf plugin
 plugins_ctf_babeltrace_plugin_ctf_la_SOURCES = \
-	plugins/ctf/common/bfcr/bfcr.cpp \
-	plugins/ctf/common/bfcr/bfcr.hpp \
-	plugins/ctf/common/msg-iter/msg-iter.cpp \
-	plugins/ctf/common/msg-iter/msg-iter.hpp \
-	plugins/ctf/common/print.hpp \
+	plugins/ctf/common/src/bfcr/bfcr.cpp \
+	plugins/ctf/common/src/bfcr/bfcr.hpp \
+	plugins/ctf/common/src/msg-iter/msg-iter.cpp \
+	plugins/ctf/common/src/msg-iter/msg-iter.hpp \
 	plugins/ctf/fs-sink/fs-sink.cpp \
 	plugins/ctf/fs-sink/fs-sink-ctf-meta.hpp \
 	plugins/ctf/fs-sink/fs-sink.hpp \

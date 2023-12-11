@@ -16,7 +16,8 @@
 
 #include <babeltrace2/babeltrace.h>
 
-#include "../common/msg-iter/msg-iter.hpp"
+#include "../common/src/metadata/tsdl/decoder.hpp"
+#include "../common/src/msg-iter/msg-iter.hpp"
 #include "viewer-connection.hpp"
 
 enum lttng_live_stream_state

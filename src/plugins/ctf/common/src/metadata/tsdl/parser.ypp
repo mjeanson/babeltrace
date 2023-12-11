@@ -19,14 +19,15 @@
 
 #define BT_LOG_OUTPUT_LEVEL ctf_plugin_metadata_log_level
 #define BT_LOG_TAG "PLUGIN/CTF/META/PARSER"
-#include "plugins/ctf/common/metadata/logging.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/logging.hpp"
 
 #include "common/list.h"
 #include "common/assert.h"
 
-#include "plugins/ctf/common/metadata/ast.hpp"
-#include "plugins/ctf/common/metadata/objstack.hpp"
-#include "plugins/ctf/common/metadata/parser-wrap.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/scanner.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/ast.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/objstack.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/parser-wrap.hpp"
 
 /*
  * Avoid warning about "yynerrs" being unused, seen with bison 3.5.1 + clang 15
@@ -1049,7 +1050,7 @@ void ctf_scanner_free(struct ctf_scanner *scanner)
 # error "Don't include parser.h directly, include parser-wrap.h instead."
 #endif
 
-#include "plugins/ctf/common/metadata/scanner.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/scanner.hpp"
 }
 
 %code provides {

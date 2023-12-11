@@ -12,11 +12,11 @@
 
 #define BT_LOG_OUTPUT_LEVEL ctf_plugin_metadata_log_level
 #define BT_LOG_TAG "PLUGIN-CTF-METADATA-LEXER"
-#include "plugins/ctf/common/metadata/logging.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/logging.hpp"
 
-#include "plugins/ctf/common/metadata/ast.hpp"
-#include "plugins/ctf/common/metadata/parser-wrap.hpp"
-#include "plugins/ctf/common/metadata/scanner.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/scanner.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/parser-wrap.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/ast.hpp"
 
 #define YY_FATAL_ERROR(_msg)	BT_LOGF_STR(_msg)
 

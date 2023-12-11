@@ -20,8 +20,9 @@
 
 #include "compat/memstream.h"
 
-#include "../common/metadata/ctf-meta-configure-ir-trace.hpp"
-#include "../common/metadata/decoder.hpp"
+#include "../common/src/metadata/tsdl/ctf-meta-configure-ir-trace.hpp"
+#include "../common/src/metadata/tsdl/decoder.hpp"
+#include "lttng-live.hpp"
 #include "metadata.hpp"
 
 #define TSDL_MAGIC 0x75d11d57

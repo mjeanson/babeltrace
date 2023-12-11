@@ -17,18 +17,19 @@
 #define BT_COMP_LOG_SELF_COMP (self_comp)
 #define BT_LOG_OUTPUT_LEVEL   (log_level)
 #define BT_LOG_TAG            "PLUGIN/SRC.CTF.FS/DS"
+#include <string.h>
+
 #include "logging/comp-logging.h"
 
 #include "common/assert.h"
 #include "compat/endian.h" /* IWYU pragma: keep  */
 #include "compat/mman.h"   /* IWYU pragma: keep  */
 
-#include "../common/msg-iter/msg-iter.hpp"
+#include "../common/src/msg-iter/msg-iter.hpp"
 #include "data-stream-file.hpp"
 #include "file.hpp"
 #include "fs.hpp"
 #include "lttng-index.hpp"
-#include "plugins/ctf/common/metadata/ctf-meta.hpp"
 
 static inline size_t remaining_mmap_bytes(struct ctf_fs_ds_file *ds_file)
 {

@@ -18,7 +18,7 @@
 
 #include "common/assert.h"
 
-#include "../common/metadata/decoder.hpp"
+#include "../common/src/metadata/tsdl/decoder.hpp"
 #include "file.hpp"
 #include "fs.hpp"
 #include "metadata.hpp"

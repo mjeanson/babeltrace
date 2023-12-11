@@ -19,7 +19,7 @@
 
 #include "common/assert.h"
 
-#include "../common/metadata/decoder.hpp"
+#include "../common/src/metadata/tsdl/decoder.hpp"
 #include "fs.hpp"
 #include "metadata.hpp"
 #include "query.hpp"

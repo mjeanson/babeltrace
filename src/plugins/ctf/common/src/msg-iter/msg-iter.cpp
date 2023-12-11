@@ -25,7 +25,6 @@
 
 #include "../bfcr/bfcr.hpp"
 #include "msg-iter.hpp"
-#include "plugins/ctf/common/metadata/ctf-meta.hpp"
 
 /* A visit stack entry */
 struct stack_entry

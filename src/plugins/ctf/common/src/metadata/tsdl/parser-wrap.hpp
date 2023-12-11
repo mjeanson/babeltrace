@@ -22,7 +22,7 @@
 #endif
 
 #define ALLOW_INCLUDE_PARSER_H
-#include "plugins/ctf/common/metadata/parser.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/parser.hpp"
 #undef ALLOW_INCLUDE_PARSER_H
 
 #endif

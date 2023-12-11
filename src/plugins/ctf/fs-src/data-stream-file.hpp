@@ -12,7 +12,7 @@
 
 #include <babeltrace2/babeltrace.h>
 
-#include "../common/msg-iter/msg-iter.hpp"
+#include "../common/src/msg-iter/msg-iter.hpp"
 
 struct ctf_fs_ds_file_info
 {

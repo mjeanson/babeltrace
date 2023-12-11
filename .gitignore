@@ -28,10 +28,10 @@
 *.bkp
 *.trs
 .dirstamp
-/src/plugins/ctf/common/metadata/lexer.cpp
-/src/plugins/ctf/common/metadata/parser.cpp
-/src/plugins/ctf/common/metadata/parser.hpp
-/src/plugins/ctf/common/metadata/parser.output
+/src/plugins/ctf/common/src/metadata/tsdl/lexer.cpp
+/src/plugins/ctf/common/src/metadata/tsdl/parser.cpp
+/src/plugins/ctf/common/src/metadata/tsdl/parser.hpp
+/src/plugins/ctf/common/src/metadata/tsdl/parser.output
 /src/bindings/python/bt2/bt2.egg-info
 /src/bindings/python/bt2/dist
 /src/cli/babeltrace2

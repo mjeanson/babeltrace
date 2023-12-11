@@ -25,7 +25,7 @@
 #include "common/common.h"
 #include "compat/bitfield.h"
 
-#include "../metadata/ctf-meta.hpp"
+#include "../metadata/tsdl/ctf-meta.hpp"
 #include "bfcr.hpp"
 
 #define DIV8(_x)                ((_x) >> 3)

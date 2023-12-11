@@ -23,13 +23,12 @@
 
 #include "plugins/common/param-validation/param-validation.h"
 
-#include "../common/metadata/ctf-meta-configure-ir-trace.hpp"
-#include "../common/msg-iter/msg-iter.hpp"
+#include "../common/src/metadata/tsdl/ctf-meta-configure-ir-trace.hpp"
+#include "../common/src/msg-iter/msg-iter.hpp"
 #include "data-stream-file.hpp"
 #include "file.hpp"
 #include "fs.hpp"
 #include "metadata.hpp"
-#include "plugins/ctf/common/metadata/ctf-meta.hpp"
 #include "query.hpp"
 
 struct tracer_info
