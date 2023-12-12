@@ -168,14 +168,13 @@ static void populate_trace_info(const struct ctf_fs_trace *trace, const bt2::Map
 bt2::Value::Shared trace_infos_query(const bt2::ConstMapValue params, const bt2c::Logger& logger)
 {
     ctf_fs_component ctf_fs {logger};
-    const bt_value *inputs_value = NULL;
-    const bt_value *trace_name_value;
+    const auto parameters = read_src_fs_parameters(params, logger);
 
-    if (!read_src_fs_parameters(params.libObjPtr(), &inputs_value, &trace_name_value, &ctf_fs)) {
-        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2::Error, "Failed to read parameters");
-    }
+    ctf_fs.clkClsCfg = parameters.clkClsCfg;
 
-    if (ctf_fs_component_create_ctf_fs_trace(&ctf_fs, inputs_value, trace_name_value, NULL)) {
+    if (ctf_fs_component_create_ctf_fs_trace(
+            &ctf_fs, parameters.inputs,
+            parameters.traceName ? parameters.traceName->c_str() : nullptr, nullptr)) {
         BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2::Error, "Failed to create trace");
     }
 

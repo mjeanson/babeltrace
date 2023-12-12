@@ -1360,25 +1360,20 @@ static bool compare_ds_file_groups_by_first_path(const ctf_fs_ds_file_group::UP&
 }
 
 int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
-                                         const bt_value *paths_value,
-                                         const bt_value *trace_name_value,
-                                         bt_self_component *selfComp)
+                                         const bt2::ConstArrayValue pathsValue,
+                                         const char *traceName, bt_self_component *selfComp)
 {
     std::vector<std::string> paths;
 
-    BT_ASSERT(bt_value_get_type(paths_value) == BT_VALUE_TYPE_ARRAY);
-    BT_ASSERT(!bt_value_array_is_empty(paths_value));
-
-    const char *trace_name = trace_name_value ? bt_value_string_get(trace_name_value) : NULL;
+    BT_ASSERT(!pathsValue.isEmpty());
 
     /*
      * Create a sorted array of the paths, to make the execution of this
      * component deterministic.
      */
-    for (std::uint64_t i = 0; i < bt_value_array_get_length(paths_value); i++) {
-        const bt_value *path_value = bt_value_array_borrow_element_by_index_const(paths_value, i);
-        const char *input = bt_value_string_get(path_value);
-        paths.emplace_back(input);
+    for (const auto pathValue : pathsValue) {
+        BT_ASSERT(pathValue.isString());
+        paths.emplace_back(pathValue.asString().value().str());
     }
 
     std::sort(paths.begin(), paths.end());
@@ -1386,7 +1381,7 @@ int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
     /* Create a separate ctf_fs_trace object for each path. */
     std::vector<ctf_fs_trace::UP> traces;
     for (const auto& path : paths) {
-        int ret = ctf_fs_component_create_ctf_fs_trace_one_path(ctf_fs, path.c_str(), trace_name,
+        int ret = ctf_fs_component_create_ctf_fs_trace_one_path(ctf_fs, path.c_str(), traceName,
                                                                 traces, selfComp);
         if (ret) {
             return ret;
@@ -1541,61 +1536,57 @@ static bt_param_validation_map_value_entry_descr fs_params_entries_descr[] = {
      bt_param_validation_value_descr::makeBool()},
     BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_END};
 
-bool read_src_fs_parameters(const bt_value *params, const bt_value **inputs,
-                            const bt_value **trace_name, struct ctf_fs_component *ctf_fs)
+ctf::src::fs::Parameters read_src_fs_parameters(const bt2::ConstMapValue params,
+                                                const bt2c::Logger& logger)
 {
     gchar *error = NULL;
     bt_param_validation_status validate_value_status =
-        bt_param_validation_validate(params, fs_params_entries_descr, &error);
+        bt_param_validation_validate(params.libObjPtr(), fs_params_entries_descr, &error);
+
     if (validate_value_status != BT_PARAM_VALIDATION_STATUS_OK) {
-        BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs->logger, "{}", error);
-        g_free(error);
-        return false;
+        bt2c::GCharUP errorFreer {error};
+        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2c::Error, "{}", error);
     }
 
-    /* inputs parameter */
-    *inputs = bt_value_map_borrow_entry_value_const(params, "inputs");
+    ctf::src::fs::Parameters parameters {params["inputs"]->asArray()};
 
     /* clock-class-offset-s parameter */
-    const bt_value *value = bt_value_map_borrow_entry_value_const(params, "clock-class-offset-s");
-    if (value) {
-        ctf_fs->clkClsCfg.offsetSec = bt_value_integer_signed_get(value);
+    if (const auto clockClassOffsetS = params["clock-class-offset-s"]) {
+        parameters.clkClsCfg.offsetSec = clockClassOffsetS->asSignedInteger().value();
     }
 
     /* clock-class-offset-ns parameter */
-    value = bt_value_map_borrow_entry_value_const(params, "clock-class-offset-ns");
-    if (value) {
-        ctf_fs->clkClsCfg.offsetNanoSec = bt_value_integer_signed_get(value);
+    if (const auto clockClassOffsetNs = params["clock-class-offset-ns"]) {
+        parameters.clkClsCfg.offsetNanoSec = clockClassOffsetNs->asSignedInteger().value();
     }
 
     /* force-clock-class-origin-unix-epoch parameter */
-    value = bt_value_map_borrow_entry_value_const(params, "force-clock-class-origin-unix-epoch");
-    if (value) {
-        ctf_fs->clkClsCfg.forceOriginIsUnixEpoch = bt_value_bool_get(value);
+    if (const auto forceClockClassOriginUnixEpoch = params["force-clock-class-origin-unix-epoch"]) {
+        parameters.clkClsCfg.forceOriginIsUnixEpoch =
+            forceClockClassOriginUnixEpoch->asBool().value();
     }
 
     /* trace-name parameter */
-    *trace_name = bt_value_map_borrow_entry_value_const(params, "trace-name");
-
-    return true;
-}
-
-static ctf_fs_component::UP ctf_fs_create(const bt_value *params,
-                                          bt_self_component_source *self_comp_src)
-{
-    const bt_value *inputs_value;
-    const bt_value *trace_name_value;
-    bt_self_component *self_comp = bt_self_component_source_as_self_component(self_comp_src);
-
-    ctf_fs_component::UP ctf_fs = bt2s::make_unique<ctf_fs_component>(
-        bt2c::Logger {bt2::SelfSourceComponent {self_comp_src}, "PLUGIN/SRC.CTF.FS/COMP"});
-
-    if (!read_src_fs_parameters(params, &inputs_value, &trace_name_value, ctf_fs.get())) {
-        return nullptr;
+    if (const auto traceName = params["trace-name"]) {
+        parameters.traceName = traceName->asString().value().str();
     }
 
-    if (ctf_fs_component_create_ctf_fs_trace(ctf_fs.get(), inputs_value, trace_name_value,
-                                             self_comp)) {
+    return parameters;
+}
+
+static ctf_fs_component::UP ctf_fs_create(const bt2::ConstMapValue params,
+                                          bt_self_component_source *self_comp_src)
+{
+    bt_self_component *self_comp = bt_self_component_source_as_self_component(self_comp_src);
+    ctf_fs_component::UP ctf_fs = bt2s::make_unique<ctf_fs_component>(
+        bt2c::Logger {bt2::SelfSourceComponent {self_comp_src}, "PLUGIN/SRC.CTF.FS/COMP"});
+    const auto parameters = read_src_fs_parameters(params, ctf_fs->logger);
+
+    ctf_fs->clkClsCfg = parameters.clkClsCfg;
+
+    if (ctf_fs_component_create_ctf_fs_trace(
+            ctf_fs.get(), parameters.inputs,
+            parameters.traceName ? parameters.traceName->c_str() : nullptr, self_comp)) {
         return nullptr;
     }
 
@@ -1618,7 +1609,7 @@ bt_component_class_initialize_method_status ctf_fs_init(bt_self_component_source
         bt_component_class_initialize_method_status ret =
             BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK;
 
-        ctf_fs_component::UP ctf_fs = ctf_fs_create(params, self_comp_src);
+        ctf_fs_component::UP ctf_fs = ctf_fs_create(bt2::ConstMapValue {params}, self_comp_src);
         if (!ctf_fs) {
             ret = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_ERROR;
         }

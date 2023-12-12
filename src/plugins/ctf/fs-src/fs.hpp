@@ -158,27 +158,38 @@ ctf_fs_iterator_seek_beginning(bt_self_message_iterator *message_iterator);
  */
 
 int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
-                                         const bt_value *paths_value,
-                                         const bt_value *trace_name_value,
+                                         bt2::ConstArrayValue pathsValue, const char *traceName,
                                          bt_self_component *selfComp);
+
+namespace ctf {
+namespace src {
+namespace fs {
+
+/* `src.ctf.fs` parameters */
+
+struct Parameters
+{
+    explicit Parameters(const bt2::ConstArrayValue inputsParam) noexcept : inputs {inputsParam}
+    {
+    }
+
+    bt2::ConstArrayValue inputs;
+    bt2s::optional<std::string> traceName;
+    ClkClsCfg clkClsCfg;
+};
+
+} /* namespace fs */
+} /* namespace src */
+} /* namespace ctf */
 
 /*
  * Read and validate parameters taken by the src.ctf.fs plugin.
  *
- *  - The mandatory `paths` parameter is returned in `*paths`.
- *  - The optional `clock-class-offset-s` and `clock-class-offset-ns`, if
- *    present, are recorded in the `ctf_fs` structure.
- *  - The optional `trace-name` parameter is returned in `*trace_name` if
- *    present, else `*trace_name` is set to NULL.
- *
- * `self_comp` and `self_comp_class` are used for logging, only one of them
- * should be set.
- *
- * Return true on success, false if any parameter didn't pass validation.
+ * Throw if any parameter doesn't pass validation.
  */
 
-bool read_src_fs_parameters(const bt_value *params, const bt_value **paths,
-                            const bt_value **trace_name, struct ctf_fs_component *ctf_fs);
+ctf::src::fs::Parameters read_src_fs_parameters(bt2::ConstMapValue params,
+                                                const bt2c::Logger& logger);
 
 /*
  * Generate the port name to be used for a given data stream file group.
