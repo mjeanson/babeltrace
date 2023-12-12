@@ -132,58 +132,64 @@ bt_component_class_initialize_method_status ctf_fs_sink_init(bt_self_component_s
                                                              bt_self_component_sink_configuration *,
                                                              const bt_value *params, void *)
 {
-    bt_component_class_initialize_method_status status;
-    bt_self_component_add_port_status add_port_status;
-    struct fs_sink_comp *fs_sink = NULL;
-    bt_self_component *self_comp = bt_self_component_sink_as_self_component(self_comp_sink);
+    try {
+        bt_component_class_initialize_method_status status;
+        bt_self_component_add_port_status add_port_status;
+        struct fs_sink_comp *fs_sink = NULL;
+        bt_self_component *self_comp = bt_self_component_sink_as_self_component(self_comp_sink);
 
-    fs_sink = new fs_sink_comp {bt2::SelfSinkComponent {self_comp_sink}};
-    fs_sink->output_dir_path = g_string_new(NULL);
-    status = configure_component(fs_sink, params);
-    if (status != BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK) {
-        /* configure_component() logs errors */
-        goto end;
-    }
+        fs_sink = new fs_sink_comp {bt2::SelfSinkComponent {self_comp_sink}};
+        fs_sink->output_dir_path = g_string_new(NULL);
+        status = configure_component(fs_sink, params);
+        if (status != BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK) {
+            /* configure_component() logs errors */
+            goto end;
+        }
 
-    if (fs_sink->assume_single_trace &&
-        g_file_test(fs_sink->output_dir_path->str, G_FILE_TEST_EXISTS)) {
-        BT_CPPLOGE_APPEND_CAUSE_SPEC(
-            fs_sink->logger, "Single trace mode, but output path exists: output-path=\"{}\"",
-            fs_sink->output_dir_path->str);
-        status = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_ERROR;
-        goto end;
-    }
+        if (fs_sink->assume_single_trace &&
+            g_file_test(fs_sink->output_dir_path->str, G_FILE_TEST_EXISTS)) {
+            BT_CPPLOGE_APPEND_CAUSE_SPEC(
+                fs_sink->logger, "Single trace mode, but output path exists: output-path=\"{}\"",
+                fs_sink->output_dir_path->str);
+            status = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_ERROR;
+            goto end;
+        }
 
-    status = ensure_output_dir_exists(fs_sink);
-    if (status != BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK) {
-        /* ensure_output_dir_exists() logs errors */
-        goto end;
-    }
+        status = ensure_output_dir_exists(fs_sink);
+        if (status != BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK) {
+            /* ensure_output_dir_exists() logs errors */
+            goto end;
+        }
 
-    fs_sink->traces = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL,
-                                            (GDestroyNotify) fs_sink_trace_destroy);
-    if (!fs_sink->traces) {
-        BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to allocate one GHashTable.");
-        status = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_MEMORY_ERROR;
-        goto end;
-    }
+        fs_sink->traces = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL,
+                                                (GDestroyNotify) fs_sink_trace_destroy);
+        if (!fs_sink->traces) {
+            BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to allocate one GHashTable.");
+            status = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_MEMORY_ERROR;
+            goto end;
+        }
 
-    add_port_status =
-        bt_self_component_sink_add_input_port(self_comp_sink, in_port_name, NULL, NULL);
-    if (add_port_status != BT_SELF_COMPONENT_ADD_PORT_STATUS_OK) {
-        status = (bt_component_class_initialize_method_status) add_port_status;
-        BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to add input port.");
-        goto end;
-    }
+        add_port_status =
+            bt_self_component_sink_add_input_port(self_comp_sink, in_port_name, NULL, NULL);
+        if (add_port_status != BT_SELF_COMPONENT_ADD_PORT_STATUS_OK) {
+            status = (bt_component_class_initialize_method_status) add_port_status;
+            BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to add input port.");
+            goto end;
+        }
 
-    bt_self_component_set_data(self_comp, fs_sink);
+        bt_self_component_set_data(self_comp, fs_sink);
 
 end:
-    if (status != BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK) {
-        destroy_fs_sink_comp(fs_sink);
-    }
+        if (status != BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK) {
+            destroy_fs_sink_comp(fs_sink);
+        }
 
-    return status;
+        return status;
+    } catch (const std::bad_alloc&) {
+        return BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_MEMORY_ERROR;
+    } catch (const bt2::Error&) {
+        return BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_ERROR;
+    }
 }
 
 static inline struct fs_sink_stream *borrow_stream(struct fs_sink_comp *fs_sink,
@@ -224,37 +230,39 @@ end:
 static inline bt_component_class_sink_consume_method_status
 handle_event_msg(struct fs_sink_comp *fs_sink, const bt_message *msg)
 {
-    int ret;
-    bt_component_class_sink_consume_method_status status =
-        BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_OK;
-    const bt_event *ir_event = bt_message_event_borrow_event_const(msg);
-    const bt_stream *ir_stream = bt_event_borrow_stream_const(ir_event);
-    struct fs_sink_stream *stream;
-    struct fs_sink_ctf_event_class *ec = NULL;
-    const bt_clock_snapshot *cs = NULL;
+    try {
+        int ret;
+        bt_component_class_sink_consume_method_status status =
+            BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_OK;
+        const bt_event *ir_event = bt_message_event_borrow_event_const(msg);
+        const bt_stream *ir_stream = bt_event_borrow_stream_const(ir_event);
+        struct fs_sink_stream *stream;
+        struct fs_sink_ctf_event_class *ec = NULL;
+        const bt_clock_snapshot *cs = NULL;
 
-    stream = borrow_stream(fs_sink, ir_stream);
-    if (G_UNLIKELY(!stream)) {
-        BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to borrow stream.");
-        status = BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_ERROR;
-        goto end;
-    }
+        stream = borrow_stream(fs_sink, ir_stream);
+        if (G_UNLIKELY(!stream)) {
+            BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to borrow stream.");
+            status = BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_ERROR;
+            goto end;
+        }
 
-    ret = try_translate_event_class_trace_ir_to_ctf_ir(fs_sink, stream->sc,
-                                                       bt_event_borrow_class_const(ir_event), &ec);
-    if (ret) {
-        BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to translate event class to CTF IR.");
-        status = BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_ERROR;
-        goto end;
-    }
+        ret = try_translate_event_class_trace_ir_to_ctf_ir(
+            fs_sink, stream->sc, bt_event_borrow_class_const(ir_event), &ec);
+        if (ret) {
+            BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger,
+                                         "Failed to translate event class to CTF IR.");
+            status = BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_ERROR;
+            goto end;
+        }
 
-    BT_ASSERT_DBG(ec);
+        BT_ASSERT_DBG(ec);
 
-    if (stream->sc->default_clock_class) {
-        cs = bt_message_event_borrow_default_clock_snapshot_const(msg);
-    }
+        if (stream->sc->default_clock_class) {
+            cs = bt_message_event_borrow_default_clock_snapshot_const(msg);
+        }
 
-    /*
+        /*
      * If this event's stream does not support packets, then we
      * lazily create artificial packets.
      *
@@ -263,43 +271,49 @@ handle_event_msg(struct fs_sink_comp *fs_sink, const bt_message *msg)
      * comes the time to write a new event and the packet's content
      * size is >= 4 MiB), except the last one which can be smaller.
      */
-    if (G_UNLIKELY(!stream->sc->has_packets)) {
-        if (stream->packet_state.is_open &&
-            bt_ctfser_get_offset_in_current_packet_bits(&stream->ctfser) / 8 >= 4 * 1024 * 1024) {
-            /*
+        if (G_UNLIKELY(!stream->sc->has_packets)) {
+            if (stream->packet_state.is_open &&
+                bt_ctfser_get_offset_in_current_packet_bits(&stream->ctfser) / 8 >=
+                    4 * 1024 * 1024) {
+                /*
              * Stream's current packet is larger than 4 MiB:
              * close it. A new packet will be opened just
              * below.
              */
-            ret = fs_sink_stream_close_packet(stream, NULL);
-            if (ret) {
-                BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to close packet.");
-                status = BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_ERROR;
-                goto end;
+                ret = fs_sink_stream_close_packet(stream, NULL);
+                if (ret) {
+                    BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to close packet.");
+                    status = BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_ERROR;
+                    goto end;
+                }
+            }
+
+            if (!stream->packet_state.is_open) {
+                /* Stream's packet is not currently opened: open it */
+                ret = fs_sink_stream_open_packet(stream, NULL, NULL);
+                if (ret) {
+                    BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to open packet.");
+                    status = BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_ERROR;
+                    goto end;
+                }
             }
         }
 
-        if (!stream->packet_state.is_open) {
-            /* Stream's packet is not currently opened: open it */
-            ret = fs_sink_stream_open_packet(stream, NULL, NULL);
-            if (ret) {
-                BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to open packet.");
-                status = BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_ERROR;
-                goto end;
-            }
+        BT_ASSERT_DBG(stream->packet_state.is_open);
+        ret = fs_sink_stream_write_event(stream, cs, ir_event, ec);
+        if (G_UNLIKELY(ret)) {
+            BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to write event.");
+            status = BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_ERROR;
+            goto end;
         }
-    }
-
-    BT_ASSERT_DBG(stream->packet_state.is_open);
-    ret = fs_sink_stream_write_event(stream, cs, ir_event, ec);
-    if (G_UNLIKELY(ret)) {
-        BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to write event.");
-        status = BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_ERROR;
-        goto end;
-    }
 
 end:
-    return status;
+        return status;
+    } catch (const std::bad_alloc&) {
+        return BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_MEMORY_ERROR;
+    } catch (const bt2::Error&) {
+        return BT_COMPONENT_CLASS_SINK_CONSUME_METHOD_STATUS_ERROR;
+    }
 }
 
 static inline bt_component_class_sink_consume_method_status
@@ -1008,23 +1022,29 @@ end:
 bt_component_class_sink_graph_is_configured_method_status
 ctf_fs_sink_graph_is_configured(bt_self_component_sink *self_comp)
 {
-    bt_component_class_sink_graph_is_configured_method_status status;
-    bt_message_iterator_create_from_sink_component_status msg_iter_status;
-    fs_sink_comp *fs_sink = (fs_sink_comp *) bt_self_component_get_data(
-        bt_self_component_sink_as_self_component(self_comp));
+    try {
+        bt_component_class_sink_graph_is_configured_method_status status;
+        bt_message_iterator_create_from_sink_component_status msg_iter_status;
+        fs_sink_comp *fs_sink = (fs_sink_comp *) bt_self_component_get_data(
+            bt_self_component_sink_as_self_component(self_comp));
 
-    msg_iter_status = bt_message_iterator_create_from_sink_component(
-        self_comp, bt_self_component_sink_borrow_input_port_by_name(self_comp, in_port_name),
-        &fs_sink->upstream_iter);
-    if (msg_iter_status != BT_MESSAGE_ITERATOR_CREATE_FROM_SINK_COMPONENT_STATUS_OK) {
-        status = (bt_component_class_sink_graph_is_configured_method_status) msg_iter_status;
-        BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to create upstream iterator.");
-        goto end;
-    }
+        msg_iter_status = bt_message_iterator_create_from_sink_component(
+            self_comp, bt_self_component_sink_borrow_input_port_by_name(self_comp, in_port_name),
+            &fs_sink->upstream_iter);
+        if (msg_iter_status != BT_MESSAGE_ITERATOR_CREATE_FROM_SINK_COMPONENT_STATUS_OK) {
+            status = (bt_component_class_sink_graph_is_configured_method_status) msg_iter_status;
+            BT_CPPLOGE_APPEND_CAUSE_SPEC(fs_sink->logger, "Failed to create upstream iterator.");
+            goto end;
+        }
 
-    status = BT_COMPONENT_CLASS_SINK_GRAPH_IS_CONFIGURED_METHOD_STATUS_OK;
+        status = BT_COMPONENT_CLASS_SINK_GRAPH_IS_CONFIGURED_METHOD_STATUS_OK;
 end:
-    return status;
+        return status;
+    } catch (const std::bad_alloc&) {
+        return BT_COMPONENT_CLASS_SINK_GRAPH_IS_CONFIGURED_METHOD_STATUS_MEMORY_ERROR;
+    } catch (const bt2c::Error&) {
+        return BT_COMPONENT_CLASS_SINK_GRAPH_IS_CONFIGURED_METHOD_STATUS_ERROR;
+    }
 }
 
 void ctf_fs_sink_finalize(bt_self_component_sink *self_comp)
