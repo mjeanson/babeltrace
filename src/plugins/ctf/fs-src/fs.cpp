@@ -15,6 +15,7 @@
 #include "common/assert.h"
 #include "common/common.h"
 #include "common/uuid.h"
+#include "cpp-common/bt2s/make-unique.hpp"
 
 #include "plugins/common/param-validation/param-validation.h"
 
@@ -309,10 +310,6 @@ void ctf_fs_destroy(struct ctf_fs_component *ctf_fs)
         return;
     }
 
-    if (ctf_fs->port_data) {
-        g_ptr_array_free(ctf_fs->port_data, TRUE);
-    }
-
     delete ctf_fs;
 }
 
@@ -321,36 +318,9 @@ void ctf_fs_component_deleter::operator()(ctf_fs_component *comp)
     ctf_fs_destroy(comp);
 }
 
-static void port_data_destroy(struct ctf_fs_port_data *port_data)
-{
-    if (!port_data) {
-        return;
-    }
-
-    delete port_data;
-}
-
-static void port_data_destroy_notifier(void *data)
-{
-    port_data_destroy((struct ctf_fs_port_data *) data);
-}
-
 ctf_fs_component::UP ctf_fs_component_create(const bt2c::Logger& parentLogger)
 {
-    ctf_fs_component::UP ctf_fs {new ctf_fs_component {parentLogger}};
-
-    ctf_fs->port_data = g_ptr_array_new_with_free_func(port_data_destroy_notifier);
-    if (!ctf_fs->port_data) {
-        goto error;
-    }
-
-    goto end;
-
-error:
-    ctf_fs.reset();
-
-end:
-    return ctf_fs;
+    return ctf_fs_component::UP {new ctf_fs_component {parentLogger}};
 }
 
 void ctf_fs_finalize(bt_self_component_source *component)
@@ -408,7 +378,7 @@ static int create_one_port_for_trace(struct ctf_fs_component *ctf_fs,
                                      bt_self_component_source *self_comp_src)
 {
     int ret = 0;
-    struct ctf_fs_port_data *port_data = NULL;
+    ctf_fs_port_data::UP port_data;
 
     bt2c::GCharUP port_name = ctf_fs_make_port_name(ds_file_group);
     if (!port_name) {
@@ -418,23 +388,22 @@ static int create_one_port_for_trace(struct ctf_fs_component *ctf_fs,
     BT_CPPLOGI_SPEC(ctf_fs->logger, "Creating one port named `{}`", port_name.get());
 
     /* Create output port for this file */
-    port_data = new ctf_fs_port_data;
+    port_data = bt2s::make_unique<ctf_fs_port_data>();
     port_data->ctf_fs = ctf_fs;
     port_data->ds_file_group = ds_file_group;
-    ret = bt_self_component_source_add_output_port(self_comp_src, port_name.get(), port_data, NULL);
+    ret = bt_self_component_source_add_output_port(self_comp_src, port_name.get(), port_data.get(),
+                                                   NULL);
     if (ret) {
         goto error;
     }
 
-    g_ptr_array_add(ctf_fs->port_data, port_data);
-    port_data = NULL;
+    ctf_fs->port_data.emplace_back(std::move(port_data));
     goto end;
 
 error:
     ret = -1;
 
 end:
-    port_data_destroy(port_data);
     return ret;
 }
 
