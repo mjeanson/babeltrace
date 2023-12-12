@@ -15,6 +15,7 @@
 #include <babeltrace2/babeltrace.h>
 
 #include "compat/socket.hpp"
+#include "cpp-common/bt2/value.hpp"
 #include "cpp-common/bt2c/glib-up.hpp"
 #include "cpp-common/bt2c/logging.hpp"
 
@@ -107,8 +108,7 @@ live_viewer_connection_create(const char *url, bool in_query,
 enum lttng_live_viewer_status
 lttng_live_create_viewer_session(struct lttng_live_msg_iter *lttng_live_msg_iter);
 
-bt_component_class_query_method_status
-live_viewer_connection_list_sessions(struct live_viewer_connection *viewer_connection,
-                                     bt2::Value::Shared& user_result);
+bt2::Value::Shared
+live_viewer_connection_list_sessions(struct live_viewer_connection *viewer_connection);
 
 #endif /* LTTNG_LIVE_VIEWER_CONNECTION_H */
