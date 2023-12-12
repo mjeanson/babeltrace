@@ -2255,24 +2255,26 @@ bt_component_class_query_method_status ctf_fs_query(bt_self_component_class_sour
                                                     const bt_value **result)
 {
     try {
-        bt_component_class_query_method_status status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_OK;
         bt2c::Logger logger {bt2::SelfComponentClass {comp_class_src},
                              bt2::PrivateQueryExecutor {priv_query_exec},
                              "PLUGIN/SRC.CTF.FS/QUERY"};
+        bt2::ConstMapValue paramsObj(params);
+        bt2::Value::Shared resultObj;
 
         if (strcmp(object, "metadata-info") == 0) {
-            status = metadata_info_query(params, logger, result);
+            resultObj = metadata_info_query(paramsObj, logger);
         } else if (strcmp(object, "babeltrace.trace-infos") == 0) {
-            status = trace_infos_query(params, logger, result);
+            resultObj = trace_infos_query(paramsObj, logger);
         } else if (!strcmp(object, "babeltrace.support-info")) {
-            status = support_info_query(params, logger, result);
+            resultObj = support_info_query(paramsObj, logger);
         } else {
             BT_CPPLOGE_SPEC(logger, "Unknown query object `{}`", object);
-            status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_UNKNOWN_OBJECT;
-            goto end;
+            return BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_UNKNOWN_OBJECT;
         }
-end:
-        return status;
+
+        *result = resultObj.release().libObjPtr();
+
+        return BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_OK;
     } catch (const std::bad_alloc&) {
         return BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_MEMORY_ERROR;
     } catch (const bt2::Error&) {
