@@ -58,31 +58,6 @@ struct ctf_fs_metadata
     int bo = 0;
 };
 
-struct ctf_fs_component_deleter
-{
-    void operator()(struct ctf_fs_component *);
-};
-
-struct ctf_fs_component
-{
-    using UP = std::unique_ptr<ctf_fs_component, ctf_fs_component_deleter>;
-
-    explicit ctf_fs_component(const bt2c::Logger& parentLogger) :
-        logger {parentLogger, "PLUGIN/SRC.CTF.FS/COMP"}
-    {
-    }
-
-    bt2c::Logger logger;
-
-    /* Array of struct ctf_fs_port_data *, owned by this */
-    GPtrArray *port_data = nullptr;
-
-    /* Owned by this */
-    struct ctf_fs_trace *trace = nullptr;
-
-    ctf::src::ClkClsCfg clkClsCfg;
-};
-
 struct ctf_fs_trace
 {
     explicit ctf_fs_trace(const bt2c::Logger& parentLogger) :
@@ -106,6 +81,40 @@ struct ctf_fs_trace
 
     /* Next automatic stream ID when not provided by packet header */
     uint64_t next_stream_id = 0;
+};
+
+struct ctf_fs_port_data
+{
+    /* Weak, belongs to ctf_fs_trace */
+    struct ctf_fs_ds_file_group *ds_file_group = nullptr;
+
+    /* Weak */
+    struct ctf_fs_component *ctf_fs = nullptr;
+};
+
+struct ctf_fs_component_deleter
+{
+    void operator()(ctf_fs_component *);
+};
+
+struct ctf_fs_component
+{
+    using UP = std::unique_ptr<ctf_fs_component, ctf_fs_component_deleter>;
+
+    explicit ctf_fs_component(const bt2c::Logger& parentLogger) noexcept :
+        logger {parentLogger, "PLUGIN/SRC.CTF.FS/COMP"}
+    {
+    }
+
+    bt2c::Logger logger;
+
+    /* Array of struct ctf_fs_port_data *, owned by this */
+    GPtrArray *port_data = nullptr;
+
+    /* Owned by this */
+    struct ctf_fs_trace *trace = nullptr;
+
+    ctf::src::ClkClsCfg clkClsCfg;
 };
 
 struct ctf_fs_ds_index_entry
@@ -179,15 +188,6 @@ struct ctf_fs_ds_file_group
      * Owned by this.
      */
     struct ctf_fs_ds_index *index = nullptr;
-};
-
-struct ctf_fs_port_data
-{
-    /* Weak, belongs to ctf_fs_trace */
-    struct ctf_fs_ds_file_group *ds_file_group = nullptr;
-
-    /* Weak */
-    struct ctf_fs_component *ctf_fs = nullptr;
 };
 
 struct ctf_fs_msg_iter_data
