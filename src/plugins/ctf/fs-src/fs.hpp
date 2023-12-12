@@ -22,24 +22,6 @@
 
 extern bool ctf_fs_debug;
 
-struct ctf_fs_file
-{
-    explicit ctf_fs_file(const bt2c::Logger& parentLogger) :
-        logger {parentLogger, "PLUGIN/SRC.CTF.FS/FILE"}
-    {
-    }
-
-    bt2c::Logger logger;
-
-    /* Owned by this */
-    GString *path = nullptr;
-
-    /* Owned by this */
-    FILE *fp = nullptr;
-
-    off_t size = 0;
-};
-
 struct ctf_fs_metadata
 {
     /* Owned by this */

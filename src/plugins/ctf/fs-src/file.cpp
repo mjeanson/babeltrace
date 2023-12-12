@@ -11,7 +11,6 @@
 #include "cpp-common/vendor/fmt/format.h"
 
 #include "file.hpp"
-#include "fs.hpp"
 
 void ctf_fs_file_destroy(struct ctf_fs_file *file)
 {

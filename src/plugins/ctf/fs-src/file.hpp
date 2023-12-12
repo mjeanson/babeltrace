@@ -9,11 +9,25 @@
 
 #include <babeltrace2/babeltrace.h>
 
-namespace bt2c {
+#include "cpp-common/bt2c/logging.hpp"
 
-class Logger;
+struct ctf_fs_file
+{
+    explicit ctf_fs_file(const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/SRC.CTF.FS/FILE"}
+    {
+    }
 
-} /* namespace bt2c */
+    bt2c::Logger logger;
+
+    /* Owned by this */
+    GString *path = nullptr;
+
+    /* Owned by this */
+    FILE *fp = nullptr;
+
+    off_t size = 0;
+};
 
 void ctf_fs_file_destroy(struct ctf_fs_file *file);
 
