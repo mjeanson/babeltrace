@@ -1449,6 +1449,13 @@ enum lttng_live_iterator_status lttng_live_get_next_index(
 	flags = be32toh(rp.flags);
 	rp_status = be32toh(rp.status);
 
+	if (flags & LTTNG_VIEWER_FLAG_NEW_STREAM) {
+		BT_COMP_LOGD("Marking all sessions as possibly needing new streams: "
+			"response=%"PRId32 ", response-flag=NEW_STREAM",
+			rp_status);
+		lttng_live_need_new_streams(lttng_live_msg_iter);
+	}
+
 	switch (rp_status) {
 	case LTTNG_VIEWER_INDEX_INACTIVE:
 	{
@@ -1488,10 +1495,6 @@ enum lttng_live_iterator_status lttng_live_get_next_index(
 		if (flags & LTTNG_VIEWER_FLAG_NEW_METADATA) {
 			BT_COMP_LOGD("Received get_next_index response: new metadata needed");
 			trace->metadata_stream_state = LTTNG_LIVE_METADATA_STREAM_STATE_NEEDED;
-		}
-		if (flags & LTTNG_VIEWER_FLAG_NEW_STREAM) {
-			BT_COMP_LOGD("Received get_next_index response: new streams needed");
-			lttng_live_need_new_streams(lttng_live_msg_iter);
 		}
 		status = LTTNG_LIVE_ITERATOR_STATUS_OK;
 		break;
