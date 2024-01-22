@@ -56,9 +56,35 @@ struct bt_field_class_bool {
 	struct bt_field_class common;
 };
 
+struct bt_field_class_bit_array_flag {
+	/* Owned by this */
+	gchar *label;
+
+	/* Strong reference */
+	const bt_integer_range_set_unsigned *range_set;
+
+	/*
+	 * Mask to apply to the field's value to determine if this flag is
+	 * active.
+	 */
+	uint64_t mask;
+};
+
 struct bt_field_class_bit_array {
 	struct bt_field_class common;
 	uint64_t length;
+
+	/* Array of `bt_field_class_bit_array_flag`, owned by this */
+	GPtrArray *flags;
+
+	/*
+	 * This is an array of `const char *` which acts as a temporary
+	 * (potentially growing) buffer for
+	 * bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer().
+	 *
+	 * The actual strings are owned by the flags above.
+	 */
+	GPtrArray *label_buf;
 };
 
 struct bt_field_class_integer {

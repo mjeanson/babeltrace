@@ -184,7 +184,8 @@ static inline void format_field_class(char **buf_ch, bool extended,
 		const struct bt_field_class_bit_array *ba_fc =
 			(const void *) field_class;
 
-		BUF_APPEND(", %slength=%" PRIu64, PRFIELD(ba_fc->length));
+		BUF_APPEND(", %slength=%" PRIu64 ", %sflag-count=%u",
+			PRFIELD(ba_fc->length), PRFIELD(ba_fc->flags->len));
 		break;
 	}
 	case BT_FIELD_CLASS_TYPE_UNSIGNED_INTEGER:

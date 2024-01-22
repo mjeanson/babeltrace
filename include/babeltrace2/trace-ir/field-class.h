@@ -344,6 +344,85 @@ A bit array field class has the following property:
     Get a bit array field class's length with
     bt_field_class_bit_array_get_length().
   </dd>
+
+  <dt>
+    \anchor api-tir-fc-ba-prop-flags
+    \bt_dt_opt Flags
+    (only available when the field class was created from a
+    \bt_trace_cls which was created
+    from a \bt_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;1)
+  </dt>
+  <dd>
+    Set of flags of the bit array field class.
+
+    A bit array field class flag is a label (string) and an
+    \bt_uint_rs, a set of bit index ranges. In the value of an
+    instance (a \bt_ba_field) returned by
+    bt_field_bit_array_get_value_as_integer(), the least significant
+    bit's index is&nbsp;0.
+
+    The integer ranges of a given flag or of multiple flags of
+    the same bit array field class can overlap. For example,
+    a bit array field class can have those two flags:
+
+    - <code>GALLERY</code>: [1,&nbsp;4], [8,&nbsp;14]
+    - <code>LUNCH</code>: [3,&nbsp;6]
+
+    In that case, the bit indexes&nbsp;2 and&nbsp;12 correspond to the
+    label <code>GALLERY</code>, the bit index&nbsp;5 to the label
+    <code>LUNCH</code>, and the bit index&nbsp;3 to the labels
+    \c GALLERY \em and <code>LUNCH</code>.
+
+    Given some bit flag field value (as an integer), a flag is said to
+    be <strong><em>active</em></strong> when <em>at least one</em> of
+    its bit indexes is the index of a set bit of the value. For example,
+    given the 8-bit bit array field value
+
+    @code{.unparsed}
+    [true, false, true, true, false, true, false, true]
+    @endcode
+
+    where the first element is the first bit of the bit array field (the
+    value as an integer being 0xad):
+
+    - A flag targeting bits 1, 3, and&nbsp;6 would be active because
+      bit&nbsp;3 is set.
+
+    - A flag targeting bits 1 and&nbsp;4 wouldn't be active because both
+      bits are cleared.
+
+    Two flags of the same bit array field class cannot have the
+    same label.
+
+    Add a flag to a bit array field class with
+    bt_field_class_bit_array_add_flag().
+
+    Get the number of flags in a bit array field class with
+    bt_field_class_bit_array_get_flag_count().
+
+    Borrow a flag from a bit array field class with
+    bt_field_class_bit_array_borrow_flag_by_index_const()
+    and
+    bt_field_class_bit_array_borrow_flag_by_label_const().
+
+    A bit array field class flag is a
+    \ref api-fund-unique-object "unique object": it
+    belongs to the bit array field class which contains it.
+
+    The type of a bit array field class flag is
+    #bt_field_class_bit_array_flag.
+
+    Get the label of a bit array field class flag with
+    bt_field_class_bit_array_flag_get_label().
+
+    Borrow the bit index range set of a bit array field class flag
+    with bt_field_class_bit_array_flag_borrow_index_ranges_const().
+
+    Get the labels of all the active flags of a bit array field class
+    for the set bits of some integral value with
+    bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer().
+  </dd>
 </dl>
 
 <h1>\anchor api-tir-fc-int Integer field classes</h1>
@@ -473,9 +552,9 @@ Enumeration field classes have the following common property:
     - <code>CALORIES</code>: [1,&nbsp;11], [15,&nbsp;37]
     - <code>SODIUM</code>: [7,&nbsp;13]
 
-    In that case, the values 2 and 30 correpond to the label
-    <code>CALORIES</code>, the value 12 to the label
-    <code>SODIUM</code>, and the value 10 to the labels
+    In that case, the values&nbsp;2 and&nbsp;30 correspond to the label
+    <code>CALORIES</code>, the value&nbsp;12 to the label
+    <code>SODIUM</code>, and the value&nbsp;10 to the labels
     \c CALORIES \em and <code>SODIUM</code>.
 
     Two mappings of the same enumeration field class cannot have the
@@ -2027,6 +2106,11 @@ property values:
     <td>\ref api-tir-fc-ba-prop-len "Length"
     <td>\bt_p{length}
   <tr>
+    <td>
+      \bt_mip version&nbsp;1:
+      \ref api-tir-fc-ba-prop-flags "flags"
+    <td>\em None
+  <tr>
     <td>\ref api-tir-fc-prop-user-attrs "User attributes"
     <td>Empty \bt_map_val
 </table>
@@ -2064,6 +2148,288 @@ See the \ref api-tir-fc-ba-prop-len "length" property.
 */
 extern uint64_t bt_field_class_bit_array_get_length(
 		const bt_field_class *field_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Status codes for bt_field_class_bit_array_add_flag().
+*/
+typedef enum bt_field_class_bit_array_add_flag_status {
+	/*!
+	@brief
+	    Success.
+	*/
+	BT_FIELD_CLASS_BIT_ARRAY_ADD_FLAG_STATUS_OK		= __BT_FUNC_STATUS_OK,
+
+	/*!
+	@brief
+	    Out of memory.
+	*/
+	BT_FIELD_CLASS_BIT_ARRAY_ADD_FLAG_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
+
+} bt_field_class_bit_array_add_flag_status;
+
+/*!
+@brief
+    Adds a flag to the \bt_ba_fc \bt_p{field_class} having the
+    label \bt_p{label} and the bit index ranges \bt_p{index_ranges}.
+
+See the \ref api-tir-fc-ba-prop-flags "flags" property.
+
+@param[in] field_class
+    Bit array field class to which to add a flag having
+    the label \bt_p{label} and the bit index ranges \bt_p{index_ranges}.
+@param[in] label
+    Label of the flag to add to \bt_p{field_class} (copied).
+@param[in] ranges
+    Bit index ranges of the flag to add to \bt_p{field_class}.
+
+@retval #BT_FIELD_CLASS_BIT_ARRAY_ADD_FLAG_STATUS_OK
+    Success.
+@retval #BT_FIELD_CLASS_BIT_ARRAY_ADD_FLAG_STATUS_MEMORY_ERROR
+    Out of memory.
+
+@bt_pre_not_null{field_class}
+@bt_pre_hot{field_class}
+@bt_pre_is_ba_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 1}
+@bt_pre_not_null{label}
+@pre
+    \bt_p{field_class} has no flag with the label \bt_p{label}.
+@bt_pre_not_null{ranges}
+@pre
+    \bt_p{index_ranges} contains one or more unsigned integer ranges.
+@pre
+    No \link bt_integer_range_unsigned_get_upper() upper value\endlink
+    of any range in \bt_p{index_ranges} is greater than or
+    equal to the
+    \link bt_field_class_bit_array_get_length() length\endlink of
+    \bt_p{field_class}.
+*/
+extern bt_field_class_bit_array_add_flag_status
+bt_field_class_bit_array_add_flag(
+	bt_field_class *field_class, const char *label,
+	const bt_integer_range_set_unsigned *index_ranges) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the number of flags contained in the \bt_ba_fc
+    \bt_p{field_class}.
+
+See the \ref api-tir-fc-ba-prop-flags "flags" property.
+
+@param[in] field_class
+    Bit array field class of which to get the number of contained
+    flags.
+
+@returns
+    Number of contained flags in \bt_p{field_class}.
+
+@bt_pre_not_null{field_class}
+@bt_pre_is_ba_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 1}
+*/
+extern uint64_t bt_field_class_bit_array_get_flag_count(
+	const bt_field_class *field_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Borrows the flag at index \bt_p{index} from the
+    \bt_ba_fc \bt_p{field_class}.
+
+See the \ref api-tir-fc-ba-prop-flags "flags" property.
+
+@param[in] field_class
+    Bit array field class from which to borrow the flag at
+    index \bt_p{index}.
+@param[in] index
+    Index of the flag to borrow from \bt_p{field_class}.
+
+@returns
+    @parblock
+    \em Borrowed reference of the flag of
+    \bt_p{field_class} at index \bt_p{index}.
+
+    The returned pointer remains valid as long as \bt_p{field_class}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{field_class}
+@bt_pre_is_ba_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 1}
+@pre
+    \bt_p{index} is less than the
+    \link bt_field_class_bit_array_get_flag_count() number of flags\endlink
+    in \bt_p{field_class}.
+
+@sa bt_field_class_bit_array_get_flag_count() &mdash;
+    Returns the number of flags contained in a
+    bit array field class.
+*/
+extern const bt_field_class_bit_array_flag *
+bt_field_class_bit_array_borrow_flag_by_index_const(
+	const bt_field_class *field_class, uint64_t index) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Borrows the flag having the label \bt_p{label} from the
+    \bt_ba_fc \bt_p{field_class}.
+
+See the \ref api-tir-fc-ba-prop-flags "flags" property.
+
+If there's no flag having the label \bt_p{label} in
+\bt_p{field_class}, this function returns \c NULL.
+
+@param[in] field_class
+    Bit array field class from which to borrow the flag
+    having the label \bt_p{label}.
+@param[in] label
+    Label of the flag to borrow from \bt_p{field_class}.
+
+@returns
+    @parblock
+    \em Borrowed reference of the flag of
+    \bt_p{field_class} having the label \bt_p{label}, or \c NULL
+    if none.
+
+    The returned pointer remains valid as long as \bt_p{field_class}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{field_class}
+@bt_pre_is_ba_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 1}
+@bt_pre_not_null{label}
+*/
+extern const bt_field_class_bit_array_flag *
+bt_field_class_bit_array_borrow_flag_by_label_const(
+	const bt_field_class *field_class, const char *label) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Array of \c const \bt_ba_fc flag labels.
+
+Returned by bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer().
+*/
+typedef char const * const *bt_field_class_bit_array_flag_label_array;
+
+/*!
+@brief
+    Status codes for
+    bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer().
+*/
+typedef enum bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer_status {
+	/*!
+	@brief
+	    Success.
+	*/
+	BT_FIELD_CLASS_BIT_ARRAY_GET_ACTIVE_FLAG_LABELS_FOR_VALUE_AS_INTEGER_STATUS_OK			= __BT_FUNC_STATUS_OK,
+
+	/*!
+	@brief
+	    Out of memory.
+	*/
+	BT_FIELD_CLASS_BIT_ARRAY_GET_ACTIVE_FLAG_LABELS_FOR_VALUE_AS_INTEGER_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
+} bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer_status;
+
+/*!
+@brief
+    Returns the labels of all the active flags of the
+    \bt_ba_fc \bt_p{field_class} for the set bits of
+    \bt_p{value_as_integer} (a bit array field value as an integer).
+
+See the \ref api-tir-fc-ba-prop-flags "flags" property.
+
+This function sets \bt_p{*labels} to the resulting array and
+\bt_p{*count} to the number of labels in \bt_p{*labels}.
+
+On success, if there's no active flags for \bt_p{value_as_integer},
+\bt_p{*count} is 0.
+
+@param[in] field_class
+    Bit array field class from which to get the labels of the
+    active flags for \bt_p{value_as_integer}.
+@param[in] value_as_integer
+    @parblock
+    Bits, as an integer, for which to get the labels of the active flags
+    of \bt_p{field_class}.
+
+    In this integral value, the index of the least significant bit
+    is&nbsp;0.
+    @endparblock
+@param[out] labels
+    @parblock
+    <strong>On success</strong>, \bt_p{*labels}
+    is an array of labels of the active flags of \bt_p{field_class}
+    for \bt_p{value}.
+
+    The number of labels in \bt_p{*labels} is \bt_p{*count}.
+
+    The array is owned by \bt_p{field_class} and remains valid as long
+    as:
+
+    - \bt_p{field_class} is not modified.
+    - You don't call this function again with \bt_p{field_class}.
+    @endparblock
+@param[out] count
+    <strong>On success</strong>, \bt_p{*count} is the number of labels
+    in \bt_p{*labels} (can be&nbsp;0).
+
+@retval #BT_FIELD_CLASS_BIT_ARRAY_GET_ACTIVE_FLAG_LABELS_FOR_VALUE_AS_INTEGER_STATUS_OK
+    Success.
+@retval #BT_FIELD_CLASS_BIT_ARRAY_GET_ACTIVE_FLAG_LABELS_FOR_VALUE_AS_INTEGER_STATUS_MEMORY_ERROR
+    Out of memory.
+
+@bt_pre_not_null{field_class}
+@bt_pre_is_ba_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 1}
+@bt_pre_not_null{labels}
+@bt_pre_not_null{count}
+*/
+extern bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer_status
+bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer(
+	const bt_field_class *field_class, uint64_t value_as_integer,
+	bt_field_class_bit_array_flag_label_array *labels,
+	uint64_t *count) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the label of the \bt_ba_fc flag \bt_p{flag}.
+
+See the \ref api-tir-fc-ba-prop-flags "flags" property.
+
+@param[in] flag
+    Bit array field class flag of which to get the label.
+
+@returns
+    @parblock
+    Label of \bt_p{flag}.
+
+    The returned pointer remains valid as long as \bt_p{flag} exists.
+    @endparblock
+
+@bt_pre_not_null{flag}
+*/
+extern const char *bt_field_class_bit_array_flag_get_label(
+	const bt_field_class_bit_array_flag *flag) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Borrows the bit index ranges from the \bt_ba_fc flag \bt_p{flag}.
+
+See the \ref api-tir-fc-ba-prop-flags "flags" property.
+
+@param[in] flag
+    Bit array field class flag from which to borrow the
+    bit index ranges.
+
+@returns
+    Bit index ranges of \bt_p{flag}.
+
+@bt_pre_not_null{flag}
+*/
+extern const bt_integer_range_set_unsigned *
+bt_field_class_bit_array_flag_borrow_index_ranges_const(
+	const bt_field_class_bit_array_flag *flag) __BT_NOEXCEPT;
 
 /*!
 @}
@@ -2387,7 +2753,7 @@ extern bt_field_class *bt_field_class_real_double_precision_create(
 
 /*!
 @brief
-    Array of \c const \bt_enum_fc labels.
+    Array of \c const \bt_enum_fc mapping labels.
 
 Returned by bt_field_class_enumeration_unsigned_get_mapping_labels_for_value()
 and bt_field_class_enumeration_signed_get_mapping_labels_for_value().

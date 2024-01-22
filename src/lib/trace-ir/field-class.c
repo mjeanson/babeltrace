@@ -68,13 +68,51 @@ void finalize_field_class(struct bt_field_class *fc)
 	BT_OBJECT_PUT_REF_AND_RESET(fc->user_attributes);
 }
 
+#define _BT_ASSERT_PRE_BIT_ARRAY_FC_FLAG_NAME	"Bit array field class flag"
+#define _BT_ASSERT_PRE_BIT_ARRAY_FC_FLAG_ID	"bit-array-field-class-flag"
+
+#define BT_ASSERT_PRE_DEV_BIT_ARRAY_FC_FLAG_NON_NULL(_flag)	\
+	BT_ASSERT_PRE_DEV_NON_NULL(				\
+		_BT_ASSERT_PRE_BIT_ARRAY_FC_FLAG_ID, (_flag),	\
+		_BT_ASSERT_PRE_BIT_ARRAY_FC_FLAG_NAME)
+
 static
 void destroy_bit_array_field_class(struct bt_object *obj)
 {
+	const struct bt_field_class_bit_array *ba_fc;
+
 	BT_ASSERT(obj);
 	BT_LIB_LOGD("Destroying bit array field class object: %!+F", obj);
+
+	ba_fc = (const void *) obj;
+
+	if (ba_fc->flags) {
+		g_ptr_array_free(ba_fc->flags, TRUE);
+	}
+
 	finalize_field_class((void *) obj);
 	g_free(obj);
+}
+
+static
+void destroy_bit_array_flag(struct bt_field_class_bit_array_flag *flag)
+{
+	if (!flag) {
+		goto end;
+	}
+
+	g_free(flag->label);
+	bt_object_put_ref(flag->range_set);
+	g_free(flag);
+
+end:
+	return;
+}
+
+static
+void destroy_bit_array_flag_void(gpointer ptr)
+{
+	destroy_bit_array_flag((struct bt_field_class_bit_array_flag *) ptr);
 }
 
 BT_EXPORT
@@ -102,6 +140,13 @@ struct bt_field_class *bt_field_class_bit_array_create(
 	}
 
 	ba_fc->length = length;
+	ba_fc->flags = g_ptr_array_new_with_free_func(
+		destroy_bit_array_flag_void);
+	if (!ba_fc->flags) {
+		BT_LIB_LOGE_APPEND_CAUSE("Failed to allocate a GPtrArray.");
+		goto error;
+	}
+
 	BT_LIB_LOGD("Created bit array field class object: %!+F", ba_fc);
 	goto end;
 
@@ -121,6 +166,190 @@ uint64_t bt_field_class_bit_array_get_length(const struct bt_field_class *fc)
 	BT_ASSERT_PRE_DEV_FC_HAS_TYPE("field-class", fc, "bit-array",
 		BT_FIELD_CLASS_TYPE_BIT_ARRAY, "Field class");
 	return ba_fc->length;
+}
+
+BT_EXPORT
+uint64_t bt_field_class_bit_array_get_flag_count(const bt_field_class *fc)
+{
+	const struct bt_field_class_bit_array *ba_fc = (const void *) fc;
+
+	BT_ASSERT_PRE_DEV_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_DEV_FC_HAS_TYPE("field-class", fc, "bit-array",
+		BT_FIELD_CLASS_TYPE_BIT_ARRAY, "Field class");
+	return ba_fc->flags->len;
+}
+
+BT_EXPORT
+bt_field_class_bit_array_add_flag_status bt_field_class_bit_array_add_flag(
+		struct bt_field_class *fc, const char *label,
+		const bt_integer_range_set_unsigned *index_ranges)
+{
+	struct bt_field_class_bit_array *ba_fc = (void *) fc;
+	struct bt_field_class_bit_array_flag *flag = NULL;
+	bt_field_class_bit_array_add_flag_status status;
+	struct bt_integer_range_set *index_ranges_internal =
+		(bt_integer_range_set *) index_ranges;
+	guint range_i;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_FC_HAS_TYPE("field-class", fc, "bit-array",
+		BT_FIELD_CLASS_TYPE_BIT_ARRAY, "Field class");
+	BT_ASSERT_PRE_NON_NULL("label", label, "Label");
+	BT_ASSERT_PRE("bit-array-field-class-flag-label-is-unique",
+		!bt_field_class_bit_array_borrow_flag_by_label_const(fc, label),
+		"Duplicate flag name in bit array field class: "
+		"%![bit-array-fc-]+F, label=\"%s\"", fc, label);
+	BT_ASSERT_PRE_INT_RANGE_SET_NON_NULL(index_ranges);
+
+	for (range_i = 0; range_i < index_ranges_internal->ranges->len; ++range_i) {
+		struct bt_integer_range *range
+			= BT_INTEGER_RANGE_SET_RANGE_AT_INDEX(index_ranges_internal,
+				range_i);
+
+		BT_ASSERT_PRE("bit-array-field-class-flag-bit-index-is-less-than-field-class-length",
+			range->upper.u < ba_fc->length,
+			"Flag bit index range's upper bound is greater than or "
+			"equal to bit array field length: %![bit-array-fc-]+F, "
+			"range-index=%u, upper-bound=%" PRIu64,
+			ba_fc, range_i, range->upper.u);
+	}
+
+	flag = g_new0(struct bt_field_class_bit_array_flag, 1);
+	if (!flag) {
+		BT_LIB_LOGE_APPEND_CAUSE("Failed to allocate a bit_array_flag.");
+		status = BT_FIELD_CLASS_BIT_ARRAY_ADD_FLAG_STATUS_MEMORY_ERROR;
+		goto end;
+	}
+
+	flag->label = g_strdup(label);
+	if (!flag->label) {
+		BT_LIB_LOGE_APPEND_CAUSE(
+			"Failed to allocate memory for bit array flag label.");
+		status = BT_FIELD_CLASS_BIT_ARRAY_ADD_FLAG_STATUS_MEMORY_ERROR;
+		goto end;
+	}
+
+	flag->range_set = index_ranges;
+	bt_integer_range_set_unsigned_get_ref(flag->range_set);
+
+	/* Set flag->mask */
+	for (range_i = 0; range_i < index_ranges_internal->ranges->len; range_i++) {
+		const struct bt_integer_range *range = (const void *)
+			BT_INTEGER_RANGE_SET_RANGE_AT_INDEX(index_ranges_internal,
+				range_i);
+		uint64_t bit_index;
+
+		for (bit_index = range->lower.u; bit_index <= range->upper.u;
+				++bit_index) {
+			flag->mask |= UINT64_C(1) << bit_index;
+		}
+	}
+
+	g_ptr_array_add(ba_fc->flags, flag);
+	flag = NULL;
+
+	status = BT_FIELD_CLASS_BIT_ARRAY_ADD_FLAG_STATUS_OK;
+	goto end;
+
+end:
+	destroy_bit_array_flag(flag);
+	return status;
+}
+
+BT_EXPORT
+const bt_field_class_bit_array_flag *
+bt_field_class_bit_array_borrow_flag_by_index_const(
+		const struct bt_field_class *fc, uint64_t index)
+{
+	struct bt_field_class_bit_array *ba_fc = (void *) fc;
+
+	BT_ASSERT_PRE_DEV_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_DEV_FC_HAS_TYPE("field-class", fc, "bit-array",
+		BT_FIELD_CLASS_TYPE_BIT_ARRAY, "Field class");
+	BT_ASSERT_PRE_DEV_VALID_INDEX(index, ba_fc->flags->len);
+	return ba_fc->flags->pdata[index];
+}
+
+BT_EXPORT
+const bt_field_class_bit_array_flag *
+bt_field_class_bit_array_borrow_flag_by_label_const(
+		const struct bt_field_class *fc, const char *label)
+{
+	struct bt_field_class_bit_array *ba_fc = (void *) fc;
+	const struct bt_field_class_bit_array_flag *flag = NULL;
+	uint64_t i;
+
+	BT_ASSERT_PRE_DEV_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_DEV_FC_HAS_TYPE("field-class", fc, "bit-array",
+		BT_FIELD_CLASS_TYPE_BIT_ARRAY, "Field class");
+	BT_ASSERT_PRE_DEV_NON_NULL("label", label, "Label");
+
+	for (i = 0; i < ba_fc->flags->len; i++) {
+		const struct bt_field_class_bit_array_flag *candidate =
+			ba_fc->flags->pdata[i];
+
+		if (strcmp(candidate->label, label) == 0) {
+			flag = candidate;
+			break;
+		}
+	}
+
+	return flag;
+}
+
+BT_EXPORT
+bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer_status
+bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer(
+		const struct bt_field_class *fc, uint64_t value_as_integer,
+		bt_field_class_bit_array_flag_label_array *label_array,
+		uint64_t *count)
+{
+	struct bt_field_class_bit_array *ba_fc = (void *) fc;
+	uint64_t i;
+
+	BT_ASSERT_PRE_DEV_NO_ERROR();
+	BT_ASSERT_PRE_DEV_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_DEV_FC_HAS_TYPE("field-class", fc, "bit-array",
+		BT_FIELD_CLASS_TYPE_BIT_ARRAY, "Field class");
+	BT_ASSERT_PRE_DEV_NON_NULL("label-array-output", label_array,
+		"Label array (output)");
+	BT_ASSERT_PRE_DEV_NON_NULL("count-output", count, "Count (output)");
+
+	g_ptr_array_set_size(ba_fc->label_buf, 0);
+
+	for (i = 0; i < ba_fc->flags->len; ++i) {
+		const struct bt_field_class_bit_array_flag *flag =
+			ba_fc->flags->pdata[i];
+
+		if (value_as_integer & flag->mask) {
+			g_ptr_array_add(ba_fc->label_buf, flag->label);
+		}
+	}
+
+	*label_array = (void *) ba_fc->label_buf->pdata;
+	*count = (uint64_t) ba_fc->label_buf->len;
+
+	return BT_FIELD_CLASS_BIT_ARRAY_GET_ACTIVE_FLAG_LABELS_FOR_VALUE_AS_INTEGER_STATUS_OK;
+}
+
+BT_EXPORT
+const char *bt_field_class_bit_array_flag_get_label(
+		const struct bt_field_class_bit_array_flag *flag)
+{
+	BT_ASSERT_PRE_DEV_BIT_ARRAY_FC_FLAG_NON_NULL(flag);
+
+	return flag->label;
+}
+
+BT_EXPORT
+const bt_integer_range_set_unsigned *
+bt_field_class_bit_array_flag_borrow_index_ranges_const(
+		const struct bt_field_class_bit_array_flag *flag)
+{
+	BT_ASSERT_PRE_DEV_BIT_ARRAY_FC_FLAG_NON_NULL(flag);
+
+	return flag->range_set;
 }
 
 static

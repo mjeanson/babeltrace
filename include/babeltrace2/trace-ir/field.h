@@ -149,7 +149,7 @@ A bit array field contains a fixed-length array of bits. Its length
 is \ref api-tir-fc-ba-prop-len "given by its class".
 
 The bit array field API interprets the array as an unsigned integer
-value: the least significant bit's index is 0.
+value: the least significant bit's index is&nbsp;0.
 
 For example, to get whether or not bit&nbsp;3 of a bit array field is
 set:
@@ -157,7 +157,7 @@ set:
 @code
 uint64_t value = bt_field_bit_array_get_value_as_integer(field);
 
-if (value & (UINT64_C(1) << UINT64_C(3))) {
+if (value & (UINT64_C(1) << 3)) {
     // Bit 3 is set
 }
 @endcode
@@ -167,6 +167,10 @@ bt_field_bit_array_set_value_as_integer().
 
 Get the bits of a bit array field with
 bt_field_bit_array_get_value_as_integer().
+
+Get the labels of all the active \ref api-tir-fc-ba-prop-flags "flags"
+of the \ref api-tir-fc-ba "class" of a bit array field for the set bits
+of its integral value with bt_field_bit_array_get_active_flag_labels().
 
 <h1>\anchor api-tir-field-int Integer fields</h1>
 
@@ -622,6 +626,67 @@ See \bt_c_ba_field to learn more.
 */
 extern uint64_t bt_field_bit_array_get_value_as_integer(
 		const bt_field *field) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Status codes for
+    bt_field_bit_array_get_active_flag_labels().
+*/
+typedef enum bt_field_bit_array_get_active_flag_labels_status {
+	/*!
+	@brief
+	    Success.
+	*/
+	BT_FIELD_BIT_ARRAY_GET_ACTIVE_FLAG_LABELS_STATUS_OK		= __BT_FUNC_STATUS_OK,
+
+	/*!
+	@brief
+	    Out of memory.
+	*/
+	BT_FIELD_BIT_ARRAY_GET_ACTIVE_FLAG_LABELS_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
+} bt_field_bit_array_get_active_flag_labels_status;
+
+/*!
+@brief
+    Returns the labels of all the active flags of the
+    \ref api-tir-fc-ba "class" of the \bt_ba_field \bt_p{field}
+    for the set bits of the integral value of \bt_p{field}.
+
+This function returns
+
+@code
+(bt_field_bit_array_get_active_flag_labels_status)
+bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer(
+    bt_field_borrow_class_const(field),
+    bt_field_bit_array_get_value_as_integer(field),
+    labels, count)
+@endcode
+
+@param[in] field
+    Bit array field having the class from which to get the labels of the
+    active flags for the integral value of \bt_p{field}.
+@param[out] labels
+    See
+    bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer().
+@param[out] count
+    See
+    bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer().
+
+@retval #BT_FIELD_BIT_ARRAY_GET_ACTIVE_FLAG_LABELS_STATUS_OK
+    Success.
+@retval #BT_FIELD_BIT_ARRAY_GET_ACTIVE_FLAG_LABELS_STATUS_MEMORY_ERROR
+    Out of memory.
+
+@bt_pre_not_null{field}
+@bt_pre_is_ba_field{field}
+@bt_pre_field_with_mip{field, 1}
+@bt_pre_not_null{labels}
+@bt_pre_not_null{count}
+*/
+extern bt_field_bit_array_get_active_flag_labels_status
+bt_field_bit_array_get_active_flag_labels(const bt_field *field,
+	bt_field_class_bit_array_flag_label_array *labels,
+	uint64_t *count) __BT_NOEXCEPT;
 
 /*! @} */
 

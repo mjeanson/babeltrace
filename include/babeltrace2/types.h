@@ -37,6 +37,7 @@ typedef struct bt_event bt_event;
 typedef struct bt_event_class bt_event_class;
 typedef struct bt_field bt_field;
 typedef struct bt_field_class bt_field_class;
+typedef struct bt_field_class_bit_array_flag bt_field_class_bit_array_flag;
 typedef struct bt_field_class_enumeration_mapping bt_field_class_enumeration_mapping;
 typedef struct bt_field_class_enumeration_signed_mapping bt_field_class_enumeration_signed_mapping;
 typedef struct bt_field_class_enumeration_unsigned_mapping bt_field_class_enumeration_unsigned_mapping;

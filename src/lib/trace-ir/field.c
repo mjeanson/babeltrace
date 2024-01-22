@@ -738,6 +738,27 @@ void bt_field_bit_array_set_value_as_integer(struct bt_field *field,
 }
 
 BT_EXPORT
+bt_field_bit_array_get_active_flag_labels_status
+bt_field_bit_array_get_active_flag_labels(const struct bt_field *field,
+		bt_field_class_bit_array_flag_label_array *label_array,
+		uint64_t *count)
+{
+	const struct bt_field_bit_array *ba_field = (const void *) field;
+
+	BT_ASSERT_PRE_DEV_NO_ERROR();
+	BT_ASSERT_PRE_DEV_FIELD_NON_NULL(field);
+	BT_ASSERT_PRE_DEV_FIELD_IS_SET("field", field);
+	BT_ASSERT_PRE_DEV_FIELD_HAS_CLASS_TYPE("field", field,
+		"bit-array-field", BT_FIELD_CLASS_TYPE_BIT_ARRAY, "Field");
+	BT_ASSERT_PRE_DEV_NON_NULL("label-array-output", label_array,
+		"Label array (output)");
+	BT_ASSERT_PRE_DEV_NON_NULL("count-output", count, "Count (output)");
+	return (int)
+		bt_field_class_bit_array_get_active_flag_labels_for_value_as_integer(
+			field->class, ba_field->value_as_int, label_array, count);
+}
+
+BT_EXPORT
 int64_t bt_field_integer_signed_get_value(const struct bt_field *field)
 {
 	const struct bt_field_integer *int_field = (const void *) field;
