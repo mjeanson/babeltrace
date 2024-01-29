@@ -15,6 +15,7 @@
 #include <babeltrace2/babeltrace.h>
 
 #include "compat/socket.hpp"
+#include "cpp-common/bt2c/glib-up.hpp"
 #include "cpp-common/bt2c/logging.hpp"
 
 #define LTTNG_DEFAULT_NETWORK_VIEWER_PORT 5344
@@ -58,10 +59,10 @@ struct live_viewer_connection
 
     std::string url;
 
-    GString *relay_hostname = nullptr;
-    GString *target_hostname = nullptr;
-    GString *session_name = nullptr;
-    GString *proto = nullptr;
+    bt2c::GStringUP relay_hostname;
+    bt2c::GStringUP target_hostname;
+    bt2c::GStringUP session_name;
+    bt2c::GStringUP proto;
 
     BT_SOCKET control_sock {};
     int port = 0;

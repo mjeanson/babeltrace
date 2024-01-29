@@ -241,10 +241,10 @@ static int parse_url(struct live_viewer_connection *viewer_connection)
                                      error_buf);
         goto end;
     }
-    viewer_connection->proto = lttng_live_url_parts.proto;
+    viewer_connection->proto.reset(lttng_live_url_parts.proto);
     lttng_live_url_parts.proto = NULL;
 
-    viewer_connection->relay_hostname = lttng_live_url_parts.hostname;
+    viewer_connection->relay_hostname.reset(lttng_live_url_parts.hostname);
     lttng_live_url_parts.hostname = NULL;
 
     if (lttng_live_url_parts.port >= 0) {
@@ -253,11 +253,11 @@ static int parse_url(struct live_viewer_connection *viewer_connection)
         viewer_connection->port = LTTNG_DEFAULT_NETWORK_VIEWER_PORT;
     }
 
-    viewer_connection->target_hostname = lttng_live_url_parts.target_hostname;
+    viewer_connection->target_hostname.reset(lttng_live_url_parts.target_hostname);
     lttng_live_url_parts.target_hostname = NULL;
 
     if (lttng_live_url_parts.session_name) {
-        viewer_connection->session_name = lttng_live_url_parts.session_name;
+        viewer_connection->session_name.reset(lttng_live_url_parts.session_name);
         lttng_live_url_parts.session_name = NULL;
     }
 
@@ -1641,22 +1641,6 @@ void live_viewer_connection_destroy(struct live_viewer_connection *viewer_connec
                     viewer_connection->url);
 
     lttng_live_disconnect_viewer(viewer_connection);
-
-    if (viewer_connection->relay_hostname) {
-        g_string_free(viewer_connection->relay_hostname, true);
-    }
-
-    if (viewer_connection->target_hostname) {
-        g_string_free(viewer_connection->target_hostname, true);
-    }
-
-    if (viewer_connection->session_name) {
-        g_string_free(viewer_connection->session_name, true);
-    }
-
-    if (viewer_connection->proto) {
-        g_string_free(viewer_connection->proto, true);
-    }
 
     delete viewer_connection;
 
