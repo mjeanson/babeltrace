@@ -12,6 +12,8 @@
 
 #include <babeltrace2/babeltrace.h>
 
+#include "cpp-common/bt2c/libc-up.hpp"
+
 #include "../common/src/metadata/tsdl/decoder.hpp"
 #include "fs.hpp"
 #include "query.hpp"
@@ -32,7 +34,7 @@ bt_component_class_query_method_status metadata_info_query(const bt_value *param
     bt_component_class_query_method_status status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_OK;
     bt_value *result = NULL;
     const bt_value *path_value = NULL;
-    FILE *metadata_fp = NULL;
+    bt2c::FileUP metadata_fp;
     int ret;
     int bo;
     const char *path;
@@ -73,13 +75,13 @@ bt_component_class_query_method_status metadata_info_query(const bt_value *param
     path = bt_value_string_get(path_value);
 
     BT_ASSERT(path);
-    metadata_fp = ctf_fs_metadata_open_file(path, logger);
+    metadata_fp.reset(ctf_fs_metadata_open_file(path, logger));
     if (!metadata_fp) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "Cannot open trace metadata: path=\"{}\".", path);
         goto error;
     }
 
-    ret = ctf_metadata_decoder_is_packetized(metadata_fp, &is_packetized, &bo, logger);
+    ret = ctf_metadata_decoder_is_packetized(metadata_fp.get(), &is_packetized, &bo, logger);
     if (ret) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(
             logger, "Cannot check whether or not the metadata stream is packetized: path=\"{}\".",
@@ -94,8 +96,8 @@ bt_component_class_query_method_status metadata_info_query(const bt_value *param
         goto error;
     }
 
-    rewind(metadata_fp);
-    decoder_status = ctf_metadata_decoder_append_content(decoder, metadata_fp);
+    rewind(metadata_fp.get());
+    decoder_status = ctf_metadata_decoder_append_content(decoder, metadata_fp.get());
     if (decoder_status) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(
             logger, "Cannot update metadata decoder's content: path=\"{}\".", path);
@@ -144,14 +146,6 @@ end:
         g_string_free(g_metadata_text, TRUE);
     }
     ctf_metadata_decoder_destroy(decoder);
-
-    if (metadata_fp) {
-        ret = fclose(metadata_fp);
-        if (ret) {
-            BT_CPPLOGE_ERRNO_SPEC(logger, "Cannot close metadata file stream", ": path=\"{}\"",
-                                  path);
-        }
-    }
 
     *user_result = result;
     return status;
