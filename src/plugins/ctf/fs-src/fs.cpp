@@ -581,7 +581,7 @@ static int create_ds_file_groups(struct ctf_fs_trace *ctf_fs_trace)
     return 0;
 }
 
-static int set_trace_name(bt_trace *trace, const char *name_suffix)
+static void set_trace_name(const bt2::Trace trace, const char *name_suffix)
 {
     std::string name;
 
@@ -589,9 +589,9 @@ static int set_trace_name(bt_trace *trace, const char *name_suffix)
      * Check if we have a trace environment string value named `hostname`.
      * If so, use it as the trace name's prefix.
      */
-    const bt_value *val = bt_trace_borrow_environment_entry_value_by_name_const(trace, "hostname");
-    if (val && bt_value_is_string(val)) {
-        name += bt_value_string_get(val);
+    const auto val = trace.environmentEntry("hostname");
+    if (val && val->isString()) {
+        name += val->asString().value();
 
         if (name_suffix) {
             name += G_DIR_SEPARATOR;
@@ -602,7 +602,7 @@ static int set_trace_name(bt_trace *trace, const char *name_suffix)
         name += name_suffix;
     }
 
-    return bt_trace_set_name(trace, name.c_str());
+    trace.name(name);
 }
 
 static ctf_fs_trace::UP ctf_fs_trace_create(const char *path, const char *name,
@@ -631,10 +631,7 @@ static ctf_fs_trace::UP ctf_fs_trace_create(const char *path, const char *name,
     if (ctf_fs_trace->trace) {
         ctf_trace_class_configure_ir_trace(ctf_fs_trace->metadata->tc, *ctf_fs_trace->trace);
 
-        ret = set_trace_name(ctf_fs_trace->trace->libObjPtr(), name);
-        if (ret) {
-            return nullptr;
-        }
+        set_trace_name(*ctf_fs_trace->trace, name);
     }
 
     ret = create_ds_file_groups(ctf_fs_trace.get());

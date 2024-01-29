@@ -258,4 +258,12 @@ bool operator!=(LhsT&& lhs, RhsT&& rhs) noexcept
 
 } /* namespace bt2c */
 
+/*
+ * Appends `rhs` to `lhs`.
+ */
+inline void operator+=(std::string& lhs, bt2c::CStringView rhs)
+{
+    lhs += rhs.data();
+}
+
 #endif /* BABELTRACE_CPP_COMMON_BT2C_C_STRING_VIEW_HPP */
