@@ -946,6 +946,26 @@
 	BT_ASSERT_PRE_DEV_NON_NULL(_BT_ASSERT_PRE_GRAPH_ID, (_graph),	\
 		_BT_ASSERT_PRE_GRAPH_NAME)
 
+#define _BT_ASSERT_PRE_MIP_VERSION_VALID_ID	"mip-version-is-valid"
+
+/* Asserts that the MIP version `_mip_version` is equal to `_val`. */
+#define BT_ASSERT_PRE_MIP_VERSION_EQ(_mip_version, _val)	\
+	BT_ASSERT_PRE(_BT_ASSERT_PRE_MIP_VERSION_VALID_ID,	\
+		_mip_version == _val,				\
+		"MIP version is not equal to %" PRIu64, _val)
+
+/*
+ * Asserts that the effective MIP version for `_trace_class` is equal to `_val`.
+ */
+#define BT_ASSERT_PRE_TC_MIP_VERSION_EQ(_trace_class, _val)		\
+	BT_ASSERT_PRE_MIP_VERSION_EQ((_trace_class)->mip_version, _val)
+
+/*
+ * Asserts that the effective MIP version for `_field_class` is equal to `_val`.
+ */
+#define BT_ASSERT_PRE_FC_MIP_VERSION_EQ(_field_class, _val)		\
+	BT_ASSERT_PRE_MIP_VERSION_EQ((_field_class)->mip_version, _val)
+
 #define _BT_ASSERT_PRE_INTR_NAME	"Interrupter"
 #define _BT_ASSERT_PRE_INTR_ID		"interrupter"
 

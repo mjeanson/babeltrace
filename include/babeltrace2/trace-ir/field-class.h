@@ -2869,6 +2869,7 @@ property values:
     New dynamic array field class reference, or \c NULL on memory error.
 
 @bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 0}
 @bt_pre_not_null{element_field_class}
 @bt_pre_fc_not_in_tc{element_field_class}
 @pre
@@ -2916,6 +2917,7 @@ In the meantime, this function returns \c NULL.
 
 @bt_pre_not_null{field_class}
 @bt_pre_is_darray_wl_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 0}
 */
 extern const bt_field_path *
 bt_field_class_array_dynamic_with_length_field_borrow_length_field_path_const(
@@ -3393,6 +3395,7 @@ In the meantime, this function returns \c NULL.
 
 @bt_pre_not_null{field_class}
 @bt_pre_is_opt_ws_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 0}
 */
 extern const bt_field_path *
 bt_field_class_option_with_selector_field_borrow_selector_field_path_const(
@@ -3446,6 +3449,7 @@ values:
     New option field class reference, or \c NULL on memory error.
 
 @bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 0}
 @bt_pre_not_null{optional_field_class}
 @bt_pre_fc_not_in_tc{optional_field_class}
 @bt_pre_not_null{selector_field_class}
@@ -3564,6 +3568,7 @@ values:
     New option field class reference, or \c NULL on memory error.
 
 @bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 0}
 @bt_pre_not_null{optional_field_class}
 @bt_pre_fc_not_in_tc{optional_field_class}
 @bt_pre_not_null{selector_field_class}
@@ -3658,6 +3663,7 @@ values:
     New option field class reference, or \c NULL on memory error.
 
 @bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 0}
 @bt_pre_not_null{optional_field_class}
 @bt_pre_fc_not_in_tc{optional_field_class}
 @bt_pre_not_null{selector_field_class}
@@ -3751,6 +3757,7 @@ property values:
     New variant field class reference, or \c NULL on memory error.
 
 @bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 0}
 @pre
     <strong>If \bt_p{selector_field_class} is not \c NULL</strong>,
     \bt_p{selector_field_class} is an \bt_int_fc.
@@ -4141,6 +4148,7 @@ In the meantime, this function returns \c NULL.
 
 @bt_pre_not_null{field_class}
 @bt_pre_is_var_ws_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 0}
 */
 extern const bt_field_path *
 bt_field_class_variant_with_selector_field_borrow_selector_field_path_const(
