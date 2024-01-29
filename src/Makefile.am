@@ -109,7 +109,7 @@ compat_libcompat_la_SOURCES = \
 	compat/memstream.h \
 	compat/mman.c \
 	compat/mman.h \
-	compat/socket.h \
+	compat/socket.hpp \
 	compat/stdio.h \
 	compat/stdlib.h \
 	compat/string.h \

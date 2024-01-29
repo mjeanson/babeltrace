@@ -12,7 +12,7 @@
 
 #include <babeltrace2/babeltrace.h>
 
-#include "compat/socket.h"
+#include "compat/socket.hpp"
 
 #define LTTNG_DEFAULT_NETWORK_VIEWER_PORT 5344
 
