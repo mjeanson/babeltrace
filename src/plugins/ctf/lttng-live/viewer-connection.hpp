@@ -7,6 +7,8 @@
 #ifndef LTTNG_LIVE_VIEWER_CONNECTION_H
 #define LTTNG_LIVE_VIEWER_CONNECTION_H
 
+#include <string>
+
 #include <glib.h>
 #include <stdint.h>
 
@@ -54,7 +56,7 @@ struct live_viewer_connection
 
     bt2c::Logger logger;
 
-    GString *url = nullptr;
+    std::string url;
 
     GString *relay_hostname = nullptr;
     GString *target_hostname = nullptr;
