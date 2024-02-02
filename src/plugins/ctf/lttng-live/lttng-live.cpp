@@ -14,6 +14,7 @@
 #include "common/assert.h"
 #include "cpp-common/bt2c/fmt.hpp"
 #include "cpp-common/bt2c/glib-up.hpp"
+#include "cpp-common/bt2s/make-unique.hpp"
 #include "cpp-common/vendor/fmt/format.h"
 
 #include "plugins/common/muxing/muxing.h"
@@ -1971,10 +1972,8 @@ end:
 
 void lttng_live_component_finalize(bt_self_component_source *component)
 {
-    lttng_live_component *data = (lttng_live_component *) bt_self_component_get_data(
-        bt_self_component_source_as_self_component(component));
-
-    delete data;
+    lttng_live_component::UP {static_cast<lttng_live_component *>(
+        bt_self_component_get_data(bt_self_component_source_as_self_component(component)))};
 }
 
 static enum session_not_found_action
@@ -2013,29 +2012,25 @@ static struct bt_param_validation_map_value_entry_descr params_descr[] = {
 
 static bt_component_class_initialize_method_status
 lttng_live_component_create(const bt_value *params, bt_self_component_source *self_comp,
-                            struct lttng_live_component **component)
+                            lttng_live_component::UP& component)
 {
-    struct lttng_live_component *lttng_live = NULL;
     const bt_value *inputs_value;
     const bt_value *url_value;
     const bt_value *value;
     enum bt_param_validation_status validation_status;
     gchar *validation_error = NULL;
-    bt_component_class_initialize_method_status status;
     bt2c::Logger logger {bt2::SelfSourceComponent {self_comp}, "PLUGIN/SRC.CTF.LTTNG-LIVE/COMP"};
 
     validation_status = bt_param_validation_validate(params, params_descr, &validation_error);
     if (validation_status == BT_PARAM_VALIDATION_STATUS_MEMORY_ERROR) {
-        status = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_MEMORY_ERROR;
-        goto error;
+        return BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_MEMORY_ERROR;
     } else if (validation_status == BT_PARAM_VALIDATION_STATUS_VALIDATION_ERROR) {
         bt2c::GCharUP errorFreer {validation_error};
         BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "{}", validation_error);
-        status = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_ERROR;
-        goto error;
+        return BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_ERROR;
     }
 
-    lttng_live = new lttng_live_component {std::move(logger)};
+    auto lttng_live = bt2s::make_unique<lttng_live_component>(std::move(logger));
     lttng_live->self_comp = bt_self_component_source_as_self_component(self_comp);
     lttng_live->max_query_size = MAX_QUERY_SIZE;
     lttng_live->has_msg_iter = false;
@@ -2054,15 +2049,8 @@ lttng_live_component_create(const bt_value *params, bt_self_component_source *se
         lttng_live->params.sess_not_found_act = SESSION_NOT_FOUND_ACTION_CONTINUE;
     }
 
-    status = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK;
-    goto end;
-
-error:
-    delete lttng_live;
-    lttng_live = NULL;
-end:
-    *component = lttng_live;
-    return status;
+    component = std::move(lttng_live);
+    return BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK;
 }
 
 bt_component_class_initialize_method_status
@@ -2070,31 +2058,26 @@ lttng_live_component_init(bt_self_component_source *self_comp_src,
                           bt_self_component_source_configuration *, const bt_value *params, void *)
 {
     try {
-        struct lttng_live_component *lttng_live;
+        lttng_live_component::UP lttng_live;
         bt_component_class_initialize_method_status ret;
         bt_self_component *self_comp = bt_self_component_source_as_self_component(self_comp_src);
         bt_self_component_add_port_status add_port_status;
 
-        ret = lttng_live_component_create(params, self_comp_src, &lttng_live);
+        ret = lttng_live_component_create(params, self_comp_src, lttng_live);
         if (ret != BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK) {
-            goto error;
+            return ret;
         }
 
         add_port_status =
             bt_self_component_source_add_output_port(self_comp_src, "out", NULL, NULL);
         if (add_port_status != BT_SELF_COMPONENT_ADD_PORT_STATUS_OK) {
             ret = (bt_component_class_initialize_method_status) add_port_status;
-            goto end;
+            return ret;
         }
 
-        bt_self_component_set_data(self_comp, lttng_live);
-        goto end;
+        bt_self_component_set_data(self_comp, lttng_live.release());
 
-error:
-        delete lttng_live;
-        lttng_live = NULL;
-end:
-        return ret;
+        return BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK;
     } catch (const std::bad_alloc&) {
         return BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_MEMORY_ERROR;
     } catch (const bt2::Error&) {

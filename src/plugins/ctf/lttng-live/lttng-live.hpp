@@ -249,6 +249,8 @@ enum session_not_found_action
  */
 struct lttng_live_component
 {
+    using UP = std::unique_ptr<lttng_live_component>;
+
     explicit lttng_live_component(bt2c::Logger loggerParam) noexcept :
         logger {std::move(loggerParam)}
     {
