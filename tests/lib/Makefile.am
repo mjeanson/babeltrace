@@ -56,11 +56,17 @@ test_remove_destruction_listener_in_destruction_listener_LDADD = \
 	$(top_builddir)/src/lib/libbabeltrace2.la
 nodist_EXTRA_test_remove_destruction_listener_in_destruction_listener_SOURCES = dummy.cpp
 
+test_mip_SOURCES = test-mip.c
+test_mip_LDADD = \
+	$(COMMON_TEST_LDADD) \
+	$(top_builddir)/src/lib/libbabeltrace2.la
+
 noinst_PROGRAMS = \
 	test-bt-uuid \
 	test-bt-values \
 	test-graph-topo \
 	test-fields-bin \
+	test-mip \
 	test-remove-destruction-listener-in-destruction-listener \
 	test-simple-sink \
 	test-trace-ir-ref

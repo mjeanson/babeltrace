@@ -22,6 +22,8 @@
 #include "component-descriptor-set.h"
 #include "lib/integer-range-set.h"
 
+#define MAX_MIP_VERSION 1
+
 static
 bool unsigned_integer_range_set_contains(
 		const struct bt_integer_range_set *range_set, uint64_t value)
@@ -46,15 +48,49 @@ end:
 }
 
 /*
- * As of this version, this function only validates that all the
- * component descriptors in `descriptors` support MIP version 0, which
- * is the only version supported by this library.
- *
- * If any component descriptor does not support MIP version 0, then this
- * function returns `BT_FUNC_STATUS_NO_MATCH`.
+ * Log the MIP versions (in `range_set`) supported by the component described by
+ * `descr`.
  */
 static
-int validate_operative_mip_version_in_array(GPtrArray *descriptors,
+void log_supported_mip_versions_range_set(const bt_integer_range_set_unsigned *range_set,
+		const struct bt_component_descriptor_set_entry *descr)
+{
+	uint64_t range_count;
+	uint64_t i;
+
+	if (!BT_LOG_ON_DEBUG) {
+		goto end;
+	}
+
+	range_count = bt_integer_range_set_get_range_count(
+		bt_integer_range_set_unsigned_as_range_set_const(range_set));
+
+	BT_LIB_LOGD("Supported MIP version ranges: %![cc-]C", descr->comp_cls);
+
+	for (i = 0; i < range_count; ++i) {
+		const bt_integer_range_unsigned *range =
+			bt_integer_range_set_unsigned_borrow_range_by_index_const(
+				range_set, i);
+		uint64_t lower = bt_integer_range_unsigned_get_lower(range);
+		uint64_t upper = bt_integer_range_unsigned_get_upper(range);
+
+		BT_LIB_LOGD("  [%" PRIu64 ", %" PRIu64 "]", lower, upper);
+	}
+
+end:
+	return;
+}
+
+/*
+ * Get the MIP version ranges supported by descriptors in `descriptors`, append
+ * them to `supported_ranges`.
+ *
+ * The elements of `descriptors` are `struct bt_component_descriptor_set_entry *`.
+ * The elements of `supported_ranges` are `bt_integer_range_set_unsigned *`.
+ */
+static
+int get_supported_mip_version_ranges(GPtrArray *descriptors,
+		GPtrArray *supported_ranges,
 		enum bt_logging_level log_level)
 {
 	typedef bt_component_class_get_supported_mip_versions_method_status
@@ -63,11 +99,11 @@ int validate_operative_mip_version_in_array(GPtrArray *descriptors,
 			const struct bt_value *,
 			void * /* init method data */,
 			enum bt_logging_level,
-			struct bt_integer_range_set *);
+			bt_integer_range_set_unsigned *);
 
-	int status = BT_FUNC_STATUS_OK;
+	int status;
 	uint64_t i;
-	struct bt_integer_range_set *range_set = NULL;
+	struct bt_integer_range_set_unsigned *range_set = NULL;
 
 	for (i = 0; i < descriptors->len; i++) {
 		struct bt_component_descriptor_set_entry *descr =
@@ -108,60 +144,66 @@ int validate_operative_mip_version_in_array(GPtrArray *descriptors,
 			bt_common_abort();
 		}
 
-		if (!method) {
-			/* Assume 0 */
-			continue;
-		}
-
-		range_set = (void *) bt_integer_range_set_unsigned_create();
+		range_set = bt_integer_range_set_unsigned_create();
 		if (!range_set) {
 			status = BT_FUNC_STATUS_MEMORY_ERROR;
 			goto end;
 		}
 
-		BT_ASSERT(descr->params);
-		BT_LIB_LOGD("Calling user's \"get supported MIP versions\" method: "
-			"%![cc-]+C, %![params-]+v, init-method-data=%p, "
-			"log-level=%s",
-			descr->comp_cls, descr->params,
-			descr->init_method_data,
-			bt_common_logging_level_string(log_level));
-		method_status = method(descr->comp_cls, descr->params,
-			descr->init_method_data, log_level,
-			range_set);
-		BT_LIB_LOGD("User method returned: status=%s",
-			bt_common_func_status_string(method_status));
-		BT_ASSERT_POST(method_name, "status-ok-with-at-least-one-range",
-			method_status != BT_FUNC_STATUS_OK ||
-			range_set->ranges->len > 0,
-			"User method returned `BT_FUNC_STATUS_OK` without "
-			"adding a range to the supported MIP version range set.");
-		BT_ASSERT_POST_NO_ERROR_IF_NO_ERROR_STATUS(method_name,
-			method_status);
-		if (method_status < 0) {
-			BT_LIB_LOGW_APPEND_CAUSE(
-				"Component class's \"get supported MIP versions\" method failed: "
+		if (method) {
+			BT_ASSERT(descr->params);
+			BT_LIB_LOGD("Calling user's \"get supported MIP versions\" method: "
 				"%![cc-]+C, %![params-]+v, init-method-data=%p, "
 				"log-level=%s",
 				descr->comp_cls, descr->params,
 				descr->init_method_data,
 				bt_common_logging_level_string(log_level));
-			status = (int) method_status;
-			goto end;
-		}
-
-		if (!unsigned_integer_range_set_contains(range_set, 0)) {
+			method_status = method(descr->comp_cls, descr->params,
+				descr->init_method_data, log_level,
+				range_set);
+			BT_LIB_LOGD("User method returned: status=%s",
+				bt_common_func_status_string(method_status));
+			BT_ASSERT_POST(method_name, "status-ok-with-at-least-one-range",
+				method_status != BT_FUNC_STATUS_OK ||
+				bt_integer_range_set_get_range_count(
+					bt_integer_range_set_unsigned_as_range_set_const(range_set)) > 0,
+				"User method returned `BT_FUNC_STATUS_OK` without "
+				"adding a range to the supported MIP version range set.");
+			BT_ASSERT_POST_NO_ERROR_IF_NO_ERROR_STATUS(method_name,
+				method_status);
+			if (method_status < 0) {
+				BT_LIB_LOGW_APPEND_CAUSE(
+					"Component class's \"get supported MIP versions\" method failed: "
+					"%![cc-]+C, %![params-]+v, init-method-data=%p, "
+					"log-level=%s",
+					descr->comp_cls, descr->params,
+					descr->init_method_data,
+					bt_common_logging_level_string(log_level));
+				status = (int) method_status;
+				goto end;
+			}
+		} else {
 			/*
-			 * Supported MIP versions do not include 0,
-			 * which is the only MIP versions currently
-			 * supported by the library itself.
+			 * Component class does not implement the
+			 * get_supported_mip_versions method, it means it only
+			 * supports version 0.
 			 */
-			status = BT_FUNC_STATUS_NO_MATCH;
-			goto end;
+			bt_integer_range_set_add_range_status add_range_status
+				= bt_integer_range_set_unsigned_add_range(range_set, 0, 0);
+			if (add_range_status != BT_INTEGER_RANGE_SET_ADD_RANGE_STATUS_OK) {
+				status = (int) add_range_status;
+				goto end;
+			}
 		}
 
-		BT_OBJECT_PUT_REF_AND_RESET(range_set);
+		log_supported_mip_versions_range_set(range_set, descr);
+
+		/* Transfer ownership of `range_set` */
+		g_ptr_array_add(supported_ranges, range_set);
+		range_set = NULL;
 	}
+
+	status = BT_FUNC_STATUS_OK;
 
 end:
 	bt_object_put_ref(range_set);
@@ -169,15 +211,59 @@ end:
 }
 
 /*
- * The purpose of this function is eventually to find the greatest
- * common supported MIP version amongst all the component descriptors.
- * But as of this version of the library, only MIP version 0 is
- * supported, so it only checks that they all support MIP version 0 and
- * always sets `*operative_mip_version` to 0.
- *
- * When any component descriptor does not support MIP version 0, this
- * function returns `BT_FUNC_STATUS_NO_MATCH`.
+ * Given `supported_ranges`, an array of `bt_integer_range_set_unsigned *`
+ * representing the supported MIP version ranges of multiple eventual
+ * components, find the greatest version supported by all.
  */
+static
+bt_get_greatest_operative_mip_version_status find_greatest_compatible_mip_version(
+		const GPtrArray *supported_ranges,
+		uint64_t *operative_mip_version)
+{
+	bool versions[MAX_MIP_VERSION + 1];
+	guint range_set_i;
+	int v;
+	bt_get_greatest_operative_mip_version_status status;
+
+	/* Start by assuming all existing MIP versions are supported. */
+	for (v = 0; v <= MAX_MIP_VERSION; ++v) {
+		versions[v] = true;
+	}
+
+	/*
+	 * Go over each (soon-to-be) component's range set of support MIP
+	 * versions.
+	 */
+	for (range_set_i = 0; range_set_i < supported_ranges->len; ++range_set_i) {
+		const struct bt_integer_range_set *range_set =
+			supported_ranges->pdata[range_set_i];
+		uint64_t i;
+
+		/*
+		 * For each existing MIP version, clear the flag if that
+		 * component would not support it.
+		 */
+		for (i = 0; i <= MAX_MIP_VERSION; ++i) {
+			if (!unsigned_integer_range_set_contains(range_set, i)) {
+				versions[i] = false;
+			}
+		}
+	}
+
+	/* Find the greatest MIP version with the flag still set. */
+	for (v = MAX_MIP_VERSION; v >= 0; --v) {
+		if (versions[v]) {
+			*operative_mip_version = v;
+			status = BT_GET_GREATEST_OPERATIVE_MIP_VERSION_STATUS_OK;
+			goto end;
+		}
+	}
+
+	status = BT_GET_GREATEST_OPERATIVE_MIP_VERSION_STATUS_NO_MATCH;
+end:
+	return status;
+}
+
 BT_EXPORT
 enum bt_get_greatest_operative_mip_version_status
 bt_get_greatest_operative_mip_version(
@@ -185,7 +271,12 @@ bt_get_greatest_operative_mip_version(
 		enum bt_logging_level log_level,
 		uint64_t *operative_mip_version)
 {
-	int status = BT_FUNC_STATUS_OK;
+	int status;
+	GPtrArray *supported_ranges;
+	unsigned int comp_count =
+		comp_descr_set->sources->len +
+		comp_descr_set->filters->len +
+		comp_descr_set->sinks->len;
 
 	BT_ASSERT_PRE_NO_ERROR();
 	BT_ASSERT_PRE_COMP_DESCR_SET_NON_NULL(comp_descr_set);
@@ -193,36 +284,53 @@ bt_get_greatest_operative_mip_version(
 		operative_mip_version,
 		"Operative MIP version (output)");
 	BT_ASSERT_PRE("component-descriptor-set-is-not-empty",
-		comp_descr_set->sources->len +
-		comp_descr_set->filters->len +
-		comp_descr_set->sinks->len > 0,
+		comp_count > 0,
 		"Component descriptor set is empty: addr=%p", comp_descr_set);
-	status = validate_operative_mip_version_in_array(
-		comp_descr_set->sources, log_level);
+
+	supported_ranges = g_ptr_array_new_with_free_func(
+		(void *) bt_integer_range_set_unsigned_put_ref);
+	if (!supported_ranges) {
+		BT_CURRENT_THREAD_ERROR_APPEND_CAUSE_FROM_UNKNOWN("Get greatest MIP",
+			"Failed to allocate one GPtrArray");
+		status = BT_GET_GREATEST_OPERATIVE_MIP_VERSION_STATUS_MEMORY_ERROR;
+		goto end;
+	}
+
+	status = get_supported_mip_version_ranges(
+		comp_descr_set->sources, supported_ranges, log_level);
 	if (status) {
 		goto end;
 	}
 
-	status = validate_operative_mip_version_in_array(
-		comp_descr_set->filters, log_level);
+	status = get_supported_mip_version_ranges(
+		comp_descr_set->filters, supported_ranges, log_level);
 	if (status) {
 		goto end;
 	}
 
-	status = validate_operative_mip_version_in_array(
-		comp_descr_set->sinks, log_level);
+	status = get_supported_mip_version_ranges(
+		comp_descr_set->sinks, supported_ranges, log_level);
 	if (status) {
 		goto end;
 	}
 
-	*operative_mip_version = 0;
+	status = find_greatest_compatible_mip_version(
+		supported_ranges, operative_mip_version);
+	if (status == BT_GET_GREATEST_OPERATIVE_MIP_VERSION_STATUS_OK) {
+		BT_LIB_LOGD("Found a compatible MIP version: version=%d",
+			*operative_mip_version);
+	} else {
+		BT_LIB_LOGD("Failed to find a compatible MIP version: status=%s",
+			bt_common_func_status_string(status));
+	}
 
 end:
+	g_ptr_array_free(supported_ranges, TRUE);
 	return status;
 }
 
 BT_EXPORT
 uint64_t bt_get_maximal_mip_version(void)
 {
-	return 1;
+	return MAX_MIP_VERSION;
 }
