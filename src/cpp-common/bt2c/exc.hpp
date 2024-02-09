@@ -69,6 +69,17 @@ public:
     }
 };
 
+/*
+ * No such file or directory.
+ */
+class NoSuchFileOrDirectoryError : public Error
+{
+public:
+    explicit NoSuchFileOrDirectoryError() noexcept : Error {"No such file or directory"}
+    {
+    }
+};
+
 } /* namespace bt2c */
 
 #endif /* BABELTRACE_CPP_COMMON_BT2C_EXC_HPP */
