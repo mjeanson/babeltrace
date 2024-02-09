@@ -121,7 +121,7 @@ end:
 
 static
 struct bt_field_path *find_field_class_in_ctx(struct bt_field_class *fc,
-		struct bt_resolve_field_path_context *ctx)
+		struct bt_resolve_field_xref_context *ctx)
 {
 	struct bt_field_path *field_path = NULL;
 	int ret;
@@ -201,7 +201,8 @@ end:
 BT_ASSERT_COND_DEV_FUNC
 static inline
 struct bt_field_class *borrow_root_field_class(
-		struct bt_resolve_field_path_context *ctx, enum bt_field_path_scope scope)
+		struct bt_resolve_field_xref_context *ctx,
+		enum bt_field_path_scope scope)
 {
 	switch (scope) {
 	case BT_FIELD_PATH_SCOPE_PACKET_CONTEXT:
@@ -261,7 +262,7 @@ static inline
 bool target_field_path_in_different_scope_has_struct_fc_only(
 		struct bt_field_path *src_field_path,
 		struct bt_field_path *tgt_field_path,
-		struct bt_resolve_field_path_context *ctx)
+		struct bt_resolve_field_xref_context *ctx)
 {
 	bool is_valid = true;
 	uint64_t i = 0;
@@ -300,7 +301,7 @@ BT_ASSERT_COND_DEV_FUNC
 static inline
 bool lca_is_structure_field_class(struct bt_field_path *src_field_path,
 		struct bt_field_path *tgt_field_path,
-		struct bt_resolve_field_path_context *ctx)
+		struct bt_resolve_field_xref_context *ctx)
 {
 	bool is_valid = true;
 	struct bt_field_class *src_fc;
@@ -356,7 +357,7 @@ BT_ASSERT_COND_DEV_FUNC
 static inline
 bool lca_to_target_has_struct_fc_only(struct bt_field_path *src_field_path,
 		struct bt_field_path *tgt_field_path,
-		struct bt_resolve_field_path_context *ctx)
+		struct bt_resolve_field_xref_context *ctx)
 {
 	bool is_valid = true;
 	struct bt_field_class *src_fc;
@@ -419,7 +420,7 @@ BT_ASSERT_COND_DEV_FUNC
 static inline
 bool field_path_is_valid(struct bt_field_class *src_fc,
 		struct bt_field_class *tgt_fc,
-		struct bt_resolve_field_path_context *ctx)
+		struct bt_resolve_field_xref_context *ctx)
 {
 	bool is_valid = true;
 	struct bt_field_path *src_field_path = find_field_class_in_ctx(
@@ -495,7 +496,7 @@ end:
 static
 struct bt_field_path *resolve_field_path(struct bt_field_class *src_fc,
 		struct bt_field_class *tgt_fc,
-		struct bt_resolve_field_path_context *ctx,
+		struct bt_resolve_field_xref_context *ctx,
 		const char *api_func)
 {
 	BT_ASSERT_PRE_DEV_FROM_FUNC(api_func, "valid-field-class",
@@ -506,7 +507,7 @@ struct bt_field_path *resolve_field_path(struct bt_field_class *src_fc,
 }
 
 int bt_resolve_field_paths(struct bt_field_class *fc,
-		struct bt_resolve_field_path_context *ctx,
+		struct bt_resolve_field_xref_context *ctx,
 		const char *api_func)
 {
 	int ret = 0;

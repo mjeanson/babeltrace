@@ -281,7 +281,7 @@ bt_event_class_set_specific_context_field_class(
 {
 	int ret;
 	struct bt_stream_class *stream_class;
-	struct bt_resolve_field_path_context resolve_ctx = {
+	struct bt_resolve_field_xref_context resolve_ctx = {
 		.packet_context = NULL,
 		.event_common_context = NULL,
 		.event_specific_context = field_class,
@@ -347,7 +347,7 @@ bt_event_class_set_payload_field_class(
 {
 	int ret;
 	struct bt_stream_class *stream_class;
-	struct bt_resolve_field_path_context resolve_ctx = {
+	struct bt_resolve_field_xref_context resolve_ctx = {
 		.packet_context = NULL,
 		.event_common_context = NULL,
 		.event_specific_context = NULL,

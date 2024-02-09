@@ -466,6 +466,7 @@ lib_libbabeltrace2_la_SOURCES = \
 	lib/trace-ir/packet.h \
 	lib/trace-ir/resolve-field-path.c \
 	lib/trace-ir/resolve-field-path.h \
+	lib/trace-ir/resolve-field-xref.h \
 	lib/trace-ir/stream.c \
 	lib/trace-ir/stream-class.c \
 	lib/trace-ir/stream-class.h \
