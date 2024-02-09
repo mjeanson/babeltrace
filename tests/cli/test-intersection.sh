@@ -67,20 +67,20 @@ test_intersect_fails() {
 diag "Test the stream intersection feature"
 
 diag "2 streams offsetted with 3 packets intersecting"
-test_intersect "${BT_CTF_TRACES_PATH}/intersection/3eventsintersect" 8 3
+test_intersect "${BT_CTF_TRACES_PATH}/1/intersection/3eventsintersect" 8 3
 
 diag "2 streams offsetted with 3 packets intersecting (exchanged file names)"
-test_intersect "${BT_CTF_TRACES_PATH}/intersection/3eventsintersectreverse" 8 3
+test_intersect "${BT_CTF_TRACES_PATH}/1/intersection/3eventsintersectreverse" 8 3
 
 diag "Only 1 stream"
-test_intersect "${BT_CTF_TRACES_PATH}/intersection/onestream" 3 3
+test_intersect "${BT_CTF_TRACES_PATH}/1/intersection/onestream" 3 3
 
 diag "No intersection between 2 streams"
-test_intersect_fails "${BT_CTF_TRACES_PATH}/intersection/nointersect" 6 \
+test_intersect_fails "${BT_CTF_TRACES_PATH}/1/intersection/nointersect" 6 \
 	"Trimming time range's beginning time is greater than end time: "
 
 diag "No stream at all"
-test_intersect_fails "${BT_CTF_TRACES_PATH}/intersection/nostream" 0 \
+test_intersect_fails "${BT_CTF_TRACES_PATH}/1/intersection/nostream" 0 \
 	"Trace has no streams: "
 
 rm -f "${stdout}" "${stderr}"

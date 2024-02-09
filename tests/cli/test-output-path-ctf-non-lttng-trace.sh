@@ -32,13 +32,13 @@ temp_input_dir=$(mktemp -t -d test-output-path-ctf-non-lttng-trace-input.XXXXXX)
 temp_output_dir=$(mktemp -t -d test-output-path-ctf-non-lttng-trace-output.XXXXXX)
 
 mkdir -p "${temp_input_dir}/a/b/c"
-cp -a "${BT_CTF_TRACES_PATH}/intersection/3eventsintersect" "${temp_input_dir}/a/b/c"
+cp -a "${BT_CTF_TRACES_PATH}/1/intersection/3eventsintersect" "${temp_input_dir}/a/b/c"
 
 mkdir -p "${temp_input_dir}/a/b/c"
-cp -a "${BT_CTF_TRACES_PATH}/intersection/3eventsintersectreverse" "${temp_input_dir}/a/b/c"
+cp -a "${BT_CTF_TRACES_PATH}/1/intersection/3eventsintersectreverse" "${temp_input_dir}/a/b/c"
 
 mkdir -p "${temp_input_dir}/d/e/f"
-cp -a "${BT_CTF_TRACES_PATH}/intersection/nointersect" "${temp_input_dir}/d/e/f"
+cp -a "${BT_CTF_TRACES_PATH}/1/intersection/nointersect" "${temp_input_dir}/d/e/f"
 
 bt_cli "/dev/null" "/dev/null" "${temp_input_dir}" -c sink.ctf.fs -p "path=\"${temp_output_dir}\""
 

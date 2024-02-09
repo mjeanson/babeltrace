@@ -16,7 +16,7 @@ fi
 # shellcheck source=../utils/utils.sh
 source "$UTILSSH"
 
-TRACE_PATH="${BT_CTF_TRACES_PATH}/succeed/wk-heartbeat-u/"
+TRACE_PATH="${BT_CTF_TRACES_PATH}/1/succeed/wk-heartbeat-u/"
 
 NUM_TESTS=118
 

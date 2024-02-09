@@ -54,16 +54,16 @@ test_lost() {
 diag "Test the packet_seq_num validation"
 
 diag "No packet lost"
-test_no_lost "${BT_CTF_TRACES_PATH}/packet-seq-num/no-lost"
+test_no_lost "${BT_CTF_TRACES_PATH}/1/packet-seq-num/no-lost"
 
 diag "No packet lost, packet_seq_num not starting at 0"
-test_no_lost "${BT_CTF_TRACES_PATH}/packet-seq-num/no-lost-not-starting-at-0"
+test_no_lost "${BT_CTF_TRACES_PATH}/1/packet-seq-num/no-lost-not-starting-at-0"
 
 diag "1 stream, 2 packets lost before the last packet"
-test_lost "${BT_CTF_TRACES_PATH}/packet-seq-num/2-lost-before-last" "2"
+test_lost "${BT_CTF_TRACES_PATH}/1/packet-seq-num/2-lost-before-last" "2"
 
 diag "2 streams, packets lost in one of them"
-test_lost "${BT_CTF_TRACES_PATH}/packet-seq-num/2-streams-lost-in-1" "2"
+test_lost "${BT_CTF_TRACES_PATH}/1/packet-seq-num/2-streams-lost-in-1" "2"
 
 diag "2 streams, packets lost in both"
-test_lost "${BT_CTF_TRACES_PATH}/packet-seq-num/2-streams-lost-in-2" "2,3,1"
+test_lost "${BT_CTF_TRACES_PATH}/1/packet-seq-num/2-streams-lost-in-2" "2,3,1"

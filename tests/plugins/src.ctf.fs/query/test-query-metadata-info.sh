@@ -18,7 +18,7 @@ fi
 source "$UTILSSH"
 
 this_dir_relative="plugins/src.ctf.fs/query"
-succeed_trace_dir="$BT_CTF_TRACES_PATH/succeed"
+succeed_trace_dir="$BT_CTF_TRACES_PATH/1/succeed"
 expect_dir="$BT_TESTS_DATADIR/$this_dir_relative"
 
 test_query_metadata_info() {

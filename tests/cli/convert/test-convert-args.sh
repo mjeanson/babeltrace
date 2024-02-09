@@ -66,8 +66,8 @@ test_bt_convert_fails() {
 	fi
 }
 
-path_to_trace="${BT_CTF_TRACES_PATH}/succeed/succeed1"
-path_to_trace2="${BT_CTF_TRACES_PATH}/succeed/succeed2"
+path_to_trace="${BT_CTF_TRACES_PATH}/1/succeed/succeed1"
+path_to_trace2="${BT_CTF_TRACES_PATH}/1/succeed/succeed2"
 output_path="/output/path"
 
 if [ "$BT_TESTS_OS_TYPE" = "mingw" ]; then

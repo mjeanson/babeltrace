@@ -13,12 +13,12 @@ import bt2
 _BT_TESTS_DATADIR = os.environ["BT_TESTS_DATADIR"]
 _BT_CTF_TRACES_PATH = os.environ["BT_CTF_TRACES_PATH"]
 _3EVENTS_INTERSECT_TRACE_PATH = os.path.join(
-    _BT_CTF_TRACES_PATH, "intersection", "3eventsintersect"
+    _BT_CTF_TRACES_PATH, "1", "intersection", "3eventsintersect"
 )
 _NOINTERSECT_TRACE_PATH = os.path.join(
-    _BT_CTF_TRACES_PATH, "intersection", "nointersect"
+    _BT_CTF_TRACES_PATH, "1", "intersection", "nointersect"
 )
-_SEQUENCE_TRACE_PATH = os.path.join(_BT_CTF_TRACES_PATH, "succeed", "sequence")
+_SEQUENCE_TRACE_PATH = os.path.join(_BT_CTF_TRACES_PATH, "1", "succeed", "sequence")
 _AUTO_SOURCE_DISCOVERY_GROUPING_PATH = os.path.join(
     _BT_TESTS_DATADIR, "auto-source-discovery", "grouping"
 )
@@ -27,7 +27,7 @@ _AUTO_SOURCE_DISCOVERY_PARAMS_LOG_LEVEL_PATH = os.path.join(
 )
 
 _METADATA_SYNTAX_ERROR_TRACE_PATH = os.path.join(
-    _BT_CTF_TRACES_PATH, "fail", "metadata-syntax-error"
+    _BT_CTF_TRACES_PATH, "1", "fail", "metadata-syntax-error"
 )
 _BT_ENABLE_PYTHON_PLUGINS = os.environ["BT_TESTS_ENABLE_PYTHON_PLUGINS"] == "1"
 

@@ -66,10 +66,10 @@ To regenerate them, you can use the included Makefile or follow these steps:
 
 Test program
 ------------
-The trace provided in `tests/data/ctf-traces/succeed/debug-info/` was generated
-using lttng-ust in a LTTng session configured to contain only the bare minimum
-to do the debug-info resolution. You can generate such trace by following these
-steps:
+The trace provided in `tests/data/ctf-traces/1/succeed/debug-info/` was
+generated using lttng-ust in a LTTng session configured to contain only the
+bare minimum to do the debug-info resolution. You can generate such trace by
+following these steps:
 
 1. Compile the example binary:
     $ ln -s x86-64-linux-gnu/dwarf-full/libhello-so libhello.so

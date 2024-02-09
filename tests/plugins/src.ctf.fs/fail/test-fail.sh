@@ -19,7 +19,7 @@ fi
 # shellcheck source=../../../utils/utils.sh
 source "$UTILSSH"
 
-fail_trace_dir="$BT_CTF_TRACES_PATH/fail"
+fail_trace_dir="$BT_CTF_TRACES_PATH/1/fail"
 
 stdout_file=$(mktemp -t test-ctf-fail-stdout.XXXXXX)
 stderr_file=$(mktemp -t test-ctf-fail-stderr.XXXXXX)

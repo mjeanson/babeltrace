@@ -7,7 +7,7 @@
         "client-count": 0,
         "traces": [
             {
-                "path": "live/split-metadata/",
+                "path": "1/live/split-metadata/",
                 "beacons": {
                 },
                 "metadata-sections": [

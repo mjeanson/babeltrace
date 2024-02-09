@@ -303,7 +303,7 @@ test_compare_to_ctf_fs() {
 	expected_stdout="$(mktemp -t test-live-compare-stdout-expected.XXXXXX)"
 	expected_stderr="$(mktemp -t test-live-compare-stderr-expected.XXXXXX)"
 
-	bt_cli "$expected_stdout" "$expected_stderr" "${trace_dir}/succeed/multi-domains" -c sink.text.details --params "with-trace-name=false,with-stream-name=false"
+	bt_cli "$expected_stdout" "$expected_stderr" "${trace_dir}/1/succeed/multi-domains" -c sink.text.details --params "with-trace-name=false,with-stream-name=false"
 	bt_remove_cr "${expected_stdout}"
 	bt_remove_cr "${expected_stderr}"
 
@@ -392,7 +392,7 @@ test_stored_values() {
 	tmp_dir=$(mktemp -d -t 'test-stored-value.XXXXXXX')
 
 	# Generate test trace.
-	bt_gen_mctf_trace "${trace_dir}/live/stored-values.mctf" "$tmp_dir/stored-values"
+	bt_gen_mctf_trace "${trace_dir}/1/live/stored-values.mctf" "$tmp_dir/stored-values"
 
 	run_test "$test_text" "$cli_args_template" "$expected_stdout" \
 		"$expected_stderr" "$tmp_dir" "${server_args[@]}"
@@ -414,8 +414,8 @@ test_live_new_stream_during_inactivity() {
 	tmp_dir=$(mktemp -d -t 'test-new-streams.XXXXXXX')
 
 	# Generate test trace.
-	bt_gen_mctf_trace "${trace_dir}/live/new-streams/first-trace.mctf" "$tmp_dir/first-trace"
-	bt_gen_mctf_trace "${trace_dir}/live/new-streams/second-trace.mctf" "$tmp_dir/second-trace"
+	bt_gen_mctf_trace "${trace_dir}/1/live/new-streams/first-trace.mctf" "$tmp_dir/first-trace"
+	bt_gen_mctf_trace "${trace_dir}/1/live/new-streams/second-trace.mctf" "$tmp_dir/second-trace"
 
 	run_test "$test_text" "$cli_args_template" "$expected_stdout" \
 		"$expected_stderr" "$tmp_dir" "${server_args[@]}"

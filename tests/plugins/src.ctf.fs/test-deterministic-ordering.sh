@@ -37,7 +37,7 @@ fi
 # shellcheck source=../../utils/utils.sh
 source "$UTILSSH"
 
-traces_dir="${BT_CTF_TRACES_PATH}/deterministic-ordering"
+traces_dir="${BT_CTF_TRACES_PATH}/1/deterministic-ordering"
 trace_a_corrupted="${traces_dir}/a-corrupted"
 trace_b_not_corrupted="${traces_dir}/b-not-corrupted"
 trace_c_corrupted="${traces_dir}/c-corrupted"

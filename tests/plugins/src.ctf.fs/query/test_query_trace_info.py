@@ -23,7 +23,7 @@ class QueryTraceInfoClockOffsetTestCase(unittest.TestCase):
         self._fs = ctf.source_component_classes["fs"]
 
         self._inputs = [
-            os.path.join(test_ctf_traces_path, "intersection", "3eventsintersect")
+            os.path.join(test_ctf_traces_path, "1", "intersection", "3eventsintersect")
         ]
 
     def _check(self, trace, offset):
@@ -127,7 +127,7 @@ class QueryTraceInfoPortNameTestCase(unittest.TestCase):
             {
                 "inputs": [
                     os.path.join(
-                        test_ctf_traces_path, "intersection", "3eventsintersect"
+                        test_ctf_traces_path, "1", "intersection", "3eventsintersect"
                     )
                 ]
             },
@@ -135,10 +135,10 @@ class QueryTraceInfoPortNameTestCase(unittest.TestCase):
 
         if os.environ["BT_TESTS_OS_TYPE"] == "mingw":
             os_stream_path = (
-                "\\tests\\data\\ctf-traces\\intersection\\3eventsintersect\\"
+                "\\tests\\data\\ctf-traces\\1\\intersection\\3eventsintersect\\"
             )
         else:
-            os_stream_path = "/tests/data/ctf-traces/intersection/3eventsintersect/"
+            os_stream_path = "/tests/data/ctf-traces/1/intersection/3eventsintersect/"
 
         self.assertEqual(len(res), 1)
         trace = res[0]
@@ -161,13 +161,19 @@ class QueryTraceInfoPortNameTestCase(unittest.TestCase):
         res = bt2.QueryExecutor(
             self._fs,
             "babeltrace.trace-infos",
-            {"inputs": [os.path.join(test_ctf_traces_path, "succeed", "succeed1")]},
+            {
+                "inputs": [
+                    os.path.join(test_ctf_traces_path, "1", "succeed", "succeed1")
+                ]
+            },
         ).query()
 
         if os.environ["BT_TESTS_OS_TYPE"] == "mingw":
-            os_stream_path = "\\tests\\data\\ctf-traces\\succeed\\succeed1\\dummystream"
+            os_stream_path = (
+                "\\tests\\data\\ctf-traces\\1\\succeed\\succeed1\\dummystream"
+            )
         else:
-            os_stream_path = "/tests/data/ctf-traces/succeed/succeed1/dummystream"
+            os_stream_path = "/tests/data/ctf-traces/1/succeed/succeed1/dummystream"
 
         self.assertEqual(len(res), 1)
         trace = res[0]
@@ -195,7 +201,11 @@ class QueryTraceInfoRangeTestCase(unittest.TestCase):
         res = bt2.QueryExecutor(
             self._fs,
             "babeltrace.trace-infos",
-            {"inputs": [os.path.join(test_ctf_traces_path, "succeed", "succeed1")]},
+            {
+                "inputs": [
+                    os.path.join(test_ctf_traces_path, "1", "succeed", "succeed1")
+                ]
+            },
         ).query()
 
         self.assertEqual(len(res), 1)
@@ -214,6 +224,7 @@ class QueryTraceInfoRangeTestCase(unittest.TestCase):
                 "inputs": [
                     os.path.join(
                         test_ctf_traces_path,
+                        "1",
                         "succeed",
                         "lttng-tracefile-rotation",
                         "kernel",
@@ -248,7 +259,7 @@ class QueryTraceInfoPacketTimestampQuirksTestCase(unittest.TestCase):
     def setUp(self):
         ctf = bt2.find_plugin("ctf")
         self._fs = ctf.source_component_classes["fs"]
-        self._path = os.path.join(test_ctf_traces_path, "succeed")
+        self._path = os.path.join(test_ctf_traces_path, "1", "succeed")
 
     def _test_lttng_quirks(self, trace_name):
         res = bt2.QueryExecutor(

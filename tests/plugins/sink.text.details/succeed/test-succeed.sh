@@ -24,7 +24,7 @@ test_details() {
 	local trace_name="$2"
 	shift 2
 	local details_args=("$@")
-	local trace_dir="$BT_CTF_TRACES_PATH/succeed/$trace_name"
+	local trace_dir="$BT_CTF_TRACES_PATH/1/succeed/$trace_name"
 	local expect_path="$expect_dir/$test_name.expect"
 
 	bt_diff_cli "$expect_path" /dev/null \

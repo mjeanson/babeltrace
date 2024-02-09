@@ -7,7 +7,7 @@
         "client-count": 0,
         "traces": [
             {
-                "path": "succeed/trace-with-index/"
+                "path": "1/succeed/trace-with-index/"
             }
         ]
     }

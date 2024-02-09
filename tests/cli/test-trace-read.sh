@@ -16,8 +16,8 @@ fi
 # shellcheck source=../utils/utils.sh
 source "$UTILSSH"
 
-SUCCESS_TRACES=("${BT_CTF_TRACES_PATH}/succeed/"*)
-FAIL_TRACES=("${BT_CTF_TRACES_PATH}/fail/"*)
+SUCCESS_TRACES=("${BT_CTF_TRACES_PATH}/1/succeed/"*)
+FAIL_TRACES=("${BT_CTF_TRACES_PATH}/1/fail/"*)
 
 NUM_TESTS=$((${#SUCCESS_TRACES[@]} + ${#FAIL_TRACES[@]}))
 
