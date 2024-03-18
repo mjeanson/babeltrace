@@ -864,6 +864,9 @@ public:
     CommonEnumerationFieldClass addMapping(const bt2c::CStringView label,
                                            const typename Mapping::RangeSet ranges) const
     {
+        static_assert(!std::is_const<LibObjT>::value,
+                      "Not available with `bt2::Const*EnumerationFieldClass`.");
+
         const auto status = internal::CommonEnumerationFieldClassSpec<MappingT>::addMapping(
             this->libObjPtr(), label, ranges.libObjPtr());
 
