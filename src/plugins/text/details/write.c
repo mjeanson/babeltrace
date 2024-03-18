@@ -413,8 +413,11 @@ void write_value(struct details_write_ctx *ctx, const bt_value *value,
 		write_float_prop_value(ctx, bt_value_real_get(value));
 		break;
 	case BT_VALUE_TYPE_STRING:
-		write_sp(ctx);
-		write_str_prop_value(ctx, bt_value_string_get(value));
+		if (strlen(bt_value_string_get(value)) > 0) {
+			write_sp(ctx);
+			write_str_prop_value(ctx, bt_value_string_get(value));
+		}
+
 		break;
 	case BT_VALUE_TYPE_ARRAY:
 	{
@@ -2122,16 +2125,19 @@ void write_trace(struct details_write_ctx *ctx, const bt_trace *trace)
 
 			BT_ASSERT_DBG(value);
 			write_compound_member_name(ctx, name);
-			write_sp(ctx);
 
 			if (bt_value_get_type(value) ==
 					BT_VALUE_TYPE_SIGNED_INTEGER) {
+				write_sp(ctx);
 				write_int_prop_value(ctx,
 					bt_value_integer_signed_get(value));
 			} else if (bt_value_get_type(value) ==
 					BT_VALUE_TYPE_STRING) {
-				write_str_prop_value(ctx,
-					bt_value_string_get(value));
+				if (strlen(bt_value_string_get(value)) > 0) {
+					write_sp(ctx);
+					write_str_prop_value(ctx,
+						bt_value_string_get(value));
+				}
 			} else {
 				bt_common_abort();
 			}

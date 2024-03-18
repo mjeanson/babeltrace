@@ -237,8 +237,8 @@ Stream beginning:
       kernel_version: #46-Ubuntu SMP Thu Dec 6 14:45:28 UTC 2018
       sysname: Linux
       trace_buffering_scheme: global
-      trace_creation_datetime: 
-      trace_name: 
+      trace_creation_datetime:
+      trace_name:
       tracer_major: 2
       tracer_minor: 11
       tracer_name: lttng-modules
@@ -261,8 +261,8 @@ Stream beginning:
       kernel_version: #46-Ubuntu SMP Thu Dec 6 14:45:28 UTC 2018
       sysname: Linux
       trace_buffering_scheme: global
-      trace_creation_datetime: 
-      trace_name: 
+      trace_creation_datetime:
+      trace_name:
       tracer_major: 2
       tracer_minor: 11
       tracer_name: lttng-modules
@@ -285,8 +285,8 @@ Stream beginning:
       kernel_version: #46-Ubuntu SMP Thu Dec 6 14:45:28 UTC 2018
       sysname: Linux
       trace_buffering_scheme: global
-      trace_creation_datetime: 
-      trace_name: 
+      trace_creation_datetime:
+      trace_name:
       tracer_major: 2
       tracer_minor: 11
       tracer_name: lttng-modules
@@ -309,8 +309,8 @@ Stream beginning:
       kernel_version: #46-Ubuntu SMP Thu Dec 6 14:45:28 UTC 2018
       sysname: Linux
       trace_buffering_scheme: global
-      trace_creation_datetime: 
-      trace_name: 
+      trace_creation_datetime:
+      trace_name:
       tracer_major: 2
       tracer_minor: 11
       tracer_name: lttng-modules
