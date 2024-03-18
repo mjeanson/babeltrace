@@ -344,6 +344,30 @@ struct TypeDescr<ConstBoolField> : public BoolFieldTypeDescr
 
 } /* namespace internal */
 
+template <typename LibLabelArrayT>
+class Labels
+{
+public:
+    explicit Labels(const LibLabelArrayT labels, const std::uint64_t size) :
+        _mLabels {labels}, _mLen {size}
+    {
+    }
+
+    std::uint64_t length() const noexcept
+    {
+        return _mLen;
+    }
+
+    bt2c::CStringView operator[](const std::uint64_t index) const noexcept
+    {
+        return _mLabels[index];
+    }
+
+private:
+    LibLabelArrayT _mLabels;
+    std::uint64_t _mLen;
+};
+
 template <typename LibObjT>
 class CommonBitArrayField final : public CommonField<LibObjT>
 {
@@ -377,13 +401,7 @@ public:
         return CommonBitArrayField<const bt_field> {*this};
     }
 
-    ConstBitArrayFieldClass cls() const noexcept
-    {
-        return ConstBitArrayFieldClass {
-            internal::CommonFieldSpec<const bt_field>::cls(this->libObjPtr())};
-    }
-
-    Class cls() noexcept
+    Class cls() const noexcept
     {
         return Class {internal::CommonFieldSpec<LibObjT>::cls(this->libObjPtr())};
     }
@@ -406,6 +424,19 @@ public:
     {
         BT_ASSERT_DBG(index < this->cls().length());
         return static_cast<bool>(this->valueAsInteger() & (1ULL << index));
+    }
+
+    Labels<bt_field_class_bit_array_flag_label_array> activeFlagLabels() const
+    {
+        bt_field_class_bit_array_flag_label_array labelArray;
+        std::uint64_t count;
+
+        if (bt_field_bit_array_get_active_flag_labels(this->libObjPtr(), &labelArray, &count) ==
+            BT_FIELD_BIT_ARRAY_GET_ACTIVE_FLAG_LABELS_STATUS_MEMORY_ERROR) {
+            throw MemoryError {};
+        }
+
+        return Labels<bt_field_class_bit_array_flag_label_array> {labelArray, count};
     }
 };
 
@@ -606,31 +637,6 @@ struct TypeDescr<ConstSignedIntegerField> : public SignedIntegerFieldTypeDescr
 
 } /* namespace internal */
 
-class EnumerationFieldClassMappingLabels
-{
-public:
-    explicit EnumerationFieldClassMappingLabels(
-        const bt_field_class_enumeration_mapping_label_array labels, const std::uint64_t size) :
-        _mLabels {labels},
-        _mLen {size}
-    {
-    }
-
-    std::uint64_t length() const noexcept
-    {
-        return _mLen;
-    }
-
-    bt2c::CStringView operator[](const std::uint64_t index) const noexcept
-    {
-        return _mLabels[index];
-    }
-
-private:
-    bt_field_class_enumeration_mapping_label_array _mLabels;
-    std::uint64_t _mLen;
-};
-
 template <typename LibObjT>
 class CommonUnsignedEnumerationField final : public CommonUnsignedIntegerField<LibObjT>
 {
@@ -674,7 +680,7 @@ public:
         return Class {internal::CommonFieldSpec<LibObjT>::cls(this->libObjPtr())};
     }
 
-    EnumerationFieldClassMappingLabels labels() const
+    Labels<bt_field_class_enumeration_mapping_label_array> labels() const
     {
         bt_field_class_enumeration_mapping_label_array labelArray;
         std::uint64_t count;
@@ -685,7 +691,7 @@ public:
             throw MemoryError {};
         }
 
-        return EnumerationFieldClassMappingLabels {labelArray, count};
+        return Labels<bt_field_class_enumeration_mapping_label_array> {labelArray, count};
     }
 };
 
@@ -754,7 +760,7 @@ public:
         return Class {internal::CommonFieldSpec<LibObjT>::cls(this->libObjPtr())};
     }
 
-    EnumerationFieldClassMappingLabels labels() const
+    Labels<bt_field_class_enumeration_mapping_label_array> mappingLabels() const
     {
         bt_field_class_enumeration_mapping_label_array labelArray;
         std::uint64_t count;
@@ -765,7 +771,7 @@ public:
             throw MemoryError {};
         }
 
-        return EnumerationFieldClassMappingLabels {labelArray, count};
+        return Labels<bt_field_class_enumeration_mapping_label_array> {labelArray, count};
     }
 };
 

@@ -492,6 +492,28 @@ struct TypeDescr<ConstFieldClass> : public FieldClassTypeDescr
 
 } /* namespace internal */
 
+class ConstBitArrayFieldClassFlag final : public BorrowedObject<const bt_field_class_bit_array_flag>
+{
+public:
+    using RangeSet = ConstUnsignedIntegerRangeSet;
+
+    explicit ConstBitArrayFieldClassFlag(const LibObjPtr libObjPtr) noexcept :
+        _ThisBorrowedObject {libObjPtr}
+    {
+    }
+
+    RangeSet ranges() const noexcept
+    {
+        return RangeSet {
+            bt_field_class_bit_array_flag_borrow_index_ranges_const(this->libObjPtr())};
+    }
+
+    bt2c::CStringView label() const noexcept
+    {
+        return bt_field_class_bit_array_flag_get_label(this->libObjPtr());
+    }
+};
+
 template <typename LibObjT>
 class CommonBitArrayFieldClass final : public CommonFieldClass<LibObjT>
 {
@@ -501,6 +523,7 @@ private:
 public:
     using typename CommonFieldClass<LibObjT>::LibObjPtr;
     using Shared = SharedFieldClass<CommonBitArrayFieldClass<LibObjT>, LibObjT>;
+    using Iterator = BorrowedObjectIterator<CommonBitArrayFieldClass>;
 
     explicit CommonBitArrayFieldClass(const LibObjPtr libObjPtr) noexcept :
         _ThisCommonFieldClass {libObjPtr}
@@ -530,6 +553,42 @@ public:
     std::uint64_t length() const noexcept
     {
         return bt_field_class_bit_array_get_length(this->libObjPtr());
+    }
+
+    ConstBitArrayFieldClassFlag operator[](const std::uint64_t index) const noexcept
+    {
+        return ConstBitArrayFieldClassFlag {
+            bt_field_class_bit_array_borrow_flag_by_index_const(this->libObjPtr(), index)};
+    }
+
+    OptionalBorrowedObject<ConstBitArrayFieldClassFlag>
+    operator[](const bt2c::CStringView label) const noexcept
+    {
+        return bt_field_class_bit_array_borrow_flag_by_label_const(this->libObjPtr(), label);
+    }
+
+    CommonBitArrayFieldClass addFlag(const bt2c::CStringView label,
+                                     const ConstBitArrayFieldClassFlag::RangeSet ranges) const
+    {
+        static_assert(!std::is_const<LibObjT>::value,
+                      "Not available with `bt2::ConstBitArrayFieldClass`.");
+
+        if (bt_field_class_bit_array_add_flag(this->libObjPtr(), label, ranges.libObjPtr()) ==
+            BT_FIELD_CLASS_BIT_ARRAY_ADD_FLAG_STATUS_MEMORY_ERROR) {
+            throw MemoryError {};
+        }
+
+        return *this;
+    }
+
+    Iterator begin() const noexcept
+    {
+        return Iterator {*this, 0};
+    }
+
+    Iterator end() const noexcept
+    {
+        return Iterator {*this, this->length()};
     }
 
     Shared shared() const noexcept
