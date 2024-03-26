@@ -2006,6 +2006,18 @@ public:
         return VariantWithoutSelectorFieldClass::Shared::createWithoutRef(libObjPtr);
     }
 
+    VariantWithoutSelectorFieldClass::Shared
+    createVariantWithoutSelectorFieldLocationFieldClass() const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTraceClass`.");
+
+        const auto libObjPtr =
+            bt_field_class_variant_without_selector_field_location_create(this->libObjPtr());
+
+        internal::validateCreatedObjPtr(libObjPtr);
+        return VariantWithoutSelectorFieldClass::Shared::createWithoutRef(libObjPtr);
+    }
+
     VariantWithUnsignedIntegerSelectorFieldClass::Shared
     createVariantWithUnsignedIntegerSelectorFieldClass(
         const IntegerFieldClass selectorFieldClass) const
@@ -2014,12 +2026,40 @@ public:
             VariantWithUnsignedIntegerSelectorFieldClass>(selectorFieldClass);
     }
 
+    VariantWithUnsignedIntegerSelectorFieldClass::Shared
+    createVariantWithUnsignedIntegerSelectorFieldLocationFieldClass(
+        const ConstFieldLocation selectorFieldLocation) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTraceClass`.");
+
+        const auto libObjPtr =
+            bt_field_class_variant_with_selector_field_location_integer_unsigned_create(
+                this->libObjPtr(), selectorFieldLocation.libObjPtr());
+
+        internal::validateCreatedObjPtr(libObjPtr);
+        return VariantWithUnsignedIntegerSelectorFieldClass::Shared::createWithoutRef(libObjPtr);
+    }
+
     VariantWithSignedIntegerSelectorFieldClass::Shared
     createVariantWithSignedIntegerSelectorFieldClass(
         const IntegerFieldClass selectorFieldClass) const
     {
         return this->_createVariantWithIntegerSelectorFieldClass<
             VariantWithSignedIntegerSelectorFieldClass>(selectorFieldClass);
+    }
+
+    VariantWithSignedIntegerSelectorFieldClass::Shared
+    createVariantWithSignedIntegerSelectorFieldLocationFieldClass(
+        const ConstFieldLocation selectorFieldLocation) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTraceClass`.");
+
+        const auto libObjPtr =
+            bt_field_class_variant_with_selector_field_location_integer_signed_create(
+                this->libObjPtr(), selectorFieldLocation.libObjPtr());
+
+        internal::validateCreatedObjPtr(libObjPtr);
+        return VariantWithSignedIntegerSelectorFieldClass::Shared::createWithoutRef(libObjPtr);
     }
 
     CommonTraceClass assignsAutomaticStreamClassId(const bool val) const noexcept
