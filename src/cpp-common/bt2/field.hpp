@@ -1597,7 +1597,7 @@ public:
 
     bool hasField() const noexcept
     {
-        return this->field();
+        return this->field().hasObject();
     }
 
     OptionalBorrowedObject<CommonField<LibObjT>> field() const noexcept
