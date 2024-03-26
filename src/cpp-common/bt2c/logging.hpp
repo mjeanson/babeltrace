@@ -115,9 +115,9 @@ public:
      * using the tag `tag`.
      */
     explicit Logger(const bt2::SelfMessageIterator selfMsgIter, std::string tag) noexcept :
-        Logger {selfMsgIter.component(), std::move(tag)}
+        _mSelfMsgIter {selfMsgIter},
+        _mLevel {static_cast<Level>(selfMsgIter.component().loggingLevel())}, _mTag {std::move(tag)}
     {
-        _mSelfMsgIter = selfMsgIter;
     }
 
     /*
@@ -580,7 +580,7 @@ private:
         return fmt::format("{}: {}", initMsg, g_strerror(errno));
     }
 
-    /* At least one of the following four members has a value */
+    /* Exactly one of the following four members has a value */
     bt2s::optional<bt2::SelfComponentClass> _mSelfCompCls;
     bt2s::optional<bt2::SelfComponent> _mSelfComp;
     bt2s::optional<bt2::SelfMessageIterator> _mSelfMsgIter;
