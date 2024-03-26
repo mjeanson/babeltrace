@@ -925,6 +925,23 @@ public:
         return bt_event_class_get_id(this->libObjPtr());
     }
 
+    CommonEventClass nameSpace(const bt2c::CStringView nameSpace) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstEventClass`.");
+
+        if (bt_event_class_set_namespace(this->libObjPtr(), nameSpace) ==
+            BT_EVENT_CLASS_SET_NAMESPACE_STATUS_MEMORY_ERROR) {
+            throw MemoryError {};
+        }
+
+        return *this;
+    }
+
+    bt2c::CStringView nameSpace() const noexcept
+    {
+        return bt_event_class_get_namespace(this->libObjPtr());
+    }
+
     CommonEventClass name(const bt2c::CStringView name) const
     {
         static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstEventClass`.");
@@ -1266,6 +1283,24 @@ public:
     std::uint64_t id() const noexcept
     {
         return bt_stream_class_get_id(this->libObjPtr());
+    }
+
+    CommonStreamClass nameSpace(const bt2c::CStringView nameSpace) const
+    {
+        static_assert(!std::is_const<LibObjT>::value,
+                      "Not available with `bt2::ConstStreamClass`.");
+
+        if (bt_stream_class_set_namespace(this->libObjPtr(), nameSpace) ==
+            BT_STREAM_CLASS_SET_NAMESPACE_STATUS_MEMORY_ERROR) {
+            throw MemoryError {};
+        }
+
+        return *this;
+    }
+
+    bt2c::CStringView nameSpace() const noexcept
+    {
+        return bt_stream_class_get_namespace(this->libObjPtr());
     }
 
     CommonStreamClass name(const bt2c::CStringView name) const
