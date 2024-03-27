@@ -860,14 +860,6 @@ private:
     (_logger).logErrorAndThrow<true, _exc_cls>(__FILE__, __func__, __LINE__, (_fmt), ##__VA_ARGS__)
 
 /*
- * Calls logErrorAndThrow() on `_logger` to log an error, append a cause
- * to the error of the current thread, and throw an instance of
- * `_exc_cls`.
- */
-#define BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(_logger, _exc_cls, _fmt, ...)                       \
-    (_logger).logErrorAndThrow<true, _exc_cls>(__FILE__, __func__, __LINE__, (_fmt), ##__VA_ARGS__)
-
-/*
  * BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC() using the default logger.
  */
 #define BT_CPPLOGE_APPEND_CAUSE_AND_THROW(_exc_cls, _fmt, ...)                                     \
