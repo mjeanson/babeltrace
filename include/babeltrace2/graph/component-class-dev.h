@@ -279,18 +279,23 @@ The available component class methods to implement are:
     Get supported \bt_mip (MIP) versions
   </dt>
   <dd>
-    Called within bt_get_greatest_operative_mip_version() to get the
+    Called within
+    bt_get_greatest_operative_mip_version() or
+    bt_get_greatest_operative_mip_version_with_restriction() to get the
     set of MIP versions that an eventual \bt_comp supports.
 
     This is a \ref api-comp-cls-dev-class-meth "class method" because
-    you can call bt_get_greatest_operative_mip_version() before you even
-    create a trace processing \bt_graph.
+    you can call
+    bt_get_greatest_operative_mip_version() or
+    bt_get_greatest_operative_mip_version_with_restriction() before you
+    even create a trace processing \bt_graph.
 
     In this method, you receive initialization parameters as the
     \bt_p{params} parameter and initialization method data as the
     \bt_p{initialize_method_data}. Those parameters are set
     when bt_component_descriptor_set_add_descriptor() is called, before
-    bt_get_greatest_operative_mip_version() is called.
+    bt_get_greatest_operative_mip_version() or
+    bt_get_greatest_operative_mip_version_with_restriction() is called.
 
     Considering those initialization parameters, you need to fill the
     received \bt_uint_rs \bt_p{supported_versions} with the rangs of
@@ -658,7 +663,8 @@ to \bt_p{supported_versions}.
 @param[in] logging_level
     Logging level to use during this method's execution, as passed
     as the \bt_p{logging_level} parameter of
-    bt_get_greatest_operative_mip_version().
+    bt_get_greatest_operative_mip_version() and
+    bt_get_greatest_operative_mip_version_with_restriction().
 @param[in] supported_versions
     \bt_c_uint_rs to which to add the ranges of supported MIP versions
     of an eventual instance of \bt_p{self_component_class} considering
@@ -716,7 +722,8 @@ to \bt_p{supported_versions}.
 @param[in] logging_level
     Logging level to use during this method's execution, as passed
     as the \bt_p{logging_level} parameter of
-    bt_get_greatest_operative_mip_version().
+    bt_get_greatest_operative_mip_version() and
+    bt_get_greatest_operative_mip_version_with_restriction().
 @param[in] supported_versions
     \bt_c_uint_rs to which to add the ranges of supported MIP versions
     of an eventual instance of \bt_p{self_component_class} considering
@@ -774,7 +781,8 @@ to \bt_p{supported_versions}.
 @param[in] logging_level
     Logging level to use during this method's execution, as passed
     as the \bt_p{logging_level} parameter of
-    bt_get_greatest_operative_mip_version().
+    bt_get_greatest_operative_mip_version() and
+    bt_get_greatest_operative_mip_version_with_restriction().
 @param[in] supported_versions
     \bt_c_uint_rs to which to add the ranges of supported MIP versions
     of an eventual instance of \bt_p{self_component_class} considering

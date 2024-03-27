@@ -813,8 +813,7 @@ For example:
   iterator inactivity.
 
 The MIP has a version which is a single major number, independent from
-the \bt_name project's version. As of \bt_name_version_min_maj, the only
-available MIP version is 0.
+the \bt_name project's version.
 
 If what the MIP covers changes in a breaking or semantical way in the
 future, the MIP and \bt_name's minor versions will be bumped.
@@ -833,8 +832,9 @@ initialization time, making the corresponding
 <code>bt_graph_add_*_component*()</code> call fail too. To avoid any
 surprise, you can create a \bt_comp_descr_set with descriptors of the
 components you intend to add to a trace processing graph and call
-bt_get_greatest_operative_mip_version() to get the greatest (most
-recent) MIP version you can use.
+bt_get_greatest_operative_mip_version() or
+bt_get_greatest_operative_mip_version_with_restriction() to get the
+greatest (most recent) MIP version you can use.
 
 To get the library's latest MIP version, use
 bt_get_maximal_mip_version().
@@ -3114,7 +3114,8 @@ This macro effectively moves a message reference from the expression
 
 /*!
 @brief
-    Status codes for bt_get_greatest_operative_mip_version().
+    Status codes for bt_get_greatest_operative_mip_version()
+    and bt_get_greatest_operative_mip_version_with_restriction().
 */
 typedef enum bt_get_greatest_operative_mip_version_status {
 	/*!
@@ -3150,21 +3151,9 @@ typedef enum bt_get_greatest_operative_mip_version_status {
     component descriptors \bt_p{component_descriptors}, and sets
     \bt_p{*mip_version} to the result.
 
-This function calls the
-\link api-comp-cls-dev-meth-mip "get supported MIP versions"\endlink
-method for each component descriptor in \bt_p{component_descriptors},
-and then returns the greatest common (operative) MIP version, if any.
-The "get supported MIP versions" method receives \bt_p{logging_level} as
-its \bt_p{logging_level} parameter.
-
-If this function does not find an operative MIP version for the
-component descriptors of \bt_p{component_descriptors}, it returns
-#BT_GET_GREATEST_OPERATIVE_MIP_VERSION_STATUS_NO_MATCH.
-
-@note
-    As of \bt_name_version_min_maj, because bt_get_maximal_mip_version()
-    returns 0, this function always sets \bt_p{*mip_version} to
-    0 on success.
+This function is equivalent to calling
+bt_get_greatest_operative_mip_version_with_restriction() with
+\bt_p{mip_version_restriction} set to \c NULL (no restriction).
 
 @param[in] component_descriptors
     Component descriptors for which to get the supported MIP versions
@@ -3193,11 +3182,99 @@ component descriptors of \bt_p{component_descriptors}, it returns
     \bt_p{component_descriptors} contains one or more component
     descriptors.
 @bt_pre_not_null{mip_version}
+
+@sa bt_get_greatest_operative_mip_version_with_restriction() &mdash;
+    Computes the greatest MIP version for specific components
+    with a MIP version restriction.
 */
 extern bt_get_greatest_operative_mip_version_status
 bt_get_greatest_operative_mip_version(
 		const bt_component_descriptor_set *component_descriptors,
 		bt_logging_level logging_level, uint64_t *mip_version)
+		__BT_NOEXCEPT;
+
+/*!
+@brief
+    Computes the greatest \bt_mip version, restricted to the set of
+    versions \bt_p{mip_version_restriction}, which
+    you can use to create a trace processing \bt_graph to which you
+    intend to \ref api-graph-lc-add "add components" described by the
+    component descriptors \bt_p{component_descriptors}, and sets
+    \bt_p{*mip_version} to the result.
+
+This function calls the
+\link api-comp-cls-dev-meth-mip "get supported MIP versions"\endlink
+method for each component descriptor in \bt_p{component_descriptors},
+and then sets \bt_p{*mip_version} to the greatest common (operative)
+MIP version which is part of the set \bt_p{mip_version_restriction},
+if any. The "get supported MIP versions" method receives
+\bt_p{logging_level} as its \bt_p{logging_level} parameter.
+
+For example, if all the components would support both MIP
+versions&nbsp;0 and&nbsp;1,
+but \bt_p{mip_version_restriction} only contains the
+[0,&nbsp;0] range, then this function sets \bt_p{*mip_version}
+to&nbsp;0.
+
+If \bt_p{mip_version_restriction} is \c NULL, then it's equivalent to
+the single range [0,&nbsp;\bt_max_mip_version], that is, all the
+possible MIP versions as of \bt_name_version_min_maj.
+
+If this function doesn't find an operative MIP version within
+\bt_p{mip_version_restriction} for the component descriptors of
+\bt_p{component_descriptors}, then it returns
+#BT_GET_GREATEST_OPERATIVE_MIP_VERSION_STATUS_NO_MATCH.
+
+@param[in] component_descriptors
+    Component descriptors for which to get the supported MIP versions
+    to compute the greatest operative MIP version.
+@param[in] logging_level
+    Logging level to use when calling the "get supported MIP versions"
+    method for each component descriptor in
+    \bt_p{component_descriptors}.
+@param[in] mip_version_restriction
+    @parblock
+    Set of MIP versions of which \bt_p{*mip_version} must be part of.
+
+    Can be \c NULL.
+    @endparblock
+@param[out] mip_version
+    <strong>On success</strong>, \bt_p{*mip_version} is the greatest
+    operative MIP version, within \bt_p{mip_version_restriction}, of
+    all the component descriptors in \bt_p{component_descriptors}.
+
+@retval #BT_GET_GREATEST_OPERATIVE_MIP_VERSION_STATUS_OK
+    Success.
+@retval #BT_GET_GREATEST_OPERATIVE_MIP_VERSION_STATUS_NO_MATCH
+    No operative MIP version exists within
+    \bt_p{mip_version_restriction} for the component descriptors of
+    \bt_p{component_descriptors}.
+@retval #BT_GET_GREATEST_OPERATIVE_MIP_VERSION_STATUS_MEMORY_ERROR
+    Out of memory.
+@retval #BT_GET_GREATEST_OPERATIVE_MIP_VERSION_STATUS_ERROR
+    Other error.
+
+@bt_pre_not_null{component_descriptors}
+@pre
+    \bt_p{component_descriptors} contains one or more component
+    descriptors.
+@pre
+    <strong>If \bt_p{mip_version_restriction} is not \c NULL</strong>,
+    then no upper value within the ranges of
+    \bt_p{mip_version_restriction} is greater
+    than&nbsp;\bt_max_mip_version
+    (the return value of bt_get_maximal_mip_version()).
+@bt_pre_not_null{mip_version}
+
+@sa bt_get_greatest_operative_mip_version() &mdash;
+    Computes the greatest MIP version for specific components.
+*/
+extern enum bt_get_greatest_operative_mip_version_status
+bt_get_greatest_operative_mip_version_with_restriction(
+		const struct bt_component_descriptor_set *comp_descr_set,
+		enum bt_logging_level log_level,
+		const bt_integer_range_set_unsigned *mip_version_restriction,
+		uint64_t *mip_version)
 		__BT_NOEXCEPT;
 
 /*!

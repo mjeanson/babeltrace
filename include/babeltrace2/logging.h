@@ -60,8 +60,9 @@ not control the logging level of:
 - A \ref api-qexec "query operation":
   bt_query_executor_set_logging_level() controls this.
 
-- The bt_get_greatest_operative_mip_version() operation: its
-  \bt_p{logging_level} parameter controls this.
+- The bt_get_greatest_operative_mip_version() or
+  bt_get_greatest_operative_mip_version_with_restriction() operation:
+  its \bt_p{logging_level} parameter controls this.
 
 As of \bt_name_version_min_maj, there's no module-specific logging level
 control: bt_logging_set_global_level() sets the logging level of all the

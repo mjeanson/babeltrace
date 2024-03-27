@@ -26,7 +26,8 @@ extern "C" {
 
 @brief
     Set of descriptors of prospective \bt_p_comp to use with
-    bt_get_greatest_operative_mip_version().
+    bt_get_greatest_operative_mip_version() or
+    bt_get_greatest_operative_mip_version_with_restriction().
 
 A <strong><em>component descriptor set</em></strong>
 is an \em unordered set of component descriptors.
@@ -50,7 +51,8 @@ trace processing \bt_graph without actually doing it:
   functions.
 
 As of \bt_name_version_min_maj, the only use case of a component
-descriptor set is bt_get_greatest_operative_mip_version(). This
+descriptor set is bt_get_greatest_operative_mip_version() and
+bt_get_greatest_operative_mip_version_with_restriction(). This
 function computes the greatest \bt_mip version which
 you can use to create a trace processing graph to which you intend
 to \ref api-graph-lc-add "add components" described by a set of

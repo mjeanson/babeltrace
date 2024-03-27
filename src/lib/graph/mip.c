@@ -218,6 +218,7 @@ end:
 static
 bt_get_greatest_operative_mip_version_status find_greatest_compatible_mip_version(
 		const GPtrArray *supported_ranges,
+		const bt_integer_range_set_unsigned *mip_version_restriction,
 		uint64_t *operative_mip_version)
 {
 	bool versions[MAX_MIP_VERSION + 1];
@@ -228,6 +229,20 @@ bt_get_greatest_operative_mip_version_status find_greatest_compatible_mip_versio
 	/* Start by assuming all existing MIP versions are supported. */
 	for (v = 0; v <= MAX_MIP_VERSION; ++v) {
 		versions[v] = true;
+	}
+
+	/*
+	 * Disable specific versions based on `mip_version_restriction`,
+	 * if set.
+	 */
+	if (mip_version_restriction) {
+		for (v = 0; v <= MAX_MIP_VERSION; ++v) {
+			if (!unsigned_integer_range_set_contains(
+					bt_integer_range_set_unsigned_as_range_set_const(
+						mip_version_restriction), v)) {
+				versions[v] = false;
+			}
+		}
 	}
 
 	/*
@@ -266,10 +281,11 @@ end:
 
 BT_EXPORT
 enum bt_get_greatest_operative_mip_version_status
-bt_get_greatest_operative_mip_version(
+bt_get_greatest_operative_mip_version_with_restriction(
 		const struct bt_component_descriptor_set *comp_descr_set,
 		enum bt_logging_level log_level,
-		uint64_t *operative_mip_version)
+		const bt_integer_range_set_unsigned *mip_version_restriction,
+		uint64_t *mip_version)
 {
 	int status;
 	GPtrArray *supported_ranges;
@@ -281,7 +297,7 @@ bt_get_greatest_operative_mip_version(
 	BT_ASSERT_PRE_NO_ERROR();
 	BT_ASSERT_PRE_COMP_DESCR_SET_NON_NULL(comp_descr_set);
 	BT_ASSERT_PRE_NON_NULL("operative-mip-version-output",
-		operative_mip_version,
+		mip_version,
 		"Operative MIP version (output)");
 	BT_ASSERT_PRE("component-descriptor-set-is-not-empty",
 		comp_count > 0,
@@ -315,10 +331,10 @@ bt_get_greatest_operative_mip_version(
 	}
 
 	status = find_greatest_compatible_mip_version(
-		supported_ranges, operative_mip_version);
+		supported_ranges, mip_version_restriction, mip_version);
 	if (status == BT_GET_GREATEST_OPERATIVE_MIP_VERSION_STATUS_OK) {
 		BT_LIB_LOGD("Found a compatible MIP version: version=%d",
-			*operative_mip_version);
+			*mip_version);
 	} else {
 		BT_LIB_LOGD("Failed to find a compatible MIP version: status=%s",
 			bt_common_func_status_string(status));
@@ -327,6 +343,17 @@ bt_get_greatest_operative_mip_version(
 end:
 	g_ptr_array_free(supported_ranges, TRUE);
 	return status;
+}
+
+BT_EXPORT
+enum bt_get_greatest_operative_mip_version_status
+bt_get_greatest_operative_mip_version(
+		const struct bt_component_descriptor_set *comp_descr_set,
+		enum bt_logging_level log_level,
+		uint64_t *mip_version)
+{
+	return bt_get_greatest_operative_mip_version_with_restriction(
+				comp_descr_set, log_level, NULL, mip_version);
 }
 
 BT_EXPORT
