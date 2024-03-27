@@ -128,6 +128,10 @@ WARN_CFLAGS += -Wno-redundant-decls
 # `__cplusplus` is not defined.
 WARN_CFLAGS += -Wno-undef
 
+# For SWIG generated code
+WARN_CFLAGS += -Wno-missing-field-initializers
+WARN_CFLAGS += -Wno-unused-parameter
+
 BUILD_FLAGS=CC="$(CC)" \
 		CFLAGS="$(GLIB_CFLAGS) $(AM_CFLAGS) $(CFLAGS) $(WARN_CFLAGS)" \
 		CPPFLAGS="$(AM_CPPFLAGS) $(CPPFLAGS) -I$(srcdir)/bt2" \
