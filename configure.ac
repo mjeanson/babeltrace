@@ -798,6 +798,11 @@ AC_SUBST(AM_CPPFLAGS)
 # Add glib to global link libs
 LIBS="$LIBS $GLIB_LIBS"
 
+# Disable exceptions for the {fmt} library.  This means, for example, that a
+# format error will result in an assertion failure (instead of throwing an
+# `fmt::format_error` exception).
+AC_DEFINE_UNQUOTED([FMT_EXCEPTIONS], 0, [Disable {fmt} exceptions.])
+
 # Abuse autoconf's AC_ARG_PROGRAM output variable 'program_transform_name'
 # to rename babeltrace2.bin to babeltrace2 at install time.
 program_transform_name="s&babeltrace2\.bin&babeltrace2&;$program_transform_name"
