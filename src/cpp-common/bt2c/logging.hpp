@@ -134,7 +134,8 @@ public:
      * `newTag`.
      */
     explicit Logger(const Logger& other, std::string newTag) :
-        _mSelfComp {other._mSelfComp}, _mSelfMsgIter {other._mSelfMsgIter},
+        _mSelfCompCls {other._mSelfCompCls}, _mSelfComp {other._mSelfComp},
+        _mSelfMsgIter {other._mSelfMsgIter},
         _mModuleName {other._mModuleName}, _mLevel {other._mLevel}, _mTag {std::move(newTag)}
     {
     }
