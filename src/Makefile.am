@@ -191,6 +191,7 @@ cpp_common_libcpp_common_la_SOURCES = \
 	cpp-common/bt2c/text-loc-str.hpp \
 	cpp-common/bt2c/type-traits.hpp \
 	cpp-common/bt2c/uuid.hpp \
+	cpp-common/bt2c/val-req.hpp \
 	cpp-common/bt2c/vector.hpp \
 	cpp-common/bt2s/make-unique.hpp \
 	cpp-common/bt2s/optional.hpp \
