@@ -125,7 +125,7 @@ void MsgIter::_next(bt2::ConstMessageArray& msgs)
             oldestUpstreamMsgIter.portName());
 
         try {
-            if (G_LIKELY(oldestUpstreamMsgIter.reload() == UpstreamMsgIter::ReloadStatus::MORE)) {
+            if (G_LIKELY(oldestUpstreamMsgIter.reload() == UpstreamMsgIter::ReloadStatus::More)) {
                 /* New current message: update heap */
                 _mHeap.replaceTop(&oldestUpstreamMsgIter);
                 BT_CPPLOGD("More messages available; updated heap: port-name={}, heap-len={}",
@@ -166,7 +166,7 @@ void MsgIter::_ensureFullHeap()
                    "port-name={}, heap-len={}, to-reload-len={}",
                    upstreamMsgIter.portName(), _mHeap.len(), _mUpstreamMsgItersToReload.size());
 
-        if (G_LIKELY(upstreamMsgIter.reload() == UpstreamMsgIter::ReloadStatus::MORE)) {
+        if (G_LIKELY(upstreamMsgIter.reload() == UpstreamMsgIter::ReloadStatus::More)) {
             /* New current message: move to heap */
             _mHeap.insert(&upstreamMsgIter);
             BT_CPPLOGD("More messages available; "
@@ -253,16 +253,16 @@ void MsgIter::_validateMsgClkCls(const bt2::ConstMessage msg)
         const auto actualClockCls = error.actualClockCls();
 
         switch (error.type()) {
-        case Type::EXPECTING_NO_CLOCK_CLASS_GOT_ONE:
+        case Type::ExpectingNoClockClassGotOne:
             BT_CPPLOGE_APPEND_CAUSE_AND_THROW(bt2::Error,
                                               "Expecting no clock class, but got one: "
                                               "clock-class-addr={}, clock-class-name={}",
                                               fmt::ptr(actualClockCls->libObjPtr()),
                                               actualClockCls->name());
 
-        case Type::EXPECTING_ORIGIN_UNIX_GOT_NONE:
-        case Type::EXPECTING_ORIGIN_UUID_GOT_NONE:
-        case Type::EXPECTING_ORIGIN_NO_UUID_GOT_NONE:
+        case Type::ExpectingOriginUnixGotNone:
+        case Type::ExpectingOriginUuidGotNone:
+        case Type::ExpectingOriginNoUuidGotNone:
         {
             const auto streamCls = *error.streamCls();
 
@@ -274,7 +274,7 @@ void MsgIter::_validateMsgClkCls(const bt2::ConstMessage msg)
                                               streamCls.id());
         }
 
-        case Type::EXPECTING_ORIGIN_UNIX_GOT_OTHER:
+        case Type::ExpectingOriginUnixGotOther:
             BT_CPPLOGE_APPEND_CAUSE_AND_THROW(bt2::Error,
                                               "Expecting a clock class having a Unix epoch origin, "
                                               "but got one not having a Unix epoch origin: "
@@ -282,7 +282,7 @@ void MsgIter::_validateMsgClkCls(const bt2::ConstMessage msg)
                                               fmt::ptr(actualClockCls->libObjPtr()),
                                               actualClockCls->name());
 
-        case Type::EXPECTING_ORIGIN_UUID_GOT_UNIX:
+        case Type::ExpectingOriginUuidGotUnix:
             BT_CPPLOGE_APPEND_CAUSE_AND_THROW(
                 bt2::Error,
                 "Expecting a clock class not having a Unix epoch origin, "
@@ -290,14 +290,14 @@ void MsgIter::_validateMsgClkCls(const bt2::ConstMessage msg)
                 "clock-class-addr={}, clock-class-name={}",
                 fmt::ptr(actualClockCls->libObjPtr()), actualClockCls->name());
 
-        case Type::EXPECTING_ORIGIN_UUID_GOT_NO_UUID:
+        case Type::ExpectingOriginUuidGotNoUuid:
             BT_CPPLOGE_APPEND_CAUSE_AND_THROW(
                 bt2::Error,
                 "Expecting a clock class with a UUID, but got one without a UUID: "
                 "clock-class-addr={}, clock-class-name={}",
                 fmt::ptr(actualClockCls->libObjPtr()), actualClockCls->name());
 
-        case Type::EXPECTING_ORIGIN_UUID_GOT_OTHER_UUID:
+        case Type::ExpectingOriginUuidGotOtherUuid:
             BT_CPPLOGE_APPEND_CAUSE_AND_THROW(bt2::Error,
                                               "Expecting a clock class with a specific UUID, "
                                               "but got one with a different UUID: "
@@ -307,7 +307,7 @@ void MsgIter::_validateMsgClkCls(const bt2::ConstMessage msg)
                                               actualClockCls->name(), *error.expectedUuid(),
                                               *actualClockCls->uuid());
 
-        case Type::EXPECTING_ORIGIN_NO_UUID_GOT_OTHER:
+        case Type::ExpectingOriginNoUuidGotOther:
         {
             const auto expectedClockCls = error.expectedClockCls();
 

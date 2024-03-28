@@ -21,8 +21,8 @@ class ClockClsCompatRunIn final : public RunIn
 public:
     enum class MsgType
     {
-        STREAM_BEG,
-        MSG_ITER_INACTIVITY,
+        StreamBeg,
+        MsgIterInactivity,
     };
 
     using CreateClockCls = bt2::ClockClass::Shared (*)(bt2::SelfComponent);
@@ -58,7 +58,7 @@ private:
         const auto clockCls = createClockCls(self.component());
 
         switch (msgType) {
-        case MsgType::STREAM_BEG:
+        case MsgType::StreamBeg:
         {
             const auto streamCls = trace.cls().createStreamClass();
 
@@ -69,7 +69,7 @@ private:
             return self.createStreamBeginningMessage(*streamCls->instantiate(trace));
         }
 
-        case MsgType::MSG_ITER_INACTIVITY:
+        case MsgType::MsgIterInactivity:
             BT_ASSERT(clockCls);
             return self.createMessageIteratorInactivityMessage(*clockCls, 12);
         };
@@ -85,10 +85,10 @@ private:
 __attribute__((used)) const char *format_as(const ClockClsCompatRunIn::MsgType msgType)
 {
     switch (msgType) {
-    case ClockClsCompatRunIn::MsgType::STREAM_BEG:
+    case ClockClsCompatRunIn::MsgType::StreamBeg:
         return "sb";
 
-    case ClockClsCompatRunIn::MsgType::MSG_ITER_INACTIVITY:
+    case ClockClsCompatRunIn::MsgType::MsgIterInactivity:
         return "mii";
     }
 
@@ -124,13 +124,13 @@ void addClkClsCompatTriggers(CondTriggers& triggers)
          * without a clock class.
          */
         static constexpr std::array<ClockClsCompatRunIn::MsgType, 2> msgTypes {
-            ClockClsCompatRunIn::MsgType::STREAM_BEG,
-            ClockClsCompatRunIn::MsgType::MSG_ITER_INACTIVITY,
+            ClockClsCompatRunIn::MsgType::StreamBeg,
+            ClockClsCompatRunIn::MsgType::MsgIterInactivity,
         };
 
         const auto isInvalidCase = [](const ClockClsCompatRunIn::MsgType msgType,
                                       const ClockClsCompatRunIn::CreateClockCls createClockCls) {
-            return msgType == ClockClsCompatRunIn::MsgType::MSG_ITER_INACTIVITY &&
+            return msgType == ClockClsCompatRunIn::MsgType::MsgIterInactivity &&
                    createClockCls == noClockClass;
         };
 
@@ -146,7 +146,7 @@ void addClkClsCompatTriggers(CondTriggers& triggers)
 
                 triggers.emplace_back(bt2s::make_unique<RunInCondTrigger<ClockClsCompatRunIn>>(
                     ClockClsCompatRunIn {msgType1, createClockCls1, msgType2, createClockCls2},
-                    CondTrigger::Type::POST, condId, fmt::format("{}-{}", msgType1, msgType2)));
+                    CondTrigger::Type::Post, condId, fmt::format("{}-{}", msgType1, msgType2)));
             }
         }
     };

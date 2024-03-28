@@ -47,13 +47,13 @@ public:
     /* Available log levels */
     enum class Level
     {
-        TRACE = BT_LOG_TRACE,
-        DEBUG = BT_LOG_DEBUG,
-        INFO = BT_LOG_INFO,
-        WARNING = BT_LOG_WARNING,
-        ERROR = BT_LOG_ERROR,
-        FATAL = BT_LOG_FATAL,
-        NONE = BT_LOG_NONE,
+        Trace = BT_LOG_TRACE,
+        Debug = BT_LOG_DEBUG,
+        Info = BT_LOG_INFO,
+        Warning = BT_LOG_WARNING,
+        Error = BT_LOG_ERROR,
+        Fatal = BT_LOG_FATAL,
+        None = BT_LOG_NONE,
     };
 
     /*
@@ -171,7 +171,7 @@ public:
      */
     bool wouldLogT() const noexcept
     {
-        return this->wouldLog(Level::TRACE);
+        return this->wouldLog(Level::Trace);
     }
 
     /*
@@ -179,7 +179,7 @@ public:
      */
     bool wouldLogD() const noexcept
     {
-        return this->wouldLog(Level::DEBUG);
+        return this->wouldLog(Level::Debug);
     }
 
     /*
@@ -187,7 +187,7 @@ public:
      */
     bool wouldLogI() const noexcept
     {
-        return this->wouldLog(Level::INFO);
+        return this->wouldLog(Level::Info);
     }
 
     /*
@@ -195,7 +195,7 @@ public:
      */
     bool wouldLogW() const noexcept
     {
-        return this->wouldLog(Level::WARNING);
+        return this->wouldLog(Level::Warning);
     }
 
     /*
@@ -203,7 +203,7 @@ public:
      */
     bool wouldLogE() const noexcept
     {
-        return this->wouldLog(Level::ERROR);
+        return this->wouldLog(Level::Error);
     }
 
     /*
@@ -211,7 +211,7 @@ public:
      */
     bool wouldLogF() const noexcept
     {
-        return this->wouldLog(Level::FATAL);
+        return this->wouldLog(Level::Fatal);
     }
 
     /*
@@ -300,7 +300,7 @@ public:
     }
 
     /*
-     * Like logAndNoThrow() with the `Level::ERROR` level, but also
+     * Like logAndNoThrow() with the `Level::Error` level, but also
      * throws a default-constructed instance of `ExcT`.
      */
     template <bool AppendCauseV, typename ExcT, typename... ArgTs>
@@ -308,25 +308,25 @@ public:
                                        const unsigned int lineNo, const char * const fmt,
                                        ArgTs&&...args) const
     {
-        this->logNoThrow<Level::ERROR, AppendCauseV>(fileName, funcName, lineNo, fmt,
+        this->logNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, fmt,
                                                      std::forward<ArgTs>(args)...);
         throw ExcT {};
     }
 
     /*
-     * Like logStrAndNoThrow() with the `Level::ERROR` level, but also
+     * Like logStrAndNoThrow() with the `Level::Error` level, but also
      * throws a default-constructed instance of `ExcT`.
      */
     template <bool AppendCauseV, typename ExcT>
     [[noreturn]] void logErrorStrAndThrow(const char * const fileName, const char * const funcName,
                                           const unsigned int lineNo, const char * const msg) const
     {
-        this->logStrNoThrow<Level::ERROR, AppendCauseV>(fileName, funcName, lineNo, msg);
+        this->logStrNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, msg);
         throw ExcT {};
     }
 
     /*
-     * Like logAndNoThrow() with the `Level::ERROR` level, but also
+     * Like logAndNoThrow() with the `Level::Error` level, but also
      * rethrows.
      */
     template <bool AppendCauseV, typename... ArgTs>
@@ -334,13 +334,13 @@ public:
                                          const unsigned int lineNo, const char * const fmt,
                                          ArgTs&&...args) const
     {
-        this->logNoThrow<Level::ERROR, AppendCauseV>(fileName, funcName, lineNo, fmt,
+        this->logNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, fmt,
                                                      std::forward<ArgTs>(args)...);
         throw;
     }
 
     /*
-     * Like logStrAndNoThrow() with the `Level::ERROR` level, but also
+     * Like logStrAndNoThrow() with the `Level::Error` level, but also
      * rethrows.
      */
     template <bool AppendCauseV>
@@ -348,7 +348,7 @@ public:
                                             const char * const funcName, const unsigned int lineNo,
                                             const char * const msg) const
     {
-        this->logStrNoThrow<Level::ERROR, AppendCauseV>(fileName, funcName, lineNo, msg);
+        this->logStrNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, msg);
         throw;
     }
 
@@ -405,7 +405,7 @@ public:
     }
 
     /*
-     * Like logErrnoNoThrow() with the `Level::ERROR` level, but also
+     * Like logErrnoNoThrow() with the `Level::Error` level, but also
      * throws a default-constructed instance of `ExcT`.
      */
     template <bool AppendCauseV, typename ExcT, typename... ArgTs>
@@ -414,13 +414,13 @@ public:
                                             const char * const initMsg, const char * const fmt,
                                             ArgTs&&...args) const
     {
-        this->logErrnoNoThrow<Level::ERROR, AppendCauseV>(fileName, funcName, lineNo, initMsg, fmt,
+        this->logErrnoNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg, fmt,
                                                           std::forward<ArgTs>(args)...);
         throw ExcT {};
     }
 
     /*
-     * Like logErrnoStrNoThrow() with the `Level::ERROR` level, but also
+     * Like logErrnoStrNoThrow() with the `Level::Error` level, but also
      * throws a default-constructed instance of `ExcT`.
      */
     template <bool AppendCauseV, typename ExcT>
@@ -429,13 +429,13 @@ public:
                              const unsigned int lineNo, const char * const initMsg,
                              const char * const msg) const
     {
-        this->logErrnoStrNoThrow<Level::ERROR, AppendCauseV>(fileName, funcName, lineNo, initMsg,
+        this->logErrnoStrNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg,
                                                              msg);
         throw ExcT {};
     }
 
     /*
-     * Like logErrnoNoThrow() with the `Level::ERROR` level, but also
+     * Like logErrnoNoThrow() with the `Level::Error` level, but also
      * rethrows.
      */
     template <bool AppendCauseV, typename... ArgTs>
@@ -444,13 +444,13 @@ public:
                                               const unsigned int lineNo, const char * const initMsg,
                                               const char * const fmt, ArgTs&&...args) const
     {
-        this->logErrnoNoThrow<Level::ERROR, AppendCauseV>(fileName, funcName, lineNo, initMsg, fmt,
+        this->logErrnoNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg, fmt,
                                                           std::forward<ArgTs>(args)...);
         throw;
     }
 
     /*
-     * Like logErrnoStrNoThrow() with the `Level::ERROR` level, but also
+     * Like logErrnoStrNoThrow() with the `Level::Error` level, but also
      * rethrows.
      */
     template <bool AppendCauseV>
@@ -459,7 +459,7 @@ public:
                                const unsigned int lineNo, const char * const initMsg,
                                const char * const msg) const
     {
-        this->logErrnoStrNoThrow<Level::ERROR, AppendCauseV>(fileName, funcName, lineNo, initMsg,
+        this->logErrnoStrNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg,
                                                              msg);
         throw;
     }
@@ -618,17 +618,17 @@ private:
  * BT_CPPLOG_EX() with specific logging levels.
  */
 #define BT_CPPLOGT_SPEC(_logger, _fmt, ...)                                                        \
-    BT_CPPLOG_EX(bt2c::Logger::Level::TRACE, (_logger), (_fmt), ##__VA_ARGS__)
+    BT_CPPLOG_EX(bt2c::Logger::Level::Trace, (_logger), (_fmt), ##__VA_ARGS__)
 #define BT_CPPLOGD_SPEC(_logger, _fmt, ...)                                                        \
-    BT_CPPLOG_EX(bt2c::Logger::Level::DEBUG, (_logger), (_fmt), ##__VA_ARGS__)
+    BT_CPPLOG_EX(bt2c::Logger::Level::Debug, (_logger), (_fmt), ##__VA_ARGS__)
 #define BT_CPPLOGI_SPEC(_logger, _fmt, ...)                                                        \
-    BT_CPPLOG_EX(bt2c::Logger::Level::INFO, (_logger), (_fmt), ##__VA_ARGS__)
+    BT_CPPLOG_EX(bt2c::Logger::Level::Info, (_logger), (_fmt), ##__VA_ARGS__)
 #define BT_CPPLOGW_SPEC(_logger, _fmt, ...)                                                        \
-    BT_CPPLOG_EX(bt2c::Logger::Level::WARNING, (_logger), (_fmt), ##__VA_ARGS__)
+    BT_CPPLOG_EX(bt2c::Logger::Level::Warning, (_logger), (_fmt), ##__VA_ARGS__)
 #define BT_CPPLOGE_SPEC(_logger, _fmt, ...)                                                        \
-    BT_CPPLOG_EX(bt2c::Logger::Level::ERROR, (_logger), (_fmt), ##__VA_ARGS__)
+    BT_CPPLOG_EX(bt2c::Logger::Level::Error, (_logger), (_fmt), ##__VA_ARGS__)
 #define BT_CPPLOGF_SPEC(_logger, _fmt, ...)                                                        \
-    BT_CPPLOG_EX(bt2c::Logger::Level::FATAL, (_logger), (_fmt), ##__VA_ARGS__)
+    BT_CPPLOG_EX(bt2c::Logger::Level::Fatal, (_logger), (_fmt), ##__VA_ARGS__)
 
 /*
  * BT_CPPLOG_EX() with specific logging levels and using the default
@@ -652,17 +652,17 @@ private:
  * BT_CPPLOG_STR_EX() with specific logging levels.
  */
 #define BT_CPPLOGT_STR_SPEC(_logger, _msg)                                                         \
-    BT_CPPLOG_STR_EX(bt2c::Logger::Level::TRACE, (_logger), (_msg))
+    BT_CPPLOG_STR_EX(bt2c::Logger::Level::Trace, (_logger), (_msg))
 #define BT_CPPLOGD_STR_SPEC(_logger, _msg)                                                         \
-    BT_CPPLOG_STR_EX(bt2c::Logger::Level::DEBUG, (_logger), (_msg))
+    BT_CPPLOG_STR_EX(bt2c::Logger::Level::Debug, (_logger), (_msg))
 #define BT_CPPLOGI_STR_SPEC(_logger, _msg)                                                         \
-    BT_CPPLOG_STR_EX(bt2c::Logger::Level::INFO, (_logger), (_msg))
+    BT_CPPLOG_STR_EX(bt2c::Logger::Level::Info, (_logger), (_msg))
 #define BT_CPPLOGW_STR_SPEC(_logger, _msg)                                                         \
-    BT_CPPLOG_STR_EX(bt2c::Logger::Level::WARNING, (_logger), (_msg))
+    BT_CPPLOG_STR_EX(bt2c::Logger::Level::Warning, (_logger), (_msg))
 #define BT_CPPLOGE_STR_SPEC(_logger, _msg)                                                         \
-    BT_CPPLOG_STR_EX(bt2c::Logger::Level::ERROR, (_logger), (_msg))
+    BT_CPPLOG_STR_EX(bt2c::Logger::Level::Error, (_logger), (_msg))
 #define BT_CPPLOGF_STR_SPEC(_logger, _msg)                                                         \
-    BT_CPPLOG_STR_EX(bt2c::Logger::Level::FATAL, (_logger), (_msg))
+    BT_CPPLOG_STR_EX(bt2c::Logger::Level::Fatal, (_logger), (_msg))
 
 /*
  * BT_CPPLOG_STR_EX() with specific logging levels and using the default
@@ -691,22 +691,22 @@ private:
  * BT_CPPLOG_MEM_EX() with specific logging levels.
  */
 #define BT_CPPLOGT_MEM_SPEC(_logger, _mem_data, _mem_len, _fmt, ...)                               \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::TRACE, (_logger), (_mem_data), (_mem_len), (_fmt),       \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Trace, (_logger), (_mem_data), (_mem_len), (_fmt),       \
                      ##__VA_ARGS__)
 #define BT_CPPLOGD_MEM_SPEC(_logger, _mem_data, _mem_len, _fmt, ...)                               \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::DEBUG, (_logger), (_mem_data), (_mem_len), (_fmt),       \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Debug, (_logger), (_mem_data), (_mem_len), (_fmt),       \
                      ##__VA_ARGS__)
 #define BT_CPPLOGI_MEM_SPEC(_logger, _mem_data, _mem_len, _fmt, ...)                               \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::INFO, (_logger), (_mem_data), (_mem_len), (_fmt),        \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Info, (_logger), (_mem_data), (_mem_len), (_fmt),        \
                      ##__VA_ARGS__)
 #define BT_CPPLOGW_MEM_SPEC(_logger, _mem_data, _mem_len, _fmt, ...)                               \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::WARNING, (_logger), (_mem_data), (_mem_len), (_fmt),     \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Warning, (_logger), (_mem_data), (_mem_len), (_fmt),     \
                      ##__VA_ARGS__)
 #define BT_CPPLOGE_MEM_SPEC(_logger, _mem_data, _mem_len, _fmt, ...)                               \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::ERROR, (_logger), (_mem_data), (_mem_len), (_fmt),       \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Error, (_logger), (_mem_data), (_mem_len), (_fmt),       \
                      ##__VA_ARGS__)
 #define BT_CPPLOGF_MEM_SPEC(_logger, _mem_data, _mem_len, _fmt, ...)                               \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::FATAL, (_logger), (_mem_data), (_mem_len), (_fmt),       \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Fatal, (_logger), (_mem_data), (_mem_len), (_fmt),       \
                      ##__VA_ARGS__)
 
 /*
@@ -746,7 +746,7 @@ private:
 #define BT_CPPLOGW_MEM_STR_SPEC(_logger, _mem_data, _mem_len, _msg)                                \
     BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::WARNING, (_logger), (_mem_data), (_mem_len), (_msg))
 #define BT_CPPLOGE_MEM_STR_SPEC(_logger, _mem_data, _mem_len, _msg)                                \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::ERROR, (_logger), (_mem_data), (_mem_len), (_msg))
+    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::Error, (_logger), (_mem_data), (_mem_len), (_msg))
 #define BT_CPPLOGF_MEM_STR_SPEC(_logger, _mem_data, _mem_len, _msg)                                \
     BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::FATAL, (_logger), (_mem_data), (_mem_len), (_msg))
 
@@ -783,17 +783,17 @@ private:
  * BT_CPPLOG_ERRNO_EX() with specific logging levels.
  */
 #define BT_CPPLOGT_ERRNO_SPEC(_logger, _init_msg, _fmt, ...)                                       \
-    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::TRACE, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
+    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Trace, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
 #define BT_CPPLOGD_ERRNO_SPEC(_logger, _init_msg, _fmt, ...)                                       \
-    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::DEBUG, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
+    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Debug, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
 #define BT_CPPLOGI_ERRNO_SPEC(_logger, _init_msg, _fmt, ...)                                       \
-    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::INFO, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
+    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Info, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
 #define BT_CPPLOGW_ERRNO_SPEC(_logger, _init_msg, _fmt, ...)                                       \
-    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::WARNING, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
+    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Warning, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
 #define BT_CPPLOGE_ERRNO_SPEC(_logger, _init_msg, _fmt, ...)                                       \
-    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::ERROR, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
+    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Error, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
 #define BT_CPPLOGF_ERRNO_SPEC(_logger, _init_msg, _fmt, ...)                                       \
-    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::FATAL, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
+    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Fatal, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
 
 /*
  * BT_CPPLOG_ERRNO_EX() with specific logging levels and using the
@@ -823,17 +823,17 @@ private:
  * BT_CPPLOG_ERRNO_STR_EX() with specific logging levels.
  */
 #define BT_CPPLOGT_ERRNO_STR_SPEC(_logger, _init_msg, _msg)                                        \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::TRACE, (_logger), (_init_msg), (_msg))
+    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Trace, (_logger), (_init_msg), (_msg))
 #define BT_CPPLOGD_ERRNO_STR_SPEC(_logger, _init_msg, _msg)                                        \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::DEBUG, (_logger), (_init_msg), (_msg))
+    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Debug, (_logger), (_init_msg), (_msg))
 #define BT_CPPLOGI_ERRNO_STR_SPEC(_logger, _init_msg, _msg)                                        \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::INFO, (_logger), (_init_msg), (_msg))
+    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Info, (_logger), (_init_msg), (_msg))
 #define BT_CPPLOGW_ERRNO_STR_SPEC(_logger, _init_msg, _msg)                                        \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::WARNING, (_logger), (_init_msg), (_msg))
+    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Warning, (_logger), (_init_msg), (_msg))
 #define BT_CPPLOGE_ERRNO_STR_SPEC(_logger, _init_msg, _msg)                                        \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::ERROR, (_logger), (_init_msg), (_msg))
+    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Error, (_logger), (_init_msg), (_msg))
 #define BT_CPPLOGF_ERRNO_STR_SPEC(_logger, _init_msg, _msg)                                        \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::FATAL, (_logger), (_init_msg), (_msg))
+    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Fatal, (_logger), (_init_msg), (_msg))
 
 /*
  * BT_CPPLOG_ERRNO_STR_EX() with specific logging levels and using the

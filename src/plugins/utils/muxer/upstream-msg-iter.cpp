@@ -33,45 +33,45 @@ namespace {
 bt2::OptionalBorrowedObject<bt2::ConstClockSnapshot> msgCs(const bt2::ConstMessage msg) noexcept
 {
     switch (msg.type()) {
-    case bt2::MessageType::EVENT:
+    case bt2::MessageType::Event:
         if (msg.asEvent().streamClassDefaultClockClass()) {
             return msg.asEvent().defaultClockSnapshot();
         }
 
         break;
-    case bt2::MessageType::PACKET_BEGINNING:
+    case bt2::MessageType::PacketBeginning:
         if (msg.asPacketBeginning().packet().stream().cls().packetsHaveBeginningClockSnapshot()) {
             return msg.asPacketBeginning().defaultClockSnapshot();
         }
 
         break;
-    case bt2::MessageType::PACKET_END:
+    case bt2::MessageType::PacketEnd:
         if (msg.asPacketEnd().packet().stream().cls().packetsHaveEndClockSnapshot()) {
             return msg.asPacketEnd().defaultClockSnapshot();
         }
 
         break;
-    case bt2::MessageType::DISCARDED_EVENTS:
+    case bt2::MessageType::DiscardedEvents:
         if (msg.asDiscardedEvents().stream().cls().discardedEventsHaveDefaultClockSnapshots()) {
             return msg.asDiscardedEvents().beginningDefaultClockSnapshot();
         }
 
         break;
-    case bt2::MessageType::DISCARDED_PACKETS:
+    case bt2::MessageType::DiscardedPackets:
         if (msg.asDiscardedPackets().stream().cls().discardedPacketsHaveDefaultClockSnapshots()) {
             return msg.asDiscardedPackets().beginningDefaultClockSnapshot();
         }
 
         break;
-    case bt2::MessageType::MESSAGE_ITERATOR_INACTIVITY:
+    case bt2::MessageType::MessageIteratorInactivity:
         return msg.asMessageIteratorInactivity().clockSnapshot();
-    case bt2::MessageType::STREAM_BEGINNING:
+    case bt2::MessageType::StreamBeginning:
         if (msg.asStreamBeginning().streamClassDefaultClockClass()) {
             return msg.asStreamBeginning().defaultClockSnapshot();
         }
 
         break;
-    case bt2::MessageType::STREAM_END:
+    case bt2::MessageType::StreamEnd:
         if (msg.asStreamEnd().streamClassDefaultClockClass()) {
             return msg.asStreamEnd().defaultClockSnapshot();
         }
@@ -108,7 +108,7 @@ UpstreamMsgIter::ReloadStatus UpstreamMsgIter::reload()
     if (G_UNLIKELY(!_mMsgs.msgs)) {
         /* Still none: no more */
         _mMsgTs.reset();
-        return ReloadStatus::NO_MORE;
+        return ReloadStatus::NoMore;
     } else {
         if (const auto cs = msgCs(this->msg())) {
             _mMsgTs = cs->nsFromOrigin();
@@ -120,7 +120,7 @@ UpstreamMsgIter::ReloadStatus UpstreamMsgIter::reload()
         }
 
         _mDiscardRequired = true;
-        return ReloadStatus::MORE;
+        return ReloadStatus::More;
     }
 }
 

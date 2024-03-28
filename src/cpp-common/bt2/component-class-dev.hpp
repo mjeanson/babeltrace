@@ -471,9 +471,9 @@ private:
     /* Type of `_mExcToThrowType` */
     enum class _ExcToThrowType
     {
-        NONE,
-        ERROR,
-        MEM_ERROR,
+        None,
+        Error,
+        MemError,
     };
 
 protected:
@@ -489,17 +489,17 @@ public:
     void next(ConstMessageArray& messages)
     {
         /* Any saved error? Now is the time to throw */
-        if (G_UNLIKELY(_mExcToThrowType != _ExcToThrowType::NONE)) {
+        if (G_UNLIKELY(_mExcToThrowType != _ExcToThrowType::None)) {
             /* Move `_mSavedLibError`, if any, as current thread error */
             if (_mSavedLibError) {
                 bt_current_thread_move_error(_mSavedLibError.release());
             }
 
             /* Throw the corresponding exception */
-            if (_mExcToThrowType == _ExcToThrowType::ERROR) {
+            if (_mExcToThrowType == _ExcToThrowType::Error) {
                 throw Error {};
             } else {
-                BT_ASSERT(_mExcToThrowType == _ExcToThrowType::MEM_ERROR);
+                BT_ASSERT(_mExcToThrowType == _ExcToThrowType::MemError);
                 throw MemoryError {};
             }
         }
@@ -513,7 +513,7 @@ public:
          * if any, so that we can restore it later (see the beginning of
          * this method).
          */
-        BT_ASSERT_DBG(_mExcToThrowType == _ExcToThrowType::NONE);
+        BT_ASSERT_DBG(_mExcToThrowType == _ExcToThrowType::None);
 
         try {
             this->_userObj()._next(messages);
@@ -529,16 +529,16 @@ public:
                 throw;
             }
 
-            _mExcToThrowType = _ExcToThrowType::MEM_ERROR;
+            _mExcToThrowType = _ExcToThrowType::MemError;
         } catch (const Error&) {
             if (messages.isEmpty()) {
                 throw;
             }
 
-            _mExcToThrowType = _ExcToThrowType::ERROR;
+            _mExcToThrowType = _ExcToThrowType::Error;
         }
 
-        if (_mExcToThrowType != _ExcToThrowType::NONE) {
+        if (_mExcToThrowType != _ExcToThrowType::None) {
             BT_CPPLOGE(
                 "An error occurred, but there are {} messages to return: delaying the error reporting.",
                 messages.length());
@@ -716,7 +716,7 @@ private:
 
     void _resetError() noexcept
     {
-        _mExcToThrowType = _ExcToThrowType::NONE;
+        _mExcToThrowType = _ExcToThrowType::None;
         _mSavedLibError.reset();
     }
 
@@ -730,7 +730,7 @@ private:
      *
      * It also saves the type of the exception to throw the next time.
      */
-    _ExcToThrowType _mExcToThrowType = _ExcToThrowType::NONE;
+    _ExcToThrowType _mExcToThrowType = _ExcToThrowType::None;
 
     struct LibErrorDeleter final
     {

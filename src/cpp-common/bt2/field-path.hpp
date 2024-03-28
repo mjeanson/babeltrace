@@ -23,9 +23,9 @@ class ConstIndexFieldPathItem;
 
 enum class FieldPathItemType
 {
-    INDEX = BT_FIELD_PATH_ITEM_TYPE_INDEX,
-    CURRENT_ARRAY_ELEMENT = BT_FIELD_PATH_ITEM_TYPE_CURRENT_ARRAY_ELEMENT,
-    CURRENT_OPTION_CONTENT = BT_FIELD_PATH_ITEM_TYPE_CURRENT_OPTION_CONTENT,
+    Index = BT_FIELD_PATH_ITEM_TYPE_INDEX,
+    CurrentArrayElement = BT_FIELD_PATH_ITEM_TYPE_CURRENT_ARRAY_ELEMENT,
+    CurrentOptionContent = BT_FIELD_PATH_ITEM_TYPE_CURRENT_OPTION_CONTENT,
 };
 
 class ConstFieldPathItem : public BorrowedObject<const bt_field_path_item>
@@ -110,10 +110,10 @@ public:
 
     enum class Scope
     {
-        PACKET_CONTEXT = BT_FIELD_PATH_SCOPE_PACKET_CONTEXT,
-        EVENT_COMMON_CONTEXT = BT_FIELD_PATH_SCOPE_EVENT_COMMON_CONTEXT,
-        EVENT_SPECIFIC_CONTEXT = BT_FIELD_PATH_SCOPE_EVENT_SPECIFIC_CONTEXT,
-        EVENT_PAYLOAD = BT_FIELD_PATH_SCOPE_EVENT_PAYLOAD,
+        PacketContext = BT_FIELD_PATH_SCOPE_PACKET_CONTEXT,
+        EventCommonContext = BT_FIELD_PATH_SCOPE_EVENT_COMMON_CONTEXT,
+        EventSpecificContext = BT_FIELD_PATH_SCOPE_EVENT_SPECIFIC_CONTEXT,
+        EventPayload = BT_FIELD_PATH_SCOPE_EVENT_PAYLOAD,
     };
 
     explicit ConstFieldPath(const LibObjPtr libObjPtr) noexcept : _ThisBorrowedObject {libObjPtr}

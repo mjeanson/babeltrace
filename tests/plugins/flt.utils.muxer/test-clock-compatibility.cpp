@@ -20,19 +20,19 @@ namespace {
 enum class MsgType
 {
     /* Send stream beginning and stream end messages. */
-    STREAM,
+    Stream,
 
     /* Send a message iterator inactivity message. */
-    MSG_ITER_INACTIVITY,
+    MsgIterInactivity,
 };
 
 __attribute__((used)) const char *format_as(MsgType msgType) noexcept
 {
     switch (msgType) {
-    case MsgType::STREAM:
+    case MsgType::Stream:
         return "stream beginning/end";
 
-    case MsgType::MSG_ITER_INACTIVITY:
+    case MsgType::MsgIterInactivity:
         return "message iterator inactivity";
     }
 
@@ -78,7 +78,7 @@ private:
         const auto clockCls = _mData->createClockClass(_mSelf.component());
 
         switch (_mData->msgType) {
-        case MsgType::STREAM:
+        case MsgType::Stream:
         {
             const auto traceCls = _mSelf.component().createTraceClass();
             const auto streamCls = traceCls->createStreamClass();
@@ -113,7 +113,7 @@ private:
             break;
         }
 
-        case MsgType::MSG_ITER_INACTIVITY:
+        case MsgType::MsgIterInactivity:
             msgs.append(
                 this->_createMessageIteratorInactivityMessage(*clockCls, *_mData->clockSnapshot));
             break;
@@ -180,8 +180,8 @@ bt2::ClockClass::Shared noClockClass(bt2::SelfComponent) noexcept
 void ErrorTestCase::run() const noexcept
 {
     static constexpr std::array<MsgType, 2> msgTypes {
-        MsgType::STREAM,
-        MsgType::MSG_ITER_INACTIVITY,
+        MsgType::Stream,
+        MsgType::MsgIterInactivity,
     };
 
     for (const auto msgType1 : msgTypes) {
@@ -190,8 +190,8 @@ void ErrorTestCase::run() const noexcept
              * It's not possible to create message iterator inactivity
              * messages without a clock class. Skip those cases.
              */
-            if ((msgType1 == MsgType::MSG_ITER_INACTIVITY && _mCreateClockClass1 == noClockClass) ||
-                (msgType2 == MsgType::MSG_ITER_INACTIVITY && _mCreateClockClass2 == noClockClass)) {
+            if ((msgType1 == MsgType::MsgIterInactivity && _mCreateClockClass1 == noClockClass) ||
+                (msgType2 == MsgType::MsgIterInactivity && _mCreateClockClass2 == noClockClass)) {
                 continue;
             }
 
@@ -219,7 +219,7 @@ void ErrorTestCase::run() const noexcept
              *
              * Skip those cases.
              */
-            if (msgType1 == MsgType::MSG_ITER_INACTIVITY && _mCreateClockClass2 == noClockClass) {
+            if (msgType1 == MsgType::MsgIterInactivity && _mCreateClockClass2 == noClockClass) {
                 continue;
             }
 
@@ -255,7 +255,7 @@ void ErrorTestCase::_runOne(const MsgType msgType1, const MsgType msgType2) cons
         const auto srcComp1 =
             graph->addComponent(*srcCompCls, "source-1",
                                 TestSourceData {_mCreateClockClass1, msgType1,
-                                                msgType1 == MsgType::MSG_ITER_INACTIVITY ?
+                                                msgType1 == MsgType::MsgIterInactivity ?
                                                     bt2s::optional<std::uint64_t> {10} :
                                                     bt2s::nullopt});
         const auto srcComp2 =

@@ -88,25 +88,25 @@ int main(const int argc, const char ** const argv)
         [] {
             bt2::Graph::create(292);
         },
-        CondTrigger::Type::PRE, "graph-create:valid-mip-version"));
+        CondTrigger::Type::Pre, "graph-create:valid-mip-version"));
 
     triggers.emplace_back(makeRunInCompInitTrigger(
         [](const bt2::SelfComponent self) {
             createUIntFc(self)->fieldValueRange(0);
         },
-        CondTrigger::Type::PRE, "field-class-integer-set-field-value-range:valid-n", "0"));
+        CondTrigger::Type::Pre, "field-class-integer-set-field-value-range:valid-n", "0"));
 
     triggers.emplace_back(makeRunInCompInitTrigger(
         [](const bt2::SelfComponent self) {
             createUIntFc(self)->fieldValueRange(65);
         },
-        CondTrigger::Type::PRE, "field-class-integer-set-field-value-range:valid-n", "gt-64"));
+        CondTrigger::Type::Pre, "field-class-integer-set-field-value-range:valid-n", "gt-64"));
 
     triggers.emplace_back(makeSimpleTrigger(
         [] {
             bt_field_class_integer_set_field_value_range(nullptr, 23);
         },
-        CondTrigger::Type::PRE, "field-class-integer-set-field-value-range:not-null:field-class"));
+        CondTrigger::Type::Pre, "field-class-integer-set-field-value-range:not-null:field-class"));
 
     addClkClsCompatTriggers(triggers);
     condMain(bt2c::makeSpan(argv, argc), triggers);

@@ -1897,10 +1897,10 @@ $ FORMATTER='my-clang-format-15 -i' ./tools/format-cpp.sh
 * Use camel case with an uppercase first letter for:
 ** Types: `Pistachio`, `NutManager`.
 ** Template parameters: `PlanetT`, `TotalSize`.
+** Enumerators: `Type::SignedInt`, `Scope::Function`.
 
 * Use snake case with uppercase letters for:
 ** Definition/macro names: `MARK_AS_UNUSED()`, `SOME_FEATURE_EXISTS`.
-** Enumerators: `Type::SIGNED_INT`, `Scope::FUNCTION`.
 
 * Use only lowercase letters and digits for namespaces: `mylib`, `bt2`.
 
@@ -2222,9 +2222,9 @@ public:
 
     enum class Gender
     {
-        MALE,
-        FEMALE,
-        OTHER,
+        Male,
+        Female,
+        Other,
     };
 
     explicit Baby() = default;

@@ -19,7 +19,7 @@
 CondTrigger::CondTrigger(const Type type, const std::string& condId,
                          const bt2c::CStringView nameSuffix) noexcept :
     _mType {type},
-    _mCondId {fmt::format("{}:{}", type == Type::PRE ? "pre" : "post", condId)},
+    _mCondId {fmt::format("{}:{}", type == Type::Pre ? "pre" : "post", condId)},
     _mName {fmt::format("{}{}{}", condId, nameSuffix ? "-" : "", nameSuffix ? nameSuffix : "")}
 {
 }

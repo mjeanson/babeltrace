@@ -70,14 +70,14 @@ class CommonMessageIteratorInactivityMessage;
 
 enum class MessageType
 {
-    STREAM_BEGINNING = BT_MESSAGE_TYPE_STREAM_BEGINNING,
-    STREAM_END = BT_MESSAGE_TYPE_STREAM_END,
-    EVENT = BT_MESSAGE_TYPE_EVENT,
-    PACKET_BEGINNING = BT_MESSAGE_TYPE_PACKET_BEGINNING,
-    PACKET_END = BT_MESSAGE_TYPE_PACKET_END,
-    DISCARDED_EVENTS = BT_MESSAGE_TYPE_DISCARDED_EVENTS,
-    DISCARDED_PACKETS = BT_MESSAGE_TYPE_DISCARDED_PACKETS,
-    MESSAGE_ITERATOR_INACTIVITY = BT_MESSAGE_TYPE_MESSAGE_ITERATOR_INACTIVITY,
+    StreamBeginning = BT_MESSAGE_TYPE_STREAM_BEGINNING,
+    StreamEnd = BT_MESSAGE_TYPE_STREAM_END,
+    Event = BT_MESSAGE_TYPE_EVENT,
+    PacketBeginning = BT_MESSAGE_TYPE_PACKET_BEGINNING,
+    PacketEnd = BT_MESSAGE_TYPE_PACKET_END,
+    DiscardedEvents = BT_MESSAGE_TYPE_DISCARDED_EVENTS,
+    DiscardedPackets = BT_MESSAGE_TYPE_DISCARDED_PACKETS,
+    MessageIteratorInactivity = BT_MESSAGE_TYPE_MESSAGE_ITERATOR_INACTIVITY,
 };
 
 template <typename LibObjT>
@@ -121,42 +121,42 @@ public:
 
     bool isStreamBeginning() const noexcept
     {
-        return this->type() == MessageType::STREAM_BEGINNING;
+        return this->type() == MessageType::StreamBeginning;
     }
 
     bool isStreamEnd() const noexcept
     {
-        return this->type() == MessageType::STREAM_END;
+        return this->type() == MessageType::StreamEnd;
     }
 
     bool isEvent() const noexcept
     {
-        return this->type() == MessageType::EVENT;
+        return this->type() == MessageType::Event;
     }
 
     bool isPacketBeginning() const noexcept
     {
-        return this->type() == MessageType::PACKET_BEGINNING;
+        return this->type() == MessageType::PacketBeginning;
     }
 
     bool isPacketEnd() const noexcept
     {
-        return this->type() == MessageType::PACKET_END;
+        return this->type() == MessageType::PacketEnd;
     }
 
     bool isDiscardedEvents() const noexcept
     {
-        return this->type() == MessageType::DISCARDED_EVENTS;
+        return this->type() == MessageType::DiscardedEvents;
     }
 
     bool isDiscardedPackets() const noexcept
     {
-        return this->type() == MessageType::DISCARDED_PACKETS;
+        return this->type() == MessageType::DiscardedPackets;
     }
 
     bool isMessageIteratorInactivity() const noexcept
     {
-        return this->type() == MessageType::MESSAGE_ITERATOR_INACTIVITY;
+        return this->type() == MessageType::MessageIteratorInactivity;
     }
 
     Shared shared() const noexcept

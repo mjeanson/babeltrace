@@ -18,23 +18,23 @@ class ClockCorrelationError final : public std::runtime_error
 public:
     enum class Type
     {
-        EXPECTING_NO_CLOCK_CLASS_GOT_ONE =
+        ExpectingNoClockClassGotOne =
             BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_NO_CLOCK_CLASS_GOT_ONE,
-        EXPECTING_ORIGIN_UNIX_GOT_NONE =
+        ExpectingOriginUnixGotNone =
             BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_NONE,
-        EXPECTING_ORIGIN_UNIX_GOT_OTHER =
+        ExpectingOriginUnixGotOther =
             BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_OTHER,
-        EXPECTING_ORIGIN_UUID_GOT_NONE =
+        ExpectingOriginUuidGotNone =
             BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UUID_GOT_NONE,
-        EXPECTING_ORIGIN_UUID_GOT_UNIX =
+        ExpectingOriginUuidGotUnix =
             BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UUID_GOT_UNIX,
-        EXPECTING_ORIGIN_UUID_GOT_NO_UUID =
+        ExpectingOriginUuidGotNoUuid =
             BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UUID_GOT_NO_UUID,
-        EXPECTING_ORIGIN_UUID_GOT_OTHER_UUID =
+        ExpectingOriginUuidGotOtherUuid =
             BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UUID_GOT_OTHER_UUID,
-        EXPECTING_ORIGIN_NO_UUID_GOT_NONE =
+        ExpectingOriginNoUuidGotNone =
             BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_NO_UUID_GOT_NONE,
-        EXPECTING_ORIGIN_NO_UUID_GOT_OTHER =
+        ExpectingOriginNoUuidGotOther =
             BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_NO_UUID_GOT_OTHER,
     };
 
@@ -89,19 +89,19 @@ private:
     enum class PropsExpectation
     {
         /* We haven't recorded clock properties yet. */
-        UNSET,
+        Unset,
 
         /* Expect to have no clock. */
-        NONE,
+        None,
 
         /* Expect a clock with a Unix epoch origin. */
-        ORIGIN_UNIX,
+        OriginUnix,
 
         /* Expect a clock without a Unix epoch origin, but with a UUID. */
-        ORIGIN_OTHER_UUID,
+        OriginOtherUuid,
 
         /* Expect a clock without a Unix epoch origin and without a UUID. */
-        ORIGIN_OTHER_NO_UUID,
+        OriginOtherNoUuid,
     };
 
 public:
@@ -117,7 +117,7 @@ public:
 private:
     void _validate(const bt2::ConstMessage msg);
 
-    PropsExpectation _mExpectation = PropsExpectation::UNSET;
+    PropsExpectation _mExpectation = PropsExpectation::Unset;
 
     /*
      * Expected UUID of the clock, if `_mExpectation` is

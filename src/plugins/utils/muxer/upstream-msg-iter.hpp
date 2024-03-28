@@ -33,8 +33,8 @@ public:
     /* Return type of reload() */
     enum class ReloadStatus
     {
-        MORE,
-        NO_MORE,
+        More,
+        NoMore,
     };
 
     /*

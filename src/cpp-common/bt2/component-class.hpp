@@ -54,9 +54,9 @@ public:
 
     enum class Type
     {
-        SOURCE = BT_COMPONENT_CLASS_TYPE_SOURCE,
-        FILTER = BT_COMPONENT_CLASS_TYPE_FILTER,
-        SINK = BT_COMPONENT_CLASS_TYPE_SINK,
+        Source = BT_COMPONENT_CLASS_TYPE_SOURCE,
+        Filter = BT_COMPONENT_CLASS_TYPE_FILTER,
+        Sink = BT_COMPONENT_CLASS_TYPE_SINK,
     };
 
     explicit CommonComponentClass(const LibObjPtr libObjPtr) noexcept :

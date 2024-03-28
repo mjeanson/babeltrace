@@ -9,18 +9,26 @@
 
 #include <babeltrace2/babeltrace.h>
 
+#include "common/macros.h"
+
 namespace bt2 {
+
+/* Avoid `-Wshadow` error on GCC, conflicting with `bt2::Error` */
+BT_DIAG_PUSH
+BT_DIAG_IGNORE_SHADOW
 
 enum class LoggingLevel
 {
-    TRACE = BT_LOGGING_LEVEL_TRACE,
-    DEBUG = BT_LOGGING_LEVEL_DEBUG,
-    INFO = BT_LOGGING_LEVEL_INFO,
-    WARNING = BT_LOGGING_LEVEL_WARNING,
-    ERROR = BT_LOGGING_LEVEL_ERROR,
-    FATAL = BT_LOGGING_LEVEL_FATAL,
-    NONE = BT_LOGGING_LEVEL_NONE,
+    Trace = BT_LOGGING_LEVEL_TRACE,
+    Debug = BT_LOGGING_LEVEL_DEBUG,
+    Info = BT_LOGGING_LEVEL_INFO,
+    Warning = BT_LOGGING_LEVEL_WARNING,
+    Error = BT_LOGGING_LEVEL_ERROR,
+    Fatal = BT_LOGGING_LEVEL_FATAL,
+    None = BT_LOGGING_LEVEL_NONE,
 };
+
+BT_DIAG_POP
 
 } /* namespace bt2 */
 

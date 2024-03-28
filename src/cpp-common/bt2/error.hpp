@@ -30,10 +30,10 @@ class ConstErrorCause : public BorrowedObject<const bt_error_cause>
 public:
     enum class ActorType
     {
-        UNKNOWN = BT_ERROR_CAUSE_ACTOR_TYPE_UNKNOWN,
-        COMPONENT = BT_ERROR_CAUSE_ACTOR_TYPE_COMPONENT,
-        COMPONENT_CLASS = BT_ERROR_CAUSE_ACTOR_TYPE_COMPONENT_CLASS,
-        MESSAGE_ITERATOR = BT_ERROR_CAUSE_ACTOR_TYPE_MESSAGE_ITERATOR,
+        Unknown = BT_ERROR_CAUSE_ACTOR_TYPE_UNKNOWN,
+        Component = BT_ERROR_CAUSE_ACTOR_TYPE_COMPONENT,
+        ComponentClass = BT_ERROR_CAUSE_ACTOR_TYPE_COMPONENT_CLASS,
+        MessageIterator = BT_ERROR_CAUSE_ACTOR_TYPE_MESSAGE_ITERATOR,
     };
 
     explicit ConstErrorCause(const LibObjPtr libObjPtr) noexcept : _ThisBorrowedObject {libObjPtr}
@@ -47,17 +47,17 @@ public:
 
     bool actorTypeIsComponentClass() const noexcept
     {
-        return this->actorType() == ActorType::COMPONENT_CLASS;
+        return this->actorType() == ActorType::ComponentClass;
     }
 
     bool actorTypeIsComponent() const noexcept
     {
-        return this->actorType() == ActorType::COMPONENT;
+        return this->actorType() == ActorType::Component;
     }
 
     bool actorTypeIsMessageIterator() const noexcept
     {
-        return this->actorType() == ActorType::MESSAGE_ITERATOR;
+        return this->actorType() == ActorType::MessageIterator;
     }
 
     ConstComponentClassErrorCause asComponentClass() const noexcept;

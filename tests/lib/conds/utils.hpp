@@ -37,8 +37,8 @@ public:
      */
     enum class Type
     {
-        PRE,
-        POST,
+        Pre,
+        Post,
     };
 
 protected:

@@ -57,7 +57,7 @@ public:
     ConstSourceComponent addComponent(const ConstSourceComponentClass componentClass,
                                       const bt2c::CStringView name,
                                       const OptionalBorrowedObject<ConstMapValue> params = {},
-                                      const LoggingLevel loggingLevel = LoggingLevel::NONE) const
+                                      const LoggingLevel loggingLevel = LoggingLevel::None) const
     {
         return this->_addComponent<ConstSourceComponent>(
             componentClass, name, params, static_cast<void *>(nullptr), loggingLevel,
@@ -68,7 +68,7 @@ public:
     ConstSourceComponent addComponent(const ConstSourceComponentClass componentClass,
                                       const bt2c::CStringView name, InitDataT&& initData,
                                       const OptionalBorrowedObject<ConstMapValue> params = {},
-                                      const LoggingLevel loggingLevel = LoggingLevel::NONE) const
+                                      const LoggingLevel loggingLevel = LoggingLevel::None) const
     {
         return this->_addComponent<ConstSourceComponent>(
             componentClass, name, params, &initData, loggingLevel,
@@ -78,7 +78,7 @@ public:
     ConstFilterComponent addComponent(const ConstFilterComponentClass componentClass,
                                       const bt2c::CStringView name,
                                       const OptionalBorrowedObject<ConstMapValue> params = {},
-                                      const LoggingLevel loggingLevel = LoggingLevel::NONE) const
+                                      const LoggingLevel loggingLevel = LoggingLevel::None) const
     {
         return this->_addComponent<ConstFilterComponent>(
             componentClass, name, params, static_cast<void *>(nullptr), loggingLevel,
@@ -89,7 +89,7 @@ public:
     ConstFilterComponent addComponent(const ConstFilterComponentClass componentClass,
                                       const bt2c::CStringView name, InitDataT&& initData,
                                       const OptionalBorrowedObject<ConstMapValue> params = {},
-                                      const LoggingLevel loggingLevel = LoggingLevel::NONE) const
+                                      const LoggingLevel loggingLevel = LoggingLevel::None) const
     {
         return this->_addComponent<ConstFilterComponent>(
             componentClass, name, params, &initData, loggingLevel,
@@ -99,7 +99,7 @@ public:
     ConstSinkComponent addComponent(const ConstSinkComponentClass componentClass,
                                     const bt2c::CStringView name,
                                     const OptionalBorrowedObject<ConstMapValue> params = {},
-                                    const LoggingLevel loggingLevel = LoggingLevel::NONE) const
+                                    const LoggingLevel loggingLevel = LoggingLevel::None) const
     {
         return this->_addComponent<ConstSinkComponent>(
             componentClass, name, params, static_cast<void *>(nullptr), loggingLevel,
@@ -110,7 +110,7 @@ public:
     ConstSinkComponent addComponent(const ConstSinkComponentClass componentClass,
                                     const bt2c::CStringView name, InitDataT&& initData,
                                     const OptionalBorrowedObject<ConstMapValue> params = {},
-                                    const LoggingLevel loggingLevel = LoggingLevel::NONE) const
+                                    const LoggingLevel loggingLevel = LoggingLevel::None) const
     {
         return this->_addComponent<ConstSinkComponent>(
             componentClass, name, params, &initData, loggingLevel,

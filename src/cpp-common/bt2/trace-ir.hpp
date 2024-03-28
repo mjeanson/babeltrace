@@ -12,6 +12,7 @@
 
 #include <babeltrace2/babeltrace.h>
 
+#include "common/macros.h"
 #include "cpp-common/bt2c/c-string-view.hpp"
 #include "cpp-common/bt2s/optional.hpp"
 
@@ -870,24 +871,30 @@ public:
     using Shared = SharedObject<CommonEventClass, LibObjT, internal::EventClassRefFuncs>;
     using UserAttributes = internal::DepUserAttrs<LibObjT>;
 
+    /* Avoid `-Wshadow` error on GCC, conflicting with `bt2::Error` */
+    BT_DIAG_PUSH
+    BT_DIAG_IGNORE_SHADOW
+
     enum class LogLevel
     {
-        EMERGENCY = BT_EVENT_CLASS_LOG_LEVEL_EMERGENCY,
-        ALERT = BT_EVENT_CLASS_LOG_LEVEL_ALERT,
-        CRITICAL = BT_EVENT_CLASS_LOG_LEVEL_CRITICAL,
-        ERR = BT_EVENT_CLASS_LOG_LEVEL_ERROR,
-        WARNING = BT_EVENT_CLASS_LOG_LEVEL_WARNING,
-        NOTICE = BT_EVENT_CLASS_LOG_LEVEL_NOTICE,
-        INFO = BT_EVENT_CLASS_LOG_LEVEL_INFO,
-        DEBUG_SYSTEM = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_SYSTEM,
-        DEBUG_PROGRAM = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_PROGRAM,
-        DEBUG_PROC = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_PROCESS,
-        DEBUG_MODULE = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_MODULE,
-        DEBUG_UNIT = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_UNIT,
-        DEBUG_FUNCTION = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_FUNCTION,
-        DEBUG_LINE = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_LINE,
-        DEBUG = BT_EVENT_CLASS_LOG_LEVEL_DEBUG,
+        Emergency = BT_EVENT_CLASS_LOG_LEVEL_EMERGENCY,
+        Alert = BT_EVENT_CLASS_LOG_LEVEL_ALERT,
+        Critical = BT_EVENT_CLASS_LOG_LEVEL_CRITICAL,
+        Error = BT_EVENT_CLASS_LOG_LEVEL_ERROR,
+        Warning = BT_EVENT_CLASS_LOG_LEVEL_WARNING,
+        Notice = BT_EVENT_CLASS_LOG_LEVEL_NOTICE,
+        Info = BT_EVENT_CLASS_LOG_LEVEL_INFO,
+        DebugSystem = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_SYSTEM,
+        DebugProgram = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_PROGRAM,
+        DebugProcess = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_PROCESS,
+        DebugModule = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_MODULE,
+        DebugUnit = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_UNIT,
+        DebugFunction = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_FUNCTION,
+        DebugLine = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_LINE,
+        Debug = BT_EVENT_CLASS_LOG_LEVEL_DEBUG,
     };
+
+    BT_DIAG_POP
 
     explicit CommonEventClass(const LibObjPtr libObjPtr) noexcept : _ThisBorrowedObject {libObjPtr}
     {
