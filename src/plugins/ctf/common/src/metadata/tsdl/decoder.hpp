@@ -13,6 +13,8 @@
 #include <babeltrace2/babeltrace.h>
 
 #include "common/uuid.h"
+#include "cpp-common/bt2c/logging.hpp"
+#include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 
 /* CTF metadata decoder status */
 enum ctf_metadata_decoder_status
@@ -25,18 +27,43 @@ enum ctf_metadata_decoder_status
     CTF_METADATA_DECODER_STATUS_IR_VISITOR_ERROR = -4,
 };
 
+inline const char *format_as(ctf_metadata_decoder_status status) noexcept
+{
+    switch (status) {
+    case CTF_METADATA_DECODER_STATUS_OK:
+        return "CTF_METADATA_DECODER_STATUS_OK";
+
+    case CTF_METADATA_DECODER_STATUS_NONE:
+        return "CTF_METADATA_DECODER_STATUS_NONE";
+
+    case CTF_METADATA_DECODER_STATUS_ERROR:
+        return "CTF_METADATA_DECODER_STATUS_ERROR";
+
+    case CTF_METADATA_DECODER_STATUS_INCOMPLETE:
+        return "CTF_METADATA_DECODER_STATUS_INCOMPLETE";
+
+    case CTF_METADATA_DECODER_STATUS_INVAL_VERSION:
+        return "CTF_METADATA_DECODER_STATUS_INVAL_VERSION";
+
+    case CTF_METADATA_DECODER_STATUS_IR_VISITOR_ERROR:
+        return "CTF_METADATA_DECODER_STATUS_IR_VISITOR_ERROR";
+    }
+
+    bt_common_abort();
+}
+
 /* Decoding configuration */
 struct ctf_metadata_decoder_config
 {
-    /* Active log level to use */
-    bt_logging_level log_level = (bt_logging_level) 0;
+    explicit ctf_metadata_decoder_config(const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/CTF/META/DECODER-CONFIG"}
+    {
+    }
 
-    /*
-     * Component or component class to use for logging (exactly one of
-     * them must be non-`NULL`); weak
-     */
+    bt2c::Logger logger;
+
+    /* Weak, used to create a bt_trace_class, if not nullptr. */
     bt_self_component *self_comp = nullptr;
-    bt_self_component_class *self_comp_class = nullptr;
 
     /* Additional clock class offset to apply */
     int64_t clock_class_offset_s = 0;
@@ -114,12 +141,9 @@ ctf_metadata_decoder_borrow_ctf_trace_class(struct ctf_metadata_decoder *mdec);
  * packetized, setting `is_packetized` accordingly on success. On
  * success, also sets `*byte_order` to the byte order of the first
  * packet.
- *
- * This function uses `log_level` and `self_comp` for logging purposes.
- * `self_comp` can be `NULL` if not available.
  */
 int ctf_metadata_decoder_is_packetized(FILE *fp, bool *is_packetized, int *byte_order,
-                                       bt_logging_level log_level, bt_self_component *self_comp);
+                                       const bt2c::Logger& logger);
 
 /*
  * Returns the byte order of the decoder's metadata stream as set by the

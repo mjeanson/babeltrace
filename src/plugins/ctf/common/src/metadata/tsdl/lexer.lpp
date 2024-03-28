@@ -7,30 +7,28 @@
  * Common Trace Formal Lexer
  */
 
-#include <ctype.h>
-#include <stdio.h>
-
-#define BT_LOG_OUTPUT_LEVEL ctf_plugin_metadata_log_level
-#define BT_LOG_TAG "PLUGIN-CTF-METADATA-LEXER"
-#include "plugins/ctf/common/src/metadata/tsdl/logging.hpp"
-
-#include "plugins/ctf/common/src/metadata/tsdl/scanner.hpp"
-#include "plugins/ctf/common/src/metadata/tsdl/parser-wrap.hpp"
 #include "plugins/ctf/common/src/metadata/tsdl/ast.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/logging.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/parser-wrap.hpp"
+#include "plugins/ctf/common/src/metadata/tsdl/scanner.hpp"
 
-#define YY_FATAL_ERROR(_msg)	BT_LOGF_STR(_msg)
+#define YY_FATAL_ERROR(_msg)	BT_CPPLOGF_STR_SPEC(currentCtfScanner->logger, _msg)
 
 #define PARSE_INTEGER_LITERAL(base)					\
 	do {								\
 		errno = 0;						\
 		yylval->ull = strtoull(yytext, NULL, base);		\
 		if (errno) {						\
-			_BT_LOGE_APPEND_CAUSE_LINENO(yylineno,			\
+			_BT_CPPLOGE_APPEND_CAUSE_LINENO(		\
+				currentCtfScanner->logger,		\
+				yylineno,				\
 				"Cannot parser constant integer: " 	\
-				"base=%d, text=\"%s\"", base, yytext);	\
+				"base={}, text=\"{}\"", base, yytext);	\
 			return CTF_ERROR;				\
 		}							\
 	} while (0)
+
+extern thread_local const ctf_scanner *const currentCtfScanner;
 %}
 
 %x comment_ml comment_sl string_lit char_const
@@ -115,7 +113,7 @@ _Imaginary			setstring(yyextra, yylval, yytext); return CTF_IMAGINARY;
 0{OCTALDIGIT}*{INTEGER_SUFFIX}?	PARSE_INTEGER_LITERAL(8); return CTF_INTEGER_LITERAL;
 0[xX]{HEXDIGIT}+{INTEGER_SUFFIX}?	PARSE_INTEGER_LITERAL(16); return CTF_INTEGER_LITERAL;
 
-{IDENTIFIER}			BT_LOGT("Got identifier: id=\"%s\"", yytext); setstring(yyextra, yylval, yytext); if (is_type(yyextra, yytext)) return ID_TYPE; else return IDENTIFIER;
+{IDENTIFIER}			BT_CPPLOGT_SPEC(currentCtfScanner->logger, "Got identifier: id=\"{}\"", yytext); setstring(yyextra, yylval, yytext); if (is_type(yyextra, yytext)) return ID_TYPE; else return IDENTIFIER;
 [ \t\r\n]			; /* ignore */
-.				_BT_LOGE_APPEND_CAUSE_LINENO(yylineno, "Invalid character: char=\"%c\", val=0x%02x", isprint((unsigned char) yytext[0]) ? yytext[0] : '\0', yytext[0]); return CTF_ERROR;
+.				_BT_CPPLOGE_APPEND_CAUSE_LINENO(currentCtfScanner->logger, yylineno, "Invalid character: char=\"{}\", val={:#02x}", isprint((unsigned char) yytext[0]) ? yytext[0] : '\0', yytext[0]); return CTF_ERROR;
 %%

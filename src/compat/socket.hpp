@@ -10,6 +10,8 @@
 
 #include <stdbool.h>
 
+#include "cpp-common/bt2c/logging.hpp"
+
 #ifdef __MINGW32__
 
 #    include <winsock2.h>
@@ -18,13 +20,7 @@
 #    define BT_SOCKET_ERROR   SOCKET_ERROR
 #    define BT_SOCKET         SOCKET
 
-#    ifndef BT_LOG_WRITE_CUR_LVL
-#        define BT_SOCKET_LOG_LEVEL_UNUSED_ATTR __attribute__((unused))
-#    else
-#        define BT_SOCKET_LOG_LEVEL_UNUSED_ATTR
-#    endif
-
-static inline int bt_socket_init(int log_level BT_SOCKET_LOG_LEVEL_UNUSED_ATTR)
+static inline int bt_socket_init(const bt2c::Logger& logger)
 {
     WORD verreq;
     WSADATA wsa;
@@ -35,18 +31,12 @@ static inline int bt_socket_init(int log_level BT_SOCKET_LOG_LEVEL_UNUSED_ATTR)
 
     ret = WSAStartup(verreq, &wsa);
     if (ret != 0) {
-#    ifdef BT_LOG_WRITE_PRINTF_CUR_LVL
-        BT_LOG_WRITE_PRINTF_CUR_LVL(BT_LOG_ERROR, log_level, BT_LOG_TAG,
-                                    "Winsock init failed with error: %d", ret);
-#    endif
+        BT_CPPLOGE_SPEC(logger, "Winsock init failed with error: {}", ret);
         goto end;
     }
 
     if (LOBYTE(wsa.wVersion) != 2 || HIBYTE(wsa.wVersion) != 2) {
-#    ifdef BT_LOG_WRITE_CUR_LVL
-        BT_LOG_WRITE_CUR_LVL(BT_LOG_ERROR, log_level, BT_LOG_TAG,
-                             "Could not init winsock 2.2 support");
-#    endif
+        BT_CPPLOGE_SPEC(logger, "Could not init winsock 2.2 support");
         WSACleanup();
         ret = -1;
     }
@@ -270,7 +260,7 @@ static inline const char *bt_socket_errormsg(void)
 #    define BT_SOCKET_ERROR   -1
 #    define BT_SOCKET         int
 
-static inline int bt_socket_init(int log_level __attribute__((unused)))
+static inline int bt_socket_init(const bt2c::Logger&)
 {
     return 0;
 }

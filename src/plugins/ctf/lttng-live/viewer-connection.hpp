@@ -13,6 +13,7 @@
 #include <babeltrace2/babeltrace.h>
 
 #include "compat/socket.hpp"
+#include "cpp-common/bt2c/logging.hpp"
 
 #define LTTNG_DEFAULT_NETWORK_VIEWER_PORT 5344
 
@@ -46,9 +47,12 @@ enum lttng_live_get_one_metadata_status
 
 struct live_viewer_connection
 {
-    bt_logging_level log_level = (bt_logging_level) 0;
-    bt_self_component *self_comp = nullptr;
-    bt_self_component_class *self_comp_class = nullptr;
+    explicit live_viewer_connection(const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/VIEWER"}
+    {
+    }
+
+    bt2c::Logger logger;
 
     GString *url = nullptr;
 
@@ -88,12 +92,9 @@ struct packet_index
     uint64_t packet_seq_num;     /* packet sequence number */
 };
 
-enum lttng_live_viewer_status
-live_viewer_connection_create(bt_self_component *self_comp,
-                              bt_self_component_class *self_comp_class, bt_logging_level log_level,
-                              const char *url, bool in_query,
-                              struct lttng_live_msg_iter *lttng_live_msg_iter,
-                              struct live_viewer_connection **viewer_connection);
+enum lttng_live_viewer_status live_viewer_connection_create(
+    const char *url, bool in_query, struct lttng_live_msg_iter *lttng_live_msg_iter,
+    const bt2c::Logger& parentLogger, struct live_viewer_connection **viewer);
 
 void live_viewer_connection_destroy(struct live_viewer_connection *conn);
 

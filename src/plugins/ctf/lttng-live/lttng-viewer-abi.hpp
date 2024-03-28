@@ -11,7 +11,9 @@
 
 #include <stdint.h>
 
-#include "compat/limits.h" /* IWYU pragma: keep  */
+#include "common/common.h"
+#include "compat/limits.h"                /* IWYU pragma: keep  */
+#include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 
 #define LTTNG_VIEWER_PATH_MAX      4096
 #define LTTNG_VIEWER_NAME_MAX      255
@@ -38,6 +40,40 @@ enum lttng_viewer_command
     LTTNG_VIEWER_CREATE_SESSION = 8,
     LTTNG_VIEWER_DETACH_SESSION = 9,
 };
+
+inline const char *format_as(const lttng_viewer_command cmd) noexcept
+{
+    switch (cmd) {
+    case LTTNG_VIEWER_CONNECT:
+        return "CONNECT";
+
+    case LTTNG_VIEWER_LIST_SESSIONS:
+        return "LIST_SESSIONS";
+
+    case LTTNG_VIEWER_ATTACH_SESSION:
+        return "ATTACH_SESSION";
+
+    case LTTNG_VIEWER_GET_NEXT_INDEX:
+        return "GET_NEXT_INDEX";
+
+    case LTTNG_VIEWER_GET_PACKET:
+        return "GET_PACKET";
+
+    case LTTNG_VIEWER_GET_METADATA:
+        return "GET_METADATA";
+
+    case LTTNG_VIEWER_GET_NEW_STREAMS:
+        return "GET_NEW_STREAMS";
+
+    case LTTNG_VIEWER_CREATE_SESSION:
+        return "CREATE_SESSION";
+
+    case LTTNG_VIEWER_DETACH_SESSION:
+        return "DETACH_SESSION";
+    }
+
+    bt_common_abort();
+}
 
 enum lttng_viewer_attach_return_code
 {
@@ -66,12 +102,56 @@ enum lttng_viewer_next_index_return_code
     LTTNG_VIEWER_INDEX_EOF = 6,      /* End of index file. */
 };
 
+inline const char *format_as(const lttng_viewer_next_index_return_code code) noexcept
+{
+    switch (code) {
+    case LTTNG_VIEWER_INDEX_OK:
+        return "INDEX_OK";
+
+    case LTTNG_VIEWER_INDEX_RETRY:
+        return "INDEX_RETRY";
+
+    case LTTNG_VIEWER_INDEX_HUP:
+        return "INDEX_HUP";
+
+    case LTTNG_VIEWER_INDEX_ERR:
+        return "INDEX_ERR";
+
+    case LTTNG_VIEWER_INDEX_INACTIVE:
+        return "INDEX_INACTIVE";
+
+    case LTTNG_VIEWER_INDEX_EOF:
+        return "INDEX_EOF";
+    }
+
+    bt_common_abort();
+}
+
 enum lttng_viewer_get_packet_return_code
 {
     LTTNG_VIEWER_GET_PACKET_OK = 1,
     LTTNG_VIEWER_GET_PACKET_RETRY = 2,
     LTTNG_VIEWER_GET_PACKET_ERR = 3,
     LTTNG_VIEWER_GET_PACKET_EOF = 4,
+};
+
+inline const char *format_as(const lttng_viewer_get_packet_return_code code) noexcept
+{
+    switch (code) {
+    case LTTNG_VIEWER_GET_PACKET_OK:
+        return "GET_PACKET_OK";
+
+    case LTTNG_VIEWER_GET_PACKET_RETRY:
+        return "GET_PACKET_RETRY";
+
+    case LTTNG_VIEWER_GET_PACKET_ERR:
+        return "GET_PACKET_ERR";
+
+    case LTTNG_VIEWER_GET_PACKET_EOF:
+        return "GET_PACKET_EOF";
+    }
+
+    bt_common_abort();
 };
 
 enum lttng_viewer_get_metadata_return_code
@@ -94,6 +174,19 @@ enum lttng_viewer_seek
     /* Receive the trace packets from now. */
     LTTNG_VIEWER_SEEK_LAST = 2,
 };
+
+inline const char *format_as(const lttng_viewer_seek seek) noexcept
+{
+    switch (seek) {
+    case LTTNG_VIEWER_SEEK_BEGINNING:
+        return "SEEK_BEGINNING";
+
+    case LTTNG_VIEWER_SEEK_LAST:
+        return "SEEK_LAST";
+    }
+
+    bt_common_abort();
+}
 
 enum lttng_viewer_new_streams_return_code
 {

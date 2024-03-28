@@ -16,6 +16,8 @@
 
 #include <babeltrace2/babeltrace.h>
 
+#include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
+
 #include "../common/src/metadata/tsdl/decoder.hpp"
 #include "../common/src/msg-iter/msg-iter.hpp"
 #include "viewer-connection.hpp"
@@ -40,11 +42,37 @@ enum lttng_live_stream_state
     LTTNG_LIVE_STREAM_EOF,
 };
 
+inline const char *format_as(const lttng_live_stream_state state) noexcept
+{
+    switch (state) {
+    case LTTNG_LIVE_STREAM_ACTIVE_NO_DATA:
+        return "ACTIVE_NO_DATA";
+
+    case LTTNG_LIVE_STREAM_QUIESCENT_NO_DATA:
+        return "QUIESCENT_NO_DATA";
+
+    case LTTNG_LIVE_STREAM_QUIESCENT:
+        return "QUIESCENT";
+
+    case LTTNG_LIVE_STREAM_ACTIVE_DATA:
+        return "ACTIVE_DATA";
+
+    case LTTNG_LIVE_STREAM_EOF:
+        return "EOF";
+    }
+
+    bt_common_abort();
+}
+
 /* Iterator over a live stream. */
 struct lttng_live_stream_iterator
 {
-    bt_logging_level log_level = (bt_logging_level) 0;
-    bt_self_component *self_comp = nullptr;
+    explicit lttng_live_stream_iterator(const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/STREAM-ITER"}
+    {
+    }
+
+    bt2c::Logger logger;
 
     /* Owned by this. */
     bt_stream *stream = nullptr;
@@ -112,8 +140,12 @@ struct lttng_live_stream_iterator
 
 struct lttng_live_metadata
 {
-    bt_logging_level log_level = (bt_logging_level) 0;
-    bt_self_component *self_comp = nullptr;
+    explicit lttng_live_metadata(const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/METADATA"}
+    {
+    }
+
+    bt2c::Logger logger;
 
     uint64_t stream_id = 0;
     /* Weak reference. */
@@ -144,8 +176,12 @@ enum lttng_live_metadata_stream_state
 
 struct lttng_live_trace
 {
-    bt_logging_level log_level = (bt_logging_level) 0;
-    bt_self_component *self_comp = nullptr;
+    explicit lttng_live_trace(const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/TRACE"}
+    {
+    }
+
+    bt2c::Logger logger;
 
     /* Back reference to session. */
     struct lttng_live_session *session = nullptr;
@@ -173,7 +209,13 @@ struct lttng_live_trace
 
 struct lttng_live_session
 {
-    bt_logging_level log_level = (bt_logging_level) 0;
+    explicit lttng_live_session(const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/SESSION"}
+    {
+    }
+
+    bt2c::Logger logger;
+
     bt_self_component *self_comp = nullptr;
 
     /* Weak reference. */
@@ -208,7 +250,12 @@ enum session_not_found_action
  */
 struct lttng_live_component
 {
-    bt_logging_level log_level = (bt_logging_level) 0;
+    explicit lttng_live_component(bt2c::Logger loggerParam) noexcept :
+        logger {std::move(loggerParam)}
+    {
+    }
+
+    bt2c::Logger logger;
 
     /* Weak reference. */
     bt_self_component *self_comp = nullptr;
@@ -230,7 +277,13 @@ struct lttng_live_component
 
 struct lttng_live_msg_iter
 {
-    bt_logging_level log_level = (bt_logging_level) 0;
+    explicit lttng_live_msg_iter(const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/MSG-ITER"}
+    {
+    }
+
+    bt2c::Logger logger;
+
     bt_self_component *self_comp = nullptr;
 
     /* Weak reference. */
@@ -274,6 +327,37 @@ enum lttng_live_iterator_status
     /** Unsupported iterator feature. */
     LTTNG_LIVE_ITERATOR_STATUS_UNSUPPORTED = -4,
 };
+
+inline const char *format_as(const lttng_live_iterator_status status) noexcept
+{
+    switch (status) {
+    case LTTNG_LIVE_ITERATOR_STATUS_CONTINUE:
+        return "LTTNG_LIVE_ITERATOR_STATUS_CONTINUE";
+
+    case LTTNG_LIVE_ITERATOR_STATUS_AGAIN:
+        return "LTTNG_LIVE_ITERATOR_STATUS_AGAIN";
+
+    case LTTNG_LIVE_ITERATOR_STATUS_END:
+        return "LTTNG_LIVE_ITERATOR_STATUS_END";
+
+    case LTTNG_LIVE_ITERATOR_STATUS_OK:
+        return "LTTNG_LIVE_ITERATOR_STATUS_OK";
+
+    case LTTNG_LIVE_ITERATOR_STATUS_INVAL:
+        return "LTTNG_LIVE_ITERATOR_STATUS_INVAL";
+
+    case LTTNG_LIVE_ITERATOR_STATUS_ERROR:
+        return "LTTNG_LIVE_ITERATOR_STATUS_ERROR";
+
+    case LTTNG_LIVE_ITERATOR_STATUS_NOMEM:
+        return "LTTNG_LIVE_ITERATOR_STATUS_NOMEM";
+
+    case LTTNG_LIVE_ITERATOR_STATUS_UNSUPPORTED:
+        return "LTTNG_LIVE_ITERATOR_STATUS_UNSUPPORTED";
+    }
+
+    bt_common_abort();
+}
 
 bt_component_class_initialize_method_status
 lttng_live_component_init(bt_self_component_source *self_comp,

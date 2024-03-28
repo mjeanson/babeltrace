@@ -6,14 +6,9 @@
  * Common Trace Format Object Stack.
  */
 
-#include <stdlib.h>
-
-#define BT_LOG_OUTPUT_LEVEL ctf_plugin_metadata_log_level
-#define BT_LOG_TAG          "PLUGIN/CTF/META/OBJSTACK"
-#include "logging.hpp"
-
 #include "common/align.h"
 #include "common/list.h"
+#include "cpp-common/bt2c/logging.hpp"
 
 #include "objstack.hpp"
 
@@ -23,7 +18,15 @@
 
 struct objstack
 {
-    struct bt_list_head head; /* list of struct objstack_node */
+    explicit objstack(const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/CTF/META/OBJSTACK"}
+    {
+    }
+
+    /* list of struct objstack_node */
+    bt_list_head head {};
+
+    bt2c::Logger logger;
 };
 
 struct objstack_node
@@ -34,20 +37,16 @@ struct objstack_node
     char __attribute__((aligned(OBJSTACK_ALIGN))) data[];
 };
 
-struct objstack *objstack_create(void)
+objstack *objstack_create(const bt2c::Logger& parentLogger)
 {
     struct objstack *objstack;
     struct objstack_node *node;
 
-    objstack = (struct objstack *) calloc(1, sizeof(*objstack));
-    if (!objstack) {
-        BT_LOGE_STR("Failed to allocate one object stack.");
-        return NULL;
-    }
+    objstack = new ::objstack {parentLogger};
     node = (objstack_node *) calloc(sizeof(struct objstack_node) + OBJSTACK_INIT_LEN, sizeof(char));
     if (!node) {
-        BT_LOGE_STR("Failed to allocate one object stack node.");
-        free(objstack);
+        BT_CPPLOGE_STR_SPEC(objstack->logger, "Failed to allocate one object stack node.");
+        delete objstack;
         return NULL;
     }
     BT_INIT_LIST_HEAD(&objstack->head);
@@ -80,7 +79,8 @@ void objstack_destroy(struct objstack *objstack)
         bt_list_del(&node->node);
         objstack_node_free(node);
     }
-    free(objstack);
+
+    delete objstack;
 }
 
 static struct objstack_node *objstack_append_node(struct objstack *objstack)
@@ -94,7 +94,7 @@ static struct objstack_node *objstack_append_node(struct objstack *objstack)
     new_node = (objstack_node *) calloc(sizeof(struct objstack_node) + (last_node->len << 1),
                                         sizeof(char));
     if (!new_node) {
-        BT_LOGE_STR("Failed to allocate one object stack node.");
+        BT_CPPLOGE_STR_SPEC(objstack->logger, "Failed to allocate one object stack node.");
         return NULL;
     }
     bt_list_add_tail(&new_node->node, &objstack->head);

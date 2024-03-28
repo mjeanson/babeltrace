@@ -15,7 +15,15 @@
 
 #include <babeltrace2/babeltrace.h>
 
+#include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
+
 #include "../metadata/tsdl/ctf-meta.hpp"
+
+namespace bt2c {
+
+class Logger;
+
+} /* namespace bt2c */
 
 /**
  * @file bfcr.h
@@ -60,6 +68,29 @@ enum bt_bfcr_status
     /** Everything okay. */
     BT_BFCR_STATUS_OK = 0,
 };
+
+inline const char *format_as(bt_bfcr_status status) noexcept
+{
+    switch (status) {
+    case BT_BFCR_STATUS_ENOMEM:
+        return "BT_BFCR_STATUS_ENOMEM";
+
+    case BT_BFCR_STATUS_EOF:
+        return "BT_BFCR_STATUS_EOF";
+
+    case BT_BFCR_STATUS_INVAL:
+        return "BT_BFCR_STATUS_INVAL";
+
+    case BT_BFCR_STATUS_ERROR:
+        return "BT_BFCR_STATUS_ERROR";
+
+    case BT_BFCR_STATUS_OK:
+        return "BT_BFCR_STATUS_OK";
+        break;
+    }
+
+    bt_common_abort();
+}
 
 typedef enum bt_bfcr_status (*bt_bfcr_unsigned_int_cb_func)(uint64_t, struct ctf_field_class *,
                                                             void *);
@@ -253,8 +284,7 @@ struct bt_bfcr_cbs
  * @param data		User data (passed to user callback functions)
  * @returns		New binary class reader on success, or \c NULL on error
  */
-struct bt_bfcr *bt_bfcr_create(struct bt_bfcr_cbs cbs, void *data, bt_logging_level log_level,
-                               bt_self_component *self_comp);
+struct bt_bfcr *bt_bfcr_create(struct bt_bfcr_cbs cbs, void *data, const bt2c::Logger& logger);
 
 /**
  * Destroys a CTF binary class reader, freeing all internal resources.
@@ -324,23 +354,5 @@ size_t bt_bfcr_continue(struct bt_bfcr *bfcr, const uint8_t *buf, size_t sz,
                         enum bt_bfcr_status *status);
 
 void bt_bfcr_set_unsigned_int_cb(struct bt_bfcr *bfcr, bt_bfcr_unsigned_int_cb_func cb);
-
-static inline const char *bt_bfcr_status_string(enum bt_bfcr_status status)
-{
-    switch (status) {
-    case BT_BFCR_STATUS_ENOMEM:
-        return "ENOMEM";
-    case BT_BFCR_STATUS_EOF:
-        return "EOF";
-    case BT_BFCR_STATUS_INVAL:
-        return "INVAL";
-    case BT_BFCR_STATUS_ERROR:
-        return "ERROR";
-    case BT_BFCR_STATUS_OK:
-        return "OK";
-    }
-
-    bt_common_abort();
-}
 
 #endif /* CTF_BFCR_H */

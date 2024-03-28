@@ -18,6 +18,12 @@
 
 #include "../metadata/tsdl/ctf-meta.hpp"
 
+namespace bt2c {
+
+class Logger;
+
+} /* namespace bt2c */
+
 /**
  * @file ctf-msg-iter.h
  *
@@ -56,6 +62,28 @@ enum ctf_msg_iter_medium_status
     CTF_MSG_ITER_MEDIUM_STATUS_OK = 0,
 };
 
+inline const char *format_as(const ctf_msg_iter_medium_status status) noexcept
+{
+    switch (status) {
+    case CTF_MSG_ITER_MEDIUM_STATUS_EOF:
+        return "EOF";
+
+    case CTF_MSG_ITER_MEDIUM_STATUS_AGAIN:
+        return "AGAIN";
+
+    case CTF_MSG_ITER_MEDIUM_STATUS_ERROR:
+        return "ERROR";
+
+    case CTF_MSG_ITER_MEDIUM_STATUS_MEMORY_ERROR:
+        return "MEMORY_ERROR";
+
+    case CTF_MSG_ITER_MEDIUM_STATUS_OK:
+        return "OK";
+    }
+
+    bt_common_abort();
+}
+
 /**
  * CTF message iterator API status code.
  */
@@ -89,6 +117,28 @@ enum ctf_msg_iter_status
     /** Everything okay. */
     CTF_MSG_ITER_STATUS_OK = CTF_MSG_ITER_MEDIUM_STATUS_OK,
 };
+
+inline const char *format_as(ctf_msg_iter_status status) noexcept
+{
+    switch (status) {
+    case CTF_MSG_ITER_STATUS_EOF:
+        return "EOF";
+
+    case CTF_MSG_ITER_STATUS_AGAIN:
+        return "AGAIN";
+
+    case CTF_MSG_ITER_STATUS_ERROR:
+        return "ERROR";
+
+    case CTF_MSG_ITER_STATUS_MEMORY_ERROR:
+        return "MEMORY_ERROR";
+
+    case CTF_MSG_ITER_STATUS_OK:
+        return "OK";
+    }
+
+    bt_common_abort();
+}
 
 /**
  * Medium operations.
@@ -224,8 +274,8 @@ struct ctf_msg_iter_medium_ops
  */
 struct ctf_msg_iter *ctf_msg_iter_create(struct ctf_trace_class *tc, size_t max_request_sz,
                                          struct ctf_msg_iter_medium_ops medops, void *medops_data,
-                                         bt_logging_level log_level, bt_self_component *self_comp,
-                                         bt_self_message_iterator *self_msg_iter);
+                                         bt_self_message_iterator *self_msg_iter,
+                                         const bt2c::Logger& logger);
 
 /**
  * Destroys a CTF message iterator, freeing all internal resources.
@@ -301,41 +351,5 @@ void ctf_msg_iter_reset(struct ctf_msg_iter *msg_it);
 void ctf_msg_iter_reset_for_next_stream_file(struct ctf_msg_iter *msg_it);
 
 void ctf_msg_iter_set_dry_run(struct ctf_msg_iter *msg_it, bool val);
-
-static inline const char *ctf_msg_iter_medium_status_string(enum ctf_msg_iter_medium_status status)
-{
-    switch (status) {
-    case CTF_MSG_ITER_MEDIUM_STATUS_EOF:
-        return "EOF";
-    case CTF_MSG_ITER_MEDIUM_STATUS_AGAIN:
-        return "AGAIN";
-    case CTF_MSG_ITER_MEDIUM_STATUS_ERROR:
-        return "ERROR";
-    case CTF_MSG_ITER_MEDIUM_STATUS_MEMORY_ERROR:
-        return "MEMORY_ERROR";
-    case CTF_MSG_ITER_MEDIUM_STATUS_OK:
-        return "OK";
-    }
-
-    bt_common_abort();
-}
-
-static inline const char *ctf_msg_iter_status_string(enum ctf_msg_iter_status status)
-{
-    switch (status) {
-    case CTF_MSG_ITER_STATUS_EOF:
-        return "EOF";
-    case CTF_MSG_ITER_STATUS_AGAIN:
-        return "AGAIN";
-    case CTF_MSG_ITER_STATUS_ERROR:
-        return "ERROR";
-    case CTF_MSG_ITER_STATUS_MEMORY_ERROR:
-        return "MEMORY_ERROR";
-    case CTF_MSG_ITER_STATUS_OK:
-        return "OK";
-    }
-
-    bt_common_abort();
-}
 
 #endif /* CTF_MSG_ITER_H */

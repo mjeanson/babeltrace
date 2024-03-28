@@ -15,6 +15,7 @@
 
 #include "common/assert.h"
 #include "common/list.h"
+#include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 
 #include "ctf-meta.hpp"
 #include "decoder.hpp"
@@ -65,6 +66,20 @@ enum node_type
 #undef ENTRY
 };
 
+inline const char *format_as(enum node_type type) noexcept
+{
+    switch (type) {
+#define ENTRY(S)                                                                                   \
+case S:                                                                                            \
+    return G_STRINGIFY(S);
+
+        FOREACH_CTF_NODES(ENTRY)
+#undef ENTRY
+    }
+
+    bt_common_abort();
+}
+
 enum ctf_unary
 {
     UNARY_UNKNOWN = 0,
@@ -73,6 +88,28 @@ enum ctf_unary
     UNARY_UNSIGNED_CONSTANT,
     UNARY_SBRAC,
 };
+
+inline const char *format_as(ctf_unary value) noexcept
+{
+    switch (value) {
+    case UNARY_UNKNOWN:
+        return "UNARY_UNKNOWN";
+
+    case UNARY_STRING:
+        return "UNARY_STRING";
+
+    case UNARY_SIGNED_CONSTANT:
+        return "UNARY_SIGNED_CONSTANT";
+
+    case UNARY_UNSIGNED_CONSTANT:
+        return "UNARY_UNSIGNED_CONSTANT";
+
+    case UNARY_SBRAC:
+        return "UNARY_SBRAC";
+    }
+
+    bt_common_abort();
+}
 
 enum ctf_unary_link
 {
@@ -88,6 +125,22 @@ enum ctf_typedec
     TYPEDEC_ID,     /* identifier */
     TYPEDEC_NESTED, /* (), array or sequence */
 };
+
+inline const char *format_as(ctf_typedec value) noexcept
+{
+    switch (value) {
+    case TYPEDEC_UNKNOWN:
+        return "TYPEDEC_UNKNOWN";
+
+    case TYPEDEC_ID:
+        return "TYPEDEC_ID";
+
+    case TYPEDEC_NESTED:
+        return "TYPEDEC_NESTED";
+    }
+
+    bt_common_abort();
+}
 
 enum ctf_typespec
 {
@@ -113,6 +166,76 @@ enum ctf_typespec
     TYPESPEC_VARIANT,
     TYPESPEC_ENUM,
 };
+
+inline const char *format_as(ctf_typespec value) noexcept
+{
+    switch (value) {
+    case TYPESPEC_UNKNOWN:
+        return "TYPESPEC_UNKNOWN";
+
+    case TYPESPEC_VOID:
+        return "TYPESPEC_VOID";
+
+    case TYPESPEC_CHAR:
+        return "TYPESPEC_CHAR";
+
+    case TYPESPEC_SHORT:
+        return "TYPESPEC_SHORT";
+
+    case TYPESPEC_INT:
+        return "TYPESPEC_INT";
+
+    case TYPESPEC_LONG:
+        return "TYPESPEC_LONG";
+
+    case TYPESPEC_FLOAT:
+        return "TYPESPEC_FLOAT";
+
+    case TYPESPEC_DOUBLE:
+        return "TYPESPEC_DOUBLE";
+
+    case TYPESPEC_SIGNED:
+        return "TYPESPEC_SIGNED";
+
+    case TYPESPEC_UNSIGNED:
+        return "TYPESPEC_UNSIGNED";
+
+    case TYPESPEC_BOOL:
+        return "TYPESPEC_BOOL";
+
+    case TYPESPEC_COMPLEX:
+        return "TYPESPEC_COMPLEX";
+
+    case TYPESPEC_IMAGINARY:
+        return "TYPESPEC_IMAGINARY";
+
+    case TYPESPEC_CONST:
+        return "TYPESPEC_CONST";
+
+    case TYPESPEC_ID_TYPE:
+        return "TYPESPEC_ID_TYPE";
+
+    case TYPESPEC_FLOATING_POINT:
+        return "TYPESPEC_FLOATING_POINT";
+
+    case TYPESPEC_INTEGER:
+        return "TYPESPEC_INTEGER";
+
+    case TYPESPEC_STRING:
+        return "TYPESPEC_STRING";
+
+    case TYPESPEC_STRUCT:
+        return "TYPESPEC_STRUCT";
+
+    case TYPESPEC_VARIANT:
+        return "TYPESPEC_VARIANT";
+
+    case TYPESPEC_ENUM:
+        return "TYPESPEC_ENUM";
+    }
+
+    bt_common_abort();
+}
 
 struct ctf_node
 {
@@ -352,8 +475,6 @@ struct ctf_ast
 
 const char *node_type(struct ctf_node *node);
 
-struct meta_log_config;
-
 struct ctf_visitor_generate_ir *
 ctf_visitor_generate_ir_create(const struct ctf_metadata_decoder_config *config);
 
@@ -367,9 +488,9 @@ ctf_visitor_generate_ir_borrow_ctf_trace_class(struct ctf_visitor_generate_ir *v
 int ctf_visitor_generate_ir_visit_node(struct ctf_visitor_generate_ir *visitor,
                                        struct ctf_node *node);
 
-int ctf_visitor_semantic_check(int depth, struct ctf_node *node, struct meta_log_config *log_cfg);
+int ctf_visitor_semantic_check(int depth, struct ctf_node *node, const bt2c::Logger& logger);
 
-int ctf_visitor_parent_links(int depth, struct ctf_node *node, struct meta_log_config *log_cfg);
+int ctf_visitor_parent_links(int depth, struct ctf_node *node, const bt2c::Logger& logger);
 
 static inline char *ctf_ast_concatenate_unary_strings(struct bt_list_head *head)
 {
@@ -422,8 +543,7 @@ error:
 #endif
 
 static inline int ctf_ast_get_unary_uuid(struct bt_list_head *head, bt_uuid_t uuid,
-                                         int log_level BT_AST_LOG_LEVEL_UNUSED_ATTR,
-                                         bt_self_component *self_comp BT_AST_LOG_LEVEL_UNUSED_ATTR)
+                                         const bt2c::Logger& logger)
 {
     int i = 0;
     int ret = 0;
@@ -443,10 +563,7 @@ static inline int ctf_ast_get_unary_uuid(struct bt_list_head *head, bt_uuid_t uu
         src_string = node->u.unary_expression.u.string;
         ret = bt_uuid_from_str(src_string, uuid);
         if (ret) {
-#ifdef BT_COMP_LOG_CUR_LVL
-            BT_COMP_LOG_CUR_LVL(BT_LOG_ERROR, log_level, self_comp,
-                                "Cannot parse UUID: uuid=\"%s\"", src_string);
-#endif
+            BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "Cannot parse UUID: uuid=\"{}\"", src_string);
             goto end;
         }
     }

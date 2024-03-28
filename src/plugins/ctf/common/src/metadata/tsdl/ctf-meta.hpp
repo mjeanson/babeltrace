@@ -16,6 +16,7 @@
 #include "common/assert.h"
 #include "common/common.h"
 #include "common/uuid.h"
+#include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 
 enum ctf_field_class_type
 {
@@ -28,6 +29,37 @@ enum ctf_field_class_type
     CTF_FIELD_CLASS_TYPE_SEQUENCE,
     CTF_FIELD_CLASS_TYPE_VARIANT,
 };
+
+inline const char *format_as(ctf_field_class_type type) noexcept
+{
+    switch (type) {
+    case CTF_FIELD_CLASS_TYPE_INT:
+        return "CTF_FIELD_CLASS_TYPE_INT";
+
+    case CTF_FIELD_CLASS_TYPE_ENUM:
+        return "CTF_FIELD_CLASS_TYPE_ENUM";
+
+    case CTF_FIELD_CLASS_TYPE_FLOAT:
+        return "CTF_FIELD_CLASS_TYPE_FLOAT";
+
+    case CTF_FIELD_CLASS_TYPE_STRING:
+        return "CTF_FIELD_CLASS_TYPE_STRING";
+
+    case CTF_FIELD_CLASS_TYPE_STRUCT:
+        return "CTF_FIELD_CLASS_TYPE_STRUCT";
+
+    case CTF_FIELD_CLASS_TYPE_ARRAY:
+        return "CTF_FIELD_CLASS_TYPE_ARRAY";
+
+    case CTF_FIELD_CLASS_TYPE_SEQUENCE:
+        return "CTF_FIELD_CLASS_TYPE_SEQUENCE";
+
+    case CTF_FIELD_CLASS_TYPE_VARIANT:
+        return "CTF_FIELD_CLASS_TYPE_VARIANT";
+    }
+
+    bt_common_abort();
+}
 
 enum ctf_field_class_meaning
 {
@@ -69,6 +101,34 @@ enum ctf_scope
     CTF_SCOPE_EVENT_SPECIFIC_CONTEXT,
     CTF_SCOPE_EVENT_PAYLOAD,
 };
+
+inline const char *format_as(const ctf_scope scope) noexcept
+{
+    switch (scope) {
+    case CTF_SCOPE_PACKET_UNKNOWN:
+        return "PACKET_UNKNOWN";
+
+    case CTF_SCOPE_PACKET_HEADER:
+        return "PACKET_HEADER";
+
+    case CTF_SCOPE_PACKET_CONTEXT:
+        return "PACKET_CONTEXT";
+
+    case CTF_SCOPE_EVENT_HEADER:
+        return "EVENT_HEADER";
+
+    case CTF_SCOPE_EVENT_COMMON_CONTEXT:
+        return "EVENT_COMMON_CONTEXT";
+
+    case CTF_SCOPE_EVENT_SPECIFIC_CONTEXT:
+        return "EVENT_SPECIFIC_CONTEXT";
+
+    case CTF_SCOPE_EVENT_PAYLOAD:
+        return "EVENT_PAYLOAD";
+    }
+
+    bt_common_abort();
+}
 
 struct ctf_clock_class
 {
@@ -1135,8 +1195,7 @@ static inline void ctf_field_path_append_index(struct ctf_field_path *fp, int64_
     g_array_append_val(fp->path, index);
 }
 
-static inline int64_t ctf_field_path_borrow_index_by_index(struct ctf_field_path *fp,
-                                                           uint64_t index)
+static inline int64_t ctf_field_path_borrow_index_by_index(const ctf_field_path *fp, uint64_t index)
 {
     BT_ASSERT_DBG(fp);
     BT_ASSERT_DBG(index < fp->path->len);
@@ -1149,46 +1208,15 @@ static inline void ctf_field_path_clear(struct ctf_field_path *fp)
     g_array_set_size(fp->path, 0);
 }
 
-static inline const char *ctf_scope_string(enum ctf_scope scope)
+inline std::string format_as(const ctf_field_path& path)
 {
-    switch (scope) {
-    case CTF_SCOPE_PACKET_HEADER:
-        return "PACKET_HEADER";
-    case CTF_SCOPE_PACKET_CONTEXT:
-        return "PACKET_CONTEXT";
-    case CTF_SCOPE_EVENT_HEADER:
-        return "EVENT_HEADER";
-    case CTF_SCOPE_EVENT_COMMON_CONTEXT:
-        return "EVENT_COMMON_CONTEXT";
-    case CTF_SCOPE_EVENT_SPECIFIC_CONTEXT:
-        return "EVENT_SPECIFIC_CONTEXT";
-    case CTF_SCOPE_EVENT_PAYLOAD:
-        return "EVENT_PAYLOAD";
-    default:
-        bt_common_abort();
-    }
-}
+    std::string str = fmt::format("[{}", path.root);
 
-static inline GString *ctf_field_path_string(struct ctf_field_path *path)
-{
-    GString *str = g_string_new(NULL);
-    uint64_t i;
-
-    BT_ASSERT(path);
-
-    if (!str) {
-        goto end;
+    for (guint i = 0; i < path.path->len; i++) {
+        str += fmt::format(", {}", ctf_field_path_borrow_index_by_index(&path, i));
     }
 
-    g_string_append_printf(str, "[%s", ctf_scope_string(path->root));
-
-    for (i = 0; i < path->path->len; i++) {
-        g_string_append_printf(str, ", %" PRId64, ctf_field_path_borrow_index_by_index(path, i));
-    }
-
-    g_string_append(str, "]");
-
-end:
+    str += ']';
     return str;
 }
 

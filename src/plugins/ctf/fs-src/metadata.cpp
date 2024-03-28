@@ -5,17 +5,6 @@
  * Copyright 2010-2011 EfficiOS Inc. and Linux Foundation
  */
 
-#include <glib.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <babeltrace2/babeltrace.h>
-
-#define BT_COMP_LOG_SELF_COMP self_comp
-#define BT_LOG_OUTPUT_LEVEL   log_level
-#define BT_LOG_TAG            "PLUGIN/SRC.CTF.FS/META"
-#include "logging/comp-logging.h"
-
 #include "common/assert.h"
 
 #include "../common/src/metadata/tsdl/decoder.hpp"
@@ -23,8 +12,7 @@
 #include "fs.hpp"
 #include "metadata.hpp"
 
-FILE *ctf_fs_metadata_open_file(const char *trace_path, bt_logging_level log_level,
-                                bt_self_component_class *comp_class)
+FILE *ctf_fs_metadata_open_file(const char *trace_path, const bt2c::Logger& logger)
 {
     GString *metadata_path;
     FILE *fp = NULL;
@@ -37,8 +25,8 @@ FILE *ctf_fs_metadata_open_file(const char *trace_path, bt_logging_level log_lev
     g_string_append(metadata_path, G_DIR_SEPARATOR_S CTF_FS_METADATA_FILENAME);
     fp = fopen(metadata_path->str, "rb");
     if (!fp) {
-        BT_COMP_CLASS_LOGE_APPEND_CAUSE_ERRNO(comp_class, "Failed to open metadata file",
-                                              ": path=\"%s\"", metadata_path->str);
+        BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(logger, "Failed to open metadata file", ": path=\"{}\"",
+                                           metadata_path->str);
     }
 
     g_string_free(metadata_path, TRUE);
@@ -47,10 +35,9 @@ end:
     return fp;
 }
 
-static struct ctf_fs_file *get_file(const char *trace_path, bt_logging_level log_level,
-                                    bt_self_component *self_comp)
+static struct ctf_fs_file *get_file(const char *trace_path, const bt2c::Logger& logger)
 {
-    struct ctf_fs_file *file = ctf_fs_file_create(log_level, self_comp);
+    struct ctf_fs_file *file = ctf_fs_file_create(logger);
 
     if (!file) {
         goto error;
@@ -80,10 +67,8 @@ int ctf_fs_metadata_set_trace_class(bt_self_component *self_comp, struct ctf_fs_
 {
     int ret = 0;
     struct ctf_fs_file *file = NULL;
-    bt_logging_level log_level = ctf_fs_trace->log_level;
+    ctf_metadata_decoder_config decoder_config {ctf_fs_trace->logger};
 
-    ctf_metadata_decoder_config decoder_config;
-    decoder_config.log_level = ctf_fs_trace->log_level;
     decoder_config.self_comp = self_comp;
     decoder_config.clock_class_offset_s = config ? config->clock_class_offset_s : 0;
     decoder_config.clock_class_offset_ns = config ? config->clock_class_offset_ns : 0;
@@ -91,23 +76,23 @@ int ctf_fs_metadata_set_trace_class(bt_self_component *self_comp, struct ctf_fs_
         config ? config->force_clock_class_origin_unix_epoch : false;
     decoder_config.create_trace_class = true;
 
-    file = get_file(ctf_fs_trace->path->str, log_level, self_comp);
+    file = get_file(ctf_fs_trace->path->str, ctf_fs_trace->logger);
     if (!file) {
-        BT_COMP_LOGE("Cannot create metadata file object.");
+        BT_CPPLOGE_SPEC(ctf_fs_trace->logger, "Cannot create metadata file object.");
         ret = -1;
         goto end;
     }
 
     ctf_fs_trace->metadata->decoder = ctf_metadata_decoder_create(&decoder_config);
     if (!ctf_fs_trace->metadata->decoder) {
-        BT_COMP_LOGE("Cannot create metadata decoder object.");
+        BT_CPPLOGE_SPEC(ctf_fs_trace->logger, "Cannot create metadata decoder object.");
         ret = -1;
         goto end;
     }
 
     ret = ctf_metadata_decoder_append_content(ctf_fs_trace->metadata->decoder, file->fp);
     if (ret) {
-        BT_COMP_LOGE("Cannot update metadata decoder's content.");
+        BT_CPPLOGE_SPEC(ctf_fs_trace->logger, "Cannot update metadata decoder's content.");
         goto end;
     }
 

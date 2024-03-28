@@ -283,7 +283,6 @@ plugins_ctf_common_metadata_libctf_ast_la_SOURCES = \
 	plugins/ctf/common/src/metadata/tsdl/decoder.hpp \
 	plugins/ctf/common/src/metadata/tsdl/decoder-packetized-file-stream-to-buf.cpp \
 	plugins/ctf/common/src/metadata/tsdl/decoder-packetized-file-stream-to-buf.hpp \
-	plugins/ctf/common/src/metadata/tsdl/logging.cpp \
 	plugins/ctf/common/src/metadata/tsdl/logging.hpp \
 	plugins/ctf/common/src/metadata/tsdl/ctf-meta.hpp \
 	plugins/ctf/common/src/metadata/tsdl/ctf-meta-visitors.hpp \
@@ -713,7 +712,8 @@ plugins_ctf_babeltrace_plugin_ctf_la_LIBADD += \
 	logging/liblogging.la \
 	plugins/common/muxing/libmuxing.la \
 	common/libcommon.la \
-	ctfser/libctfser.la
+	ctfser/libctfser.la \
+	cpp-common/vendor/fmt/libfmt.la
 endif
 
 # text plugin

@@ -11,6 +11,12 @@
 
 #include <babeltrace2/babeltrace.h>
 
+namespace bt2c {
+
+class Logger;
+
+} /* namespace bt2c */
+
 #define CTF_FS_METADATA_FILENAME "metadata"
 
 struct ctf_fs_metadata_config
@@ -27,8 +33,7 @@ void ctf_fs_metadata_fini(struct ctf_fs_metadata *metadata);
 int ctf_fs_metadata_set_trace_class(bt_self_component *self_comp, struct ctf_fs_trace *ctf_fs_trace,
                                     struct ctf_fs_metadata_config *config);
 
-FILE *ctf_fs_metadata_open_file(const char *trace_path, bt_logging_level log_level,
-                                bt_self_component_class *comp_class);
+FILE *ctf_fs_metadata_open_file(const char *trace_path, const bt2c::Logger& logger);
 
 bool ctf_metadata_is_packetized(FILE *fp, int *byte_order);
 

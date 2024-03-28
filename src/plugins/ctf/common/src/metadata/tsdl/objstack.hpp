@@ -11,7 +11,13 @@
 
 #include <cstddef>
 
-struct objstack *objstack_create(void);
+namespace bt2c {
+
+class Logger;
+
+} /* namespace bt2c */
+
+struct objstack *objstack_create(const bt2c::Logger& parentLogger);
 void objstack_destroy(struct objstack *objstack);
 
 /*

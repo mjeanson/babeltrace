@@ -9,9 +9,15 @@
 
 #include <babeltrace2/babeltrace.h>
 
+namespace bt2c {
+
+class Logger;
+
+} /* namespace bt2c */
+
 void ctf_fs_file_destroy(struct ctf_fs_file *file);
 
-struct ctf_fs_file *ctf_fs_file_create(bt_logging_level log_level, bt_self_component *self_comp);
+struct ctf_fs_file *ctf_fs_file_create(const bt2c::Logger& parentLogger);
 
 int ctf_fs_file_open(struct ctf_fs_file *file, const char *mode);
 

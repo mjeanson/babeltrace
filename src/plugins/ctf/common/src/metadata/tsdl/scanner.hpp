@@ -25,14 +25,20 @@ struct ctf_scanner_scope
 
 struct ctf_scanner
 {
-    yyscan_t scanner;
-    struct ctf_ast *ast;
-    struct ctf_scanner_scope root_scope;
-    struct ctf_scanner_scope *cs;
-    struct objstack *objstack;
+    explicit ctf_scanner(const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/CTF/META/PARSER"}
+    {
+    }
+
+    bt2c::Logger logger;
+    yyscan_t scanner {};
+    ctf_ast *ast = nullptr;
+    ctf_scanner_scope root_scope {};
+    ctf_scanner_scope *cs = nullptr;
+    struct objstack *objstack = nullptr;
 };
 
-struct ctf_scanner *ctf_scanner_alloc(void);
+struct ctf_scanner *ctf_scanner_alloc(const bt2c::Logger& parentLogger);
 
 void ctf_scanner_free(struct ctf_scanner *scanner);
 

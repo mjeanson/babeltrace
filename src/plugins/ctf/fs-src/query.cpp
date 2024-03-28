@@ -12,16 +12,8 @@
 
 #include <babeltrace2/babeltrace.h>
 
-#define BT_LOG_OUTPUT_LEVEL ((enum bt_log_level) log_level)
-#define BT_LOG_TAG          "PLUGIN/SRC.CTF.FS/QUERY"
-#include "logging/comp-logging.h"
-#include "logging/log.h"
-
-#include "common/assert.h"
-
 #include "../common/src/metadata/tsdl/decoder.hpp"
 #include "fs.hpp"
-#include "metadata.hpp"
 #include "query.hpp"
 
 #define METADATA_TEXT_SIG "/* CTF 1.8"
@@ -33,13 +25,11 @@ struct range
     bool set = false;
 };
 
-bt_component_class_query_method_status
-metadata_info_query(bt_self_component_class_source *self_comp_class_src, const bt_value *params,
-                    bt_logging_level log_level, const bt_value **user_result)
+bt_component_class_query_method_status metadata_info_query(const bt_value *params,
+                                                           const bt2c::Logger& logger,
+                                                           const bt_value **user_result)
 {
     bt_component_class_query_method_status status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_OK;
-    bt_self_component_class *self_comp_class =
-        bt_self_component_class_source_as_self_component_class(self_comp_class_src);
     bt_value *result = NULL;
     const bt_value *path_value = NULL;
     FILE *metadata_fp = NULL;
@@ -48,7 +38,7 @@ metadata_info_query(bt_self_component_class_source *self_comp_class_src, const b
     const char *path;
     bool is_packetized;
     struct ctf_metadata_decoder *decoder = NULL;
-    ctf_metadata_decoder_config decoder_cfg;
+    ctf_metadata_decoder_config decoder_cfg {logger};
     enum ctf_metadata_decoder_status decoder_status;
     GString *g_metadata_text = NULL;
     const char *plaintext;
@@ -62,22 +52,20 @@ metadata_info_query(bt_self_component_class_source *self_comp_class_src, const b
     BT_ASSERT(params);
 
     if (!bt_value_is_map(params)) {
-        BT_COMP_CLASS_LOGE_APPEND_CAUSE(self_comp_class,
-                                        "Query parameters is not a map value object.");
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "Query parameters is not a map value object.");
         status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_ERROR;
         goto error;
     }
 
     path_value = bt_value_map_borrow_entry_value_const(params, "path");
     if (!path_value) {
-        BT_COMP_CLASS_LOGE_APPEND_CAUSE(self_comp_class, "Mandatory `path` parameter missing");
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "Mandatory `path` parameter missing");
         status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_ERROR;
         goto error;
     }
 
     if (!bt_value_is_string(path_value)) {
-        BT_COMP_CLASS_LOGE_APPEND_CAUSE(self_comp_class,
-                                        "`path` parameter is required to be a string value");
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "`path` parameter is required to be a string value");
         status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_ERROR;
         goto error;
     }
@@ -85,36 +73,32 @@ metadata_info_query(bt_self_component_class_source *self_comp_class_src, const b
     path = bt_value_string_get(path_value);
 
     BT_ASSERT(path);
-    metadata_fp = ctf_fs_metadata_open_file(path, log_level, self_comp_class);
+    metadata_fp = ctf_fs_metadata_open_file(path, logger);
     if (!metadata_fp) {
-        BT_COMP_CLASS_LOGE_APPEND_CAUSE(self_comp_class, "Cannot open trace metadata: path=\"%s\".",
-                                        path);
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "Cannot open trace metadata: path=\"{}\".", path);
         goto error;
     }
 
-    ret = ctf_metadata_decoder_is_packetized(metadata_fp, &is_packetized, &bo, log_level, NULL);
+    ret = ctf_metadata_decoder_is_packetized(metadata_fp, &is_packetized, &bo, logger);
     if (ret) {
-        BT_COMP_CLASS_LOGE_APPEND_CAUSE(
-            self_comp_class,
-            "Cannot check whether or not the metadata stream is packetized: path=\"%s\".", path);
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(
+            logger, "Cannot check whether or not the metadata stream is packetized: path=\"{}\".",
+            path);
         goto error;
     }
 
-    decoder_cfg.log_level = log_level;
-    decoder_cfg.self_comp_class = self_comp_class;
     decoder_cfg.keep_plain_text = true;
     decoder = ctf_metadata_decoder_create(&decoder_cfg);
     if (!decoder) {
-        BT_COMP_CLASS_LOGE_APPEND_CAUSE(self_comp_class,
-                                        "Cannot create metadata decoder: path=\"%s\".", path);
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "Cannot create metadata decoder: path=\"{}\".", path);
         goto error;
     }
 
     rewind(metadata_fp);
     decoder_status = ctf_metadata_decoder_append_content(decoder, metadata_fp);
     if (decoder_status) {
-        BT_COMP_CLASS_LOGE_APPEND_CAUSE(
-            self_comp_class, "Cannot update metadata decoder's content: path=\"%s\".", path);
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(
+            logger, "Cannot update metadata decoder's content: path=\"{}\".", path);
         goto error;
     }
 
@@ -134,15 +118,14 @@ metadata_info_query(bt_self_component_class_source *self_comp_class_src, const b
 
     ret = bt_value_map_insert_string_entry(result, "text", g_metadata_text->str);
     if (ret) {
-        BT_COMP_CLASS_LOGE_APPEND_CAUSE(self_comp_class,
-                                        "Cannot insert metadata text into query result.");
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "Cannot insert metadata text into query result.");
         goto error;
     }
 
     ret = bt_value_map_insert_bool_entry(result, "is-packetized", is_packetized);
     if (ret) {
-        BT_COMP_CLASS_LOGE_APPEND_CAUSE(
-            self_comp_class, "Cannot insert \"is-packetized\" attribute into query result.");
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(
+            logger, "Cannot insert \"is-packetized\" attribute into query result.");
         goto error;
     }
 
@@ -165,7 +148,8 @@ end:
     if (metadata_fp) {
         ret = fclose(metadata_fp);
         if (ret) {
-            BT_LOGE_ERRNO("Cannot close metadata file stream", ": path=\"%s\"", path);
+            BT_CPPLOGE_ERRNO_SPEC(logger, "Cannot close metadata file stream", ": path=\"{}\"",
+                                  path);
         }
     }
 
@@ -266,7 +250,7 @@ end:
 }
 
 static int populate_trace_info(const struct ctf_fs_trace *trace, bt_value *trace_info,
-                               bt_logging_level log_level, bt_self_component_class *self_comp_class)
+                               const bt2c::Logger& logger)
 {
     int ret = 0;
     size_t group_idx;
@@ -278,8 +262,8 @@ static int populate_trace_info(const struct ctf_fs_trace *trace, bt_value *trace
     /* Add trace range info only if it contains streams. */
     if (trace->ds_file_groups->len == 0) {
         ret = -1;
-        BT_COMP_CLASS_LOGE_APPEND_CAUSE(self_comp_class, "Trace has no streams: trace-path=%s",
-                                        trace->path->str);
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "Trace has no streams: trace-path={}",
+                                     trace->path->str);
         goto end;
     }
 
@@ -313,13 +297,10 @@ end:
 }
 
 bt_component_class_query_method_status
-trace_infos_query(bt_self_component_class_source *self_comp_class_src, const bt_value *params,
-                  bt_logging_level log_level, const bt_value **user_result)
+trace_infos_query(const bt_value *params, const bt2c::Logger& logger, const bt_value **user_result)
 {
     struct ctf_fs_component *ctf_fs = NULL;
     bt_component_class_query_method_status status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_OK;
-    bt_self_component_class *self_comp_class =
-        bt_self_component_class_source_as_self_component_class(self_comp_class_src);
     bt_value *result = NULL;
     const bt_value *inputs_value = NULL;
     const bt_value *trace_name_value;
@@ -330,25 +311,22 @@ trace_infos_query(bt_self_component_class_source *self_comp_class_src, const bt_
     BT_ASSERT(params);
 
     if (!bt_value_is_map(params)) {
-        BT_COMP_CLASS_LOGE_APPEND_CAUSE(self_comp_class,
-                                        "Query parameters is not a map value object.");
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "Query parameters is not a map value object.");
         status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_ERROR;
         goto error;
     }
 
-    ctf_fs = ctf_fs_component_create(log_level);
+    ctf_fs = ctf_fs_component_create(logger);
     if (!ctf_fs) {
         goto error;
     }
 
-    if (!read_src_fs_parameters(params, &inputs_value, &trace_name_value, ctf_fs, NULL,
-                                self_comp_class)) {
+    if (!read_src_fs_parameters(params, &inputs_value, &trace_name_value, ctf_fs)) {
         status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_ERROR;
         goto error;
     }
 
-    if (ctf_fs_component_create_ctf_fs_trace(ctf_fs, inputs_value, trace_name_value, NULL,
-                                             self_comp_class)) {
+    if (ctf_fs_component_create_ctf_fs_trace(ctf_fs, inputs_value, trace_name_value, NULL)) {
         goto error;
     }
 
@@ -360,11 +338,11 @@ trace_infos_query(bt_self_component_class_source *self_comp_class_src, const bt_
 
     append_status = bt_value_array_append_empty_map_element(result, &trace_info);
     if (append_status != BT_VALUE_ARRAY_APPEND_ELEMENT_STATUS_OK) {
-        BT_COMP_CLASS_LOGE_APPEND_CAUSE(self_comp_class, "Failed to create trace info map.");
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "Failed to create trace info map.");
         goto error;
     }
 
-    ret = populate_trace_info(ctf_fs->trace, trace_info, log_level, self_comp_class);
+    ret = populate_trace_info(ctf_fs->trace, trace_info, logger);
     if (ret) {
         goto error;
     }
@@ -389,8 +367,7 @@ end:
 }
 
 bt_component_class_query_method_status
-support_info_query(bt_self_component_class_source *comp_class, const bt_value *params,
-                   bt_logging_level log_level, const bt_value **user_result)
+support_info_query(const bt_value *params, const bt2c::Logger& logger, const bt_value **user_result)
 {
     const bt_value *input_type_value;
     const char *input_type;
@@ -431,10 +408,7 @@ support_info_query(bt_self_component_class_source *comp_class, const bt_value *p
         enum ctf_metadata_decoder_status decoder_status;
         bt_uuid_t uuid;
 
-        ctf_metadata_decoder_config metadata_decoder_config;
-        metadata_decoder_config.log_level = log_level;
-        metadata_decoder_config.self_comp_class =
-            bt_self_component_class_source_as_self_component_class(comp_class);
+        ctf_metadata_decoder_config metadata_decoder_config {logger};
 
         metadata_decoder = ctf_metadata_decoder_create(&metadata_decoder_config);
         if (!metadata_decoder) {
@@ -444,7 +418,8 @@ support_info_query(bt_self_component_class_source *comp_class, const bt_value *p
 
         decoder_status = ctf_metadata_decoder_append_content(metadata_decoder, metadata_file);
         if (decoder_status != CTF_METADATA_DECODER_STATUS_OK) {
-            BT_LOGW("cannot append metadata content: metadata-decoder-status=%d", decoder_status);
+            BT_CPPLOGW_SPEC(logger, "cannot append metadata content: metadata-decoder-status={}",
+                            decoder_status);
             status = BT_COMPONENT_CLASS_QUERY_METHOD_STATUS_ERROR;
             goto end;
         }

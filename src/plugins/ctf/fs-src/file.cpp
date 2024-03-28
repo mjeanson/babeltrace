@@ -8,10 +8,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
-#define BT_COMP_LOG_SELF_COMP (file->self_comp)
-#define BT_LOG_OUTPUT_LEVEL   (file->log_level)
-#define BT_LOG_TAG            "PLUGIN/SRC.CTF.FS/FILE"
-#include "logging/comp-logging.h"
+#include "cpp-common/vendor/fmt/format.h"
 
 #include "file.hpp"
 #include "fs.hpp"
@@ -23,11 +20,12 @@ void ctf_fs_file_destroy(struct ctf_fs_file *file)
     }
 
     if (file->fp) {
-        BT_COMP_LOGD("Closing file \"%s\" (%p)", file->path ? file->path->str : NULL, file->fp);
+        BT_CPPLOGD_SPEC(file->logger, "Closing file \"{}\" ({})",
+                        file->path ? file->path->str : NULL, fmt::ptr(file->fp));
 
         if (fclose(file->fp)) {
-            BT_COMP_LOGE("Cannot close file \"%s\": %s", file->path ? file->path->str : "NULL",
-                         strerror(errno));
+            BT_CPPLOGE_SPEC(file->logger, "Cannot close file \"{}\": {}",
+                            file->path ? file->path->str : "NULL", strerror(errno));
         }
     }
 
@@ -38,11 +36,9 @@ void ctf_fs_file_destroy(struct ctf_fs_file *file)
     delete file;
 }
 
-struct ctf_fs_file *ctf_fs_file_create(bt_logging_level log_level, bt_self_component *self_comp)
+struct ctf_fs_file *ctf_fs_file_create(const bt2c::Logger& parentLogger)
 {
-    ctf_fs_file *file = new ctf_fs_file;
-    file->log_level = log_level;
-    file->self_comp = self_comp;
+    ctf_fs_file *file = new ctf_fs_file {parentLogger};
     file->path = g_string_new(NULL);
     if (!file->path) {
         goto error;
@@ -63,24 +59,24 @@ int ctf_fs_file_open(struct ctf_fs_file *file, const char *mode)
     int ret = 0;
     struct stat stat;
 
-    BT_COMP_LOGI("Opening file \"%s\" with mode \"%s\"", file->path->str, mode);
+    BT_CPPLOGI_SPEC(file->logger, "Opening file \"{}\" with mode \"{}\"", file->path->str, mode);
     file->fp = fopen(file->path->str, mode);
     if (!file->fp) {
-        BT_COMP_LOGE_APPEND_CAUSE_ERRNO(file->self_comp, "Cannot open file", ": path=%s, mode=%s",
-                                        file->path->str, mode);
+        BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(file->logger, "Cannot open file", ": path={}, mode={}",
+                                           file->path->str, mode);
         goto error;
     }
 
-    BT_COMP_LOGI("Opened file: %p", file->fp);
+    BT_CPPLOGI_SPEC(file->logger, "Opened file: {}", fmt::ptr(file->fp));
 
     if (fstat(fileno(file->fp), &stat)) {
-        BT_COMP_LOGE_APPEND_CAUSE_ERRNO(file->self_comp, "Cannot get file information", ": path=%s",
-                                        file->path->str);
+        BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(file->logger, "Cannot get file information", ": path={}",
+                                           file->path->str);
         goto error;
     }
 
     file->size = stat.st_size;
-    BT_COMP_LOGI("File is %jd bytes", (intmax_t) file->size);
+    BT_CPPLOGI_SPEC(file->logger, "File is {} bytes", (intmax_t) file->size);
     goto end;
 
 error:
@@ -88,7 +84,8 @@ error:
 
     if (file->fp) {
         if (fclose(file->fp)) {
-            BT_COMP_LOGE("Cannot close file \"%s\": %s", file->path->str, strerror(errno));
+            BT_CPPLOGE_SPEC(file->logger, "Cannot close file \"{}\": {}", file->path->str,
+                            strerror(errno));
         }
     }
 

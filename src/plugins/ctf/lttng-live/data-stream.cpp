@@ -10,23 +10,13 @@
 #include <glib.h>
 #include <inttypes.h>
 #include <stdio.h>
-
-#include <babeltrace2/babeltrace.h>
-
-#define BT_COMP_LOG_SELF_COMP self_comp
-#define BT_LOG_OUTPUT_LEVEL   log_level
-#define BT_LOG_TAG            "PLUGIN/SRC.CTF.LTTNG-LIVE/DS"
-#include <glib.h>
-#include <inttypes.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include <babeltrace2/babeltrace.h>
 
-#include "logging/comp-logging.h"
-
 #include "common/assert.h"
 #include "compat/mman.h" /* IWYU pragma: keep  */
+#include "cpp-common/vendor/fmt/format.h"
 
 #include "../common/src/msg-iter/msg-iter.hpp"
 #include "data-stream.hpp"
@@ -73,15 +63,13 @@ end:
 static bt_stream *medop_borrow_stream(bt_stream_class *stream_class, int64_t stream_id, void *data)
 {
     lttng_live_stream_iterator *lttng_live_stream = (lttng_live_stream_iterator *) data;
-    bt_logging_level log_level = lttng_live_stream->log_level;
-    bt_self_component *self_comp = lttng_live_stream->self_comp;
 
     if (!lttng_live_stream->stream) {
         uint64_t stream_class_id = bt_stream_class_get_id(stream_class);
 
-        BT_COMP_LOGI("Creating stream %s (ID: %" PRIu64 ") out of stream "
-                     "class %" PRId64,
-                     lttng_live_stream->name->str, stream_id, stream_class_id);
+        BT_CPPLOGI_SPEC(lttng_live_stream->logger,
+                        "Creating stream {} (ID: {}) out of stream class {}",
+                        lttng_live_stream->name->str, stream_id, stream_class_id);
 
         if (stream_id < 0) {
             /*
@@ -98,10 +86,10 @@ static bt_stream *medop_borrow_stream(bt_stream_class *stream_class, int64_t str
         }
 
         if (!lttng_live_stream->stream) {
-            BT_COMP_LOGE_APPEND_CAUSE(self_comp,
-                                      "Cannot create stream %s (stream class ID "
-                                      "%" PRId64 ", stream ID %" PRIu64 ")",
-                                      lttng_live_stream->name->str, stream_class_id, stream_id);
+            BT_CPPLOGE_APPEND_CAUSE_SPEC(
+                lttng_live_stream->logger,
+                "Cannot create stream {} (stream class ID {}, stream ID {})",
+                lttng_live_stream->name->str, stream_class_id, stream_id);
             goto end;
         }
 
@@ -124,16 +112,15 @@ enum lttng_live_iterator_status lttng_live_lazy_msg_init(struct lttng_live_sessi
 {
     struct lttng_live_component *lttng_live = session->lttng_live_msg_iter->lttng_live_comp;
     uint64_t trace_idx, stream_iter_idx;
-    bt_logging_level log_level = session->log_level;
-    bt_self_component *self_comp = session->self_comp;
 
     if (!session->lazy_stream_msg_init) {
         return LTTNG_LIVE_ITERATOR_STATUS_OK;
     }
 
-    BT_COMP_LOGD("Lazily initializing self message iterator for live session: "
-                 "session-id=%" PRIu64 ", self-msg-iter-addr=%p",
-                 session->id, self_msg_iter);
+    BT_CPPLOGD_SPEC(session->logger,
+                    "Lazily initializing self message iterator for live session: "
+                    "session-id={}, self-msg-iter-addr={}",
+                    session->id, fmt::ptr(self_msg_iter));
 
     for (trace_idx = 0; trace_idx < session->traces->len; trace_idx++) {
         struct lttng_live_trace *trace =
@@ -150,15 +137,17 @@ enum lttng_live_iterator_status lttng_live_lazy_msg_init(struct lttng_live_sessi
                 continue;
             }
             ctf_tc = ctf_metadata_decoder_borrow_ctf_trace_class(trace->metadata->decoder);
-            BT_COMP_LOGD("Creating CTF message iterator: "
-                         "session-id=%" PRIu64 ", ctf-tc-addr=%p, "
-                         "stream-iter-name=%s, self-msg-iter-addr=%p",
-                         session->id, ctf_tc, stream_iter->name->str, self_msg_iter);
+            BT_CPPLOGD_SPEC(stream_iter->logger,
+                            "Creating CTF message iterator: session-id={}, ctf-tc-addr={}, "
+                            "stream-iter-name={}, self-msg-iter-addr={}",
+                            session->id, fmt::ptr(ctf_tc), stream_iter->name->str,
+                            fmt::ptr(self_msg_iter));
             stream_iter->msg_iter =
                 ctf_msg_iter_create(ctf_tc, lttng_live->max_query_size, medops, stream_iter,
-                                    log_level, self_comp, self_msg_iter);
+                                    self_msg_iter, stream_iter->logger);
             if (!stream_iter->msg_iter) {
-                BT_COMP_LOGE_APPEND_CAUSE(self_comp, "Failed to create CTF message iterator");
+                BT_CPPLOGE_APPEND_CAUSE_SPEC(stream_iter->logger,
+                                             "Failed to create CTF message iterator");
                 goto error;
             }
         }
@@ -176,28 +165,21 @@ struct lttng_live_stream_iterator *
 lttng_live_stream_iterator_create(struct lttng_live_session *session, uint64_t ctf_trace_id,
                                   uint64_t stream_id, bt_self_message_iterator *self_msg_iter)
 {
-    struct lttng_live_component *lttng_live;
-    struct lttng_live_trace *trace;
-    bt_logging_level log_level;
-    bt_self_component *self_comp;
+    lttng_live_stream_iterator *stream_iter = nullptr;
 
     BT_ASSERT(session);
     BT_ASSERT(session->lttng_live_msg_iter);
     BT_ASSERT(session->lttng_live_msg_iter->lttng_live_comp);
-    log_level = session->log_level;
-    self_comp = session->self_comp;
 
-    lttng_live = session->lttng_live_msg_iter->lttng_live_comp;
-
-    lttng_live_stream_iterator *stream_iter = new lttng_live_stream_iterator;
-    stream_iter->log_level = log_level;
-    stream_iter->self_comp = self_comp;
-    trace = lttng_live_session_borrow_or_create_trace_by_id(session, ctf_trace_id);
+    lttng_live_component *lttng_live = session->lttng_live_msg_iter->lttng_live_comp;
+    lttng_live_trace *trace =
+        lttng_live_session_borrow_or_create_trace_by_id(session, ctf_trace_id);
     if (!trace) {
-        BT_COMP_LOGE_APPEND_CAUSE(self_comp, "Failed to borrow CTF trace.");
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(session->logger, "Failed to borrow CTF trace.");
         goto error;
     }
 
+    stream_iter = new lttng_live_stream_iterator {session->logger};
     stream_iter->trace = trace;
     stream_iter->state = LTTNG_LIVE_STREAM_ACTIVE_NO_DATA;
     stream_iter->viewer_stream_id = stream_id;
@@ -213,23 +195,26 @@ lttng_live_stream_iterator_create(struct lttng_live_session *session, uint64_t c
             ctf_metadata_decoder_borrow_ctf_trace_class(trace->metadata->decoder);
         BT_ASSERT(!stream_iter->msg_iter);
         stream_iter->msg_iter =
-            ctf_msg_iter_create(ctf_tc, lttng_live->max_query_size, medops, stream_iter, log_level,
-                                self_comp, self_msg_iter);
+            ctf_msg_iter_create(ctf_tc, lttng_live->max_query_size, medops, stream_iter,
+                                self_msg_iter, stream_iter->logger);
         if (!stream_iter->msg_iter) {
-            BT_COMP_LOGE_APPEND_CAUSE(self_comp, "Failed to create CTF message iterator");
+            BT_CPPLOGE_APPEND_CAUSE_SPEC(stream_iter->logger,
+                                         "Failed to create CTF message iterator");
             goto error;
         }
     }
     stream_iter->buf = g_new0(uint8_t, lttng_live->max_query_size);
     if (!stream_iter->buf) {
-        BT_COMP_LOGE_APPEND_CAUSE(self_comp, "Failed to allocate live stream iterator buffer");
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(stream_iter->logger,
+                                     "Failed to allocate live stream iterator buffer");
         goto error;
     }
 
     stream_iter->buflen = lttng_live->max_query_size;
     stream_iter->name = g_string_new(NULL);
     if (!stream_iter->name) {
-        BT_COMP_LOGE_APPEND_CAUSE(self_comp, "Failed to allocate live stream iterator name buffer");
+        BT_CPPLOGE_APPEND_CAUSE_SPEC(stream_iter->logger,
+                                     "Failed to allocate live stream iterator name buffer");
         goto error;
     }
 

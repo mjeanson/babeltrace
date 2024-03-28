@@ -12,11 +12,10 @@
  * YYDEBUG (and therefore the yydebug declaration).
  */
 
-#include "logging/log.h"
+#include "logging/log-api.h"
 
 #if BT_LOG_ENABLED_TRACE
-#    define YYDEBUG                           1
-#    define YYFPRINTF(_stream, _fmt, args...) BT_LOGT(_fmt, ##args)
+#    define YYDEBUG 1
 #else
 #    define YYDEBUG 0
 #endif
