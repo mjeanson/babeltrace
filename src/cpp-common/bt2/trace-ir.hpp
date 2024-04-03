@@ -855,6 +855,31 @@ using DepStructFc = DepType<LibObjT, StructureFieldClass, ConstStructureFieldCla
 
 } /* namespace internal */
 
+/* Avoid `-Wshadow` error on GCC, conflicting with `bt2::Error` */
+BT_DIAG_PUSH
+BT_DIAG_IGNORE_SHADOW
+
+enum class EventClassLogLevel
+{
+    Emergency = BT_EVENT_CLASS_LOG_LEVEL_EMERGENCY,
+    Alert = BT_EVENT_CLASS_LOG_LEVEL_ALERT,
+    Critical = BT_EVENT_CLASS_LOG_LEVEL_CRITICAL,
+    Error = BT_EVENT_CLASS_LOG_LEVEL_ERROR,
+    Warning = BT_EVENT_CLASS_LOG_LEVEL_WARNING,
+    Notice = BT_EVENT_CLASS_LOG_LEVEL_NOTICE,
+    Info = BT_EVENT_CLASS_LOG_LEVEL_INFO,
+    DebugSystem = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_SYSTEM,
+    DebugProgram = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_PROGRAM,
+    DebugProcess = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_PROCESS,
+    DebugModule = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_MODULE,
+    DebugUnit = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_UNIT,
+    DebugFunction = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_FUNCTION,
+    DebugLine = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_LINE,
+    Debug = BT_EVENT_CLASS_LOG_LEVEL_DEBUG,
+};
+
+BT_DIAG_POP
+
 template <typename LibObjT>
 class CommonEventClass final : public BorrowedObject<LibObjT>
 {
@@ -870,31 +895,6 @@ public:
     using typename BorrowedObject<LibObjT>::LibObjPtr;
     using Shared = SharedObject<CommonEventClass, LibObjT, internal::EventClassRefFuncs>;
     using UserAttributes = internal::DepUserAttrs<LibObjT>;
-
-    /* Avoid `-Wshadow` error on GCC, conflicting with `bt2::Error` */
-    BT_DIAG_PUSH
-    BT_DIAG_IGNORE_SHADOW
-
-    enum class LogLevel
-    {
-        Emergency = BT_EVENT_CLASS_LOG_LEVEL_EMERGENCY,
-        Alert = BT_EVENT_CLASS_LOG_LEVEL_ALERT,
-        Critical = BT_EVENT_CLASS_LOG_LEVEL_CRITICAL,
-        Error = BT_EVENT_CLASS_LOG_LEVEL_ERROR,
-        Warning = BT_EVENT_CLASS_LOG_LEVEL_WARNING,
-        Notice = BT_EVENT_CLASS_LOG_LEVEL_NOTICE,
-        Info = BT_EVENT_CLASS_LOG_LEVEL_INFO,
-        DebugSystem = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_SYSTEM,
-        DebugProgram = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_PROGRAM,
-        DebugProcess = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_PROCESS,
-        DebugModule = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_MODULE,
-        DebugUnit = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_UNIT,
-        DebugFunction = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_FUNCTION,
-        DebugLine = BT_EVENT_CLASS_LOG_LEVEL_DEBUG_LINE,
-        Debug = BT_EVENT_CLASS_LOG_LEVEL_DEBUG,
-    };
-
-    BT_DIAG_POP
 
     explicit CommonEventClass(const LibObjPtr libObjPtr) noexcept : _ThisBorrowedObject {libObjPtr}
     {
@@ -943,7 +943,7 @@ public:
         return bt_event_class_get_name(this->libObjPtr());
     }
 
-    CommonEventClass logLevel(const LogLevel logLevel) const noexcept
+    CommonEventClass logLevel(const EventClassLogLevel logLevel) const noexcept
     {
         static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstEventClass`.");
 
@@ -952,12 +952,12 @@ public:
         return *this;
     }
 
-    bt2s::optional<LogLevel> logLevel() const noexcept
+    bt2s::optional<EventClassLogLevel> logLevel() const noexcept
     {
         bt_event_class_log_level libLogLevel;
 
         if (bt_event_class_get_log_level(this->libObjPtr(), &libLogLevel)) {
-            return static_cast<LogLevel>(libLogLevel);
+            return static_cast<EventClassLogLevel>(libLogLevel);
         }
 
         return bt2s::nullopt;

@@ -33,6 +33,13 @@ struct ComponentClassRefFuncs final
 
 } /* namespace internal */
 
+enum class ComponentClassType
+{
+    Source = BT_COMPONENT_CLASS_TYPE_SOURCE,
+    Filter = BT_COMPONENT_CLASS_TYPE_FILTER,
+    Sink = BT_COMPONENT_CLASS_TYPE_SINK,
+};
+
 template <typename LibObjT>
 class CommonSourceComponentClass;
 
@@ -51,13 +58,6 @@ private:
 public:
     using typename _ThisBorrowedObject::LibObjPtr;
     using Shared = SharedObject<CommonComponentClass, LibObjT, internal::ComponentClassRefFuncs>;
-
-    enum class Type
-    {
-        Source = BT_COMPONENT_CLASS_TYPE_SOURCE,
-        Filter = BT_COMPONENT_CLASS_TYPE_FILTER,
-        Sink = BT_COMPONENT_CLASS_TYPE_SINK,
-    };
 
     explicit CommonComponentClass(const LibObjPtr libObjPtr) noexcept :
         _ThisBorrowedObject {libObjPtr}

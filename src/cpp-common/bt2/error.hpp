@@ -25,39 +25,39 @@ class ConstComponentClassErrorCause;
 class ConstComponentErrorCause;
 class ConstMessageIteratorErrorCause;
 
+enum class ErrorCauseActorType
+{
+    Unknown = BT_ERROR_CAUSE_ACTOR_TYPE_UNKNOWN,
+    Component = BT_ERROR_CAUSE_ACTOR_TYPE_COMPONENT,
+    ComponentClass = BT_ERROR_CAUSE_ACTOR_TYPE_COMPONENT_CLASS,
+    MessageIterator = BT_ERROR_CAUSE_ACTOR_TYPE_MESSAGE_ITERATOR,
+};
+
 class ConstErrorCause : public BorrowedObject<const bt_error_cause>
 {
 public:
-    enum class ActorType
-    {
-        Unknown = BT_ERROR_CAUSE_ACTOR_TYPE_UNKNOWN,
-        Component = BT_ERROR_CAUSE_ACTOR_TYPE_COMPONENT,
-        ComponentClass = BT_ERROR_CAUSE_ACTOR_TYPE_COMPONENT_CLASS,
-        MessageIterator = BT_ERROR_CAUSE_ACTOR_TYPE_MESSAGE_ITERATOR,
-    };
-
     explicit ConstErrorCause(const LibObjPtr libObjPtr) noexcept : _ThisBorrowedObject {libObjPtr}
     {
     }
 
-    ActorType actorType() const noexcept
+    ErrorCauseActorType actorType() const noexcept
     {
-        return static_cast<ActorType>(bt_error_cause_get_actor_type(this->libObjPtr()));
+        return static_cast<ErrorCauseActorType>(bt_error_cause_get_actor_type(this->libObjPtr()));
     }
 
     bool actorTypeIsComponentClass() const noexcept
     {
-        return this->actorType() == ActorType::ComponentClass;
+        return this->actorType() == ErrorCauseActorType::ComponentClass;
     }
 
     bool actorTypeIsComponent() const noexcept
     {
-        return this->actorType() == ActorType::Component;
+        return this->actorType() == ErrorCauseActorType::Component;
     }
 
     bool actorTypeIsMessageIterator() const noexcept
     {
-        return this->actorType() == ActorType::MessageIterator;
+        return this->actorType() == ErrorCauseActorType::MessageIterator;
     }
 
     ConstComponentClassErrorCause asComponentClass() const noexcept;
@@ -93,9 +93,9 @@ public:
         BT_ASSERT(this->actorTypeIsComponentClass());
     }
 
-    bt2::ComponentClass::Type componentClassType() const noexcept
+    bt2::ComponentClassType componentClassType() const noexcept
     {
-        return static_cast<bt2::ComponentClass::Type>(
+        return static_cast<bt2::ComponentClassType>(
             bt_error_cause_component_class_actor_get_component_class_type(this->libObjPtr()));
     }
 
@@ -128,9 +128,9 @@ public:
         return bt_error_cause_component_actor_get_component_name(this->libObjPtr());
     }
 
-    bt2::ComponentClass::Type componentClassType() const noexcept
+    bt2::ComponentClassType componentClassType() const noexcept
     {
-        return static_cast<bt2::ComponentClass::Type>(
+        return static_cast<bt2::ComponentClassType>(
             bt_error_cause_component_actor_get_component_class_type(this->libObjPtr()));
     }
 
@@ -168,9 +168,9 @@ public:
         return bt_error_cause_message_iterator_actor_get_component_name(this->libObjPtr());
     }
 
-    bt2::ComponentClass::Type componentClassType() const noexcept
+    bt2::ComponentClassType componentClassType() const noexcept
     {
-        return static_cast<bt2::ComponentClass::Type>(
+        return static_cast<bt2::ComponentClassType>(
             bt_error_cause_message_iterator_actor_get_component_class_type(this->libObjPtr()));
     }
 

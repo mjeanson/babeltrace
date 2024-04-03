@@ -102,27 +102,27 @@ struct FieldPathRefFuncs final
 
 } /* namespace internal */
 
+enum class FieldPathScope
+{
+    PacketContext = BT_FIELD_PATH_SCOPE_PACKET_CONTEXT,
+    EventCommonContext = BT_FIELD_PATH_SCOPE_EVENT_COMMON_CONTEXT,
+    EventSpecificContext = BT_FIELD_PATH_SCOPE_EVENT_SPECIFIC_CONTEXT,
+    EventPayload = BT_FIELD_PATH_SCOPE_EVENT_PAYLOAD,
+};
+
 class ConstFieldPath final : public BorrowedObject<const bt_field_path>
 {
 public:
     using Shared = SharedObject<ConstFieldPath, const bt_field_path, internal::FieldPathRefFuncs>;
     using Iterator = BorrowedObjectIterator<ConstFieldPath>;
 
-    enum class Scope
-    {
-        PacketContext = BT_FIELD_PATH_SCOPE_PACKET_CONTEXT,
-        EventCommonContext = BT_FIELD_PATH_SCOPE_EVENT_COMMON_CONTEXT,
-        EventSpecificContext = BT_FIELD_PATH_SCOPE_EVENT_SPECIFIC_CONTEXT,
-        EventPayload = BT_FIELD_PATH_SCOPE_EVENT_PAYLOAD,
-    };
-
     explicit ConstFieldPath(const LibObjPtr libObjPtr) noexcept : _ThisBorrowedObject {libObjPtr}
     {
     }
 
-    Scope rootScope() const noexcept
+    FieldPathScope rootScope() const noexcept
     {
-        return static_cast<Scope>(bt_field_path_get_root_scope(this->libObjPtr()));
+        return static_cast<FieldPathScope>(bt_field_path_get_root_scope(this->libObjPtr()));
     }
 
     std::uint64_t length() const noexcept
