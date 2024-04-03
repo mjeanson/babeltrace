@@ -219,7 +219,7 @@ class ConstErrorIterator final
 
 private:
     explicit ConstErrorIterator(const UniqueConstError& error, const std::uint64_t index) noexcept :
-        _mError {error}, _mIndex {index}
+        _mError {&error}, _mIndex {index}
     {
     }
 
@@ -257,7 +257,7 @@ public:
     }
 
 private:
-    const UniqueConstError& _mError;
+    const UniqueConstError *_mError;
     std::uint64_t _mIndex;
 };
 
@@ -321,7 +321,7 @@ private:
 
 inline ConstErrorCause ConstErrorIterator::operator*() const noexcept
 {
-    return _mError[_mIndex];
+    return (*_mError)[_mIndex];
 }
 
 inline UniqueConstError takeCurrentThreadError() noexcept
