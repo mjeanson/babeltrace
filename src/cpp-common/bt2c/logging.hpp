@@ -925,6 +925,34 @@ private:
     BT_CPPLOGE_STR_APPEND_CAUSE_AND_RETHROW_SPEC(_BT_CPPLOG_DEF_LOGGER, (_msg))
 
 /*
+ * Calls logErrno() on `_logger` with the `Level::Error` level to log an
+ * error and append a cause to the error of the current thread.
+ */
+#define BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(_logger, _init_msg, _fmt, ...)                          \
+    (_logger).logErrno<bt2c::Logger::Level::Error, true>(__FILE__, __func__, __LINE__,             \
+                                                         (_init_msg), (_fmt), ##__VA_ARGS__)
+
+/*
+ * BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC() using the default logger.
+ */
+#define BT_CPPLOGE_ERRNO_APPEND_CAUSE(_init_msg, _fmt, ...)                                        \
+    BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_fmt), ##__VA_ARGS__)
+
+/*
+ * Calls logErrnoStr() on `_logger` with the `Level::Error` level to log
+ * an error and append a cause to the error of the current thread.
+ */
+#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_SPEC(_logger, _init_msg, _msg)                           \
+    (_logger).logErrnoStr<bt2c::Logger::Level::Error, true>(__FILE__, __func__, __LINE__,          \
+                                                            (_init_msg), (_msg))
+
+/*
+ * BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_SPEC() using the default logger.
+ */
+#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE(_init_msg, _msg)                                         \
+    BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_msg))
+
+/*
  * Calls logErrorErrnoAndThrow() on `_logger` to log an error, append a
  * cause to the error of the current thread, and throw an instance of
  * `_exc_cls`.
