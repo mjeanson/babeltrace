@@ -6,8 +6,9 @@
 
 #include "common/common.h"
 #include "cpp-common/bt2/message.hpp"
-#include "cpp-common/bt2c/uuid.hpp"
 #include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
+
+#include "uuid.hpp"
 
 namespace bt2 {
 
