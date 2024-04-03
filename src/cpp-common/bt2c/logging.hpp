@@ -593,6 +593,14 @@ private:
     mutable std::vector<char> _mBuf;
 };
 
+/*
+ * Returns `s` if it's not `nullptr`, or the `(null)` string otherwise.
+ */
+inline const char *maybeNull(const char * const s) noexcept
+{
+    return s ? s : "(null)";
+}
+
 } /* namespace bt2c */
 
 /* Internal: default logger name */

@@ -11,10 +11,16 @@
 
 #include <babeltrace2/babeltrace.h>
 
+#include "cpp-common/bt2c/logging.hpp"
+
 struct fs_sink_comp
 {
-    bt_logging_level log_level = BT_LOGGING_LEVEL_NONE;
-    bt_self_component *self_comp = nullptr;
+    explicit fs_sink_comp(const bt2::SelfSinkComponent selfSinkComp) :
+        logger {selfSinkComp, "PLUGIN/SINK.CTF.FS/COMP"}
+    {
+    }
+
+    bt2c::Logger logger;
 
     /* Owned by this */
     bt_message_iterator *upstream_iter = nullptr;

@@ -12,6 +12,7 @@
 
 #include <babeltrace2/babeltrace.h>
 
+#include "cpp-common/bt2c/logging.hpp"
 #include "ctfser/ctfser.h"
 
 struct fs_sink_trace;
@@ -19,7 +20,12 @@ struct fs_sink_ctf_stream_class;
 
 struct fs_sink_stream
 {
-    bt_logging_level log_level = BT_LOGGING_LEVEL_NONE;
+    explicit fs_sink_stream(const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/SINK.CTF.FS/STREAM"}
+    {
+    }
+
+    bt2c::Logger logger;
     fs_sink_trace *trace = nullptr;
     bt_ctfser ctfser {};
 

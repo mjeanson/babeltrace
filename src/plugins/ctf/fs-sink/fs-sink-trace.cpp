@@ -9,11 +9,6 @@
 
 #include <babeltrace2/babeltrace.h>
 
-#define BT_COMP_LOG_SELF_COMP (trace->fs_sink->self_comp)
-#define BT_LOG_OUTPUT_LEVEL   (trace->log_level)
-#define BT_LOG_TAG            "PLUGIN/SINK.CTF.FS/TRACE"
-#include "logging/comp-logging.h"
-
 #include "common/assert.h"
 
 #include "fs-sink-ctf-meta.hpp"
@@ -141,7 +136,8 @@ static int lttng_validate_datetime(const struct fs_sink_trace *trace, const char
      * the format.
      */
     if (!g_time_val_from_iso8601(datetime, &tv)) {
-        BT_COMP_LOGI("Couldn't parse datetime as ISO 8601: date=\"%s\"", datetime);
+        BT_CPPLOGI_SPEC(trace->logger, "Couldn't parse datetime as ISO 8601: date=\"{}\"",
+                        datetime);
         goto end;
     }
 
@@ -161,7 +157,8 @@ static int append_lttng_trace_path_ust_uid(const struct fs_sink_trace *trace, GS
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(tc, "tracer_buffering_id");
     if (!v || !bt_value_is_signed_integer(v)) {
-        BT_COMP_LOGI_STR("Couldn't get environment value: name=\"tracer_buffering_id\"");
+        BT_CPPLOGI_STR_SPEC(trace->logger,
+                            "Couldn't get environment value: name=\"tracer_buffering_id\"");
         goto error;
     }
 
@@ -169,7 +166,8 @@ static int append_lttng_trace_path_ust_uid(const struct fs_sink_trace *trace, GS
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(tc, "architecture_bit_width");
     if (!v || !bt_value_is_signed_integer(v)) {
-        BT_COMP_LOGI_STR("Couldn't get environment value: name=\"architecture_bit_width\"");
+        BT_CPPLOGI_STR_SPEC(trace->logger,
+                            "Couldn't get environment value: name=\"architecture_bit_width\"");
         goto error;
     }
 
@@ -195,7 +193,7 @@ static int append_lttng_trace_path_ust_pid(const struct fs_sink_trace *trace, GS
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(tc, "procname");
     if (!v || !bt_value_is_string(v)) {
-        BT_COMP_LOGI_STR("Couldn't get environment value: name=\"procname\"");
+        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"procname\"");
         goto error;
     }
 
@@ -203,7 +201,7 @@ static int append_lttng_trace_path_ust_pid(const struct fs_sink_trace *trace, GS
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(tc, "vpid");
     if (!v || !bt_value_is_signed_integer(v)) {
-        BT_COMP_LOGI_STR("Couldn't get environment value: name=\"vpid\"");
+        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"vpid\"");
         goto error;
     }
 
@@ -211,7 +209,8 @@ static int append_lttng_trace_path_ust_pid(const struct fs_sink_trace *trace, GS
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(tc, "vpid_datetime");
     if (!v || !bt_value_is_string(v)) {
-        BT_COMP_LOGI_STR("Couldn't get environment value: name=\"vpid_datetime\"");
+        BT_CPPLOGI_STR_SPEC(trace->logger,
+                            "Couldn't get environment value: name=\"vpid_datetime\"");
         goto error;
     }
 
@@ -251,20 +250,20 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace, "tracer_name");
     if (!v || !bt_value_is_string(v)) {
-        BT_COMP_LOGI_STR("Couldn't get environment value: name=\"tracer_name\"");
+        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"tracer_name\"");
         goto error;
     }
 
     tracer_name = bt_value_string_get(v);
 
     if (!g_str_equal(tracer_name, "lttng-ust") && !g_str_equal(tracer_name, "lttng-modules")) {
-        BT_COMP_LOGI("Unrecognized tracer name: name=\"%s\"", tracer_name);
+        BT_CPPLOGI_SPEC(trace->logger, "Unrecognized tracer name: name=\"{}\"", tracer_name);
         goto error;
     }
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace, "tracer_major");
     if (!v || !bt_value_is_signed_integer(v)) {
-        BT_COMP_LOGI_STR("Couldn't get environment value: name=\"tracer_major\"");
+        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"tracer_major\"");
         goto error;
     }
 
@@ -272,22 +271,23 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace, "tracer_minor");
     if (!v || !bt_value_is_signed_integer(v)) {
-        BT_COMP_LOGI_STR("Couldn't get environment value: name=\"tracer_minor\"");
+        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"tracer_minor\"");
         goto error;
     }
 
     tracer_minor = bt_value_integer_signed_get(v);
 
     if (!(tracer_major >= 3 || (tracer_major == 2 && tracer_minor >= 11))) {
-        BT_COMP_LOGI("Unsupported LTTng version for automatic trace path: major=%" PRId64
-                     ", minor=%" PRId64,
-                     tracer_major, tracer_minor);
+        BT_CPPLOGI_SPEC(trace->logger,
+                        "Unsupported LTTng version for automatic trace path: major={}, minor={}",
+                        tracer_major, tracer_minor);
         goto error;
     }
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace, "hostname");
     if (!v || !bt_value_is_string(v)) {
-        BT_COMP_LOGI_STR("Couldn't get environment value: name=\"tracer_hostname\"");
+        BT_CPPLOGI_STR_SPEC(trace->logger,
+                            "Couldn't get environment value: name=\"tracer_hostname\"");
         goto error;
     }
 
@@ -295,7 +295,7 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace, "trace_name");
     if (!v || !bt_value_is_string(v)) {
-        BT_COMP_LOGI_STR("Couldn't get environment value: name=\"trace_name\"");
+        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"trace_name\"");
         goto error;
     }
 
@@ -304,7 +304,8 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace,
                                                               "trace_creation_datetime");
     if (!v || !bt_value_is_string(v)) {
-        BT_COMP_LOGI_STR("Couldn't get environment value: name=\"trace_creation_datetime\"");
+        BT_CPPLOGI_STR_SPEC(trace->logger,
+                            "Couldn't get environment value: name=\"trace_creation_datetime\"");
         goto error;
     }
 
@@ -318,7 +319,7 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace, "domain");
     if (!v || !bt_value_is_string(v)) {
-        BT_COMP_LOGI_STR("Couldn't get environment value: name=\"domain\"");
+        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"domain\"");
         goto error;
     }
 
@@ -331,7 +332,8 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
         v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace,
                                                                   "tracer_buffering_scheme");
         if (!v || !bt_value_is_string(v)) {
-            BT_COMP_LOGI_STR("Couldn't get environment value: name=\"tracer_buffering_scheme\"");
+            BT_CPPLOGI_STR_SPEC(trace->logger,
+                                "Couldn't get environment value: name=\"tracer_buffering_scheme\"");
             goto error;
         }
 
@@ -348,13 +350,14 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
             }
         } else {
             /* Unknown buffering scheme. */
-            BT_COMP_LOGI("Unknown buffering scheme: tracer_buffering_scheme=\"%s\"",
-                         tracer_buffering_scheme);
+            BT_CPPLOGI_SPEC(trace->logger,
+                            "Unknown buffering scheme: tracer_buffering_scheme=\"{}\"",
+                            tracer_buffering_scheme);
             goto error;
         }
     } else if (!g_str_equal(domain, "kernel")) {
         /* Unknown domain. */
-        BT_COMP_LOGI("Unknown domain: domain=\"%s\"", domain);
+        BT_CPPLOGI_SPEC(trace->logger, "Unknown domain: domain=\"{}\"", domain);
         goto error;
     }
 
@@ -488,17 +491,19 @@ void fs_sink_trace_destroy(struct fs_sink_trace *trace)
     BT_ASSERT(trace->metadata_path);
     fh = fopen(trace->metadata_path->str, "wb");
     if (!fh) {
-        BT_COMP_LOGF_ERRNO("In trace destruction listener: "
-                           "cannot open metadata file for writing",
-                           ": path=\"%s\"", trace->metadata_path->str);
+        BT_CPPLOGF_ERRNO_SPEC(trace->logger,
+                              "In trace destruction listener: "
+                              "cannot open metadata file for writing",
+                              ": path=\"{}\"", trace->metadata_path->str);
         bt_common_abort();
     }
 
     len = fwrite(tsdl->str, sizeof(*tsdl->str), tsdl->len, fh);
     if (len != tsdl->len) {
-        BT_COMP_LOGF_ERRNO("In trace destruction listener: "
-                           "cannot write metadata file",
-                           ": path=\"%s\"", trace->metadata_path->str);
+        BT_CPPLOGF_ERRNO_SPEC(trace->logger,
+                              "In trace destruction listener: "
+                              "cannot write metadata file",
+                              ": path=\"{}\"", trace->metadata_path->str);
         bt_common_abort();
     }
 
@@ -515,9 +520,10 @@ void fs_sink_trace_destroy(struct fs_sink_trace *trace)
         int ret = fclose(fh);
 
         if (ret != 0) {
-            BT_COMP_LOGW_ERRNO("In trace destruction listener: "
-                               "cannot close metadata file",
-                               ": path=\"%s\"", trace->metadata_path->str);
+            BT_CPPLOGW_ERRNO_SPEC(trace->logger,
+                                  "In trace destruction listener: "
+                                  "cannot close metadata file",
+                                  ": path=\"{}\"", trace->metadata_path->str);
         }
     }
 
@@ -550,10 +556,9 @@ static void ir_trace_destruction_listener(const bt_trace *ir_trace, void *data)
 struct fs_sink_trace *fs_sink_trace_create(struct fs_sink_comp *fs_sink, const bt_trace *ir_trace)
 {
     int ret;
-    fs_sink_trace *trace = new fs_sink_trace;
+    fs_sink_trace *trace = new fs_sink_trace {fs_sink->logger};
     bt_trace_add_listener_status trace_status;
 
-    trace->log_level = fs_sink->log_level;
     trace->fs_sink = fs_sink;
     trace->ir_trace = ir_trace;
     trace->ir_trace_destruction_listener_id = UINT64_C(-1);
@@ -566,8 +571,8 @@ struct fs_sink_trace *fs_sink_trace_create(struct fs_sink_comp *fs_sink, const b
     BT_ASSERT(trace->path);
     ret = g_mkdir_with_parents(trace->path->str, 0755);
     if (ret) {
-        BT_COMP_LOGE_ERRNO("Cannot create directories for trace directory", ": path=\"%s\"",
-                           trace->path->str);
+        BT_CPPLOGE_ERRNO_SPEC(trace->logger, "Cannot create directories for trace directory",
+                              ": path=\"{}\"", trace->path->str);
         goto error;
     }
 

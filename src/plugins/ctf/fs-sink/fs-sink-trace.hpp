@@ -11,12 +11,19 @@
 
 #include <babeltrace2/babeltrace.h>
 
+#include "cpp-common/bt2c/logging.hpp"
+
 struct fs_sink_comp;
 struct fs_sink_ctf_trace;
 
 struct fs_sink_trace
 {
-    bt_logging_level log_level = BT_LOGGING_LEVEL_NONE;
+    explicit fs_sink_trace(const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/SINK.CTF.FS/TRACE"}
+    {
+    }
+
+    bt2c::Logger logger;
     fs_sink_comp *fs_sink = nullptr;
 
     /* Owned by this */
