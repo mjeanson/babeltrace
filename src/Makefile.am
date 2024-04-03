@@ -202,6 +202,9 @@ cpp_common_vendor_fmt_libfmt_la_SOURCES = \
 	cpp-common/vendor/fmt/std.h \
 	cpp-common/vendor/fmt/xchar.h
 
+cpp_common_vendor_fmt_libfmt_la_CXXFLAGS = \
+	$(AM_CXXFLAGS) -Wno-missing-noreturn
+
 ctfser_libctfser_la_SOURCES = \
 	ctfser/ctfser.c \
 	ctfser/ctfser.h
