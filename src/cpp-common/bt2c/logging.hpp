@@ -840,6 +840,33 @@ private:
     BT_CPPLOGF_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_msg))
 
 /*
+ * Calls log() on `_logger` with the `Error` level to log an error and
+ * append a cause to the error of the current thread.
+ */
+#define BT_CPPLOGE_APPEND_CAUSE_SPEC(_logger, _fmt, ...)                                           \
+    (_logger).log<bt2c::Logger::Level::Error, true>(__FILE__, __func__, __LINE__, (_fmt),          \
+                                                    ##__VA_ARGS__)
+
+/*
+ * BT_CPPLOGE_APPEND_CAUSE_SPEC() using the default logger.
+ */
+#define BT_CPPLOGE_APPEND_CAUSE(_fmt, ...)                                                         \
+    BT_CPPLOGE_APPEND_CAUSE_SPEC(_BT_CPPLOG_DEF_LOGGER, (_fmt), ##__VA_ARGS__)
+
+/*
+ * Calls logStr() on `_logger` with the `Error` level to log an error and
+ * append a cause to the error of the current thread.
+ */
+#define BT_CPPLOGE_STR_APPEND_CAUSE_SPEC(_logger, _msg)                                            \
+    (_logger).logStr<bt2c::Logger::Level::Error, true>(__FILE__, __func__, __LINE__, (_msg))
+
+/*
+ * BT_CPPLOGE_STR_APPEND_CAUSE_SPEC() using the default logger.
+ */
+#define BT_CPPLOGE_STR_APPEND_CAUSE(_msg)                                                          \
+    BT_CPPLOGE_STR_APPEND_CAUSE_SPEC(_BT_CPPLOG_DEF_LOGGER, (_msg))
+
+/*
  * Calls logErrorAndThrow() on `_logger` to log an error, append a cause
  * to the error of the current thread, and throw an instance of
  * `_exc_cls`.
