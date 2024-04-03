@@ -183,7 +183,12 @@ cpp_common_libcpp_common_la_SOURCES = \
 	cpp-common/vendor/nlohmann/json.hpp \
 	cpp-common/vendor/optional-lite/optional.hpp \
 	cpp-common/vendor/span-lite/span.hpp \
-	cpp-common/vendor/string-view-lite/string_view.hpp
+	cpp-common/vendor/string-view-lite/string_view.hpp \
+	cpp-common/vendor/wise-enum/optional.h \
+	cpp-common/vendor/wise-enum/optional_common.h \
+	cpp-common/vendor/wise-enum/wise_enum.h \
+	cpp-common/vendor/wise-enum/wise_enum_detail.h \
+	cpp-common/vendor/wise-enum/wise_enum_generated.h
 
 cpp_common_vendor_fmt_libfmt_la_SOURCES = \
 	cpp-common/vendor/fmt/args.h \

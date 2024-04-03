@@ -5,3 +5,8 @@ Files:
   src/cpp-common/vendor/fmt/*.cc
 Copyright: 2012 - present, Victor Zverovich
 License: MIT
+
+Files:
+  src/cpp-common/vendor/wise-enum/*.h
+Copyright: 2017 - present, Nir Friedman
+License: BSL-1.0

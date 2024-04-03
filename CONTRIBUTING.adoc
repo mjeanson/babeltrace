@@ -1821,6 +1821,9 @@ IMPORTANT: Use the symbols of `src/cpp-common/bt2s/span.hpp`, under the
 IMPORTANT: Use the symbols of `src/cpp-common/bt2s/string-view.hpp`,
 under the `bt2s` namespace, instead of using this directly.
 
+`wise_enum`::
+    https://github.com/quicknir/wise_enum[wise_enum].
+
 === Automake/Libtool requirements
 
 To add a {cpp} source file to a part of the project, use the `.cpp`

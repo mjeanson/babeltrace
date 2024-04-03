@@ -138,6 +138,7 @@ embedded into the {bt2} source tree:
 * https://github.com/martinmoene/optional-lite[optional lite]
 * https://github.com/martinmoene/span-lite[span lite]
 * https://github.com/martinmoene/string-view-lite[string_view lite]
+* https://github.com/quicknir/wise_enum[wise_enum]
 * https://github.com/wonder-mice/zf_log[zf_log]
 ====
 
