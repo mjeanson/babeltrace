@@ -32,9 +32,9 @@ namespace bt2c {
  * self message iterator, or simple module name), a current logging
  * level, and a logging tag.
  *
- * It offers the logNoThrow(), logMemNoThrow(), logErrnoNoThrow(),
- * logErrorAndThrow(), logErrorAndRethrow(), logErrorErrnoAndThrow(),
- * and logErrorErrnoAndRethrow() method templates to log using a given
+ * It offers the log(), logMem(), logErrno(), logErrorAndThrow(),
+ * logErrorAndRethrow(), logErrorErrnoAndThrow(), and
+ * logErrorErrnoAndRethrow() method templates to log using a given
  * level, optionally append a cause to the error of the current thread
  * using the correct actor, and optionally throw or rethrow.
  *
@@ -278,11 +278,11 @@ public:
      * the error of the current thread using the same message.
      */
     template <Level LevelV, bool AppendCauseV, typename... ArgTs>
-    void logNoThrow(const char * const fileName, const char * const funcName,
-                    const unsigned int lineNo, const char * const fmt, ArgTs&&...args) const
+    void log(const char * const fileName, const char * const funcName, const unsigned int lineNo,
+             const char * const fmt, ArgTs&&...args) const
     {
-        this->_logNoThrow<_StdLogWriter, LevelV, AppendCauseV>(
-            fileName, funcName, lineNo, nullptr, 0, "", fmt, std::forward<ArgTs>(args)...);
+        this->_log<_StdLogWriter, LevelV, AppendCauseV>(fileName, funcName, lineNo, nullptr, 0, "",
+                                                        fmt, std::forward<ArgTs>(args)...);
     }
 
     /*
@@ -292,63 +292,61 @@ public:
      * the error of the current thread using the same message.
      */
     template <Level LevelV, bool AppendCauseV>
-    void logStrNoThrow(const char * const fileName, const char * const funcName,
-                       const unsigned int lineNo, const char * const msg) const
+    void logStr(const char * const fileName, const char * const funcName, const unsigned int lineNo,
+                const char * const msg) const
     {
-        this->_logStrNoThrow<_StdLogWriter, LevelV, AppendCauseV>(fileName, funcName, lineNo,
-                                                                  nullptr, 0, "", msg);
+        this->_logStr<_StdLogWriter, LevelV, AppendCauseV>(fileName, funcName, lineNo, nullptr, 0,
+                                                           "", msg);
     }
 
     /*
-     * Like logNoThrow() with the `Level::Error` level, but also
-     * throws a default-constructed instance of `ExcT`.
+     * Like log() with the `Level::Error` level, but also throws a
+     * default-constructed instance of `ExcT`.
      */
     template <bool AppendCauseV, typename ExcT, typename... ArgTs>
     [[noreturn]] void logErrorAndThrow(const char * const fileName, const char * const funcName,
                                        const unsigned int lineNo, const char * const fmt,
                                        ArgTs&&...args) const
     {
-        this->logNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, fmt,
-                                                     std::forward<ArgTs>(args)...);
+        this->log<Level::Error, AppendCauseV>(fileName, funcName, lineNo, fmt,
+                                              std::forward<ArgTs>(args)...);
         throw ExcT {};
     }
 
     /*
-     * Like logStrNoThrow() with the `Level::Error` level, but also
-     * throws a default-constructed instance of `ExcT`.
+     * Like logStr() with the `Level::Error` level, but also throws a
+     * default-constructed instance of `ExcT`.
      */
     template <bool AppendCauseV, typename ExcT>
     [[noreturn]] void logErrorStrAndThrow(const char * const fileName, const char * const funcName,
                                           const unsigned int lineNo, const char * const msg) const
     {
-        this->logStrNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, msg);
+        this->logStr<Level::Error, AppendCauseV>(fileName, funcName, lineNo, msg);
         throw ExcT {};
     }
 
     /*
-     * Like logNoThrow() with the `Level::Error` level, but also
-     * rethrows.
+     * Like log() with the `Level::Error` level, but also rethrows.
      */
     template <bool AppendCauseV, typename... ArgTs>
     [[noreturn]] void logErrorAndRethrow(const char * const fileName, const char * const funcName,
                                          const unsigned int lineNo, const char * const fmt,
                                          ArgTs&&...args) const
     {
-        this->logNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, fmt,
-                                                     std::forward<ArgTs>(args)...);
+        this->log<Level::Error, AppendCauseV>(fileName, funcName, lineNo, fmt,
+                                              std::forward<ArgTs>(args)...);
         throw;
     }
 
     /*
-     * Like logStrNoThrow() with the `Level::Error` level, but also
-     * rethrows.
+     * Like logStr() with the `Level::Error` level, but also rethrows.
      */
     template <bool AppendCauseV>
     [[noreturn]] void logErrorStrAndRethrow(const char * const fileName,
                                             const char * const funcName, const unsigned int lineNo,
                                             const char * const msg) const
     {
-        this->logStrNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, msg);
+        this->logStr<Level::Error, AppendCauseV>(fileName, funcName, lineNo, msg);
         throw;
     }
 
@@ -377,13 +375,13 @@ public:
      * the error of the current thread using the same message.
      */
     template <Level LevelV, bool AppendCauseV, typename... ArgTs>
-    void logErrnoNoThrow(const char * const fileName, const char * const funcName,
-                         const unsigned int lineNo, const char * const initMsg,
-                         const char * const fmt, ArgTs&&...args) const
+    void logErrno(const char * const fileName, const char * const funcName,
+                  const unsigned int lineNo, const char * const initMsg, const char * const fmt,
+                  ArgTs&&...args) const
     {
-        this->_logNoThrow<_InitMsgLogWriter, LevelV, AppendCauseV>(
-            fileName, funcName, lineNo, nullptr, 0, this->_errnoIntroStr(initMsg).c_str(), fmt,
-            std::forward<ArgTs>(args)...);
+        this->_log<_InitMsgLogWriter, LevelV, AppendCauseV>(fileName, funcName, lineNo, nullptr, 0,
+                                                            this->_errnoIntroStr(initMsg).c_str(),
+                                                            fmt, std::forward<ArgTs>(args)...);
     }
 
     /*
@@ -396,17 +394,17 @@ public:
      * the error of the current thread using the same message.
      */
     template <Level LevelV, bool AppendCauseV>
-    void logErrnoStrNoThrow(const char * const fileName, const char * const funcName,
-                            const unsigned int lineNo, const char * const initMsg,
-                            const char * const msg) const
+    void logErrnoStr(const char * const fileName, const char * const funcName,
+                     const unsigned int lineNo, const char * const initMsg,
+                     const char * const msg) const
     {
-        this->_logStrNoThrow<_InitMsgLogWriter, LevelV, AppendCauseV>(
+        this->_logStr<_InitMsgLogWriter, LevelV, AppendCauseV>(
             fileName, funcName, lineNo, nullptr, 0, this->_errnoIntroStr(initMsg).c_str(), msg);
     }
 
     /*
-     * Like logErrnoNoThrow() with the `Level::Error` level, but also
-     * throws a default-constructed instance of `ExcT`.
+     * Like logErrno() with the `Level::Error` level, but also throws a
+     * default-constructed instance of `ExcT`.
      */
     template <bool AppendCauseV, typename ExcT, typename... ArgTs>
     [[noreturn]] void logErrorErrnoAndThrow(const char * const fileName,
@@ -414,14 +412,14 @@ public:
                                             const char * const initMsg, const char * const fmt,
                                             ArgTs&&...args) const
     {
-        this->logErrnoNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg, fmt,
-                                                          std::forward<ArgTs>(args)...);
+        this->logErrno<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg, fmt,
+                                                   std::forward<ArgTs>(args)...);
         throw ExcT {};
     }
 
     /*
-     * Like logErrnoStrNoThrow() with the `Level::Error` level, but also
-     * throws a default-constructed instance of `ExcT`.
+     * Like logErrnoStr() with the `Level::Error` level, but also throws
+     * a default-constructed instance of `ExcT`.
      */
     template <bool AppendCauseV, typename ExcT>
     [[noreturn]] void
@@ -429,14 +427,12 @@ public:
                              const unsigned int lineNo, const char * const initMsg,
                              const char * const msg) const
     {
-        this->logErrnoStrNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg,
-                                                             msg);
+        this->logErrnoStr<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg, msg);
         throw ExcT {};
     }
 
     /*
-     * Like logErrnoNoThrow() with the `Level::Error` level, but also
-     * rethrows.
+     * Like logErrno() with the `Level::Error` level, but also rethrows.
      */
     template <bool AppendCauseV, typename... ArgTs>
     [[noreturn]] void logErrorErrnoAndRethrow(const char * const fileName,
@@ -444,13 +440,13 @@ public:
                                               const unsigned int lineNo, const char * const initMsg,
                                               const char * const fmt, ArgTs&&...args) const
     {
-        this->logErrnoNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg, fmt,
-                                                          std::forward<ArgTs>(args)...);
+        this->logErrno<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg, fmt,
+                                                   std::forward<ArgTs>(args)...);
         throw;
     }
 
     /*
-     * Like logErrnoStrNoThrow() with the `Level::Error` level, but also
+     * Like logErrnoStr() with the `Level::Error` level, but also
      * rethrows.
      */
     template <bool AppendCauseV>
@@ -459,8 +455,7 @@ public:
                                const unsigned int lineNo, const char * const initMsg,
                                const char * const msg) const
     {
-        this->logErrnoStrNoThrow<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg,
-                                                             msg);
+        this->logErrnoStr<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg, msg);
         throw;
     }
 
@@ -485,12 +480,12 @@ public:
      * the log message.
      */
     template <Level LevelV, typename... ArgTs>
-    void logMemNoThrow(const char * const fileName, const char * const funcName,
-                       const unsigned int lineNo, const void * const memData,
-                       const unsigned int memLen, const char * const fmt, ArgTs&&...args) const
+    void logMem(const char * const fileName, const char * const funcName, const unsigned int lineNo,
+                const void * const memData, const unsigned int memLen, const char * const fmt,
+                ArgTs&&...args) const
     {
-        this->_logNoThrow<_MemLogWriter, LevelV, false>(fileName, funcName, lineNo, memData, memLen,
-                                                        "", fmt, std::forward<ArgTs>(args)...);
+        this->_log<_MemLogWriter, LevelV, false>(fileName, funcName, lineNo, memData, memLen, "",
+                                                 fmt, std::forward<ArgTs>(args)...);
     }
 
     /*
@@ -498,24 +493,23 @@ public:
      * message `msg`.
      */
     template <Level LevelV>
-    void logMemStrNoThrow(const char * const fileName, const char * const funcName,
-                          const unsigned int lineNo, const void * const memData,
-                          const unsigned int memLen, const char * const msg) const
+    void logMemStr(const char * const fileName, const char * const funcName,
+                   const unsigned int lineNo, const void * const memData, const unsigned int memLen,
+                   const char * const msg) const
     {
-        this->_logStrNoThrow<_MemLogWriter, LevelV, false>(fileName, funcName, lineNo, memData,
-                                                           memLen, "", msg);
+        this->_logStr<_MemLogWriter, LevelV, false>(fileName, funcName, lineNo, memData, memLen, "",
+                                                    msg);
     }
 
 private:
     /*
      * Formats a log message with fmt::format() given `fmt` and `args`,
-     * and then forwards everything to _logStrNoThrow().
+     * and then forwards everything to _logStr().
      */
     template <typename LogWriterT, Level LevelV, bool AppendCauseV, typename... ArgTs>
-    void _logNoThrow(const char * const fileName, const char * const funcName,
-                     const unsigned int lineNo, const void * const memData,
-                     const std::size_t memLen, const char * const initMsg, const char * const fmt,
-                     ArgTs&&...args) const
+    void _log(const char * const fileName, const char * const funcName, const unsigned int lineNo,
+              const void * const memData, const std::size_t memLen, const char * const initMsg,
+              const char * const fmt, ArgTs&&...args) const
     {
         /* Only format arguments if logging or appending an error cause */
         if (G_UNLIKELY(this->wouldLog(LevelV) || AppendCauseV)) {
@@ -528,8 +522,8 @@ private:
             _mBuf.push_back('\0');
         }
 
-        this->_logStrNoThrow<LogWriterT, LevelV, AppendCauseV>(fileName, funcName, lineNo, memData,
-                                                               memLen, initMsg, _mBuf.data());
+        this->_logStr<LogWriterT, LevelV, AppendCauseV>(fileName, funcName, lineNo, memData, memLen,
+                                                        initMsg, _mBuf.data());
     }
 
     /*
@@ -541,10 +535,9 @@ private:
      * `initMsg` and `msg` as the message.
      */
     template <typename LogWriterT, Level LevelV, bool AppendCauseV>
-    void _logStrNoThrow(const char * const fileName, const char * const funcName,
-                        const unsigned int lineNo, const void * const memData,
-                        const std::size_t memLen, const char * const initMsg,
-                        const char * const msg) const
+    void _logStr(const char * const fileName, const char * const funcName,
+                 const unsigned int lineNo, const void * const memData, const std::size_t memLen,
+                 const char * const initMsg, const char * const msg) const
     {
         /* Initial message and main message are required */
         BT_ASSERT(initMsg);
@@ -603,14 +596,12 @@ private:
 #define _BT_CPPLOG_DEF_LOGGER _mLogger
 
 /*
- * Calls logNoThrow() on `_logger` to log using the level `_lvl` without
- * appending nor throwing.
+ * Calls log() on `_logger` to log using the level `_lvl`.
  */
 #define BT_CPPLOG_EX(_lvl, _logger, _fmt, ...)                                                     \
     do {                                                                                           \
         if (G_UNLIKELY((_logger).wouldLog(_lvl))) {                                                \
-            (_logger).logNoThrow<(_lvl), false>(__FILE__, __func__, __LINE__, (_fmt),              \
-                                                ##__VA_ARGS__);                                    \
+            (_logger).log<(_lvl), false>(__FILE__, __func__, __LINE__, (_fmt), ##__VA_ARGS__);     \
         }                                                                                          \
     } while (0)
 
@@ -642,11 +633,10 @@ private:
 #define BT_CPPLOGF(_fmt, ...) BT_CPPLOGF_SPEC(_BT_CPPLOG_DEF_LOGGER, (_fmt), ##__VA_ARGS__)
 
 /*
- * Calls logStrNoThrow() on `_logger` to log using the level `_lvl`
- * without appending nor throwing.
+ * Calls logStr() on `_logger` to log using the level `_lvl`.
  */
 #define BT_CPPLOG_STR_EX(_lvl, _logger, _msg)                                                      \
-    (_logger).logStrNoThrow<(_lvl), false>(__FILE__, __func__, __LINE__, (_msg))
+    (_logger).logStr<(_lvl), false>(__FILE__, __func__, __LINE__, (_msg))
 
 /*
  * BT_CPPLOG_STR_EX() with specific logging levels.
@@ -676,14 +666,13 @@ private:
 #define BT_CPPLOGF_STR(_msg) BT_CPPLOGF_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_msg))
 
 /*
- * Calls logMemNoThrow() on `_logger` to log using the level `_lvl`
- * without appending nor throwing.
+ * Calls logMem() on `_logger` to log using the level `_lvl`.
  */
 #define BT_CPPLOG_MEM_EX(_lvl, _logger, _mem_data, _mem_len, _fmt, ...)                            \
     do {                                                                                           \
         if (G_UNLIKELY((_logger).wouldLog(_lvl))) {                                                \
-            (_logger).logMemNoThrow<(_lvl)>(__FILE__, __func__, __LINE__, (_mem_data), (_mem_len), \
-                                            (_fmt), ##__VA_ARGS__);                                \
+            (_logger).logMem<(_lvl)>(__FILE__, __func__, __LINE__, (_mem_data), (_mem_len),        \
+                                     (_fmt), ##__VA_ARGS__);                                       \
         }                                                                                          \
     } while (0)
 
@@ -727,12 +716,10 @@ private:
     BT_CPPLOGF_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_fmt), ##__VA_ARGS__)
 
 /*
- * Calls logMemStrNoThrow() on `_logger` to log using the level `_lvl`
- * without appending nor throwing.
+ * Calls logMemStr() on `_logger` to log using the level `_lvl`.
  */
 #define BT_CPPLOG_MEM_STR_EX(_lvl, _logger, _mem_data, _mem_len, _msg)                             \
-    (_logger).logMemStrNoThrow<(_lvl)>(__FILE__, __func__, __LINE__, (_mem_data), (_mem_len),      \
-                                       (_msg))
+    (_logger).logMemStr<(_lvl)>(__FILE__, __func__, __LINE__, (_mem_data), (_mem_len), (_msg))
 
 /*
  * BT_CPPLOG_MEM_STR_EX() with specific logging levels.
@@ -768,14 +755,14 @@ private:
     BT_CPPLOGF_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_msg))
 
 /*
- * Calls logErrnoNoThrow() on `_logger` to log using the level `_lvl`
- * and initial message `_init_msg` without appending nor throwing.
+ * Calls logErrno() on `_logger` to log using the level `_lvl` and
+ * initial message `_init_msg`.
  */
 #define BT_CPPLOG_ERRNO_EX(_lvl, _logger, _init_msg, _fmt, ...)                                    \
     do {                                                                                           \
         if (G_UNLIKELY((_logger).wouldLog(_lvl))) {                                                \
-            (_logger).logErrnoNoThrow<(_lvl), false>(__FILE__, __func__, __LINE__, (_init_msg),    \
-                                                     (_fmt), ##__VA_ARGS__);                       \
+            (_logger).logErrno<(_lvl), false>(__FILE__, __func__, __LINE__, (_init_msg), (_fmt),   \
+                                              ##__VA_ARGS__);                                      \
         }                                                                                          \
     } while (0)
 
@@ -813,11 +800,11 @@ private:
     BT_CPPLOGF_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_fmt), ##__VA_ARGS__)
 
 /*
- * Calls logErrnoStrNoThrow() on `_logger` to log using the level `_lvl`
- * and initial message `_init_msg` without appending nor throwing.
+ * Calls logErrnoStr() on `_logger` to log using the level `_lvl` and
+ * initial message `_init_msg`.
  */
 #define BT_CPPLOG_ERRNO_STR_EX(_lvl, _logger, _init_msg, _msg)                                     \
-    (_logger).logErrnoStrNoThrow<(_lvl), false>(__FILE__, __func__, __LINE__, (_init_msg), (_msg))
+    (_logger).logErrnoStr<(_lvl), false>(__FILE__, __func__, __LINE__, (_init_msg), (_msg))
 
 /*
  * BT_CPPLOG_ERRNO_STR_EX() with specific logging levels.
