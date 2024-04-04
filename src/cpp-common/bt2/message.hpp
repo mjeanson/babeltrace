@@ -16,6 +16,7 @@
 #include "cpp-common/bt2/clock-snapshot.hpp"
 #include "cpp-common/bt2/trace-ir.hpp"
 #include "cpp-common/bt2s/optional.hpp"
+#include "cpp-common/vendor/wise-enum/wise_enum.h"
 
 #include "borrowed-object.hpp"
 #include "internal/utils.hpp"
@@ -68,17 +69,19 @@ class CommonDiscardedPacketsMessage;
 template <typename LibObjT>
 class CommonMessageIteratorInactivityMessage;
 
-enum class MessageType
-{
-    StreamBeginning = BT_MESSAGE_TYPE_STREAM_BEGINNING,
-    StreamEnd = BT_MESSAGE_TYPE_STREAM_END,
-    Event = BT_MESSAGE_TYPE_EVENT,
-    PacketBeginning = BT_MESSAGE_TYPE_PACKET_BEGINNING,
-    PacketEnd = BT_MESSAGE_TYPE_PACKET_END,
-    DiscardedEvents = BT_MESSAGE_TYPE_DISCARDED_EVENTS,
-    DiscardedPackets = BT_MESSAGE_TYPE_DISCARDED_PACKETS,
-    MessageIteratorInactivity = BT_MESSAGE_TYPE_MESSAGE_ITERATOR_INACTIVITY,
-};
+/* clang-format off */
+
+WISE_ENUM_CLASS(MessageType,
+    (StreamBeginning, BT_MESSAGE_TYPE_STREAM_BEGINNING),
+    (StreamEnd, BT_MESSAGE_TYPE_STREAM_END),
+    (Event, BT_MESSAGE_TYPE_EVENT),
+    (PacketBeginning, BT_MESSAGE_TYPE_PACKET_BEGINNING),
+    (PacketEnd, BT_MESSAGE_TYPE_PACKET_END),
+    (DiscardedEvents, BT_MESSAGE_TYPE_DISCARDED_EVENTS),
+    (DiscardedPackets, BT_MESSAGE_TYPE_DISCARDED_PACKETS),
+    (MessageIteratorInactivity, BT_MESSAGE_TYPE_MESSAGE_ITERATOR_INACTIVITY));
+
+/* clang-format on */
 
 template <typename LibObjT>
 class CommonMessage : public BorrowedObject<LibObjT>
