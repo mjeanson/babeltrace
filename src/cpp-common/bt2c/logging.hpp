@@ -300,7 +300,7 @@ public:
     }
 
     /*
-     * Like logAndNoThrow() with the `Level::Error` level, but also
+     * Like logNoThrow() with the `Level::Error` level, but also
      * throws a default-constructed instance of `ExcT`.
      */
     template <bool AppendCauseV, typename ExcT, typename... ArgTs>
@@ -314,7 +314,7 @@ public:
     }
 
     /*
-     * Like logStrAndNoThrow() with the `Level::Error` level, but also
+     * Like logStrNoThrow() with the `Level::Error` level, but also
      * throws a default-constructed instance of `ExcT`.
      */
     template <bool AppendCauseV, typename ExcT>
@@ -326,7 +326,7 @@ public:
     }
 
     /*
-     * Like logAndNoThrow() with the `Level::Error` level, but also
+     * Like logNoThrow() with the `Level::Error` level, but also
      * rethrows.
      */
     template <bool AppendCauseV, typename... ArgTs>
@@ -340,7 +340,7 @@ public:
     }
 
     /*
-     * Like logStrAndNoThrow() with the `Level::Error` level, but also
+     * Like logStrNoThrow() with the `Level::Error` level, but also
      * rethrows.
      */
     template <bool AppendCauseV>
