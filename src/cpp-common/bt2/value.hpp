@@ -16,6 +16,7 @@
 #include "common/assert.h"
 #include "common/common.h"
 #include "cpp-common/bt2c/c-string-view.hpp"
+#include "cpp-common/vendor/wise-enum/wise_enum.h"
 
 #include "borrowed-object-iterator.hpp"
 #include "borrowed-object.hpp"
@@ -70,17 +71,19 @@ class CommonArrayValue;
 template <typename LibObjT>
 class CommonMapValue;
 
-enum class ValueType
-{
-    Null = BT_VALUE_TYPE_NULL,
-    Bool = BT_VALUE_TYPE_BOOL,
-    UnsignedInteger = BT_VALUE_TYPE_UNSIGNED_INTEGER,
-    SignedInteger = BT_VALUE_TYPE_SIGNED_INTEGER,
-    Real = BT_VALUE_TYPE_REAL,
-    String = BT_VALUE_TYPE_STRING,
-    Array = BT_VALUE_TYPE_ARRAY,
-    Map = BT_VALUE_TYPE_MAP,
-};
+/* clang-format off */
+
+WISE_ENUM_CLASS(ValueType,
+    (Null, BT_VALUE_TYPE_NULL),
+    (Bool, BT_VALUE_TYPE_BOOL),
+    (UnsignedInteger, BT_VALUE_TYPE_UNSIGNED_INTEGER),
+    (SignedInteger, BT_VALUE_TYPE_SIGNED_INTEGER),
+    (Real, BT_VALUE_TYPE_REAL),
+    (String, BT_VALUE_TYPE_STRING),
+    (Array, BT_VALUE_TYPE_ARRAY),
+    (Map, BT_VALUE_TYPE_MAP));
+
+/* clang-format on */
 
 template <typename ValueObjT>
 class CommonValueRawValueProxy final
