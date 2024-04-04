@@ -12,6 +12,7 @@
 #include <babeltrace2/babeltrace.h>
 
 #include "common/assert.h"
+#include "cpp-common/vendor/wise-enum/wise_enum.h"
 
 #include "borrowed-object-iterator.hpp"
 #include "borrowed-object.hpp"
@@ -102,13 +103,15 @@ struct FieldPathRefFuncs final
 
 } /* namespace internal */
 
-enum class FieldPathScope
-{
-    PacketContext = BT_FIELD_PATH_SCOPE_PACKET_CONTEXT,
-    EventCommonContext = BT_FIELD_PATH_SCOPE_EVENT_COMMON_CONTEXT,
-    EventSpecificContext = BT_FIELD_PATH_SCOPE_EVENT_SPECIFIC_CONTEXT,
-    EventPayload = BT_FIELD_PATH_SCOPE_EVENT_PAYLOAD,
-};
+/* clang-format off */
+
+WISE_ENUM_CLASS(FieldPathScope,
+    (PacketContext, BT_FIELD_PATH_SCOPE_PACKET_CONTEXT),
+    (EventCommonContext, BT_FIELD_PATH_SCOPE_EVENT_COMMON_CONTEXT),
+    (EventSpecificContext, BT_FIELD_PATH_SCOPE_EVENT_SPECIFIC_CONTEXT),
+    (EventPayload, BT_FIELD_PATH_SCOPE_EVENT_PAYLOAD))
+
+/* clang-format on */
 
 class ConstFieldPath final : public BorrowedObject<const bt_field_path>
 {
