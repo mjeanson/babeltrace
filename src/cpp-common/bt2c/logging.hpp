@@ -23,6 +23,7 @@
 #include "cpp-common/bt2/self-message-iterator.hpp"
 #include "cpp-common/bt2s/optional.hpp"
 #include "cpp-common/vendor/fmt/core.h"
+#include "cpp-common/vendor/wise-enum/wise_enum.h"
 #include "logging/log-api.h"
 
 namespace bt2c {
@@ -44,17 +45,19 @@ namespace bt2c {
 class Logger final
 {
 public:
+    /* clang-format off */
+
     /* Available log levels */
-    enum class Level
-    {
-        Trace = BT_LOG_TRACE,
-        Debug = BT_LOG_DEBUG,
-        Info = BT_LOG_INFO,
-        Warning = BT_LOG_WARNING,
-        Error = BT_LOG_ERROR,
-        Fatal = BT_LOG_FATAL,
-        None = BT_LOG_NONE,
-    };
+    WISE_ENUM_CLASS_MEMBER(Level,
+        (Trace, BT_LOG_TRACE),
+        (Debug, BT_LOG_DEBUG),
+        (Info, BT_LOG_INFO),
+        (Warning, BT_LOG_WARNING),
+        (Error, BT_LOG_ERROR),
+        (Fatal, BT_LOG_FATAL),
+        (None, BT_LOG_NONE));
+
+    /* clang-format on */
 
     /*
      * Builds a logger from the self component class `selfCompCls` using
