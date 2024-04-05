@@ -684,7 +684,7 @@ static int create_ds_file_groups(struct ctf_fs_trace *ctf_fs_trace)
         }
 
         /* Create the file. */
-        file = ctf_fs_file_create(ctf_fs_trace->logger);
+        file = ctf_fs_file_create(ctf_fs_trace->logger).release();
         if (!file) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(
                 ctf_fs_trace->logger,

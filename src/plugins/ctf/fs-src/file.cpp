@@ -35,9 +35,15 @@ void ctf_fs_file_destroy(struct ctf_fs_file *file)
     delete file;
 }
 
-struct ctf_fs_file *ctf_fs_file_create(const bt2c::Logger& parentLogger)
+void ctf_fs_file_deleter::operator()(ctf_fs_file * const file) noexcept
 {
-    ctf_fs_file *file = new ctf_fs_file {parentLogger};
+    ctf_fs_file_destroy(file);
+}
+
+ctf_fs_file::UP ctf_fs_file_create(const bt2c::Logger& parentLogger)
+{
+    ctf_fs_file::UP file {new ctf_fs_file {parentLogger}};
+
     file->path = g_string_new(NULL);
     if (!file->path) {
         goto error;
@@ -46,8 +52,7 @@ struct ctf_fs_file *ctf_fs_file_create(const bt2c::Logger& parentLogger)
     goto end;
 
 error:
-    ctf_fs_file_destroy(file);
-    file = NULL;
+    file.reset();
 
 end:
     return file;

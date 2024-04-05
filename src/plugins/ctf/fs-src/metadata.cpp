@@ -37,7 +37,7 @@ end:
 
 static struct ctf_fs_file *get_file(const char *trace_path, const bt2c::Logger& logger)
 {
-    struct ctf_fs_file *file = ctf_fs_file_create(logger);
+    struct ctf_fs_file *file = ctf_fs_file_create(logger).release();
 
     if (!file) {
         goto error;

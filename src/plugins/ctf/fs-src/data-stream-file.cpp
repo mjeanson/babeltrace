@@ -823,7 +823,7 @@ struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace,
         goto error;
     }
 
-    ds_file->file = ctf_fs_file_create(parentLogger);
+    ds_file->file = ctf_fs_file_create(parentLogger).release();
     if (!ds_file->file) {
         goto error;
     }
