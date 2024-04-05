@@ -19,6 +19,7 @@
 #include "plugins/common/param-validation/param-validation.h"
 
 #include "../common/src/metadata/tsdl/decoder.hpp"
+#include "data-stream-file.hpp"
 #include "fs.hpp"
 #include "query.hpp"
 

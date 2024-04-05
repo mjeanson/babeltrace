@@ -12,6 +12,7 @@
 
 #include <babeltrace2/babeltrace.h>
 
+#include "cpp-common/bt2c/data-len.hpp"
 #include "cpp-common/bt2c/logging.hpp"
 
 #include "../common/src/msg-iter/msg-iter.hpp"
@@ -64,6 +65,79 @@ struct ctf_fs_ds_file
     off_t request_offset_in_mapping = 0;
 };
 
+struct ctf_fs_ds_index_entry
+{
+    explicit ctf_fs_ds_index_entry(const bt2c::DataLen offsetParam,
+                                   const bt2c::DataLen packetSizeParam) noexcept :
+        offset(offsetParam),
+        packetSize(packetSizeParam)
+    {
+    }
+
+    /* Weak, belongs to ctf_fs_ds_file_info. */
+    const char *path = nullptr;
+
+    /* Position of the packet from the beginning of the file. */
+    bt2c::DataLen offset;
+
+    /* Size of the packet. */
+    bt2c::DataLen packetSize;
+
+    /*
+     * Extracted from the packet context, relative to the respective fields'
+     * mapped clock classes (in cycles).
+     */
+    uint64_t timestamp_begin = 0, timestamp_end = 0;
+
+    /*
+     * Converted from the packet context, relative to the trace's EPOCH
+     * (in ns since EPOCH).
+     */
+    int64_t timestamp_begin_ns = 0, timestamp_end_ns = 0;
+
+    /*
+     * Packet sequence number, or UINT64_MAX if not present in the index.
+     */
+    uint64_t packet_seq_num = 0;
+};
+
+struct ctf_fs_ds_index
+{
+    /* Array of pointer to struct ctf_fs_ds_index_entry. */
+    GPtrArray *entries = nullptr;
+};
+
+struct ctf_fs_ds_file_group
+{
+    /*
+     * Array of struct ctf_fs_ds_file_info, owned by this.
+     *
+     * This is an _ordered_ array of data stream file infos which
+     * belong to this group (a single stream instance).
+     *
+     * You can call ctf_fs_ds_file_create() with one of those paths
+     * and the trace IR stream below.
+     */
+    GPtrArray *ds_file_infos = nullptr;
+
+    /* Owned by this */
+    struct ctf_stream_class *sc = nullptr;
+
+    /* Owned by this */
+    bt_stream *stream = nullptr;
+
+    /* Stream (instance) ID; -1ULL means none */
+    uint64_t stream_id = 0;
+
+    /* Weak, belongs to component */
+    struct ctf_fs_trace *ctf_fs_trace = nullptr;
+
+    /*
+     * Owned by this.
+     */
+    struct ctf_fs_ds_index *index = nullptr;
+};
+
 struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace, bt_stream *stream,
                                              const char *path, const bt2c::Logger& logger);
 
@@ -76,6 +150,17 @@ struct ctf_fs_ds_index *ctf_fs_ds_file_build_index(struct ctf_fs_ds_file *ds_fil
 struct ctf_fs_ds_index *ctf_fs_ds_index_create(const bt2c::Logger& logger);
 
 void ctf_fs_ds_index_destroy(struct ctf_fs_ds_index *index);
+
+void ctf_fs_ds_file_info_destroy(struct ctf_fs_ds_file_info *ds_file_info);
+
+struct ctf_fs_ds_file_info *ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns);
+
+struct ctf_fs_ds_file_group *ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs_trace,
+                                                         struct ctf_stream_class *sc,
+                                                         uint64_t stream_instance_id,
+                                                         struct ctf_fs_ds_index *index);
+
+void ctf_fs_ds_file_group_destroy(struct ctf_fs_ds_file_group *ds_file_group);
 
 /*
  * Medium operations to iterate on a single ctf_fs_ds_file.

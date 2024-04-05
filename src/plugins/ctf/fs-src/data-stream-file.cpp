@@ -925,3 +925,77 @@ void ctf_fs_ds_index_destroy(struct ctf_fs_ds_index *index)
 
     delete index;
 }
+
+void ctf_fs_ds_file_info_destroy(struct ctf_fs_ds_file_info *ds_file_info)
+{
+    if (!ds_file_info) {
+        return;
+    }
+
+    if (ds_file_info->path) {
+        g_string_free(ds_file_info->path, TRUE);
+    }
+
+    delete ds_file_info;
+}
+
+struct ctf_fs_ds_file_info *ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns)
+{
+    ctf_fs_ds_file_info *ds_file_info = new ctf_fs_ds_file_info;
+    ds_file_info->path = g_string_new(path);
+    if (!ds_file_info->path) {
+        ctf_fs_ds_file_info_destroy(ds_file_info);
+        ds_file_info = NULL;
+        goto end;
+    }
+
+    ds_file_info->begin_ns = begin_ns;
+
+end:
+    return ds_file_info;
+}
+
+void ctf_fs_ds_file_group_destroy(struct ctf_fs_ds_file_group *ds_file_group)
+{
+    if (!ds_file_group) {
+        return;
+    }
+
+    if (ds_file_group->ds_file_infos) {
+        g_ptr_array_free(ds_file_group->ds_file_infos, TRUE);
+    }
+
+    ctf_fs_ds_index_destroy(ds_file_group->index);
+
+    bt_stream_put_ref(ds_file_group->stream);
+    delete ds_file_group;
+}
+
+struct ctf_fs_ds_file_group *ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs_trace,
+                                                         struct ctf_stream_class *sc,
+                                                         uint64_t stream_instance_id,
+                                                         struct ctf_fs_ds_index *index)
+{
+    ctf_fs_ds_file_group *ds_file_group = new ctf_fs_ds_file_group;
+    ds_file_group->ds_file_infos =
+        g_ptr_array_new_with_free_func((GDestroyNotify) ctf_fs_ds_file_info_destroy);
+    if (!ds_file_group->ds_file_infos) {
+        goto error;
+    }
+
+    ds_file_group->index = index;
+
+    ds_file_group->stream_id = stream_instance_id;
+    BT_ASSERT(sc);
+    ds_file_group->sc = sc;
+    ds_file_group->ctf_fs_trace = ctf_fs_trace;
+    goto end;
+
+error:
+    ctf_fs_ds_file_group_destroy(ds_file_group);
+    ctf_fs_ds_index_destroy(index);
+    ds_file_group = NULL;
+
+end:
+    return ds_file_group;
+}
