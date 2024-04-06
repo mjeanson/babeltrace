@@ -521,7 +521,7 @@ static void ds_index_insert_ds_index_entry_sorted(struct ctf_fs_ds_index *index,
     }
 }
 
-static void merge_ctf_fs_ds_indexes(struct ctf_fs_ds_index *dest, struct ctf_fs_ds_index *src)
+static void merge_ctf_fs_ds_indexes(struct ctf_fs_ds_index *dest, ctf_fs_ds_index::UP src)
 {
     guint i;
 
@@ -547,7 +547,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
     int ret;
     struct ctf_fs_ds_file *ds_file = NULL;
     ctf_fs_ds_file_info::UP ds_file_info;
-    struct ctf_fs_ds_index *index = NULL;
+    ctf_fs_ds_index::UP index;
     struct ctf_msg_iter *msg_iter = NULL;
     struct ctf_stream_class *sc = NULL;
     struct ctf_msg_iter_packet_properties props;
@@ -604,7 +604,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
         goto error;
     }
 
-    index = ctf_fs_ds_file_build_index(ds_file, ds_file_info.get(), msg_iter).release();
+    index = ctf_fs_ds_file_build_index(ds_file, ds_file_info.get(), msg_iter);
     if (!index) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger, "Failed to index CTF stream file \'{}\'",
                                      ds_file->file->path->str);
@@ -628,10 +628,8 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
          * there's no timestamp to order the file within its
          * group.
          */
-        new_ds_file_group = ctf_fs_ds_file_group_create(ctf_fs_trace, sc, UINT64_C(-1), index);
-
-        /* Ownership of index is transferred. */
-        index = NULL;
+        new_ds_file_group =
+            ctf_fs_ds_file_group_create(ctf_fs_trace, sc, UINT64_C(-1), std::move(index));
 
         if (!new_ds_file_group) {
             goto error;
@@ -655,9 +653,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
 
     if (!ds_file_group) {
         new_ds_file_group =
-            ctf_fs_ds_file_group_create(ctf_fs_trace, sc, stream_instance_id, index);
-        /* Ownership of index is transferred. */
-        index = NULL;
+            ctf_fs_ds_file_group_create(ctf_fs_trace, sc, stream_instance_id, std::move(index));
         if (!new_ds_file_group) {
             goto error;
         }
@@ -665,7 +661,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
         ds_file_group = new_ds_file_group.get();
         ctf_fs_trace->ds_file_groups.emplace_back(std::move(new_ds_file_group));
     } else {
-        merge_ctf_fs_ds_indexes(ds_file_group->index, index);
+        merge_ctf_fs_ds_indexes(ds_file_group->index.get(), std::move(index));
     }
 
     ds_file_group_insert_ds_file_info_sorted(ds_file_group, std::move(ds_file_info));
@@ -682,7 +678,6 @@ end:
         ctf_msg_iter_destroy(msg_iter);
     }
 
-    ctf_fs_ds_index_destroy(index);
     return ret;
 }
 
@@ -1003,7 +998,7 @@ static void merge_ctf_fs_ds_file_groups(struct ctf_fs_ds_file_group *dest,
     }
 
     /* Merge both indexes. */
-    merge_ctf_fs_ds_indexes(dest->index, src->index);
+    merge_ctf_fs_ds_indexes(dest->index.get(), std::move(src->index));
 }
 
 /* Merge src_trace's data stream file groups into dest_trace's. */
@@ -1064,17 +1059,15 @@ static int merge_matching_ctf_fs_ds_file_groups(struct ctf_fs_trace *dest_trace,
                                                            src_group->sc->id);
             BT_ASSERT(sc);
 
-            auto index = ctf_fs_ds_index_create(dest_trace->logger).release();
+            auto index = ctf_fs_ds_index_create(dest_trace->logger);
             if (!index) {
                 ret = -1;
                 goto end;
             }
 
             auto new_dest_group =
-                ctf_fs_ds_file_group_create(dest_trace, sc, src_group->stream_id, index);
+                ctf_fs_ds_file_group_create(dest_trace, sc, src_group->stream_id, std::move(index));
 
-            /* Ownership of index is transferred. */
-            index = NULL;
             if (!new_dest_group) {
                 ret = -1;
                 goto end;
@@ -1294,10 +1287,9 @@ static int fix_index_lttng_event_after_packet_bug(struct ctf_fs_trace *trace)
         guint entry_i;
         struct ctf_clock_class *default_cc;
         struct ctf_fs_ds_index_entry *last_entry;
-        struct ctf_fs_ds_index *index;
 
         BT_ASSERT(ds_file_group);
-        index = ds_file_group->index;
+        const auto index = ds_file_group->index.get();
 
         BT_ASSERT(index);
         BT_ASSERT(index->entries);
@@ -1372,7 +1364,7 @@ static int fix_index_barectf_event_before_packet_bug(struct ctf_fs_trace *trace)
     for (const auto& ds_file_group : trace->ds_file_groups) {
         guint entry_i;
         struct ctf_clock_class *default_cc;
-        struct ctf_fs_ds_index *index = ds_file_group->index;
+        const auto index = ds_file_group->index.get();
 
         BT_ASSERT(index);
         BT_ASSERT(index->entries);
@@ -1439,10 +1431,9 @@ static int fix_index_lttng_crash_quirk(struct ctf_fs_trace *trace)
     for (const auto& ds_file_group : trace->ds_file_groups) {
         guint entry_idx;
         struct ctf_clock_class *default_cc;
-        struct ctf_fs_ds_index *index;
 
         BT_ASSERT(ds_file_group);
-        index = ds_file_group->index;
+        const auto index = ds_file_group->index.get();
 
         BT_ASSERT(ds_file_group->sc->default_clock_class);
         default_cc = ds_file_group->sc->default_clock_class;

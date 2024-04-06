@@ -149,10 +149,7 @@ struct ctf_fs_ds_file_group
     /* Weak, belongs to component */
     struct ctf_fs_trace *ctf_fs_trace = nullptr;
 
-    /*
-     * Owned by this.
-     */
-    struct ctf_fs_ds_index *index = nullptr;
+    ctf_fs_ds_index::UP index;
 };
 
 struct ctf_fs_ds_file *ctf_fs_ds_file_create(struct ctf_fs_trace *ctf_fs_trace, bt_stream *stream,
@@ -173,7 +170,7 @@ ctf_fs_ds_file_info::UP ctf_fs_ds_file_info_create(const char *path, int64_t beg
 ctf_fs_ds_file_group::UP ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs_trace,
                                                      struct ctf_stream_class *sc,
                                                      uint64_t stream_instance_id,
-                                                     struct ctf_fs_ds_index *index);
+                                                     ctf_fs_ds_index::UP index);
 
 /*
  * Medium operations to iterate on a single ctf_fs_ds_file.

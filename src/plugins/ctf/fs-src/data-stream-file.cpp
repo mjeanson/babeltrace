@@ -944,8 +944,6 @@ static void ctf_fs_ds_file_group_destroy(struct ctf_fs_ds_file_group *ds_file_gr
         return;
     }
 
-    ctf_fs_ds_index_destroy(ds_file_group->index);
-
     bt_stream_put_ref(ds_file_group->stream);
     delete ds_file_group;
 }
@@ -958,11 +956,11 @@ void ctf_fs_ds_file_group_deleter::operator()(ctf_fs_ds_file_group *group) noexc
 ctf_fs_ds_file_group::UP ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs_trace,
                                                      struct ctf_stream_class *sc,
                                                      uint64_t stream_instance_id,
-                                                     struct ctf_fs_ds_index *index)
+                                                     ctf_fs_ds_index::UP index)
 {
     ctf_fs_ds_file_group::UP ds_file_group {new ctf_fs_ds_file_group};
 
-    ds_file_group->index = index;
+    ds_file_group->index = std::move(index);
 
     ds_file_group->stream_id = stream_instance_id;
     BT_ASSERT(sc);
