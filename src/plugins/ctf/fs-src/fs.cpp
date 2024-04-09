@@ -257,11 +257,6 @@ end:
     }
 }
 
-ctf_fs_component::UP ctf_fs_component_create(const bt2c::Logger& parentLogger)
-{
-    return bt2s::make_unique<ctf_fs_component>(parentLogger);
-}
-
 void ctf_fs_finalize(bt_self_component_source *component)
 {
     ctf_fs_component::UP {static_cast<ctf_fs_component *>(
@@ -1775,11 +1770,8 @@ static ctf_fs_component::UP ctf_fs_create(const bt_value *params,
     const bt_value *trace_name_value;
     bt_self_component *self_comp = bt_self_component_source_as_self_component(self_comp_src);
 
-    ctf_fs_component::UP ctf_fs = ctf_fs_component_create(
+    ctf_fs_component::UP ctf_fs = bt2s::make_unique<ctf_fs_component>(
         bt2c::Logger {bt2::SelfSourceComponent {self_comp_src}, "PLUGIN/SRC.CTF.FS/COMP"});
-    if (!ctf_fs) {
-        return nullptr;
-    }
 
     if (!read_src_fs_parameters(params, &inputs_value, &trace_name_value, ctf_fs.get())) {
         return nullptr;

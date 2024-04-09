@@ -145,10 +145,6 @@ ctf_fs_iterator_next(bt_self_message_iterator *iterator, bt_message_array_const 
 bt_message_iterator_class_seek_beginning_method_status
 ctf_fs_iterator_seek_beginning(bt_self_message_iterator *message_iterator);
 
-/* Create and initialize a new, empty ctf_fs_component. */
-
-ctf_fs_component::UP ctf_fs_component_create(const bt2c::Logger& parentLogger);
-
 /*
  * Create one `struct ctf_fs_trace` from one trace, or multiple traces sharing
  * the same UUID.
