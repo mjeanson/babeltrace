@@ -31,7 +31,7 @@ struct ctf_metadata_decoder
     bt2c::Logger logger;
     struct ctf_scanner *scanner = nullptr;
     GString *text = nullptr;
-    struct ctf_visitor_generate_ir *visitor = nullptr;
+    ctf_visitor_generate_ir::UP visitor;
     bt_uuid_t uuid {};
     bool is_uuid_set = false;
     int bo = 0;
@@ -157,7 +157,7 @@ void ctf_metadata_decoder_destroy(struct ctf_metadata_decoder *mdec)
     }
 
     BT_CPPLOGD_SPEC(mdec->logger, "Destroying CTF metadata decoder: addr={}", fmt::ptr(mdec));
-    ctf_visitor_generate_ir_destroy(mdec->visitor);
+
     delete mdec;
 }
 
@@ -316,7 +316,7 @@ ctf_metadata_decoder_append_content(struct ctf_metadata_decoder *mdec, FILE *fp)
     }
 
     if (mdec->config.create_trace_class) {
-        ret = ctf_visitor_generate_ir_visit_node(mdec->visitor, &mdec->scanner->ast->root);
+        ret = ctf_visitor_generate_ir_visit_node(mdec->visitor.get(), &mdec->scanner->ast->root);
         switch (ret) {
         case 0:
             /* Success */
@@ -361,7 +361,7 @@ bt_trace_class *ctf_metadata_decoder_get_ir_trace_class(struct ctf_metadata_deco
 {
     BT_ASSERT_DBG(mdec);
     BT_ASSERT_DBG(mdec->config.create_trace_class);
-    return ctf_visitor_generate_ir_get_ir_trace_class(mdec->visitor);
+    return ctf_visitor_generate_ir_get_ir_trace_class(mdec->visitor.get());
 }
 
 struct ctf_trace_class *
@@ -369,7 +369,7 @@ ctf_metadata_decoder_borrow_ctf_trace_class(struct ctf_metadata_decoder *mdec)
 {
     BT_ASSERT_DBG(mdec);
     BT_ASSERT_DBG(mdec->config.create_trace_class);
-    return ctf_visitor_generate_ir_borrow_ctf_trace_class(mdec->visitor);
+    return ctf_visitor_generate_ir_borrow_ctf_trace_class(mdec->visitor.get());
 }
 
 const char *ctf_metadata_decoder_get_text(struct ctf_metadata_decoder *mdec)
