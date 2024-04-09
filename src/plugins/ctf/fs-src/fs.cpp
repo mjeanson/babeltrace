@@ -1707,27 +1707,15 @@ end:
     return ret;
 }
 
-static GString *get_stream_instance_unique_name(struct ctf_fs_ds_file_group *ds_file_group)
+static const std::string&
+get_stream_instance_unique_name(struct ctf_fs_ds_file_group *ds_file_group)
 {
-    GString *name;
-    struct ctf_fs_ds_file_info *ds_file_info;
-
-    name = g_string_new(NULL);
-    if (!name) {
-        goto end;
-    }
-
     /*
-     * If there's more than one stream file in the stream file
-     * group, the first (earliest) stream file's path is used as
-     * the stream's unique name.
+     * The first (earliest) stream file's path is used as the stream's unique
+     * name.
      */
     BT_ASSERT(!ds_file_group->ds_file_infos.empty());
-    ds_file_info = ds_file_group->ds_file_infos[0].get();
-    g_string_assign(name, ds_file_info->path.c_str());
-
-end:
-    return name;
+    return ds_file_group->ds_file_infos[0]->path;
 }
 
 /* Create the IR stream objects for ctf_fs_trace. */
@@ -1735,14 +1723,9 @@ end:
 static int create_streams_for_trace(struct ctf_fs_trace *ctf_fs_trace)
 {
     int ret;
-    GString *name = NULL;
 
     for (const auto& ds_file_group : ctf_fs_trace->ds_file_groups) {
-        name = get_stream_instance_unique_name(ds_file_group.get());
-
-        if (!name) {
-            goto error;
-        }
+        const std::string& name = get_stream_instance_unique_name(ds_file_group.get());
 
         BT_ASSERT(ds_file_group->sc->ir_sc);
         BT_ASSERT(ctf_fs_trace->trace);
@@ -1766,23 +1749,20 @@ static int create_streams_for_trace(struct ctf_fs_trace *ctf_fs_trace)
             BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger,
                                          "Cannot create stream for DS file group: "
                                          "addr={}, stream-name=\"{}\"",
-                                         fmt::ptr(ds_file_group), name->str);
+                                         fmt::ptr(ds_file_group), name);
             goto error;
         }
 
         ds_file_group->stream = bt2::Stream::Shared::createWithoutRef(stream);
 
-        ret = bt_stream_set_name(ds_file_group->stream->libObjPtr(), name->str);
+        ret = bt_stream_set_name(ds_file_group->stream->libObjPtr(), name.c_str());
         if (ret) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs_trace->logger,
                                          "Cannot set stream's name: "
                                          "addr={}, stream-name=\"{}\"",
-                                         fmt::ptr(ds_file_group->stream->libObjPtr()), name->str);
+                                         fmt::ptr(ds_file_group->stream->libObjPtr()), name);
             goto error;
         }
-
-        g_string_free(name, TRUE);
-        name = NULL;
     }
 
     ret = 0;
@@ -1792,10 +1772,6 @@ error:
     ret = -1;
 
 end:
-
-    if (name) {
-        g_string_free(name, TRUE);
-    }
     return ret;
 }
 
