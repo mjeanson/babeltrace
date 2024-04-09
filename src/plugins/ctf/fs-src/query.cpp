@@ -123,14 +123,13 @@ static void populate_stream_info(struct ctf_fs_ds_file_group *group, const bt2::
      * the timestamp_begin of the first index entry and the timestamp_end
      * of the last index entry.
      */
-    BT_ASSERT(group->index);
-    BT_ASSERT(!group->index->entries.empty());
+    BT_ASSERT(!group->index.entries.empty());
 
     /* First entry. */
-    const auto& first_ds_index_entry = group->index->entries.front();
+    const auto& first_ds_index_entry = group->index.entries.front();
 
     /* Last entry. */
-    const auto& last_ds_index_entry = group->index->entries.back();
+    const auto& last_ds_index_entry = group->index.entries.back();
 
     stream_range->begin_ns = first_ds_index_entry.timestamp_begin_ns;
     stream_range->end_ns = last_ds_index_entry.timestamp_end_ns;
