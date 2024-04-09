@@ -475,6 +475,36 @@ struct ctf_ast
 
 const char *node_type(struct ctf_node *node);
 
+struct ctf_visitor_generate_ir
+{
+    explicit ctf_visitor_generate_ir(ctf_metadata_decoder_config decoderConfig,
+                                     bt2c::Logger loggerParam) :
+        decoder_config {std::move(decoderConfig)},
+        logger {std::move(loggerParam)}
+    {
+    }
+
+    /* Trace IR trace class being filled (owned by this) */
+    bt_trace_class *trace_class = nullptr;
+
+    /* CTF meta trace being filled (owned by this) */
+    struct ctf_trace_class *ctf_tc = nullptr;
+
+    /* Current declaration scope (top of the stack) (owned by this) */
+    struct ctx_decl_scope *current_scope = nullptr;
+
+    /* True if trace declaration is visited */
+    bool is_trace_visited = false;
+
+    /* True if this is an LTTng trace */
+    bool is_lttng = false;
+
+    /* Config passed by the user */
+    struct ctf_metadata_decoder_config decoder_config;
+
+    bt2c::Logger logger;
+};
+
 struct ctf_visitor_generate_ir *
 ctf_visitor_generate_ir_create(const struct ctf_metadata_decoder_config *config);
 
