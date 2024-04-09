@@ -115,7 +115,7 @@ static void add_range(const bt2::MapValue info, struct range *range, const char 
 }
 
 static void populate_stream_info(struct ctf_fs_ds_file_group *group, const bt2::MapValue groupInfo,
-                                 struct range *stream_range, const bt2c::Logger& logger)
+                                 struct range *stream_range)
 {
     /*
      * Since each `struct ctf_fs_ds_file_group` has a sorted array of
@@ -144,13 +144,7 @@ static void populate_stream_info(struct ctf_fs_ds_file_group *group, const bt2::
         stream_range->begin_ns != UINT64_C(-1) && stream_range->end_ns != UINT64_C(-1);
 
     add_range(groupInfo, stream_range, "range-ns");
-
-    bt2c::GCharUP portName = ctf_fs_make_port_name(group);
-    if (!portName) {
-        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2::Error, "Failed to make port name");
-    }
-
-    groupInfo.insert("port-name", portName.get());
+    groupInfo.insert("port-name", ctf_fs_make_port_name(group));
 }
 
 static void populate_trace_info(const struct ctf_fs_trace *trace, const bt2::MapValue traceInfo,
@@ -168,7 +162,7 @@ static void populate_trace_info(const struct ctf_fs_trace *trace, const bt2::Map
     for (const auto& group : trace->ds_file_groups) {
         range group_range;
         const auto groupInfo = fileGroups.appendEmptyMap();
-        populate_stream_info(group.get(), groupInfo, &group_range, logger);
+        populate_stream_info(group.get(), groupInfo, &group_range);
     }
 }
 
