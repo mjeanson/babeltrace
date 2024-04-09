@@ -256,6 +256,16 @@ struct ctf_msg_iter_medium_ops
     bt_stream *(*borrow_stream)(bt_stream_class *stream_class, int64_t stream_id, void *data);
 };
 
+/** CTF message iterator. */
+struct ctf_msg_iter;
+
+struct ctf_msg_iter_deleter
+{
+    void operator()(ctf_msg_iter *iter) noexcept;
+};
+
+using ctf_msg_iter_up = std::unique_ptr<ctf_msg_iter, ctf_msg_iter_deleter>;
+
 /**
  * Creates a CTF message iterator.
  *
@@ -272,10 +282,10 @@ struct ctf_msg_iter_medium_ops
  * @returns			New CTF message iterator on
  *				success, or \c NULL on error
  */
-struct ctf_msg_iter *ctf_msg_iter_create(struct ctf_trace_class *tc, size_t max_request_sz,
-                                         struct ctf_msg_iter_medium_ops medops, void *medops_data,
-                                         bt_self_message_iterator *self_msg_iter,
-                                         const bt2c::Logger& logger);
+ctf_msg_iter_up ctf_msg_iter_create(struct ctf_trace_class *tc, size_t max_request_sz,
+                                    struct ctf_msg_iter_medium_ops medops, void *medops_data,
+                                    bt_self_message_iterator *self_msg_iter,
+                                    const bt2c::Logger& logger);
 
 /**
  * Destroys a CTF message iterator, freeing all internal resources.
