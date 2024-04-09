@@ -21,6 +21,7 @@
 #include "../common/src/metadata/tsdl/decoder.hpp"
 #include "data-stream-file.hpp"
 #include "fs.hpp"
+#include "metadata.hpp"
 #include "query.hpp"
 
 #define METADATA_TEXT_SIG "/* CTF 1.8"
@@ -158,9 +159,8 @@ static void populate_stream_info(struct ctf_fs_ds_file_group *group, const bt2::
 static void populate_trace_info(const struct ctf_fs_trace *trace, const bt2::MapValue traceInfo,
                                 const bt2c::Logger& logger)
 {
-    BT_ASSERT(trace->ds_file_groups);
     /* Add trace range info only if it contains streams. */
-    if (trace->ds_file_groups->len == 0) {
+    if (trace->ds_file_groups.empty()) {
         BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(
             logger, bt2::Error, "Trace has no streams: trace-path={}", trace->path->str);
     }
@@ -168,13 +168,10 @@ static void populate_trace_info(const struct ctf_fs_trace *trace, const bt2::Map
     const auto fileGroups = traceInfo.insertEmptyArray("stream-infos");
 
     /* Find range of all stream groups, and of the trace. */
-    for (size_t group_idx = 0; group_idx < trace->ds_file_groups->len; group_idx++) {
+    for (const auto& group : trace->ds_file_groups) {
         range group_range;
-        ctf_fs_ds_file_group *group =
-            (ctf_fs_ds_file_group *) g_ptr_array_index(trace->ds_file_groups, group_idx);
-
         const auto groupInfo = fileGroups.appendEmptyMap();
-        populate_stream_info(group, groupInfo, &group_range, logger);
+        populate_stream_info(group.get(), groupInfo, &group_range, logger);
     }
 }
 

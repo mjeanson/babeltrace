@@ -281,10 +281,6 @@ static void ctf_fs_trace_destroy(struct ctf_fs_trace *ctf_fs_trace)
         return;
     }
 
-    if (ctf_fs_trace->ds_file_groups) {
-        g_ptr_array_free(ctf_fs_trace->ds_file_groups, TRUE);
-    }
-
     BT_TRACE_PUT_REF_AND_RESET(ctf_fs_trace->trace);
 
     if (ctf_fs_trace->path) {
@@ -412,14 +408,10 @@ static int create_ports_for_trace(struct ctf_fs_component *ctf_fs,
                                   bt_self_component_source *self_comp_src)
 {
     int ret = 0;
-    size_t i;
 
     /* Create one output port for each stream file group */
-    for (i = 0; i < ctf_fs_trace->ds_file_groups->len; i++) {
-        struct ctf_fs_ds_file_group *ds_file_group =
-            (struct ctf_fs_ds_file_group *) g_ptr_array_index(ctf_fs_trace->ds_file_groups, i);
-
-        ret = create_one_port_for_trace(ctf_fs, ds_file_group, self_comp_src);
+    for (const auto& ds_file_group : ctf_fs_trace->ds_file_groups) {
+        ret = create_one_port_for_trace(ctf_fs, ds_file_group.get(), self_comp_src);
         if (ret) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs->logger, "Cannot create output port.");
             goto end;
@@ -555,7 +547,6 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
     struct ctf_fs_ds_file_group *ds_file_group = NULL;
     ctf_fs_ds_file_group::UP new_ds_file_group;
     int ret;
-    size_t i;
     struct ctf_fs_ds_file *ds_file = NULL;
     struct ctf_fs_ds_file_info *ds_file_info = NULL;
     struct ctf_fs_ds_index *index = NULL;
@@ -650,6 +641,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
 
         ds_file_group_insert_ds_file_info_sorted(new_ds_file_group.get(),
                                                  BT_MOVE_REF(ds_file_info));
+        ctf_fs_trace->ds_file_groups.emplace_back(std::move(new_ds_file_group));
         goto end;
     }
 
@@ -657,15 +649,11 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
     BT_ASSERT(begin_ns != -1);
 
     /* Find an existing stream file group with this ID */
-    for (i = 0; i < ctf_fs_trace->ds_file_groups->len; i++) {
-        ds_file_group =
-            (struct ctf_fs_ds_file_group *) g_ptr_array_index(ctf_fs_trace->ds_file_groups, i);
-
-        if (ds_file_group->sc == sc && ds_file_group->stream_id == stream_instance_id) {
+    for (const auto& candidate : ctf_fs_trace->ds_file_groups) {
+        if (candidate->sc == sc && candidate->stream_id == stream_instance_id) {
+            ds_file_group = candidate.get();
             break;
         }
-
-        ds_file_group = NULL;
     }
 
     if (!ds_file_group) {
@@ -678,6 +666,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
         }
 
         ds_file_group = new_ds_file_group.get();
+        ctf_fs_trace->ds_file_groups.emplace_back(std::move(new_ds_file_group));
     } else {
         merge_ctf_fs_ds_indexes(ds_file_group->index, index);
     }
@@ -690,10 +679,6 @@ error:
     ret = -1;
 
 end:
-    if (new_ds_file_group) {
-        g_ptr_array_add(ctf_fs_trace->ds_file_groups, new_ds_file_group.release());
-    }
-
     ctf_fs_ds_file_destroy(ds_file);
     ctf_fs_ds_file_info_destroy(ds_file_info);
 
@@ -864,11 +849,6 @@ static ctf_fs_trace::UP ctf_fs_trace_create(const char *path, const char *name,
 
     ctf_fs_trace->metadata = new ctf_fs_metadata;
     ctf_fs_metadata_init(ctf_fs_trace->metadata);
-    ctf_fs_trace->ds_file_groups =
-        g_ptr_array_new_with_free_func((GDestroyNotify) ctf_fs_ds_file_group_destroy);
-    if (!ctf_fs_trace->ds_file_groups) {
-        goto error;
-    }
 
     ret = ctf_fs_metadata_set_trace_class(selfComp, ctf_fs_trace.get(), clkClsCfg);
     if (ret) {
@@ -1020,7 +1000,7 @@ static unsigned int metadata_count_stream_and_event_classes(struct ctf_fs_trace 
  */
 
 static void merge_ctf_fs_ds_file_groups(struct ctf_fs_ds_file_group *dest,
-                                        struct ctf_fs_ds_file_group *src)
+                                        ctf_fs_ds_file_group::UP src)
 {
     guint i;
 
@@ -1043,30 +1023,24 @@ static void merge_ctf_fs_ds_file_groups(struct ctf_fs_ds_file_group *dest,
 static int merge_matching_ctf_fs_ds_file_groups(struct ctf_fs_trace *dest_trace,
                                                 ctf_fs_trace::UP src_trace)
 {
-    GPtrArray *dest = dest_trace->ds_file_groups;
-    GPtrArray *src = src_trace->ds_file_groups;
-    guint s_i;
+    std::vector<ctf_fs_ds_file_group::UP>& dest = dest_trace->ds_file_groups;
+    std::vector<ctf_fs_ds_file_group::UP>& src = src_trace->ds_file_groups;
     int ret = 0;
 
     /*
      * Save the initial length of dest: we only want to check against the
      * original elements in the inner loop.
      */
-    const guint dest_len = dest->len;
+    size_t dest_len = dest.size();
 
-    for (s_i = 0; s_i < src->len; s_i++) {
-        struct ctf_fs_ds_file_group *src_group =
-            (struct ctf_fs_ds_file_group *) g_ptr_array_index(src, s_i);
+    for (auto& src_group : src) {
         struct ctf_fs_ds_file_group *dest_group = NULL;
 
         /* A stream instance without ID can't match a stream in the other trace.  */
         if (src_group->stream_id != -1) {
-            guint d_i;
-
             /* Let's search for a matching ds_file_group in the destination.  */
-            for (d_i = 0; d_i < dest_len; d_i++) {
-                struct ctf_fs_ds_file_group *candidate_dest =
-                    (struct ctf_fs_ds_file_group *) g_ptr_array_index(dest, d_i);
+            for (size_t d_i = 0; d_i < dest_len; ++d_i) {
+                ctf_fs_ds_file_group *candidate_dest = dest[d_i].get();
 
                 /* Can't match a stream instance without ID.  */
                 if (candidate_dest->stream_id == -1) {
@@ -1120,12 +1094,11 @@ static int merge_matching_ctf_fs_ds_file_groups(struct ctf_fs_trace *dest_trace,
             }
 
             dest_group = new_dest_group.get();
-
-            g_ptr_array_add(dest_trace->ds_file_groups, new_dest_group.release());
+            dest_trace->ds_file_groups.emplace_back(std::move(new_dest_group));
         }
 
         BT_ASSERT(dest_group);
-        merge_ctf_fs_ds_file_groups(dest_group, src_group);
+        merge_ctf_fs_ds_file_groups(dest_group, std::move(src_group));
     }
 
 end:
@@ -1329,17 +1302,12 @@ static int decode_packet_last_event_timestamp(struct ctf_fs_trace *ctf_fs_trace,
 static int fix_index_lttng_event_after_packet_bug(struct ctf_fs_trace *trace)
 {
     int ret = 0;
-    guint ds_file_group_i;
-    GPtrArray *ds_file_groups = trace->ds_file_groups;
 
-    for (ds_file_group_i = 0; ds_file_group_i < ds_file_groups->len; ds_file_group_i++) {
+    for (const auto& ds_file_group : trace->ds_file_groups) {
         guint entry_i;
         struct ctf_clock_class *default_cc;
         struct ctf_fs_ds_index_entry *last_entry;
         struct ctf_fs_ds_index *index;
-
-        struct ctf_fs_ds_file_group *ds_file_group =
-            (struct ctf_fs_ds_file_group *) g_ptr_array_index(ds_file_groups, ds_file_group_i);
 
         BT_ASSERT(ds_file_group);
         index = ds_file_group->index;
@@ -1413,15 +1381,10 @@ end:
 static int fix_index_barectf_event_before_packet_bug(struct ctf_fs_trace *trace)
 {
     int ret = 0;
-    guint ds_file_group_i;
-    GPtrArray *ds_file_groups = trace->ds_file_groups;
 
-    for (ds_file_group_i = 0; ds_file_group_i < ds_file_groups->len; ds_file_group_i++) {
+    for (const auto& ds_file_group : trace->ds_file_groups) {
         guint entry_i;
         struct ctf_clock_class *default_cc;
-        ctf_fs_ds_file_group *ds_file_group =
-            (ctf_fs_ds_file_group *) g_ptr_array_index(ds_file_groups, ds_file_group_i);
-
         struct ctf_fs_ds_index *index = ds_file_group->index;
 
         BT_ASSERT(index);
@@ -1485,16 +1448,11 @@ end:
 static int fix_index_lttng_crash_quirk(struct ctf_fs_trace *trace)
 {
     int ret = 0;
-    guint ds_file_group_idx;
-    GPtrArray *ds_file_groups = trace->ds_file_groups;
 
-    for (ds_file_group_idx = 0; ds_file_group_idx < ds_file_groups->len; ds_file_group_idx++) {
+    for (const auto& ds_file_group : trace->ds_file_groups) {
         guint entry_idx;
         struct ctf_clock_class *default_cc;
         struct ctf_fs_ds_index *index;
-
-        ctf_fs_ds_file_group *ds_file_group =
-            (ctf_fs_ds_file_group *) g_ptr_array_index(ds_file_groups, ds_file_group_idx);
 
         BT_ASSERT(ds_file_group);
         index = ds_file_group->index;
@@ -1755,20 +1713,18 @@ end:
     return ret;
 }
 
-static gint compare_ds_file_groups_by_first_path(gconstpointer a, gconstpointer b)
+static bool compare_ds_file_groups_by_first_path(const ctf_fs_ds_file_group::UP& ds_file_group_a,
+                                                 const ctf_fs_ds_file_group::UP& ds_file_group_b)
 {
-    ctf_fs_ds_file_group * const *ds_file_group_a = (ctf_fs_ds_file_group **) a;
-    ctf_fs_ds_file_group * const *ds_file_group_b = (ctf_fs_ds_file_group **) b;
-
-    BT_ASSERT((*ds_file_group_a)->ds_file_infos->len > 0);
-    BT_ASSERT((*ds_file_group_b)->ds_file_infos->len > 0);
+    BT_ASSERT(ds_file_group_a->ds_file_infos->len > 0);
+    BT_ASSERT(ds_file_group_b->ds_file_infos->len > 0);
 
     const ctf_fs_ds_file_info *first_ds_file_info_a =
-        (const ctf_fs_ds_file_info *) (*ds_file_group_a)->ds_file_infos->pdata[0];
+        (const ctf_fs_ds_file_info *) ds_file_group_a->ds_file_infos->pdata[0];
     const ctf_fs_ds_file_info *first_ds_file_info_b =
-        (const ctf_fs_ds_file_info *) (*ds_file_group_b)->ds_file_infos->pdata[0];
+        (const ctf_fs_ds_file_info *) ds_file_group_b->ds_file_infos->pdata[0];
 
-    return strcmp(first_ds_file_info_a->path->str, first_ds_file_info_b->path->str);
+    return strcmp(first_ds_file_info_a->path->str, first_ds_file_info_b->path->str) < 0;
 }
 
 static gint compare_strings(gconstpointer p_a, gconstpointer p_b)
@@ -1897,7 +1853,8 @@ int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
      * Having a deterministic order here can help debugging and
      * testing.
      */
-    g_ptr_array_sort(ctf_fs->trace->ds_file_groups, compare_ds_file_groups_by_first_path);
+    std::sort(ctf_fs->trace->ds_file_groups.begin(), ctf_fs->trace->ds_file_groups.end(),
+              compare_ds_file_groups_by_first_path);
     goto end;
 error:
     ret = -1;
@@ -1939,12 +1896,9 @@ static int create_streams_for_trace(struct ctf_fs_trace *ctf_fs_trace)
 {
     int ret;
     GString *name = NULL;
-    guint i;
 
-    for (i = 0; i < ctf_fs_trace->ds_file_groups->len; i++) {
-        ctf_fs_ds_file_group *ds_file_group =
-            (ctf_fs_ds_file_group *) g_ptr_array_index(ctf_fs_trace->ds_file_groups, i);
-        name = get_stream_instance_unique_name(ds_file_group);
+    for (const auto& ds_file_group : ctf_fs_trace->ds_file_groups) {
+        name = get_stream_instance_unique_name(ds_file_group.get());
 
         if (!name) {
             goto error;

@@ -955,7 +955,7 @@ end:
     return ds_file_info;
 }
 
-void ctf_fs_ds_file_group_destroy(struct ctf_fs_ds_file_group *ds_file_group)
+static void ctf_fs_ds_file_group_destroy(struct ctf_fs_ds_file_group *ds_file_group)
 {
     if (!ds_file_group) {
         return;

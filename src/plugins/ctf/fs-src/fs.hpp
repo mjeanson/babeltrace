@@ -17,7 +17,7 @@
 #include "cpp-common/bt2c/glib-up.hpp"
 #include "cpp-common/bt2c/logging.hpp"
 
-#include "metadata.hpp"
+#include "data-stream-file.hpp"
 #include "plugins/ctf/common/src/metadata/tsdl/decoder.hpp"
 
 extern bool ctf_fs_debug;
@@ -79,8 +79,7 @@ struct ctf_fs_trace
     /* Owned by this */
     bt_trace *trace = nullptr;
 
-    /* Array of struct ctf_fs_ds_file_group *, owned by this */
-    GPtrArray *ds_file_groups = nullptr;
+    std::vector<ctf_fs_ds_file_group::UP> ds_file_groups;
 
     /* Owned by this */
     GString *path = nullptr;
