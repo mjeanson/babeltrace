@@ -13,7 +13,10 @@
 #include <babeltrace2/babeltrace.h>
 
 #include "cpp-common/bt2/exc.hpp"
+#include "cpp-common/bt2c/glib-up.hpp"
 #include "cpp-common/bt2c/libc-up.hpp"
+
+#include "plugins/common/param-validation/param-validation.h"
 
 #include "../common/src/metadata/tsdl/decoder.hpp"
 #include "fs.hpp"
@@ -28,20 +31,26 @@ struct range
     bool set = false;
 };
 
+static bt_param_validation_map_value_entry_descr metadataInfoQueryParamsDesc[] = {
+    {"path", BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_MANDATORY,
+     bt_param_validation_value_descr::makeString()},
+    BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_END};
+
 bt2::Value::Shared metadata_info_query(const bt2::ConstMapValue params, const bt2c::Logger& logger)
 {
-    const auto pathValue = params["path"];
-    if (!pathValue) {
-        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2::Error,
-                                               "Mandatory `path` parameter missing");
+    gchar *validateError = nullptr;
+    const auto validationStatus = bt_param_validation_validate(
+        params.libObjPtr(), metadataInfoQueryParamsDesc, &validateError);
+
+    if (validationStatus == BT_PARAM_VALIDATION_STATUS_MEMORY_ERROR) {
+        throw bt2::MemoryError {};
+    } else if (validationStatus == BT_PARAM_VALIDATION_STATUS_VALIDATION_ERROR) {
+        const bt2c::GCharUP deleter {validateError};
+
+        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2::Error, "{}", validateError);
     }
 
-    if (!pathValue->isString()) {
-        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2::Error,
-                                               "`path` parameter is required to be a string value");
-    }
-
-    const auto path = pathValue->asString().value();
+    const auto path = params["path"]->asString().value();
     bt2c::FileUP metadataFp {ctf_fs_metadata_open_file(path, logger)};
     if (!metadataFp) {
         BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2::Error,
@@ -195,23 +204,41 @@ bt2::Value::Shared trace_infos_query(const bt2::ConstMapValue params, const bt2c
     return result;
 }
 
+static bt_param_validation_map_value_entry_descr supportInfoQueryParamsDesc[] = {
+    {"type", BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_MANDATORY,
+     bt_param_validation_value_descr::makeString()},
+    {"input", BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_MANDATORY,
+     bt_param_validation_value_descr::makeString()},
+    BT_PARAM_VALIDATION_MAP_VALUE_ENTRY_END};
+
 bt2::Value::Shared support_info_query(const bt2::ConstMapValue params, const bt2c::Logger& logger)
 {
-    const auto typeValue = params["type"];
-    BT_ASSERT(typeValue);
-    BT_ASSERT(typeValue->isString());
-    const auto type = typeValue->asString().value();
+    gchar *validateError = NULL;
+    const auto validationStatus = bt_param_validation_validate(
+        params.libObjPtr(), supportInfoQueryParamsDesc, &validateError);
+
+    if (validationStatus == BT_PARAM_VALIDATION_STATUS_MEMORY_ERROR) {
+        throw bt2::MemoryError {};
+    } else if (validationStatus == BT_PARAM_VALIDATION_STATUS_VALIDATION_ERROR) {
+        const bt2c::GCharUP deleter {validateError};
+
+        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2::Error, "{}", validateError);
+    }
+
+    const auto type = params["type"]->asString().value();
 
     if (strcmp(type, "directory") != 0) {
+        /*
+         * The input type is not a directory so we are 100% sure it's not a CTF
+         * 1.8 trace as it would need a directory with at least 1 metadata file
+         * and 1 data stream file.
+         */
         const auto result = bt2::MapValue::create();
         result->insert("weight", 0.0f);
         return result;
     }
 
-    const auto inputValue = params["input"];
-    BT_ASSERT(inputValue);
-    BT_ASSERT(inputValue->isString());
-    const auto input = inputValue->asString().value();
+    const auto input = params["input"]->asString().value();
 
     bt2c::GCharUP metadataPath {g_build_filename(input, CTF_FS_METADATA_FILENAME, NULL)};
     if (!metadataPath) {
