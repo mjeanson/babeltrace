@@ -117,8 +117,7 @@ struct ctf_fs_ds_index
 {
     using UP = std::unique_ptr<ctf_fs_ds_index, ctf_fs_ds_index_deleter>;
 
-    /* Array of pointer to struct ctf_fs_ds_index_entry. */
-    GPtrArray *entries = nullptr;
+    std::vector<ctf_fs_ds_index_entry::UP> entries;
 };
 
 struct ctf_fs_ds_file_group_deleter
@@ -163,7 +162,7 @@ ctf_fs_ds_index::UP ctf_fs_ds_file_build_index(struct ctf_fs_ds_file *ds_file,
                                                struct ctf_fs_ds_file_info *ds_file_info,
                                                struct ctf_msg_iter *msg_iter);
 
-ctf_fs_ds_index::UP ctf_fs_ds_index_create(const bt2c::Logger& logger);
+ctf_fs_ds_index::UP ctf_fs_ds_index_create();
 
 void ctf_fs_ds_index_destroy(struct ctf_fs_ds_index *index);
 

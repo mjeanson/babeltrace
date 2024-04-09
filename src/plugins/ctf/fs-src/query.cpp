@@ -124,16 +124,13 @@ static void populate_stream_info(struct ctf_fs_ds_file_group *group, const bt2::
      * of the last index entry.
      */
     BT_ASSERT(group->index);
-    BT_ASSERT(group->index->entries);
-    BT_ASSERT(group->index->entries->len > 0);
+    BT_ASSERT(!group->index->entries.empty());
 
     /* First entry. */
-    ctf_fs_ds_index_entry *first_ds_index_entry =
-        (struct ctf_fs_ds_index_entry *) g_ptr_array_index(group->index->entries, 0);
+    const auto first_ds_index_entry = group->index->entries.front().get();
 
     /* Last entry. */
-    ctf_fs_ds_index_entry *last_ds_index_entry = (struct ctf_fs_ds_index_entry *) g_ptr_array_index(
-        group->index->entries, group->index->entries->len - 1);
+    const auto last_ds_index_entry = group->index->entries.back().get();
 
     stream_range->begin_ns = first_ds_index_entry->timestamp_begin_ns;
     stream_range->end_ns = last_ds_index_entry->timestamp_end_ns;

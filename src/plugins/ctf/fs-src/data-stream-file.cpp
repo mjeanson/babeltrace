@@ -359,7 +359,7 @@ static enum ctf_msg_iter_medium_status medop_group_switch_packet(void *void_data
     enum ctf_msg_iter_medium_status status;
 
     /* If we have gone through all index entries, we are done. */
-    if (data->next_index_entry_index >= data->ds_file_group->index->entries->len) {
+    if (data->next_index_entry_index >= data->ds_file_group->index->entries.size()) {
         status = CTF_MSG_ITER_MEDIUM_STATUS_EOF;
         goto end;
     }
@@ -368,8 +368,7 @@ static enum ctf_msg_iter_medium_status medop_group_switch_packet(void *void_data
      * Otherwise, look up the next index entry / packet and prepare it
      *  for reading.
      */
-    index_entry = (struct ctf_fs_ds_index_entry *) g_ptr_array_index(
-        data->ds_file_group->index->entries, data->next_index_entry_index);
+    index_entry = data->ds_file_group->index->entries[data->next_index_entry_index].get();
 
     status = ctf_fs_ds_group_medops_set_file(data, index_entry);
     if (status != CTF_MSG_ITER_MEDIUM_STATUS_OK) {
@@ -404,7 +403,7 @@ enum ctf_msg_iter_medium_status ctf_fs_ds_group_medops_data_create(
     BT_ASSERT(self_msg_iter);
     BT_ASSERT(ds_file_group);
     BT_ASSERT(ds_file_group->index);
-    BT_ASSERT(ds_file_group->index->entries->len > 0);
+    BT_ASSERT(!ds_file_group->index->entries.empty());
 
     ctf_fs_ds_group_medops_data *data = new ctf_fs_ds_group_medops_data {parentLogger};
     data->ds_file_group = ds_file_group;
@@ -437,11 +436,6 @@ struct ctf_msg_iter_medium_ops ctf_fs_ds_group_medops = {
     .switch_packet = medop_group_switch_packet,
     .borrow_stream = medop_group_borrow_stream,
 };
-
-static void ctf_fs_ds_index_entry_destroy(ctf_fs_ds_index_entry *entry)
-{
-    delete entry;
-}
 
 static ctf_fs_ds_index_entry::UP ctf_fs_ds_index_entry_create(const bt2c::DataLen offset,
                                                               const bt2c::DataLen packetSize)
@@ -581,7 +575,7 @@ static ctf_fs_ds_index::UP build_index_from_idx_file(struct ctf_fs_ds_file *ds_f
         goto error;
     }
 
-    index = ctf_fs_ds_index_create(ds_file->logger);
+    index = ctf_fs_ds_index_create();
     if (!index) {
         goto error;
     }
@@ -655,8 +649,7 @@ static ctf_fs_ds_index::UP build_index_from_idx_file(struct ctf_fs_ds_file *ds_f
 
         prev_index_entry = index_entry.get();
 
-        /* Give ownership of `index_entry` to `index->entries`. */
-        g_ptr_array_add(index->entries, index_entry.release());
+        index->entries.emplace_back(std::move(index_entry));
     }
 
     /* Validate that the index addresses the complete stream. */
@@ -739,7 +732,7 @@ static ctf_fs_ds_index::UP build_index_from_stream_file(struct ctf_fs_ds_file *d
 
     BT_CPPLOGI_SPEC(ds_file->logger, "Indexing stream file {}", ds_file->file->path->str);
 
-    index = ctf_fs_ds_index_create(ds_file->logger);
+    index = ctf_fs_ds_index_create();
     if (!index) {
         goto error;
     }
@@ -800,7 +793,7 @@ static ctf_fs_ds_index::UP build_index_from_stream_file(struct ctf_fs_ds_file *d
             goto error;
         }
 
-        g_ptr_array_add(index->entries, index_entry.release());
+        index->entries.emplace_back(std::move(index_entry));
 
         currentPacketOffset += currentPacketSize;
         BT_CPPLOGD_SPEC(ds_file->logger,
@@ -873,23 +866,9 @@ end:
     return index;
 }
 
-ctf_fs_ds_index::UP ctf_fs_ds_index_create(const bt2c::Logger& logger)
+ctf_fs_ds_index::UP ctf_fs_ds_index_create()
 {
-    ctf_fs_ds_index::UP index {new ctf_fs_ds_index};
-
-    index->entries = g_ptr_array_new_with_free_func((GDestroyNotify) ctf_fs_ds_index_entry_destroy);
-    if (!index->entries) {
-        BT_CPPLOGE_SPEC(logger, "Failed to allocate index entries.");
-        goto error;
-    }
-
-    goto end;
-
-error:
-    index.reset();
-
-end:
-    return index;
+    return ctf_fs_ds_index::UP {new ctf_fs_ds_index};
 }
 
 void ctf_fs_ds_file_destroy(struct ctf_fs_ds_file *ds_file)
@@ -912,10 +891,6 @@ void ctf_fs_ds_index_destroy(struct ctf_fs_ds_index *index)
 {
     if (!index) {
         return;
-    }
-
-    if (index->entries) {
-        g_ptr_array_free(index->entries, TRUE);
     }
 
     delete index;
