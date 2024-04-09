@@ -199,7 +199,7 @@ bt2::Value::Shared trace_infos_query(const bt2::ConstMapValue params, const bt2c
 
     const auto result = bt2::ArrayValue::create();
     const auto traceInfo = result->appendEmptyMap();
-    populate_trace_info(ctf_fs->trace, traceInfo, logger);
+    populate_trace_info(ctf_fs->trace.get(), traceInfo, logger);
 
     return result;
 }

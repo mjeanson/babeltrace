@@ -58,8 +58,15 @@ struct ctf_fs_metadata
     int bo = 0;
 };
 
+struct ctf_fs_trace_deleter
+{
+    void operator()(ctf_fs_trace *) noexcept;
+};
+
 struct ctf_fs_trace
 {
+    using UP = std::unique_ptr<ctf_fs_trace, ctf_fs_trace_deleter>;
+
     explicit ctf_fs_trace(const bt2c::Logger& parentLogger) :
         logger {parentLogger, "PLUGIN/SRC.CTF.FS/TRACE"}
     {
@@ -111,8 +118,7 @@ struct ctf_fs_component
     /* Array of struct ctf_fs_port_data *, owned by this */
     GPtrArray *port_data = nullptr;
 
-    /* Owned by this */
-    struct ctf_fs_trace *trace = nullptr;
+    ctf_fs_trace::UP trace;
 
     ctf::src::ClkClsCfg clkClsCfg;
 };

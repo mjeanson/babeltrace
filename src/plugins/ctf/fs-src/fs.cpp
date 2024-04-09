@@ -298,13 +298,16 @@ static void ctf_fs_trace_destroy(struct ctf_fs_trace *ctf_fs_trace)
     delete ctf_fs_trace;
 }
 
+void ctf_fs_trace_deleter::operator()(ctf_fs_trace * const trace) noexcept
+{
+    ctf_fs_trace_destroy(trace);
+}
+
 void ctf_fs_destroy(struct ctf_fs_component *ctf_fs)
 {
     if (!ctf_fs) {
         return;
     }
-
-    ctf_fs_trace_destroy(ctf_fs->trace);
 
     if (ctf_fs->port_data) {
         g_ptr_array_free(ctf_fs->port_data, TRUE);
@@ -1995,14 +1998,14 @@ int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
             goto error;
         }
 
-        ctf_fs->trace = trace;
+        ctf_fs->trace.reset(trace);
     } else {
         /* Just one trace, it may or may not have a UUID, both are fine. */
-        ctf_fs->trace = (ctf_fs_trace *) traces->pdata[0];
+        ctf_fs->trace.reset((ctf_fs_trace *) traces->pdata[0]);
         traces->pdata[0] = NULL;
     }
 
-    ret = fix_packet_index_tracer_bugs(ctf_fs->trace);
+    ret = fix_packet_index_tracer_bugs(ctf_fs->trace.get());
     if (ret) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs->logger, "Failed to fix packet index tracer bugs.");
     }
@@ -2210,11 +2213,11 @@ static ctf_fs_component::UP ctf_fs_create(const bt_value *params,
         return nullptr;
     }
 
-    if (create_streams_for_trace(ctf_fs->trace)) {
+    if (create_streams_for_trace(ctf_fs->trace.get())) {
         return nullptr;
     }
 
-    if (create_ports_for_trace(ctf_fs.get(), ctf_fs->trace, self_comp_src)) {
+    if (create_ports_for_trace(ctf_fs.get(), ctf_fs->trace.get(), self_comp_src)) {
         return nullptr;
     }
 
