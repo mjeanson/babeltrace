@@ -1578,11 +1578,9 @@ static ctf_fs_component::UP ctf_fs_create(const bt2::ConstMapValue params,
                                           bt_self_component_source *self_comp_src)
 {
     bt_self_component *self_comp = bt_self_component_source_as_self_component(self_comp_src);
-    ctf_fs_component::UP ctf_fs = bt2s::make_unique<ctf_fs_component>(
-        bt2c::Logger {bt2::SelfSourceComponent {self_comp_src}, "PLUGIN/SRC.CTF.FS/COMP"});
-    const auto parameters = read_src_fs_parameters(params, ctf_fs->logger);
-
-    ctf_fs->clkClsCfg = parameters.clkClsCfg;
+    const bt2c::Logger logger {bt2::SelfSourceComponent {self_comp_src}, "PLUGIN/SRC.CTF.FS/COMP"};
+    const auto parameters = read_src_fs_parameters(params, logger);
+    auto ctf_fs = bt2s::make_unique<ctf_fs_component>(parameters.clkClsCfg, logger);
 
     if (ctf_fs_component_create_ctf_fs_trace(
             ctf_fs.get(), parameters.inputs,

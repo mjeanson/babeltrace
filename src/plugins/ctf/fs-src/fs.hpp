@@ -74,8 +74,10 @@ struct ctf_fs_component
 {
     using UP = std::unique_ptr<ctf_fs_component>;
 
-    explicit ctf_fs_component(const bt2c::Logger& parentLogger) noexcept :
-        logger {parentLogger, "PLUGIN/SRC.CTF.FS/COMP"}
+    explicit ctf_fs_component(const ctf::src::ClkClsCfg& clkClsCfgParam,
+                              const bt2c::Logger& parentLogger) noexcept :
+        logger {parentLogger, "PLUGIN/SRC.CTF.FS/COMP"},
+        clkClsCfg {clkClsCfgParam}
     {
     }
 

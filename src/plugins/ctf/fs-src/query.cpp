@@ -167,10 +167,8 @@ static void populate_trace_info(const struct ctf_fs_trace *trace, const bt2::Map
 
 bt2::Value::Shared trace_infos_query(const bt2::ConstMapValue params, const bt2c::Logger& logger)
 {
-    ctf_fs_component ctf_fs {logger};
     const auto parameters = read_src_fs_parameters(params, logger);
-
-    ctf_fs.clkClsCfg = parameters.clkClsCfg;
+    ctf_fs_component ctf_fs {parameters.clkClsCfg, logger};
 
     if (ctf_fs_component_create_ctf_fs_trace(
             &ctf_fs, parameters.inputs,
