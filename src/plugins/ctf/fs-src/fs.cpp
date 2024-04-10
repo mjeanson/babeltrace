@@ -470,15 +470,9 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
          * there's no timestamp to order the file within its
          * group.
          */
-        auto new_ds_file_group =
-            ctf_fs_ds_file_group_create(ctf_fs_trace, sc, UINT64_C(-1), std::move(*index));
-
-        if (!new_ds_file_group) {
-            return -1;
-        }
-
-        new_ds_file_group->insert_ds_file_info_sorted(std::move(ds_file_info));
-        ctf_fs_trace->ds_file_groups.emplace_back(std::move(new_ds_file_group));
+        ctf_fs_trace->ds_file_groups.emplace_back(bt2s::make_unique<ctf_fs_ds_file_group>(
+            ctf_fs_trace, sc, UINT64_C(-1), std::move(*index)));
+        ctf_fs_trace->ds_file_groups.back()->insert_ds_file_info_sorted(std::move(ds_file_info));
         return 0;
     }
 
@@ -494,17 +488,10 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
         }
     }
 
-    ctf_fs_ds_file_group::UP new_ds_file_group;
-
     if (!ds_file_group) {
-        new_ds_file_group =
-            ctf_fs_ds_file_group_create(ctf_fs_trace, sc, stream_instance_id, std::move(*index));
-        if (!new_ds_file_group) {
-            return -1;
-        }
-
-        ds_file_group = new_ds_file_group.get();
-        ctf_fs_trace->ds_file_groups.emplace_back(std::move(new_ds_file_group));
+        ctf_fs_trace->ds_file_groups.emplace_back(bt2s::make_unique<ctf_fs_ds_file_group>(
+            ctf_fs_trace, sc, static_cast<std::uint64_t>(stream_instance_id), std::move(*index)));
+        ds_file_group = ctf_fs_trace->ds_file_groups.back().get();
     } else {
         merge_ctf_fs_ds_indexes(ds_file_group->index, *index);
     }
@@ -786,15 +773,9 @@ static int merge_matching_ctf_fs_ds_file_groups(struct ctf_fs_trace *dest_trace,
                 dest_trace->metadata->tc, src_group->sc->id);
             BT_ASSERT(sc);
 
-            auto new_dest_group =
-                ctf_fs_ds_file_group_create(dest_trace, sc, src_group->stream_id, {});
-
-            if (!new_dest_group) {
-                return -1;
-            }
-
-            dest_group = new_dest_group.get();
-            dest_trace->ds_file_groups.emplace_back(std::move(new_dest_group));
+            dest_trace->ds_file_groups.emplace_back(bt2s::make_unique<ctf_fs_ds_file_group>(
+                dest_trace, sc, src_group->stream_id, ctf_fs_ds_index {}));
+            dest_group = dest_trace->ds_file_groups.back().get();
         }
 
         BT_ASSERT(dest_group);

@@ -121,6 +121,16 @@ struct ctf_fs_ds_file_group
 {
     using UP = std::unique_ptr<ctf_fs_ds_file_group>;
 
+    explicit ctf_fs_ds_file_group(struct ctf_fs_trace * const trace,
+                                  ctf_stream_class * const scParam, const uint64_t streamInstanceId,
+                                  ctf_fs_ds_index indexParam) noexcept :
+
+        sc {scParam},
+        stream_id(streamInstanceId), ctf_fs_trace {trace}, index {std::move(indexParam)}
+
+    {
+    }
+
     /*
      * Insert ds_file_info in the list of ds_file_infos at the right
      * place to keep it sorted.
@@ -158,11 +168,6 @@ bt2s::optional<ctf_fs_ds_index> ctf_fs_ds_file_build_index(struct ctf_fs_ds_file
                                                            struct ctf_msg_iter *msg_iter);
 
 ctf_fs_ds_file_info::UP ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns);
-
-ctf_fs_ds_file_group::UP ctf_fs_ds_file_group_create(struct ctf_fs_trace *ctf_fs_trace,
-                                                     struct ctf_stream_class *sc,
-                                                     uint64_t stream_instance_id,
-                                                     ctf_fs_ds_index index);
 
 /*
  * Medium operations to iterate on a single ctf_fs_ds_file.
