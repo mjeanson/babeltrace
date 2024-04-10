@@ -391,18 +391,18 @@ lttng_live_get_session(struct lttng_live_msg_iter *lttng_live_msg_iter,
         break;
     case LTTNG_LIVE_ITERATOR_STATUS_END:
         /*
-		 * We received a `_END` from the `_get_new_streams()` function,
-		 * which means no more data will ever be received from the data
-		 * streams of this session. But it's possible that the metadata
-		 * is incomplete.
-		 * The live protocol guarantees that we receive all the
-		 * metadata needed before we receive data streams needing it.
-		 * But it's possible to receive metadata NOT needed by
-		 * data streams after the session was closed. For example, this
-		 * could happen if a new event is registered and the session is
-		 * stopped before any tracepoint for that event is actually
-		 * fired.
-		 */
+         * We received a `_END` from the `_get_new_streams()` function,
+         * which means no more data will ever be received from the data
+         * streams of this session. But it's possible that the metadata
+         * is incomplete.
+         * The live protocol guarantees that we receive all the
+         * metadata needed before we receive data streams needing it.
+         * But it's possible to receive metadata NOT needed by
+         * data streams after the session was closed. For example, this
+         * could happen if a new event is registered and the session is
+         * stopped before any tracepoint for that event is actually
+         * fired.
+         */
         BT_CPPLOGD_SPEC(
             lttng_live_msg_iter->logger,
             "Updating streams returned _END status. Override status to _OK in order fetch any remaining metadata:"
@@ -1037,10 +1037,10 @@ handle_late_message(struct lttng_live_msg_iter *lttng_live_msg_iter,
      * In short, the only scenario in which it's okay and fixable to
      * received a late message is when:
      *  1. the late message is a discarded packets or discarded events
-     *	message,
+     *     message,
      *  2. this stream produced an inactivity message downstream, and
      *  3. the timestamp of the late message is within the inactivity
-     *	timespan we sent downstream through the inactivity message.
+     *     timespan we sent downstream through the inactivity message.
      */
 
     BT_CPPLOGD_SPEC(lttng_live_msg_iter->logger,
@@ -1433,13 +1433,13 @@ lttng_live_msg_iter_next(bt_self_message_iterator *self_msg_it, bt_message_array
 
         if (G_UNLIKELY(lttng_live_msg_iter->was_interrupted)) {
             /*
-         * The iterator was interrupted in a previous call to the
-         * `_next()` method. We currently do not support generating
-         * messages after such event. The babeltrace2 CLI should never
-         * be running the graph after being interrupted. So this check
-         * is to prevent other graph users from using this live
-         * iterator in an messed up internal state.
-         */
+             * The iterator was interrupted in a previous call to the
+             * `_next()` method. We currently do not support generating
+             * messages after such event. The babeltrace2 CLI should never
+             * be running the graph after being interrupted. So this check
+             * is to prevent other graph users from using this live
+             * iterator in an messed up internal state.
+             */
             status = BT_MESSAGE_ITERATOR_CLASS_NEXT_METHOD_STATUS_ERROR;
             BT_CPPLOGE_APPEND_CAUSE_SPEC(
                 lttng_live_msg_iter->logger,
@@ -1448,26 +1448,26 @@ lttng_live_msg_iter_next(bt_self_message_iterator *self_msg_it, bt_message_array
         }
 
         /*
-     * Clear all the invalid message reference that might be left over in
-     * the output array.
-     */
+         * Clear all the invalid message reference that might be left over in
+         * the output array.
+         */
         memset(msgs, 0, capacity * sizeof(*msgs));
 
         /*
-     * If no session are exposed on the relay found at the url provided by
-     * the user, session count will be 0. In this case, we return status
-     * end to return gracefully.
-     */
+         * If no session are exposed on the relay found at the url provided by
+         * the user, session count will be 0. In this case, we return status
+         * end to return gracefully.
+         */
         if (lttng_live_msg_iter->sessions->len == 0) {
             if (lttng_live->params.sess_not_found_act != SESSION_NOT_FOUND_ACTION_CONTINUE) {
                 status = BT_MESSAGE_ITERATOR_CLASS_NEXT_METHOD_STATUS_END;
                 goto end;
             } else {
                 /*
-             * The are no more active session for this session
-             * name. Retry to create a viewer session for the
-             * requested session name.
-             */
+                 * The are no more active session for this session
+                 * name. Retry to create a viewer session for the
+                 * requested session name.
+                 */
                 viewer_status = lttng_live_create_viewer_session(lttng_live_msg_iter);
                 if (viewer_status != LTTNG_LIVE_VIEWER_STATUS_OK) {
                     if (viewer_status == LTTNG_LIVE_VIEWER_STATUS_ERROR) {
@@ -1489,24 +1489,24 @@ lttng_live_msg_iter_next(bt_self_message_iterator *self_msg_it, bt_message_array
         }
 
         /*
-     * Here the muxing of message is done.
-     *
-     * We need to iterate over all the streams of all the traces of all the
-     * viewer sessions in order to get the message with the smallest
-     * timestamp. In this case, a session is a viewer session and there is
-     * one viewer session per consumer daemon. (UST 32bit, UST 64bit and/or
-     * kernel). Each viewer session can have multiple traces, for example,
-     * 64bit UST viewer sessions could have multiple per-pid traces.
-     *
-     * We iterate over the streams of each traces to update and see what is
-     * their next message's timestamp. From those timestamps, we select the
-     * message with the smallest timestamp as the best candidate message
-     * for that trace and do the same thing across all the sessions.
-     *
-     * We then compare the timestamp of best candidate message of all the
-     * sessions to pick the message with the smallest timestamp and we
-     * return it.
-     */
+         * Here the muxing of message is done.
+         *
+         * We need to iterate over all the streams of all the traces of all the
+         * viewer sessions in order to get the message with the smallest
+         * timestamp. In this case, a session is a viewer session and there is
+         * one viewer session per consumer daemon. (UST 32bit, UST 64bit and/or
+         * kernel). Each viewer session can have multiple traces, for example,
+         * 64bit UST viewer sessions could have multiple per-pid traces.
+         *
+         * We iterate over the streams of each traces to update and see what is
+         * their next message's timestamp. From those timestamps, we select the
+         * message with the smallest timestamp as the best candidate message
+         * for that trace and do the same thing across all the sessions.
+         *
+         * We then compare the timestamp of best candidate message of all the
+         * sessions to pick the message with the smallest timestamp and we
+         * return it.
+         */
         while (*count < capacity) {
             struct lttng_live_stream_iterator *youngest_stream_iter = NULL,
                                               *candidate_stream_iter = NULL;
@@ -1523,18 +1523,19 @@ lttng_live_msg_iter_next(bt_self_message_iterator *self_msg_it, bt_message_array
                                                                       &candidate_stream_iter);
 
                 /* If we receive an END status, it means that either:
-             * - Those traces never had active streams (UST with no
-             *   data produced yet),
-             * - All live stream iterators have ENDed.*/
+                 * - Those traces never had active streams (UST with no
+                 *   data produced yet),
+                 * - All live stream iterators have ENDed.
+                 */
                 if (stream_iter_status == LTTNG_LIVE_ITERATOR_STATUS_END) {
                     if (session->closed && session->traces->len == 0) {
                         /*
-                     * Remove the session from the list.
-                     * session_idx is not modified since
-                     * g_ptr_array_remove_index_fast
-                     * replaces the the removed element with
-                     * the array's last element.
-                     */
+                         * Remove the session from the list.
+                         * session_idx is not modified since
+                         * g_ptr_array_remove_index_fast
+                         * replaces the the removed element with
+                         * the array's last element.
+                         */
                         g_ptr_array_remove_index_fast(lttng_live_msg_iter->sessions, session_idx);
                     } else {
                         session_idx++;
@@ -1552,26 +1553,26 @@ lttng_live_msg_iter_next(bt_self_message_iterator *self_msg_it, bt_message_array
                     youngest_stream_iter = candidate_stream_iter;
                 } else if (candidate_stream_iter->current_msg_ts_ns == youngest_msg_ts_ns) {
                     /*
-                 * The currently selected message to be sent
-                 * downstream next has the exact same timestamp
-                 * that of the current candidate message. We
-                 * must break the tie in a predictable manner.
-                 */
+                     * The currently selected message to be sent
+                     * downstream next has the exact same timestamp
+                     * that of the current candidate message. We
+                     * must break the tie in a predictable manner.
+                     */
                     BT_CPPLOGD_STR_SPEC(
                         lttng_live_msg_iter->logger,
                         "Two of the next message candidates have the same timestamps, pick one deterministically.");
                     /*
-                 * Order the messages in an arbitrary but
-                 * deterministic way.
-                 */
+                     * Order the messages in an arbitrary but
+                     * deterministic way.
+                     */
                     int ret = common_muxing_compare_messages(candidate_stream_iter->current_msg,
                                                              youngest_stream_iter->current_msg);
                     if (ret < 0) {
                         /*
-                     * The `candidate_stream_iter->current_msg`
-                     * should go first. Update the next
-                     * iterator and the current timestamp.
-                     */
+                         * The `candidate_stream_iter->current_msg`
+                         * should go first. Update the next
+                         * iterator and the current timestamp.
+                         */
                         youngest_msg_ts_ns = candidate_stream_iter->current_msg_ts_ns;
                         youngest_stream_iter = candidate_stream_iter;
                     } else if (ret == 0) {
@@ -1599,10 +1600,10 @@ lttng_live_msg_iter_next(bt_self_message_iterator *self_msg_it, bt_message_array
                           youngest_stream_iter->current_msg_ts_ns);
 
             /*
-         * Insert the next message to the message batch. This will set
-         * stream iterator current message to NULL so that next time
-         * we fetch the next message of that stream iterator
-         */
+             * Insert the next message to the message batch. This will set
+             * stream iterator current message to NULL so that next time
+             * we fetch the next message of that stream iterator
+             */
             BT_MESSAGE_MOVE_REF(msgs[*count], youngest_stream_iter->current_msg);
             (*count)++;
 
@@ -1618,13 +1619,13 @@ return_status:
         case LTTNG_LIVE_ITERATOR_STATUS_OK:
         case LTTNG_LIVE_ITERATOR_STATUS_AGAIN:
             /*
-         * If we gathered messages, return _OK even if the graph was
-         * interrupted. This allows for the components downstream to at
-         * least get the those messages. If the graph was indeed
-         * interrupted there should not be another _next() call as the
-         * application will tear down the graph. This component class
-         * doesn't support restarting after an interruption.
-         */
+             * If we gathered messages, return _OK even if the graph was
+             * interrupted. This allows for the components downstream to at
+             * least get the those messages. If the graph was indeed
+             * interrupted there should not be another _next() call as the
+             * application will tear down the graph. This component class
+             * doesn't support restarting after an interruption.
+             */
             if (*count > 0) {
                 status = BT_MESSAGE_ITERATOR_CLASS_NEXT_METHOD_STATUS_OK;
             } else {
@@ -1720,9 +1721,9 @@ lttng_live_msg_iter_init(bt_self_message_iterator *self_msg_it,
                                              "Failed to create viewer connection");
             } else if (viewer_status == LTTNG_LIVE_VIEWER_STATUS_INTERRUPTED) {
                 /*
-             * Interruption in the _iter_init() method is not
-             * supported. Return an error.
-             */
+                 * Interruption in the _iter_init() method is not
+                 * supported. Return an error.
+                 */
                 BT_CPPLOGE_APPEND_CAUSE_SPEC(lttng_live_msg_iter->logger,
                                              "Interrupted while creating viewer connection");
             }
@@ -1738,9 +1739,9 @@ lttng_live_msg_iter_init(bt_self_message_iterator *self_msg_it,
                                              "Failed to create viewer session");
             } else if (viewer_status == LTTNG_LIVE_VIEWER_STATUS_INTERRUPTED) {
                 /*
-             * Interruption in the _iter_init() method is not
-             * supported. Return an error.
-             */
+                 * Interruption in the _iter_init() method is not
+                 * supported. Return an error.
+                 */
                 BT_CPPLOGE_APPEND_CAUSE_SPEC(lttng_live_msg_iter->logger,
                                              "Interrupted when creating viewer session");
             }

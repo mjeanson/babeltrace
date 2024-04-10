@@ -1046,8 +1046,8 @@ static int visit_field_class_declarator(struct ctf_visitor_generate_ir *ctx,
 
             /*
              * If we have a pointer declarator, it HAS to
-		 	 * be present in the field class aliases (else
-		 	 * fail).
+             * be present in the field class aliases (else
+             * fail).
              */
             qalias =
                 create_class_alias_identifier(ctx, cls_specifier_list, node_field_class_declarator);

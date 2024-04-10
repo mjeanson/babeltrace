@@ -947,10 +947,10 @@ static int decode_packet_last_event_timestamp(struct ctf_fs_trace *ctf_fs_trace,
  *
  * To fix up this erroneous data we do the following:
  *  1. If it's not the stream file's last packet: set the packet index entry's
- *	end time to the next packet's beginning time.
+ *     end time to the next packet's beginning time.
  *  2. If it's the stream file's last packet, set the packet index entry's end
- *	time to the packet's last event's time, if any, or to the packet's
- *  	beginning time otherwise.
+ *     time to the packet's last event's time, if any, or to the packet's
+ *     beginning time otherwise.
  *
  * Known buggy tracer versions:
  *  - before lttng-ust 2.11.0
