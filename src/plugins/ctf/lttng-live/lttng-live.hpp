@@ -297,8 +297,7 @@ struct lttng_live_msg_iter
     /* Owned by this. */
     struct live_viewer_connection *viewer_connection = nullptr;
 
-    /* Array of pointers to struct lttng_live_session. */
-    GPtrArray *sessions = nullptr;
+    std::vector<lttng_live_session::UP> sessions;
 
     /* Number of live stream iterator this message iterator has.*/
     uint64_t active_stream_iter = 0;
