@@ -232,8 +232,6 @@ void lttng_live_stream_iterator_destroy(struct lttng_live_stream_iterator *strea
         return;
     }
 
-    bt_message_put_ref(stream_iter->current_msg);
-
     /* Track the number of active stream iterator. */
     stream_iter->trace->session->lttng_live_msg_iter->active_stream_iter--;
 

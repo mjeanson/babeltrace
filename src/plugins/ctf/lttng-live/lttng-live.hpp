@@ -16,6 +16,7 @@
 
 #include <babeltrace2/babeltrace.h>
 
+#include "cpp-common/bt2/message.hpp"
 #include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 
 #include "../common/src/metadata/tsdl/decoder.hpp"
@@ -118,11 +119,8 @@ struct lttng_live_stream_iterator
 
     enum lttng_live_stream_state state = LTTNG_LIVE_STREAM_QUIESCENT;
 
-    /*
-     * The current message produced by this live stream iterator. Owned by
-     * this.
-     */
-    const bt_message *current_msg = nullptr;
+    /* The current message produced by this live stream iterator. */
+    bt2::ConstMessage::Shared current_msg;
 
     /* Timestamp in nanoseconds of the current message (current_msg). */
     int64_t current_msg_ts_ns = 0;
