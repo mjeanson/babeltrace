@@ -14,19 +14,20 @@ Pretty-print (plain text) the events, in order, of one or more traces:
 
 [verse]
 *babeltrace2* [<<gen-opts,'GENERAL OPTIONS'>>] [*convert*] [opt:--retry-duration='TIME-US']
-            'TRACE-PATH'...
+            [opt:--allowed-mip-versions='VERSION'] 'TRACE-PATH'...
 
 Convert one or more traces to a given format:
 
 [verse]
 *babeltrace2* [<<gen-opts,'GENERAL OPTIONS'>>] [*convert*] [opt:--retry-duration='TIME-US']
-            'CONVERSION ARGS'
+            [opt:--allowed-mip-versions='VERSION'] 'CONVERSION ARGS'
 
 Get the equivalent man:babeltrace2-run(1) command arguments to convert
 one or more traces to a given format:
 
 [verse]
 *babeltrace2* [<<gen-opts,'GENERAL OPTIONS'>>] [*convert*] [opt:--retry-duration='TIME-US']
+            [opt:--allowed-mip-versions='VERSION']
             (opt:--run-args | opt:--run-args-0) 'CONVERSION ARGS'
 
 Print the metadata text of a CTF trace:
@@ -853,6 +854,12 @@ opt:--stream-intersection option.
 
 
 === Conversion graph configuration
+
+opt:-m 'VERSION'::
+opt:--allowed-mip-versions='VERSION'::
+    Only allow the conversion graph to honour version 'VERSION' (0 or 1)
+    of the Message Interchange Protocol (MIP) instead of allowing
+    both versions.
 
 opt:--retry-duration='TIME-US'::
     Set the duration of a single retry to 'TIME-US'~µs when a sink

@@ -1763,6 +1763,7 @@ bt_get_greatest_operative_mip_version_status get_greatest_operative_mip_version(
 	bt_get_greatest_operative_mip_version_status status =
 		BT_GET_GREATEST_OPERATIVE_MIP_VERSION_STATUS_OK;
 	bt_component_descriptor_set *comp_descr_set = NULL;
+	bt_integer_range_set_unsigned *mip_version_restriction = NULL;
 	int ret;
 
 	BT_ASSERT(cfg);
@@ -1812,10 +1813,41 @@ bt_get_greatest_operative_mip_version_status get_greatest_operative_mip_version(
 		}
 	}
 
-	status = bt_get_greatest_operative_mip_version(comp_descr_set,
-		(bt_logging_level) bt_cli_log_level, mip_version);
+	/* Set MIP version restrictions if needed */
+	if (!cfg->cmd_data.run.allow_mip_0 || !cfg->cmd_data.run.allow_mip_1) {
+		mip_version_restriction = bt_integer_range_set_unsigned_create();
+		if (!mip_version_restriction) {
+			status = BT_GET_GREATEST_OPERATIVE_MIP_VERSION_STATUS_MEMORY_ERROR;
+			goto end;
+		}
+
+		if (cfg->cmd_data.run.allow_mip_0) {
+			bt_integer_range_set_add_range_status add_range_status =
+				bt_integer_range_set_unsigned_add_range(
+					mip_version_restriction, 0, 0);
+			if (add_range_status != BT_INTEGER_RANGE_SET_ADD_RANGE_STATUS_OK) {
+				status = (int) add_range_status;
+				goto end;
+			}
+		}
+
+		if (cfg->cmd_data.run.allow_mip_1) {
+			bt_integer_range_set_add_range_status add_range_status =
+				bt_integer_range_set_unsigned_add_range(
+					mip_version_restriction, 1, 1);
+			if (add_range_status != BT_INTEGER_RANGE_SET_ADD_RANGE_STATUS_OK) {
+				status = (int) add_range_status;
+				goto end;
+			}
+		}
+	}
+
+	status = bt_get_greatest_operative_mip_version_with_restriction(
+		comp_descr_set, (bt_logging_level) bt_cli_log_level,
+		mip_version_restriction, mip_version);
 
 end:
+	bt_object_put_ref(mip_version_restriction);
 	bt_component_descriptor_set_put_ref(comp_descr_set);
 	return status;
 }

@@ -13,6 +13,7 @@ babeltrace2-run - Create a Babeltrace 2 trace processing graph and run it
 
 [verse]
 *babeltrace2* [<<gen-opts,'GENERAL OPTIONS'>>] *run* [opt:--retry-duration='TIME-US']
+            [opt:--allowed-mip-versions='VERSION']
             opt:--connect='CONN-RULE'... 'COMPONENTS'
 
 
@@ -269,6 +270,12 @@ See <<connect-comps,``Connect components''>> to learn more.
 
 
 === Graph configuration
+
+opt:-m 'VERSION'::
+opt:--allowed-mip-versions='VERSION'::
+    Only allow the graph to honour version 'VERSION' (0 or 1)
+    of the Message Interchange Protocol (MIP) instead of allowing
+    both versions.
 
 opt:--retry-duration='TIME-US'::
     Set the duration of a single retry to 'TIME-US'~µs when a sink

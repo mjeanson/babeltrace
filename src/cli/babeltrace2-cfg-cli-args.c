@@ -829,6 +829,7 @@ end:
 /* argpar options */
 enum {
 	OPT_NONE = 0,
+	OPT_ALLOWED_MIP_VERSIONS,
 	OPT_BASE_PARAMS,
 	OPT_BEGIN,
 	OPT_CLOCK_CYCLES,
@@ -1874,6 +1875,8 @@ void print_run_usage(FILE *fp)
 	fprintf(fp, "\n");
 	fprintf(fp, "Options:\n");
 	fprintf(fp, "\n");
+	fprintf(fp, "  -m, --allowed-mip-versions=VER    Allow only the MIP version VER (0 or 1)\n");
+	fprintf(fp, "                                    (default: all MIP versions are allowed)\n");
 	fprintf(fp, "  -b, --base-params=PARAMS          Set PARAMS as the current base parameters\n");
 	fprintf(fp, "                                    for all the following components until\n");
 	fprintf(fp, "                                    --reset-base-params is encountered\n");
@@ -1954,6 +1957,7 @@ enum bt_config_cli_args_status bt_config_run_from_args(int argc, const char *arg
 	bt_value *connection_args = NULL;
 	char error_buf[256] = { 0 };
 	long retry_duration = -1;
+	long allowed_mip_version = -1;
 	bt_value_map_extend_status extend_status;
 	GString *error_str = NULL;
 	struct argpar_iter *argpar_iter = NULL;
@@ -1968,6 +1972,7 @@ enum bt_config_cli_args_status bt_config_run_from_args(int argc, const char *arg
 		{ OPT_PARAMS, 'p', "params", true },
 		{ OPT_RESET_BASE_PARAMS, 'r', "reset-base-params", false },
 		{ OPT_RETRY_DURATION, '\0', "retry-duration", true },
+		{ OPT_ALLOWED_MIP_VERSIONS, 'm', "allowed-mip-versions", true },
 		ARGPAR_OPT_DESCR_SENTINEL
 	};
 
@@ -1989,6 +1994,8 @@ enum bt_config_cli_args_status bt_config_run_from_args(int argc, const char *arg
 	}
 
 	cfg->cmd_data.run.retry_duration_us = 100000;
+	cfg->cmd_data.run.allow_mip_0 = true;
+	cfg->cmd_data.run.allow_mip_1 = true;
 	cur_base_params = bt_value_map_create();
 	if (!cur_base_params) {
 		BT_CLI_LOGE_APPEND_CAUSE_OOM();
@@ -2179,6 +2186,29 @@ enum bt_config_cli_args_status bt_config_run_from_args(int argc, const char *arg
 				(uint64_t) retry_duration;
 			break;
 		}
+		case OPT_ALLOWED_MIP_VERSIONS: {
+			gchar *end;
+			size_t arg_len = strlen(arg);
+
+			allowed_mip_version = g_ascii_strtoll(arg, &end, 10);
+
+			if (arg_len == 0 || end != (arg + arg_len)) {
+				BT_CLI_LOGE_APPEND_CAUSE(
+					"Could not parse --allowed-mip-versions option's argument as an unsigned integer: `%s`",
+					arg);
+				goto error;
+			}
+
+			if (allowed_mip_version < 0 || allowed_mip_version > 1) {
+				BT_CLI_LOGE_APPEND_CAUSE("--allowed-mip-versions option's argument must be 0 or 1: %ld",
+					allowed_mip_version);
+				goto error;
+			}
+
+			cfg->cmd_data.run.allow_mip_0 = (allowed_mip_version == 0);
+			cfg->cmd_data.run.allow_mip_1 = (allowed_mip_version == 1);
+			break;
+		}
 		default:
 			bt_common_abort();
 		}
@@ -2279,6 +2309,8 @@ void print_convert_usage(FILE *fp)
 	fprintf(fp, "\n");
 	fprintf(fp, "Options:\n");
 	fprintf(fp, "\n");
+	fprintf(fp, "  -m, --allowed-mip-versions=VER    Allow only the MIP version VER (0 or 1)\n");
+	fprintf(fp, "                                    (default: all MIP versions are allowed)\n");
 	fprintf(fp, "  -c, --component=[NAME:]TYPE.PLUGIN.CLS\n");
 	fprintf(fp, "                                    Instantiate the component class CLS of type\n");
 	fprintf(fp, "                                    TYPE (`source`, `filter`, or `sink`) found\n");
@@ -2395,6 +2427,7 @@ void print_convert_usage(FILE *fp)
 static
 const struct argpar_opt_descr convert_options[] = {
 	/* id, short_name, long_name, with_arg */
+	{ OPT_ALLOWED_MIP_VERSIONS, 'm', "allowed-mip-versions", true },
 	{ OPT_BEGIN, 'b', "begin", true },
 	{ OPT_CLOCK_CYCLES, '\0', "clock-cycles", false },
 	{ OPT_CLOCK_DATE, '\0', "clock-date", false },
@@ -3699,6 +3732,18 @@ enum bt_config_cli_args_status bt_config_convert_from_args(int argc,
 					goto error;
 				}
 				break;
+			case OPT_ALLOWED_MIP_VERSIONS:
+				if (bt_value_array_append_string_element(run_args,
+						"--allowed-mip-versions")) {
+					BT_CLI_LOGE_APPEND_CAUSE_OOM();
+					goto error;
+				}
+
+				if (bt_value_array_append_string_element(run_args, arg)) {
+					BT_CLI_LOGE_APPEND_CAUSE_OOM();
+					goto error;
+				}
+				break;
 			case OPT_BEGIN:
 			case OPT_CLOCK_CYCLES:
 			case OPT_CLOCK_DATE:
@@ -4059,6 +4104,7 @@ enum bt_config_cli_args_status bt_config_convert_from_args(int argc,
 			*default_log_level =
 				logging_level_min(*default_log_level, BT_LOG_TRACE);
 			break;
+		case OPT_ALLOWED_MIP_VERSIONS:
 		case OPT_COMPONENT:
 		case OPT_HELP:
 		case OPT_LOG_LEVEL:

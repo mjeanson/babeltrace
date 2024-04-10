@@ -73,6 +73,10 @@ struct bt_config {
 			 */
 			uint64_t retry_duration_us;
 
+			/* Allowed MIP versions */
+			bool allow_mip_0;
+			bool allow_mip_1;
+
 			/*
 			 * Whether or not to trim the source trace to the
 			 * intersection of its streams.
