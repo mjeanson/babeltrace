@@ -5,6 +5,8 @@
 
 import sys
 import os
+import shutil
+import subprocess
 
 # Distutils was removed in Python 3.12, use setuptools as an alternative.
 if sys.version_info >= (3, 12):
@@ -114,10 +116,44 @@ def our_get_config_vars(*args):
 sysconfig.get_config_vars = our_get_config_vars
 
 
+# Returns 'True' when running on a MinGW system.
+def is_mingw():
+    return sys.platform == "win32" and shutil.which("cygpath") != None
+
+
+# On MinGW systems run 'cygpath -m' on 'path', on other systems return 'path' as-is.
+def cygpath_m(path: str):
+    if is_mingw():
+        return subprocess.check_output(
+            'cygpath -m "{}"'.format(path), shell=True, encoding="utf-8"
+        ).strip("\n")
+
+    return path
+
+
+# On MinGW systems, check CFLAGS and CPPFLAGS for absolute include paths
+# (starts with '-I/') and convert them to valid Windows paths using cygpath.
+if is_mingw():
+    for flagvar in ["CFLAGS", "CPPFLAGS"]:
+        cur_flags = os.getenv(flagvar)
+        if cur_flags != None:
+            new_flags = ""
+            for flag in cur_flags.split():
+                if flag.startswith("-I/"):
+                    flag = "-I{}".format(cygpath_m(flag[2:]))
+
+                new_flags += " {}".format(flag)
+
+            os.environ[flagvar] = new_flags
+
+
 def main():
     babeltrace_ext = Extension(
         "bt2._native_bt",
-        sources=["bt2/native_bt.c", "@srcdir@/bt2/logging.c"],
+        sources=[
+            "bt2/native_bt.c",
+            cygpath_m("@srcdir@/bt2/logging.c"),
+        ],
         libraries=["babeltrace2", "glib-2.0"],
         extra_objects=[
             "@top_builddir@/src/autodisc/.libs/libautodisc.a",
