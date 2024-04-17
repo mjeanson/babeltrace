@@ -17,7 +17,7 @@ namespace ctf {
 
 struct MetaTranslateCtx
 {
-    bt_self_component *self_comp;
+    bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp;
     bt_trace_class *ir_tc;
     bt_stream_class *ir_sc;
     struct ctf_trace_class *tc;
@@ -608,7 +608,7 @@ static inline int ctf_trace_class_to_ir(ctf::MetaTranslateCtx *ctx)
     for (i = 0; i < ctx->tc->clock_classes->len; i++) {
         ctf_clock_class *cc = (ctf_clock_class *) ctx->tc->clock_classes->pdata[i];
 
-        cc->ir_cc = bt_clock_class_create(ctx->self_comp);
+        cc->ir_cc = bt_clock_class_create(ctx->selfComp->libObjPtr());
         ctf_clock_class_to_ir(cc->ir_cc, cc);
     }
 
@@ -620,14 +620,14 @@ end:
     return ret;
 }
 
-int ctf_trace_class_translate(bt_self_component *self_comp, bt_trace_class *ir_tc,
-                              struct ctf_trace_class *tc)
+int ctf_trace_class_translate(const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
+                              bt_trace_class *ir_tc, struct ctf_trace_class *tc)
 {
     int ret = 0;
     uint64_t i;
     ctf::MetaTranslateCtx ctx = {};
 
-    ctx.self_comp = self_comp;
+    ctx.selfComp = selfComp;
     ctx.tc = tc;
     ctx.ir_tc = ir_tc;
     ret = ctf_trace_class_to_ir(&ctx);

@@ -694,12 +694,9 @@ Ctf1MetadataStreamParser::Ctf1MetadataStreamParser(
     const bt2c::Logger& parentLogger) :
     MetadataStreamParser {selfComp, clkClsCfg},
     _mLogger {parentLogger, "PLUGIN/CTF/CTF-1-META-STREAM-PARSER"},
+    _mOrigCtfIrGenerator {ctf_visitor_generate_ir_create(clkClsCfg, selfComp, _mLogger)},
     _mScanner {ctf_scanner_alloc(_mLogger)}, _mStreamDecoder {_mLogger}
 {
-    ctf_metadata_decoder_config metadataCfg {_mLogger};
-
-    metadataCfg.clkClsCfg = clkClsCfg;
-    _mOrigCtfIrGenerator = ctf_visitor_generate_ir_create(&metadataCfg);
 }
 
 MetadataStreamParser::ParseRet

@@ -24,7 +24,6 @@
 #include "ast.hpp"
 #include "ctf-meta-visitors.hpp"
 #include "ctf-meta.hpp"
-#include "decoder.hpp"
 
 /* Bit value (left shift) */
 #define _BV(_val) (1 << (_val))
@@ -471,14 +470,14 @@ ctf_visitor_generate_ir::~ctf_visitor_generate_ir()
  * @returns	New visitor context, or NULL on error
  */
 static ctf_visitor_generate_ir::UP
-ctx_create(const struct ctf_metadata_decoder_config *decoder_config, const bt2c::Logger& logger)
+ctx_create(const ctf::src::ClkClsCfg clkClsCfg,
+           const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
+           const bt2c::Logger& logger)
 {
-    BT_ASSERT(decoder_config);
+    ctf_visitor_generate_ir::UP ctx {new ctf_visitor_generate_ir {clkClsCfg, selfComp, logger}};
 
-    ctf_visitor_generate_ir::UP ctx {new ctf_visitor_generate_ir {*decoder_config, logger}};
-
-    if (decoder_config->self_comp) {
-        bt_trace_class *trace_class = bt_trace_class_create(decoder_config->self_comp);
+    if (selfComp) {
+        bt_trace_class *trace_class = bt_trace_class_create(selfComp->libObjPtr());
         if (!trace_class) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(ctx->logger, "Cannot create empty trace class.");
             goto error;
@@ -4186,7 +4185,7 @@ static inline uint64_t cycles_from_ns(uint64_t frequency, uint64_t ns)
 static void apply_clock_class_is_absolute(struct ctf_visitor_generate_ir *ctx,
                                           struct ctf_clock_class *clock)
 {
-    if (ctx->decoder_config.clkClsCfg.forceOriginIsUnixEpoch) {
+    if (ctx->clkClsCfg.forceOriginIsUnixEpoch) {
         clock->is_absolute = true;
     }
 
@@ -4197,33 +4196,30 @@ static void apply_clock_class_offset(struct ctf_visitor_generate_ir *ctx,
                                      struct ctf_clock_class *clock)
 {
     uint64_t freq;
-    int64_t offset_s_to_apply = ctx->decoder_config.clkClsCfg.offsetSec;
+    int64_t offset_s_to_apply = ctx->clkClsCfg.offsetSec;
     uint64_t offset_ns_to_apply;
     int64_t cur_offset_s;
     uint64_t cur_offset_cycles;
     long long offsetSecLL;
     unsigned long long offsetCyclesULL;
 
-    if (ctx->decoder_config.clkClsCfg.offsetSec == 0 &&
-        ctx->decoder_config.clkClsCfg.offsetNanoSec == 0) {
+    if (ctx->clkClsCfg.offsetSec == 0 && ctx->clkClsCfg.offsetNanoSec == 0) {
         goto end;
     }
 
     /* Transfer nanoseconds to seconds as much as possible */
-    if (ctx->decoder_config.clkClsCfg.offsetNanoSec < 0) {
-        const int64_t abs_ns = -ctx->decoder_config.clkClsCfg.offsetNanoSec;
+    if (ctx->clkClsCfg.offsetNanoSec < 0) {
+        const int64_t abs_ns = -ctx->clkClsCfg.offsetNanoSec;
         const int64_t abs_extra_s = abs_ns / INT64_C(1000000000) + 1;
         const int64_t extra_s = -abs_extra_s;
-        const int64_t offset_ns =
-            ctx->decoder_config.clkClsCfg.offsetNanoSec - (extra_s * INT64_C(1000000000));
+        const int64_t offset_ns = ctx->clkClsCfg.offsetNanoSec - (extra_s * INT64_C(1000000000));
 
         BT_ASSERT(offset_ns > 0);
         offset_ns_to_apply = (uint64_t) offset_ns;
         offset_s_to_apply += extra_s;
     } else {
-        const int64_t extra_s = ctx->decoder_config.clkClsCfg.offsetNanoSec / INT64_C(1000000000);
-        const int64_t offset_ns =
-            ctx->decoder_config.clkClsCfg.offsetNanoSec - (extra_s * INT64_C(1000000000));
+        const int64_t extra_s = ctx->clkClsCfg.offsetNanoSec / INT64_C(1000000000);
+        const int64_t offset_ns = ctx->clkClsCfg.offsetNanoSec - (extra_s * INT64_C(1000000000));
 
         BT_ASSERT(offset_ns >= 0);
         offset_ns_to_apply = (uint64_t) offset_ns;
@@ -4404,13 +4400,14 @@ end:
 }
 
 ctf_visitor_generate_ir::UP
-ctf_visitor_generate_ir_create(const struct ctf_metadata_decoder_config *decoder_config)
+ctf_visitor_generate_ir_create(const ctf::src::ClkClsCfg& clkClsCfg,
+                               const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
+                               const bt2c::Logger& parentLogger)
 {
-    bt2c::Logger logger {decoder_config->logger, "PLUGIN/CTF/META/IR-VISITOR"};
+    bt2c::Logger logger {parentLogger, "PLUGIN/CTF/META/IR-VISITOR"};
 
     /* Create visitor's context */
-    ctf_visitor_generate_ir::UP ctx = ctx_create(decoder_config, logger);
-
+    ctf_visitor_generate_ir::UP ctx = ctx_create(clkClsCfg, selfComp, logger);
     if (!ctx) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "Cannot create visitor's context.");
         goto error;
@@ -4663,8 +4660,7 @@ int ctf_visitor_generate_ir_visit_node(struct ctf_visitor_generate_ir *ctx, stru
 
     if (ctx->trace_class) {
         /* Copy new CTF metadata -> new IR metadata */
-        ret = ctf_trace_class_translate(ctx->decoder_config.self_comp,
-                                        ctx->trace_class->libObjPtr(), ctx->ctf_tc);
+        ret = ctf_trace_class_translate(ctx->selfComp, ctx->trace_class->libObjPtr(), ctx->ctf_tc);
         if (ret) {
             ret = -EINVAL;
             goto end;

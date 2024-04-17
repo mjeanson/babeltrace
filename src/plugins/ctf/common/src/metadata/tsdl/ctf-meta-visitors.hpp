@@ -9,6 +9,9 @@
 
 #include <babeltrace2/babeltrace.h>
 
+#include "cpp-common/bt2/optional-borrowed-object.hpp"
+#include "cpp-common/bt2/self-component-port.hpp"
+
 #include "ctf-meta.hpp"
 
 namespace bt2c {
@@ -20,8 +23,8 @@ class Logger;
 int ctf_trace_class_resolve_field_classes(struct ctf_trace_class *tc,
                                           const bt2c::Logger& parentLogger);
 
-int ctf_trace_class_translate(bt_self_component *self_comp, bt_trace_class *ir_tc,
-                              struct ctf_trace_class *tc);
+int ctf_trace_class_translate(bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
+                              bt_trace_class *ir_tc, struct ctf_trace_class *tc);
 
 int ctf_trace_class_update_default_clock_classes(struct ctf_trace_class *ctf_tc,
                                                  const bt2c::Logger& parentLogger);
