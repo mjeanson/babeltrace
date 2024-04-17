@@ -801,6 +801,12 @@ ctf_field_class_enum_mapping_borrow_range_by_index(struct ctf_field_class_enum_m
     BT_ASSERT_DBG(index < mapping->ranges->len);
     return &bt_g_array_index(mapping->ranges, struct ctf_range, index);
 }
+static inline const struct ctf_range *ctf_field_class_enum_mapping_borrow_range_by_index_const(
+    const struct ctf_field_class_enum_mapping *mapping, uint64_t index)
+{
+    return ctf_field_class_enum_mapping_borrow_range_by_index(
+        (struct ctf_field_class_enum_mapping *) mapping, index);
+}
 
 static inline struct ctf_field_class_enum_mapping *
 ctf_field_class_enum_borrow_mapping_by_index(struct ctf_field_class_enum *fc, uint64_t index)
@@ -808,6 +814,13 @@ ctf_field_class_enum_borrow_mapping_by_index(struct ctf_field_class_enum *fc, ui
     BT_ASSERT_DBG(fc);
     BT_ASSERT_DBG(index < fc->mappings->len);
     return &bt_g_array_index(fc->mappings, struct ctf_field_class_enum_mapping, index);
+}
+
+static inline const struct ctf_field_class_enum_mapping *
+ctf_field_class_enum_borrow_mapping_by_index_const(const struct ctf_field_class_enum *fc,
+                                                   uint64_t index)
+{
+    return ctf_field_class_enum_borrow_mapping_by_index((struct ctf_field_class_enum *) fc, index);
 }
 
 static inline struct ctf_field_class_enum_mapping *
@@ -881,6 +894,14 @@ ctf_field_class_struct_borrow_member_by_index(struct ctf_field_class_struct *fc,
     BT_ASSERT_DBG(fc);
     BT_ASSERT_DBG(index < fc->members->len);
     return &bt_g_array_index(fc->members, struct ctf_named_field_class, index);
+}
+
+static inline const struct ctf_named_field_class *
+ctf_field_class_struct_borrow_member_by_index_const(const struct ctf_field_class_struct *fc,
+                                                    uint64_t index)
+{
+    return ctf_field_class_struct_borrow_member_by_index((struct ctf_field_class_struct *) fc,
+                                                         index);
 }
 
 static inline struct ctf_named_field_class *
@@ -987,6 +1008,14 @@ ctf_field_class_variant_borrow_option_by_index(struct ctf_field_class_variant *f
     return &bt_g_array_index(fc->options, struct ctf_named_field_class, index);
 }
 
+static inline const struct ctf_named_field_class *
+ctf_field_class_variant_borrow_option_by_index_const(const struct ctf_field_class_variant *fc,
+                                                     uint64_t index)
+{
+    return ctf_field_class_variant_borrow_option_by_index((struct ctf_field_class_variant *) fc,
+                                                          index);
+}
+
 static inline struct ctf_named_field_class *
 ctf_field_class_variant_borrow_option_by_name(struct ctf_field_class_variant *fc, const char *name)
 {
@@ -1016,6 +1045,14 @@ ctf_field_class_variant_borrow_range_by_index(struct ctf_field_class_variant *fc
     BT_ASSERT_DBG(fc);
     BT_ASSERT_DBG(index < fc->ranges->len);
     return &bt_g_array_index(fc->ranges, struct ctf_field_class_variant_range, index);
+}
+
+static inline const struct ctf_field_class_variant_range *
+ctf_field_class_variant_borrow_range_by_index_const(const struct ctf_field_class_variant *fc,
+                                                    uint64_t index)
+{
+    return ctf_field_class_variant_borrow_range_by_index((struct ctf_field_class_variant *) fc,
+                                                         index);
 }
 
 static inline void ctf_field_class_variant_append_option(struct ctf_field_class_variant *fc,
@@ -1105,6 +1142,39 @@ ctf_field_class_compound_borrow_field_class_by_index(struct ctf_field_class *com
     }
 
     return fc;
+}
+
+static inline const struct ctf_named_field_class *
+ctf_field_class_compound_borrow_named_field_class_by_index(struct ctf_field_class *comp_fc,
+                                                           uint64_t index)
+{
+    struct ctf_named_field_class *named_fc = NULL;
+
+    switch (comp_fc->type) {
+    case CTF_FIELD_CLASS_TYPE_STRUCT:
+    {
+        named_fc = ctf_field_class_struct_borrow_member_by_index(
+            (struct ctf_field_class_struct *) comp_fc, index);
+
+        BT_ASSERT_DBG(named_fc);
+        break;
+    }
+    case CTF_FIELD_CLASS_TYPE_VARIANT:
+    {
+        named_fc = ctf_field_class_variant_borrow_option_by_index(
+            (struct ctf_field_class_variant *) comp_fc, index);
+
+        BT_ASSERT_DBG(named_fc);
+        break;
+    }
+    case CTF_FIELD_CLASS_TYPE_ARRAY:
+    case CTF_FIELD_CLASS_TYPE_SEQUENCE:
+        bt_common_abort();
+    default:
+        break;
+    }
+
+    return named_fc;
 }
 
 static inline uint64_t ctf_field_class_compound_get_field_class_count(struct ctf_field_class *fc)
