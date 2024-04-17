@@ -66,7 +66,7 @@ struct CommonClockClassSpec<const bt_clock_class> final
 class ClockOffset final
 {
 public:
-    explicit ClockOffset(const std::int64_t seconds, const std::uint64_t cycles) :
+    explicit ClockOffset(const std::int64_t seconds, const std::uint64_t cycles) noexcept :
         _mSeconds {seconds}, _mCycles {cycles}
     {
     }
@@ -85,6 +85,8 @@ private:
     std::int64_t _mSeconds;
     std::uint64_t _mCycles;
 };
+
+class ClockOriginView;
 
 template <typename LibObjT>
 class CommonClockClass final : public BorrowedObject<LibObjT>
@@ -158,9 +160,36 @@ public:
         return *this;
     }
 
-    std::uint64_t precision() const noexcept
+    bt2s::optional<std::uint64_t> precision() const noexcept
     {
-        return bt_clock_class_get_precision(this->libObjPtr());
+        std::uint64_t prec;
+
+        if (bt_clock_class_get_opt_precision(this->libObjPtr(), &prec) ==
+            BT_PROPERTY_AVAILABILITY_NOT_AVAILABLE) {
+            return bt2s::nullopt;
+        }
+
+        return prec;
+    }
+
+    CommonClockClass accuracy(const std::uint64_t accuracy) const noexcept
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstClockClass`.");
+
+        bt_clock_class_set_accuracy(this->libObjPtr(), accuracy);
+        return *this;
+    }
+
+    bt2s::optional<std::uint64_t> accuracy() const noexcept
+    {
+        std::uint64_t accuracy;
+
+        if (bt_clock_class_get_accuracy(this->libObjPtr(), &accuracy) ==
+            BT_PROPERTY_AVAILABILITY_NOT_AVAILABLE) {
+            return bt2s::nullopt;
+        }
+
+        return accuracy;
     }
 
     CommonClockClass originIsUnixEpoch(const bool originIsUnixEpoch) const noexcept
@@ -172,9 +201,52 @@ public:
         return *this;
     }
 
-    bool originIsUnixEpoch() const noexcept
+    CommonClockClass setOriginIsUnixEpoch() const noexcept
     {
-        return static_cast<bool>(bt_clock_class_origin_is_unix_epoch(this->libObjPtr()));
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstClockClass`.");
+
+        bt_clock_class_set_origin_unix_epoch(this->libObjPtr());
+        return *this;
+    }
+
+    CommonClockClass setOriginIsUnknown() const noexcept
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstClockClass`.");
+
+        bt_clock_class_set_origin_unknown(this->libObjPtr());
+        return *this;
+    }
+
+    CommonClockClass origin(const bt2c::CStringView nameSpace, const bt2c::CStringView name,
+                            const bt2c::CStringView uid) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstClockClass`.");
+
+        if (bt_clock_class_set_origin(this->libObjPtr(), nameSpace, name, uid) ==
+            BT_CLOCK_CLASS_SET_ORIGIN_STATUS_MEMORY_ERROR) {
+            throw MemoryError {};
+        }
+
+        return *this;
+    }
+
+    ClockOriginView origin() const noexcept;
+
+    CommonClockClass nameSpace(const bt2c::CStringView nameSpace) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstClockClass`.");
+
+        if (bt_clock_class_set_namespace(this->libObjPtr(), nameSpace) ==
+            BT_CLOCK_CLASS_SET_NAMESPACE_STATUS_MEMORY_ERROR) {
+            throw MemoryError {};
+        }
+
+        return *this;
+    }
+
+    bt2c::CStringView nameSpace() const noexcept
+    {
+        return bt_clock_class_get_namespace(this->libObjPtr());
     }
 
     CommonClockClass name(const bt2c::CStringView name) const
@@ -193,6 +265,29 @@ public:
     bt2c::CStringView name() const noexcept
     {
         return bt_clock_class_get_name(this->libObjPtr());
+    }
+
+    CommonClockClass uid(const bt2c::CStringView uid) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstClockClass`.");
+
+        if (bt_clock_class_set_uid(this->libObjPtr(), uid) ==
+            BT_CLOCK_CLASS_SET_UID_STATUS_MEMORY_ERROR) {
+            throw MemoryError {};
+        }
+
+        return *this;
+    }
+
+    bt2c::CStringView uid() const noexcept
+    {
+        return bt_clock_class_get_uid(this->libObjPtr());
+    }
+
+    bool hasSameIdentity(const CommonClockClass<const bt_clock_class> other) const noexcept
+    {
+        return static_cast<bool>(
+            bt_clock_class_has_same_identity(this->libObjPtr(), other.libObjPtr()));
     }
 
     CommonClockClass description(const bt2c::CStringView description) const
@@ -288,6 +383,49 @@ struct TypeDescr<ConstClockClass> : public ClockClassTypeDescr
 };
 
 } /* namespace internal */
+
+class ClockOriginView final
+{
+public:
+    explicit ClockOriginView(const ConstClockClass clockClass) noexcept : _mClkCls {clockClass}
+    {
+    }
+
+    bt2c::CStringView nameSpace() const noexcept
+    {
+        return bt_clock_class_get_origin_namespace(_mClkCls.libObjPtr());
+    }
+
+    bt2c::CStringView name() const noexcept
+    {
+        return bt_clock_class_get_origin_name(_mClkCls.libObjPtr());
+    }
+
+    bt2c::CStringView uid() const noexcept
+    {
+        return bt_clock_class_get_origin_uid(_mClkCls.libObjPtr());
+    }
+
+    bool isUnknown() const noexcept
+    {
+        return bt_clock_class_origin_is_unknown(_mClkCls.libObjPtr());
+    }
+
+    bool isUnixEpoch() const noexcept
+    {
+        return bt_clock_class_origin_is_unix_epoch(_mClkCls.libObjPtr());
+    }
+
+private:
+    ConstClockClass _mClkCls;
+};
+
+template <typename LibObjT>
+ClockOriginView CommonClockClass<LibObjT>::origin() const noexcept
+{
+    return ClockOriginView {*this};
+}
+
 } /* namespace bt2 */
 
 #endif /* BABELTRACE_CPP_COMMON_BT2_CLOCK_CLASS_HPP */

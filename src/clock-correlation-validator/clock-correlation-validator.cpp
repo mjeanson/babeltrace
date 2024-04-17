@@ -41,7 +41,7 @@ void ClockCorrelationValidator::_validate(const bt2::ConstMessage msg)
          */
         if (!clockCls) {
             _mExpectation = PropsExpectation::None;
-        } else if (clockCls->originIsUnixEpoch()) {
+        } else if (clockCls->origin().isUnixEpoch()) {
             _mExpectation = PropsExpectation::OriginUnix;
         } else if (const auto uuid = clockCls->uuid()) {
             _mExpectation = PropsExpectation::OriginOtherUuid;
@@ -73,7 +73,7 @@ void ClockCorrelationValidator::_validate(const bt2::ConstMessage msg)
                                          streamCls};
         }
 
-        if (!clockCls->originIsUnixEpoch()) {
+        if (!clockCls->origin().isUnixEpoch()) {
             throw ClockCorrelationError {ClockCorrelationError::Type::ExpectingOriginUnixGotOther,
                                          bt2s::nullopt,
                                          *clockCls,
@@ -93,7 +93,7 @@ void ClockCorrelationValidator::_validate(const bt2::ConstMessage msg)
                                          streamCls};
         }
 
-        if (clockCls->originIsUnixEpoch()) {
+        if (clockCls->origin().isUnixEpoch()) {
             throw ClockCorrelationError {ClockCorrelationError::Type::ExpectingOriginUuidGotUnix,
                                          bt2s::nullopt,
                                          *clockCls,
