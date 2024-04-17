@@ -640,6 +640,23 @@ public:
 
     Class cls() const noexcept;
 
+    CommonTrace nameSpace(const bt2c::CStringView nameSpace) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTrace`.");
+
+        if (bt_trace_set_namespace(this->libObjPtr(), nameSpace) ==
+            BT_TRACE_SET_NAMESPACE_STATUS_MEMORY_ERROR) {
+            throw MemoryError {};
+        }
+
+        return *this;
+    }
+
+    bt2c::CStringView nameSpace() const noexcept
+    {
+        return bt_trace_get_namespace(this->libObjPtr());
+    }
+
     CommonTrace name(const bt2c::CStringView name) const
     {
         static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTrace`.");
@@ -658,6 +675,22 @@ public:
         return bt_trace_get_name(this->libObjPtr());
     }
 
+    CommonTrace uid(const bt2c::CStringView uid) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstTrace`.");
+
+        if (bt_trace_set_uid(this->libObjPtr(), uid) == BT_TRACE_SET_UID_STATUS_MEMORY_ERROR) {
+            throw MemoryError {};
+        }
+
+        return *this;
+    }
+
+    bt2c::CStringView uid() const noexcept
+    {
+        return bt_trace_get_uid(this->libObjPtr());
+    }
+
     CommonTrace uuid(const bt2c::UuidView& uuid) const noexcept
     {
         bt_trace_set_uuid(this->libObjPtr(), uuid.begin());
@@ -673,16 +706,6 @@ public:
         }
 
         return bt2s::nullopt;
-    }
-
-    void uid(const bt2c::CStringView uid) const noexcept
-    {
-        bt_trace_set_uid(this->libObjPtr(), uid);
-    }
-
-    bt2c::CStringView uid() const noexcept
-    {
-        return bt_trace_get_uid(this->libObjPtr());
     }
 
     std::uint64_t length() const noexcept
@@ -972,6 +995,23 @@ public:
     bt2c::CStringView name() const noexcept
     {
         return bt_event_class_get_name(this->libObjPtr());
+    }
+
+    CommonEventClass uid(const bt2c::CStringView uid) const
+    {
+        static_assert(!std::is_const<LibObjT>::value, "Not available with `bt2::ConstEventClass`.");
+
+        if (bt_event_class_set_uid(this->libObjPtr(), uid) ==
+            BT_EVENT_CLASS_SET_UID_STATUS_MEMORY_ERROR) {
+            throw MemoryError {};
+        }
+
+        return *this;
+    }
+
+    bt2c::CStringView uid() const noexcept
+    {
+        return bt_event_class_get_uid(this->libObjPtr());
     }
 
     CommonEventClass logLevel(const EventClassLogLevel logLevel) const noexcept
@@ -1336,6 +1376,24 @@ public:
         return bt_stream_class_get_name(this->libObjPtr());
     }
 
+    CommonStreamClass uid(const bt2c::CStringView uid) const
+    {
+        static_assert(!std::is_const<LibObjT>::value,
+                      "Not available with `bt2::ConstStreamClass`.");
+
+        if (bt_stream_class_set_uid(this->libObjPtr(), uid) ==
+            BT_STREAM_CLASS_SET_UID_STATUS_MEMORY_ERROR) {
+            throw MemoryError {};
+        }
+
+        return *this;
+    }
+
+    bt2c::CStringView uid() const noexcept
+    {
+        return bt_stream_class_get_uid(this->libObjPtr());
+    }
+
     CommonStreamClass assignsAutomaticEventClassId(const bool val) const noexcept
     {
         static_assert(!std::is_const<LibObjT>::value,
@@ -1683,6 +1741,11 @@ public:
 
         internal::validateCreatedObjPtr(libObjPtr);
         return Trace::Shared::createWithoutRef(libObjPtr);
+    }
+
+    std::uint64_t graphMipVersion() const noexcept
+    {
+        return bt_trace_class_get_graph_mip_version(this->libObjPtr());
     }
 
     ConstFieldLocation::Shared createFieldLocation(const ConstFieldLocation::Scope scope,
