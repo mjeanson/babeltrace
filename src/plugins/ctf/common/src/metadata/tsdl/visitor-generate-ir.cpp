@@ -464,16 +464,10 @@ ctf_visitor_generate_ir::~ctf_visitor_generate_ir()
     }
 }
 
-/**
- * Creates a new visitor context.
- *
- * @param trace	Associated trace
- * @returns	New visitor context, or NULL on error
- */
-static ctf_visitor_generate_ir::UP
-ctx_create(const ctf::src::ClkClsCfg clkClsCfg,
-           const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
-           const bt2c::Logger& logger)
+ctf_visitor_generate_ir::UP
+ctf_visitor_generate_ir_create(const ctf::src::ClkClsCfg& clkClsCfg,
+                               const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
+                               const bt2c::Logger& logger)
 {
     ctf_visitor_generate_ir::UP ctx =
         bt2s::make_unique<ctf_visitor_generate_ir>(clkClsCfg, selfComp, logger);
@@ -4399,29 +4393,6 @@ static int visit_root_decl(struct ctf_visitor_generate_ir *ctx, struct ctf_node 
 
 end:
     return ret;
-}
-
-ctf_visitor_generate_ir::UP
-ctf_visitor_generate_ir_create(const ctf::src::ClkClsCfg& clkClsCfg,
-                               const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
-                               const bt2c::Logger& parentLogger)
-{
-    bt2c::Logger logger {parentLogger, "PLUGIN/CTF/META/IR-VISITOR"};
-
-    /* Create visitor's context */
-    ctf_visitor_generate_ir::UP ctx = ctx_create(clkClsCfg, selfComp, logger);
-    if (!ctx) {
-        BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "Cannot create visitor's context.");
-        goto error;
-    }
-
-    goto end;
-
-error:
-    ctx.reset();
-
-end:
-    return ctx;
 }
 
 bt2::TraceClass::Shared
