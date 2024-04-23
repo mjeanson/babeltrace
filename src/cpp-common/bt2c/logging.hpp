@@ -680,100 +680,100 @@ inline const char *maybeNull(const char * const s) noexcept
 /*
  * Calls logMem() on `_logger` to log using the level `_lvl`.
  */
-#define BT_CPPLOG_MEM_EX(_lvl, _logger, _mem_data, _mem_len, _fmt, ...)                            \
+#define BT_CPPLOG_MEM_EX(_lvl, _logger, _memData, _memLen, _fmt, ...)                              \
     do {                                                                                           \
         if (G_UNLIKELY((_logger).wouldLog(_lvl))) {                                                \
-            (_logger).logMem<(_lvl)>(__FILE__, __func__, __LINE__, (_mem_data), (_mem_len),        \
-                                     (_fmt), ##__VA_ARGS__);                                       \
+            (_logger).logMem<(_lvl)>(__FILE__, __func__, __LINE__, (_memData), (_memLen), (_fmt),  \
+                                     ##__VA_ARGS__);                                               \
         }                                                                                          \
     } while (0)
 
 /*
  * BT_CPPLOG_MEM_EX() with specific logging levels.
  */
-#define BT_CPPLOGT_MEM_SPEC(_logger, _mem_data, _mem_len, _fmt, ...)                               \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Trace, (_logger), (_mem_data), (_mem_len), (_fmt),       \
+#define BT_CPPLOGT_MEM_SPEC(_logger, _memData, _memLen, _fmt, ...)                                 \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Trace, (_logger), (_memData), (_memLen), (_fmt),         \
                      ##__VA_ARGS__)
-#define BT_CPPLOGD_MEM_SPEC(_logger, _mem_data, _mem_len, _fmt, ...)                               \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Debug, (_logger), (_mem_data), (_mem_len), (_fmt),       \
+#define BT_CPPLOGD_MEM_SPEC(_logger, _memData, _memLen, _fmt, ...)                                 \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Debug, (_logger), (_memData), (_memLen), (_fmt),         \
                      ##__VA_ARGS__)
-#define BT_CPPLOGI_MEM_SPEC(_logger, _mem_data, _mem_len, _fmt, ...)                               \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Info, (_logger), (_mem_data), (_mem_len), (_fmt),        \
+#define BT_CPPLOGI_MEM_SPEC(_logger, _memData, _memLen, _fmt, ...)                                 \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Info, (_logger), (_memData), (_memLen), (_fmt),          \
                      ##__VA_ARGS__)
-#define BT_CPPLOGW_MEM_SPEC(_logger, _mem_data, _mem_len, _fmt, ...)                               \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Warning, (_logger), (_mem_data), (_mem_len), (_fmt),     \
+#define BT_CPPLOGW_MEM_SPEC(_logger, _memData, _memLen, _fmt, ...)                                 \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Warning, (_logger), (_memData), (_memLen), (_fmt),       \
                      ##__VA_ARGS__)
-#define BT_CPPLOGE_MEM_SPEC(_logger, _mem_data, _mem_len, _fmt, ...)                               \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Error, (_logger), (_mem_data), (_mem_len), (_fmt),       \
+#define BT_CPPLOGE_MEM_SPEC(_logger, _memData, _memLen, _fmt, ...)                                 \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Error, (_logger), (_memData), (_memLen), (_fmt),         \
                      ##__VA_ARGS__)
-#define BT_CPPLOGF_MEM_SPEC(_logger, _mem_data, _mem_len, _fmt, ...)                               \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Fatal, (_logger), (_mem_data), (_mem_len), (_fmt),       \
+#define BT_CPPLOGF_MEM_SPEC(_logger, _memData, _memLen, _fmt, ...)                                 \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Fatal, (_logger), (_memData), (_memLen), (_fmt),         \
                      ##__VA_ARGS__)
 
 /*
  * BT_CPPLOG_MEM_EX() with specific logging levels and using the default
  * logger.
  */
-#define BT_CPPLOGT_MEM(_mem_data, _mem_len, _fmt, ...)                                             \
-    BT_CPPLOGT_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGD_MEM(_mem_data, _mem_len, _fmt, ...)                                             \
-    BT_CPPLOGD_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGI_MEM(_mem_data, _mem_len, _fmt, ...)                                             \
-    BT_CPPLOGI_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGW_MEM(_mem_data, _mem_len, _fmt, ...)                                             \
-    BT_CPPLOGW_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGE_MEM(_mem_data, _mem_len, _fmt, ...)                                             \
-    BT_CPPLOGE_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGF_MEM(_mem_data, _mem_len, _fmt, ...)                                             \
-    BT_CPPLOGF_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGT_MEM(_memData, _memLen, _fmt, ...)                                               \
+    BT_CPPLOGT_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGD_MEM(_memData, _memLen, _fmt, ...)                                               \
+    BT_CPPLOGD_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGI_MEM(_memData, _memLen, _fmt, ...)                                               \
+    BT_CPPLOGI_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGW_MEM(_memData, _memLen, _fmt, ...)                                               \
+    BT_CPPLOGW_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGE_MEM(_memData, _memLen, _fmt, ...)                                               \
+    BT_CPPLOGE_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGF_MEM(_memData, _memLen, _fmt, ...)                                               \
+    BT_CPPLOGF_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_fmt), ##__VA_ARGS__)
 
 /*
  * Calls logMemStr() on `_logger` to log using the level `_lvl`.
  */
-#define BT_CPPLOG_MEM_STR_EX(_lvl, _logger, _mem_data, _mem_len, _msg)                             \
-    (_logger).logMemStr<(_lvl)>(__FILE__, __func__, __LINE__, (_mem_data), (_mem_len), (_msg))
+#define BT_CPPLOG_MEM_STR_EX(_lvl, _logger, _memData, _memLen, _msg)                               \
+    (_logger).logMemStr<(_lvl)>(__FILE__, __func__, __LINE__, (_memData), (_memLen), (_msg))
 
 /*
  * BT_CPPLOG_MEM_STR_EX() with specific logging levels.
  */
-#define BT_CPPLOGT_MEM_STR_SPEC(_logger, _mem_data, _mem_len, _msg)                                \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::TRACE, (_logger), (_mem_data), (_mem_len), (_msg))
-#define BT_CPPLOGD_MEM_STR_SPEC(_logger, _mem_data, _mem_len, _msg)                                \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::DEBUG, (_logger), (_mem_data), (_mem_len), (_msg))
-#define BT_CPPLOGI_MEM_STR_SPEC(_logger, _mem_data, _mem_len, _msg)                                \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::INFO, (_logger), (_mem_data), (_mem_len), (_msg))
-#define BT_CPPLOGW_MEM_STR_SPEC(_logger, _mem_data, _mem_len, _msg)                                \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::WARNING, (_logger), (_mem_data), (_mem_len), (_msg))
-#define BT_CPPLOGE_MEM_STR_SPEC(_logger, _mem_data, _mem_len, _msg)                                \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::Error, (_logger), (_mem_data), (_mem_len), (_msg))
-#define BT_CPPLOGF_MEM_STR_SPEC(_logger, _mem_data, _mem_len, _msg)                                \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::FATAL, (_logger), (_mem_data), (_mem_len), (_msg))
+#define BT_CPPLOGT_MEM_STR_SPEC(_logger, _memData, _memLen, _msg)                                  \
+    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::TRACE, (_logger), (_memData), (_memLen), (_msg))
+#define BT_CPPLOGD_MEM_STR_SPEC(_logger, _memData, _memLen, _msg)                                  \
+    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::DEBUG, (_logger), (_memData), (_memLen), (_msg))
+#define BT_CPPLOGI_MEM_STR_SPEC(_logger, _memData, _memLen, _msg)                                  \
+    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::INFO, (_logger), (_memData), (_memLen), (_msg))
+#define BT_CPPLOGW_MEM_STR_SPEC(_logger, _memData, _memLen, _msg)                                  \
+    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::WARNING, (_logger), (_memData), (_memLen), (_msg))
+#define BT_CPPLOGE_MEM_STR_SPEC(_logger, _memData, _memLen, _msg)                                  \
+    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::Error, (_logger), (_memData), (_memLen), (_msg))
+#define BT_CPPLOGF_MEM_STR_SPEC(_logger, _memData, _memLen, _msg)                                  \
+    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::FATAL, (_logger), (_memData), (_memLen), (_msg))
 
 /*
  * BT_CPPLOG_MEM_STR_EX() with specific logging levels and using the
  * default logger.
  */
-#define BT_CPPLOGT_MEM_STR(_mem_data, _mem_len, _msg)                                              \
-    BT_CPPLOGT_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_msg))
-#define BT_CPPLOGD_MEM_STR(_mem_data, _mem_len, _msg)                                              \
-    BT_CPPLOGD_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_msg))
-#define BT_CPPLOGI_MEM_STR(_mem_data, _mem_len, _msg)                                              \
-    BT_CPPLOGI_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_msg))
-#define BT_CPPLOGW_MEM_STR(_mem_data, _mem_len, _msg)                                              \
-    BT_CPPLOGW_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_msg))
-#define BT_CPPLOGE_MEM_STR(_mem_data, _mem_len, _msg)                                              \
-    BT_CPPLOGE_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_msg))
-#define BT_CPPLOGF_MEM_STR(_mem_data, _mem_len, _msg)                                              \
-    BT_CPPLOGF_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_mem_data), (_mem_len), (_msg))
+#define BT_CPPLOGT_MEM_STR(_memData, _memLen, _msg)                                                \
+    BT_CPPLOGT_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_msg))
+#define BT_CPPLOGD_MEM_STR(_memData, _memLen, _msg)                                                \
+    BT_CPPLOGD_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_msg))
+#define BT_CPPLOGI_MEM_STR(_memData, _memLen, _msg)                                                \
+    BT_CPPLOGI_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_msg))
+#define BT_CPPLOGW_MEM_STR(_memData, _memLen, _msg)                                                \
+    BT_CPPLOGW_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_msg))
+#define BT_CPPLOGE_MEM_STR(_memData, _memLen, _msg)                                                \
+    BT_CPPLOGE_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_msg))
+#define BT_CPPLOGF_MEM_STR(_memData, _memLen, _msg)                                                \
+    BT_CPPLOGF_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_msg))
 
 /*
  * Calls logErrno() on `_logger` to log using the level `_lvl` and
- * initial message `_init_msg`.
+ * initial message `_initMsg`.
  */
-#define BT_CPPLOG_ERRNO_EX(_lvl, _logger, _init_msg, _fmt, ...)                                    \
+#define BT_CPPLOG_ERRNO_EX(_lvl, _logger, _initMsg, _fmt, ...)                                     \
     do {                                                                                           \
         if (G_UNLIKELY((_logger).wouldLog(_lvl))) {                                                \
-            (_logger).logErrno<(_lvl), false>(__FILE__, __func__, __LINE__, (_init_msg), (_fmt),   \
+            (_logger).logErrno<(_lvl), false>(__FILE__, __func__, __LINE__, (_initMsg), (_fmt),    \
                                               ##__VA_ARGS__);                                      \
         }                                                                                          \
     } while (0)
@@ -781,75 +781,75 @@ inline const char *maybeNull(const char * const s) noexcept
 /*
  * BT_CPPLOG_ERRNO_EX() with specific logging levels.
  */
-#define BT_CPPLOGT_ERRNO_SPEC(_logger, _init_msg, _fmt, ...)                                       \
-    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Trace, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGD_ERRNO_SPEC(_logger, _init_msg, _fmt, ...)                                       \
-    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Debug, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGI_ERRNO_SPEC(_logger, _init_msg, _fmt, ...)                                       \
-    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Info, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGW_ERRNO_SPEC(_logger, _init_msg, _fmt, ...)                                       \
-    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Warning, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGE_ERRNO_SPEC(_logger, _init_msg, _fmt, ...)                                       \
-    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Error, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGF_ERRNO_SPEC(_logger, _init_msg, _fmt, ...)                                       \
-    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Fatal, (_logger), (_init_msg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGT_ERRNO_SPEC(_logger, _initMsg, _fmt, ...)                                        \
+    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Trace, (_logger), (_initMsg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGD_ERRNO_SPEC(_logger, _initMsg, _fmt, ...)                                        \
+    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Debug, (_logger), (_initMsg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGI_ERRNO_SPEC(_logger, _initMsg, _fmt, ...)                                        \
+    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Info, (_logger), (_initMsg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGW_ERRNO_SPEC(_logger, _initMsg, _fmt, ...)                                        \
+    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Warning, (_logger), (_initMsg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGE_ERRNO_SPEC(_logger, _initMsg, _fmt, ...)                                        \
+    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Error, (_logger), (_initMsg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGF_ERRNO_SPEC(_logger, _initMsg, _fmt, ...)                                        \
+    BT_CPPLOG_ERRNO_EX(bt2c::Logger::Level::Fatal, (_logger), (_initMsg), (_fmt), ##__VA_ARGS__)
 
 /*
  * BT_CPPLOG_ERRNO_EX() with specific logging levels and using the
  * default logger.
  */
-#define BT_CPPLOGT_ERRNO(_init_msg, _fmt, ...)                                                     \
-    BT_CPPLOGT_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGD_ERRNO(_init_msg, _fmt, ...)                                                     \
-    BT_CPPLOGD_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGI_ERRNO(_init_msg, _fmt, ...)                                                     \
-    BT_CPPLOGI_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGW_ERRNO(_init_msg, _fmt, ...)                                                     \
-    BT_CPPLOGW_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGE_ERRNO(_init_msg, _fmt, ...)                                                     \
-    BT_CPPLOGE_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGF_ERRNO(_init_msg, _fmt, ...)                                                     \
-    BT_CPPLOGF_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGT_ERRNO(_initMsg, _fmt, ...)                                                      \
+    BT_CPPLOGT_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGD_ERRNO(_initMsg, _fmt, ...)                                                      \
+    BT_CPPLOGD_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGI_ERRNO(_initMsg, _fmt, ...)                                                      \
+    BT_CPPLOGI_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGW_ERRNO(_initMsg, _fmt, ...)                                                      \
+    BT_CPPLOGW_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGE_ERRNO(_initMsg, _fmt, ...)                                                      \
+    BT_CPPLOGE_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGF_ERRNO(_initMsg, _fmt, ...)                                                      \
+    BT_CPPLOGF_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_fmt), ##__VA_ARGS__)
 
 /*
  * Calls logErrnoStr() on `_logger` to log using the level `_lvl` and
- * initial message `_init_msg`.
+ * initial message `_initMsg`.
  */
-#define BT_CPPLOG_ERRNO_STR_EX(_lvl, _logger, _init_msg, _msg)                                     \
-    (_logger).logErrnoStr<(_lvl), false>(__FILE__, __func__, __LINE__, (_init_msg), (_msg))
+#define BT_CPPLOG_ERRNO_STR_EX(_lvl, _logger, _initMsg, _msg)                                      \
+    (_logger).logErrnoStr<(_lvl), false>(__FILE__, __func__, __LINE__, (_initMsg), (_msg))
 
 /*
  * BT_CPPLOG_ERRNO_STR_EX() with specific logging levels.
  */
-#define BT_CPPLOGT_ERRNO_STR_SPEC(_logger, _init_msg, _msg)                                        \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Trace, (_logger), (_init_msg), (_msg))
-#define BT_CPPLOGD_ERRNO_STR_SPEC(_logger, _init_msg, _msg)                                        \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Debug, (_logger), (_init_msg), (_msg))
-#define BT_CPPLOGI_ERRNO_STR_SPEC(_logger, _init_msg, _msg)                                        \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Info, (_logger), (_init_msg), (_msg))
-#define BT_CPPLOGW_ERRNO_STR_SPEC(_logger, _init_msg, _msg)                                        \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Warning, (_logger), (_init_msg), (_msg))
-#define BT_CPPLOGE_ERRNO_STR_SPEC(_logger, _init_msg, _msg)                                        \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Error, (_logger), (_init_msg), (_msg))
-#define BT_CPPLOGF_ERRNO_STR_SPEC(_logger, _init_msg, _msg)                                        \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Fatal, (_logger), (_init_msg), (_msg))
+#define BT_CPPLOGT_ERRNO_STR_SPEC(_logger, _initMsg, _msg)                                         \
+    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Trace, (_logger), (_initMsg), (_msg))
+#define BT_CPPLOGD_ERRNO_STR_SPEC(_logger, _initMsg, _msg)                                         \
+    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Debug, (_logger), (_initMsg), (_msg))
+#define BT_CPPLOGI_ERRNO_STR_SPEC(_logger, _initMsg, _msg)                                         \
+    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Info, (_logger), (_initMsg), (_msg))
+#define BT_CPPLOGW_ERRNO_STR_SPEC(_logger, _initMsg, _msg)                                         \
+    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Warning, (_logger), (_initMsg), (_msg))
+#define BT_CPPLOGE_ERRNO_STR_SPEC(_logger, _initMsg, _msg)                                         \
+    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Error, (_logger), (_initMsg), (_msg))
+#define BT_CPPLOGF_ERRNO_STR_SPEC(_logger, _initMsg, _msg)                                         \
+    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Fatal, (_logger), (_initMsg), (_msg))
 
 /*
  * BT_CPPLOG_ERRNO_STR_EX() with specific logging levels and using the
  * default logger.
  */
-#define BT_CPPLOGT_ERRNO_STR(_init_msg, _msg)                                                      \
-    BT_CPPLOGT_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_msg))
-#define BT_CPPLOGD_ERRNO_STR(_init_msg, _msg)                                                      \
-    BT_CPPLOGD_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_msg))
-#define BT_CPPLOGI_ERRNO_STR(_init_msg, _msg)                                                      \
-    BT_CPPLOGI_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_msg))
-#define BT_CPPLOGW_ERRNO_STR(_init_msg, _msg)                                                      \
-    BT_CPPLOGW_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_msg))
-#define BT_CPPLOGE_ERRNO_STR(_init_msg, _msg)                                                      \
-    BT_CPPLOGE_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_msg))
-#define BT_CPPLOGF_ERRNO_STR(_init_msg, _msg)                                                      \
-    BT_CPPLOGF_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_msg))
+#define BT_CPPLOGT_ERRNO_STR(_initMsg, _msg)                                                       \
+    BT_CPPLOGT_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
+#define BT_CPPLOGD_ERRNO_STR(_initMsg, _msg)                                                       \
+    BT_CPPLOGD_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
+#define BT_CPPLOGI_ERRNO_STR(_initMsg, _msg)                                                       \
+    BT_CPPLOGI_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
+#define BT_CPPLOGW_ERRNO_STR(_initMsg, _msg)                                                       \
+    BT_CPPLOGW_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
+#define BT_CPPLOGE_ERRNO_STR(_initMsg, _msg)                                                       \
+    BT_CPPLOGE_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
+#define BT_CPPLOGF_ERRNO_STR(_initMsg, _msg)                                                       \
+    BT_CPPLOGF_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
 
 /*
  * Calls log() on `_logger` with the `Error` level to log an error and
@@ -881,36 +881,36 @@ inline const char *maybeNull(const char * const s) noexcept
 /*
  * Calls logErrorAndThrow() on `_logger` to log an error, append a cause
  * to the error of the current thread, and throw an instance of
- * `_exc_cls`.
+ * `_excCls`.
  */
-#define BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(_logger, _exc_cls, _fmt, ...)                       \
-    (_logger).logErrorAndThrow<true, _exc_cls>(__FILE__, __func__, __LINE__, (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(_logger, _excCls, _fmt, ...)                        \
+    (_logger).logErrorAndThrow<true, _excCls>(__FILE__, __func__, __LINE__, (_fmt), ##__VA_ARGS__)
 
 /*
  * BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC() using the default logger.
  */
-#define BT_CPPLOGE_APPEND_CAUSE_AND_THROW(_exc_cls, _fmt, ...)                                     \
-    BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(_BT_CPPLOG_DEF_LOGGER, _exc_cls, (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGE_APPEND_CAUSE_AND_THROW(_excCls, _fmt, ...)                                      \
+    BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(_BT_CPPLOG_DEF_LOGGER, _excCls, (_fmt), ##__VA_ARGS__)
 
 /*
  * Calls logErrorStrAndThrow() on `_logger` to log an error, append a
  * cause to the error of the current thread, and throw an instance of
- * `_exc_cls`.
+ * `_excCls`.
  */
-#define BT_CPPLOGE_STR_APPEND_CAUSE_AND_THROW_SPEC(_logger, _exc_cls, _msg)                        \
-    (_logger).logErrorStrAndThrow<true, _exc_cls>(__FILE__, __func__, __LINE__, (_msg))
+#define BT_CPPLOGE_STR_APPEND_CAUSE_AND_THROW_SPEC(_logger, _excCls, _msg)                         \
+    (_logger).logErrorStrAndThrow<true, _excCls>(__FILE__, __func__, __LINE__, (_msg))
 
 /*
  * BT_CPPLOGE_STR_APPEND_CAUSE_AND_THROW_SPEC() using the default
  * logger.
  */
-#define BT_CPPLOGE_STR_APPEND_CAUSE_AND_THROW(_exc_cls, _msg)                                      \
-    BT_CPPLOGE_STR_APPEND_CAUSE_AND_THROW_SPEC(_BT_CPPLOG_DEF_LOGGER, _exc_cls, (_msg))
+#define BT_CPPLOGE_STR_APPEND_CAUSE_AND_THROW(_excCls, _msg)                                       \
+    BT_CPPLOGE_STR_APPEND_CAUSE_AND_THROW_SPEC(_BT_CPPLOG_DEF_LOGGER, _excCls, (_msg))
 
 /*
  * Calls logErrorAndRethrow() on `_logger` to log an error, append a
  * cause to the error of the current thread, and throw an instance of
- * `_exc_cls`.
+ * `_excCls`.
  */
 #define BT_CPPLOGE_APPEND_CAUSE_AND_RETHROW_SPEC(_logger, _fmt, ...)                               \
     (_logger).logErrorAndRethrow<true>(__FILE__, __func__, __LINE__, (_fmt), ##__VA_ARGS__)
@@ -924,7 +924,7 @@ inline const char *maybeNull(const char * const s) noexcept
 /*
  * Calls logErrorStrAndRethrow() on `_logger` to log an error, append a
  * cause to the error of the current thread, and throw an instance of
- * `_exc_cls`.
+ * `_excCls`.
  */
 #define BT_CPPLOGE_STR_APPEND_CAUSE_AND_RETHROW_SPEC(_logger, _msg)                                \
     (_logger).logErrorStrAndRethrow<true>(__FILE__, __func__, __LINE__, (_msg))
@@ -940,94 +940,94 @@ inline const char *maybeNull(const char * const s) noexcept
  * Calls logErrno() on `_logger` with the `Level::Error` level to log an
  * error and append a cause to the error of the current thread.
  */
-#define BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(_logger, _init_msg, _fmt, ...)                          \
-    (_logger).logErrno<bt2c::Logger::Level::Error, true>(__FILE__, __func__, __LINE__,             \
-                                                         (_init_msg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(_logger, _initMsg, _fmt, ...)                           \
+    (_logger).logErrno<bt2c::Logger::Level::Error, true>(__FILE__, __func__, __LINE__, (_initMsg), \
+                                                         (_fmt), ##__VA_ARGS__)
 
 /*
  * BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC() using the default logger.
  */
-#define BT_CPPLOGE_ERRNO_APPEND_CAUSE(_init_msg, _fmt, ...)                                        \
-    BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGE_ERRNO_APPEND_CAUSE(_initMsg, _fmt, ...)                                         \
+    BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_fmt), ##__VA_ARGS__)
 
 /*
  * Calls logErrnoStr() on `_logger` with the `Level::Error` level to log
  * an error and append a cause to the error of the current thread.
  */
-#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_SPEC(_logger, _init_msg, _msg)                           \
+#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_SPEC(_logger, _initMsg, _msg)                            \
     (_logger).logErrnoStr<bt2c::Logger::Level::Error, true>(__FILE__, __func__, __LINE__,          \
-                                                            (_init_msg), (_msg))
+                                                            (_initMsg), (_msg))
 
 /*
  * BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_SPEC() using the default logger.
  */
-#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE(_init_msg, _msg)                                         \
-    BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_msg))
+#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE(_initMsg, _msg)                                          \
+    BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
 
 /*
  * Calls logErrorErrnoAndThrow() on `_logger` to log an error, append a
  * cause to the error of the current thread, and throw an instance of
- * `_exc_cls`.
+ * `_excCls`.
  */
-#define BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_THROW_SPEC(_logger, _exc_cls, _init_msg, _fmt, ...)      \
-    (_logger).logErrorErrnoAndThrow<true, _exc_cls>(__FILE__, __func__, __LINE__, (_init_msg),     \
-                                                    (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_THROW_SPEC(_logger, _excCls, _initMsg, _fmt, ...)        \
+    (_logger).logErrorErrnoAndThrow<true, _excCls>(__FILE__, __func__, __LINE__, (_initMsg),       \
+                                                   (_fmt), ##__VA_ARGS__)
 
 /*
  * BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_THROW_SPEC() using the default
  * logger.
  */
-#define BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_THROW(_exc_cls, _init_msg, _fmt, ...)                    \
-    BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_THROW_SPEC(_BT_CPPLOG_DEF_LOGGER, _exc_cls, (_init_msg),     \
+#define BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_THROW(_excCls, _initMsg, _fmt, ...)                      \
+    BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_THROW_SPEC(_BT_CPPLOG_DEF_LOGGER, _excCls, (_initMsg),       \
                                                  (_fmt), ##__VA_ARGS__)
 
 /*
  * Calls logErrorErrnoStrAndThrow() on `_logger` to log an error, append
  * a cause to the error of the current thread, and throw an instance of
- * `_exc_cls`.
+ * `_excCls`.
  */
-#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_THROW_SPEC(_logger, _exc_cls, _init_msg, _msg)       \
-    (_logger).logErrorErrnoStrAndThrow<true, _exc_cls>(__FILE__, __func__, __LINE__, (_init_msg),  \
-                                                       (_msg))
+#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_THROW_SPEC(_logger, _excCls, _initMsg, _msg)         \
+    (_logger).logErrorErrnoStrAndThrow<true, _excCls>(__FILE__, __func__, __LINE__, (_initMsg),    \
+                                                      (_msg))
 
 /*
  * BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_THROW_SPEC() using the default
  * logger.
  */
-#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_THROW(_exc_cls, _init_msg, _msg)                     \
-    BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_THROW_SPEC(_BT_CPPLOG_DEF_LOGGER, _exc_cls, (_init_msg), \
+#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_THROW(_excCls, _initMsg, _msg)                       \
+    BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_THROW_SPEC(_BT_CPPLOG_DEF_LOGGER, _excCls, (_initMsg),   \
                                                      (_msg))
 
 /*
  * Calls logErrorErrnoAndRethrow() on `_logger` to log an error, append
  * a cause to the error of the current thread, and throw an instance of
- * `_exc_cls`.
+ * `_excCls`.
  */
-#define BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_RETHROW_SPEC(_logger, _init_msg, _fmt, ...)              \
-    (_logger).logErrorErrnoAndRethrow<true>(__FILE__, __func__, __LINE__, (_init_msg), (_fmt),     \
+#define BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_RETHROW_SPEC(_logger, _initMsg, _fmt, ...)               \
+    (_logger).logErrorErrnoAndRethrow<true>(__FILE__, __func__, __LINE__, (_initMsg), (_fmt),      \
                                             ##__VA_ARGS__)
 
 /*
  * BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_RETHROW_SPEC() using the default
  * logger.
  */
-#define BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_RETHROW(_init_msg, _fmt, ...)                            \
-    BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_RETHROW_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_fmt),     \
+#define BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_RETHROW(_initMsg, _fmt, ...)                             \
+    BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_RETHROW_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_fmt),      \
                                                    ##__VA_ARGS__)
 
 /*
  * Calls logErrorErrnoStrAndRethrow() on `_logger` to log an error,
  * append a cause to the error of the current thread, and throw an
- * instance of `_exc_cls`.
+ * instance of `_excCls`.
  */
-#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_RETHROW_SPEC(_logger, _init_msg, _msg)               \
-    (_logger).logErrorErrnoStrAndRethrow<true>(__FILE__, __func__, __LINE__, (_init_msg), (_msg))
+#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_RETHROW_SPEC(_logger, _initMsg, _msg)                \
+    (_logger).logErrorErrnoStrAndRethrow<true>(__FILE__, __func__, __LINE__, (_initMsg), (_msg))
 
 /*
  * BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_RETHROW_SPEC() using the
  * default logger.
  */
-#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_RETHROW(_init_msg, _msg)                             \
-    BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_RETHROW_SPEC(_BT_CPPLOG_DEF_LOGGER, (_init_msg), (_msg))
+#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_RETHROW(_initMsg, _msg)                              \
+    BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_RETHROW_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
 
 #endif /* BABELTRACE_CPP_COMMON_BT2C_LOGGING_HPP */
