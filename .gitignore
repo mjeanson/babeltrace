@@ -1,5 +1,7 @@
 /tests/bitfield/test-bitfield
 /tests/argpar/test-argpar
+/tests/cpp-common/test-c-string-view
+/tests/cpp-common/test-uuid
 /tests/ctf-writer/ctf-writer
 /tests/lib/plugin
 /tests/lib/test-bt-uuid
@@ -10,6 +12,9 @@
 /tests/lib/test-simple-sink
 /tests/lib/test-remove-destruction-listener-in-destruction-listener
 /tests/lib/conds/conds-triggers
+/tests/lib/test-plugin-init-fail
+/tests/lib/test-plugins
+/tests/plugins/flt.utils.muxer/test-clock-compatibility
 /tests/param-validation/test-param-validation
 /tests/plugins/flt.lttng-utils.debug-info/test-bin-info
 /tests/plugins/flt.lttng-utils.debug-info/test-dwarf
