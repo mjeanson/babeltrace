@@ -49,13 +49,14 @@ public:
 
     /* Available log levels */
     WISE_ENUM_CLASS_MEMBER(Level,
-        (Trace, BT_LOG_TRACE),
-        (Debug, BT_LOG_DEBUG),
-        (Info, BT_LOG_INFO),
-        (Warning, BT_LOG_WARNING),
-        (Error, BT_LOG_ERROR),
-        (Fatal, BT_LOG_FATAL),
-        (None, BT_LOG_NONE));
+        (Trace,     BT_LOG_TRACE),
+        (Debug,     BT_LOG_DEBUG),
+        (Info,      BT_LOG_INFO),
+        (Warning,   BT_LOG_WARNING),
+        (Error,     BT_LOG_ERROR),
+        (Fatal,     BT_LOG_FATAL),
+        (None,      BT_LOG_NONE)
+    )
 
     /* clang-format on */
 
