@@ -430,7 +430,8 @@ bt_run_in_py_env() {
 	if [[ ${BT_TESTS_ENABLE_ASAN:-} == 1 ]]; then
 		if $BT_TESTS_CC_BIN --version | head -n 1 | bt_grep -q '^gcc'; then
 			local -r lib_asan=$($BT_TESTS_CC_BIN -print-file-name=libasan.so)
-			local -x LD_PRELOAD=$lib_asan${LD_PRELOAD:+:}${LD_PRELOAD:-}
+			local -r lib_stdcxx=$($BT_TESTS_CC_BIN -print-file-name=libstdc++.so)
+			local -x LD_PRELOAD=$lib_asan:$lib_stdcxx${LD_PRELOAD:+:}${LD_PRELOAD:-}
 		fi
 
 		local -x ASAN_OPTIONS=${ASAN_OPTIONS:-}${ASAN_OPTIONS:+,}detect_leaks=0
