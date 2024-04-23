@@ -1777,7 +1777,7 @@ Also provides conversion to `bt2c::Uuid`.
 Everything under the `bt2s` namespace has its equivalent under the `std`
 namespace, but in {cpp} versions we don't yet have access to, namely:
 
-`make_unique.hpp`::
+`make-unique.hpp`::
     `bt2s::make_unique()`, a drop-in replacement of `std::make_unique()`
     ({cpp}14).
 
