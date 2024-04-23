@@ -22,6 +22,7 @@
 #include "cpp-common/bt2/self-component-port.hpp"
 #include "cpp-common/bt2/self-message-iterator.hpp"
 #include "cpp-common/bt2s/optional.hpp"
+#include "cpp-common/bt2s/span.hpp"
 #include "cpp-common/vendor/fmt/core.h"
 #include "cpp-common/vendor/wise-enum/wise_enum.h"
 #include "logging/log-api.h"
@@ -45,6 +46,8 @@ namespace bt2c {
 class Logger final
 {
 public:
+    using MemData = bt2s::span<const std::uint8_t>;
+
     /* clang-format off */
 
     /* Available log levels */
@@ -262,9 +265,8 @@ private:
     struct _StdLogWriter final
     {
         static void write(const char * const fileName, const char * const funcName,
-                          const unsigned lineNo, const Level level, const char * const tag,
-                          const void *, unsigned int, const char * const initMsg,
-                          const char * const msg) noexcept
+                          const unsigned lineNo, const Level level, const char * const tag, MemData,
+                          const char * const initMsg, const char * const msg) noexcept
         {
             BT_ASSERT_DBG(initMsg && std::strcmp(initMsg, "") == 0);
             bt_log_write(fileName, funcName, lineNo, static_cast<bt_log_level>(level), tag, msg);
@@ -285,8 +287,8 @@ public:
     void log(const char * const fileName, const char * const funcName, const unsigned int lineNo,
              const char * const fmt, ArgTs&&...args) const
     {
-        this->_log<_StdLogWriter, LevelV, AppendCauseV>(fileName, funcName, lineNo, nullptr, 0, "",
-                                                        fmt, std::forward<ArgTs>(args)...);
+        this->_log<_StdLogWriter, LevelV, AppendCauseV>(fileName, funcName, lineNo, {}, "", fmt,
+                                                        std::forward<ArgTs>(args)...);
     }
 
     /*
@@ -299,8 +301,7 @@ public:
     void logStr(const char * const fileName, const char * const funcName, const unsigned int lineNo,
                 const char * const msg) const
     {
-        this->_logStr<_StdLogWriter, LevelV, AppendCauseV>(fileName, funcName, lineNo, nullptr, 0,
-                                                           "", msg);
+        this->_logStr<_StdLogWriter, LevelV, AppendCauseV>(fileName, funcName, lineNo, {}, "", msg);
     }
 
     /*
@@ -358,9 +359,8 @@ private:
     struct _InitMsgLogWriter final
     {
         static void write(const char * const fileName, const char * const funcName,
-                          const unsigned lineNo, const Level level, const char * const tag,
-                          const void *, unsigned int, const char * const initMsg,
-                          const char * const msg) noexcept
+                          const unsigned lineNo, const Level level, const char * const tag, MemData,
+                          const char * const initMsg, const char * const msg) noexcept
         {
             bt_log_write_printf(funcName, fileName, lineNo, static_cast<bt_log_level>(level), tag,
                                 "%s%s", initMsg, msg);
@@ -383,7 +383,7 @@ public:
                   const unsigned int lineNo, const char * const initMsg, const char * const fmt,
                   ArgTs&&...args) const
     {
-        this->_log<_InitMsgLogWriter, LevelV, AppendCauseV>(fileName, funcName, lineNo, nullptr, 0,
+        this->_log<_InitMsgLogWriter, LevelV, AppendCauseV>(fileName, funcName, lineNo, {},
                                                             this->_errnoIntroStr(initMsg).c_str(),
                                                             fmt, std::forward<ArgTs>(args)...);
     }
@@ -403,7 +403,7 @@ public:
                      const char * const msg) const
     {
         this->_logStr<_InitMsgLogWriter, LevelV, AppendCauseV>(
-            fileName, funcName, lineNo, nullptr, 0, this->_errnoIntroStr(initMsg).c_str(), msg);
+            fileName, funcName, lineNo, {}, this->_errnoIntroStr(initMsg).c_str(), msg);
     }
 
     /*
@@ -468,11 +468,10 @@ private:
     {
         static void write(const char * const fileName, const char * const funcName,
                           const unsigned lineNo, const Level level, const char * const tag,
-                          const void * const memData, const unsigned int memLen, const char *,
-                          const char * const msg) noexcept
+                          const MemData memData, const char *, const char * const msg) noexcept
         {
             bt_log_write_mem(funcName, fileName, lineNo, static_cast<bt_log_level>(level), tag,
-                             memData, memLen, msg);
+                             memData.data(), memData.size(), msg);
         }
     };
 
@@ -485,11 +484,10 @@ public:
      */
     template <Level LevelV, typename... ArgTs>
     void logMem(const char * const fileName, const char * const funcName, const unsigned int lineNo,
-                const void * const memData, const unsigned int memLen, const char * const fmt,
-                ArgTs&&...args) const
+                const MemData memData, const char * const fmt, ArgTs&&...args) const
     {
-        this->_log<_MemLogWriter, LevelV, false>(fileName, funcName, lineNo, memData, memLen, "",
-                                                 fmt, std::forward<ArgTs>(args)...);
+        this->_log<_MemLogWriter, LevelV, false>(fileName, funcName, lineNo, memData, "", fmt,
+                                                 std::forward<ArgTs>(args)...);
     }
 
     /*
@@ -498,11 +496,9 @@ public:
      */
     template <Level LevelV>
     void logMemStr(const char * const fileName, const char * const funcName,
-                   const unsigned int lineNo, const void * const memData, const unsigned int memLen,
-                   const char * const msg) const
+                   const unsigned int lineNo, const MemData memData, const char * const msg) const
     {
-        this->_logStr<_MemLogWriter, LevelV, false>(fileName, funcName, lineNo, memData, memLen, "",
-                                                    msg);
+        this->_logStr<_MemLogWriter, LevelV, false>(fileName, funcName, lineNo, memData, "", msg);
     }
 
 private:
@@ -512,8 +508,8 @@ private:
      */
     template <typename LogWriterT, Level LevelV, bool AppendCauseV, typename... ArgTs>
     void _log(const char * const fileName, const char * const funcName, const unsigned int lineNo,
-              const void * const memData, const std::size_t memLen, const char * const initMsg,
-              const char * const fmt, ArgTs&&...args) const
+              const MemData memData, const char * const initMsg, const char * const fmt,
+              ArgTs&&...args) const
     {
         /* Only format arguments if logging or appending an error cause */
         if (G_UNLIKELY(this->wouldLog(LevelV) || AppendCauseV)) {
@@ -526,7 +522,7 @@ private:
             _mBuf.push_back('\0');
         }
 
-        this->_logStr<LogWriterT, LevelV, AppendCauseV>(fileName, funcName, lineNo, memData, memLen,
+        this->_logStr<LogWriterT, LevelV, AppendCauseV>(fileName, funcName, lineNo, memData,
                                                         initMsg, _mBuf.data());
     }
 
@@ -540,8 +536,8 @@ private:
      */
     template <typename LogWriterT, Level LevelV, bool AppendCauseV>
     void _logStr(const char * const fileName, const char * const funcName,
-                 const unsigned int lineNo, const void * const memData, const std::size_t memLen,
-                 const char * const initMsg, const char * const msg) const
+                 const unsigned int lineNo, const MemData memData, const char * const initMsg,
+                 const char * const msg) const
     {
         /* Initial message and main message are required */
         BT_ASSERT(initMsg);
@@ -549,8 +545,8 @@ private:
 
         /* Log if needed */
         if (this->wouldLog(LevelV)) {
-            LogWriterT::write(fileName, funcName, lineNo, LevelV, _mTag.data(), memData, memLen,
-                              initMsg, msg);
+            LogWriterT::write(fileName, funcName, lineNo, LevelV, _mTag.data(), memData, initMsg,
+                              msg);
         }
 
         /* Append an error cause if needed */
@@ -680,10 +676,10 @@ inline const char *maybeNull(const char * const s) noexcept
 /*
  * Calls logMem() on `_logger` to log using the level `_lvl`.
  */
-#define BT_CPPLOG_MEM_EX(_lvl, _logger, _memData, _memLen, _fmt, ...)                              \
+#define BT_CPPLOG_MEM_EX(_lvl, _logger, _memData, _fmt, ...)                                       \
     do {                                                                                           \
         if (G_UNLIKELY((_logger).wouldLog(_lvl))) {                                                \
-            (_logger).logMem<(_lvl)>(__FILE__, __func__, __LINE__, (_memData), (_memLen), (_fmt),  \
+            (_logger).logMem<(_lvl)>(__FILE__, __func__, __LINE__, (_memData), (_fmt),             \
                                      ##__VA_ARGS__);                                               \
         }                                                                                          \
     } while (0)
@@ -691,80 +687,74 @@ inline const char *maybeNull(const char * const s) noexcept
 /*
  * BT_CPPLOG_MEM_EX() with specific logging levels.
  */
-#define BT_CPPLOGT_MEM_SPEC(_logger, _memData, _memLen, _fmt, ...)                                 \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Trace, (_logger), (_memData), (_memLen), (_fmt),         \
-                     ##__VA_ARGS__)
-#define BT_CPPLOGD_MEM_SPEC(_logger, _memData, _memLen, _fmt, ...)                                 \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Debug, (_logger), (_memData), (_memLen), (_fmt),         \
-                     ##__VA_ARGS__)
-#define BT_CPPLOGI_MEM_SPEC(_logger, _memData, _memLen, _fmt, ...)                                 \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Info, (_logger), (_memData), (_memLen), (_fmt),          \
-                     ##__VA_ARGS__)
-#define BT_CPPLOGW_MEM_SPEC(_logger, _memData, _memLen, _fmt, ...)                                 \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Warning, (_logger), (_memData), (_memLen), (_fmt),       \
-                     ##__VA_ARGS__)
-#define BT_CPPLOGE_MEM_SPEC(_logger, _memData, _memLen, _fmt, ...)                                 \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Error, (_logger), (_memData), (_memLen), (_fmt),         \
-                     ##__VA_ARGS__)
-#define BT_CPPLOGF_MEM_SPEC(_logger, _memData, _memLen, _fmt, ...)                                 \
-    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Fatal, (_logger), (_memData), (_memLen), (_fmt),         \
-                     ##__VA_ARGS__)
+#define BT_CPPLOGT_MEM_SPEC(_logger, _memData, _fmt, ...)                                          \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Trace, (_logger), (_memData), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGD_MEM_SPEC(_logger, _memData, _fmt, ...)                                          \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Debug, (_logger), (_memData), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGI_MEM_SPEC(_logger, _memData, _fmt, ...)                                          \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Info, (_logger), (_memData), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGW_MEM_SPEC(_logger, _memData, _fmt, ...)                                          \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Warning, (_logger), (_memData), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGE_MEM_SPEC(_logger, _memData, _fmt, ...)                                          \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Error, (_logger), (_memData), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGF_MEM_SPEC(_logger, _memData, _fmt, ...)                                          \
+    BT_CPPLOG_MEM_EX(bt2c::Logger::Level::Fatal, (_logger), (_memData), (_fmt), ##__VA_ARGS__)
 
 /*
  * BT_CPPLOG_MEM_EX() with specific logging levels and using the default
  * logger.
  */
-#define BT_CPPLOGT_MEM(_memData, _memLen, _fmt, ...)                                               \
-    BT_CPPLOGT_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGD_MEM(_memData, _memLen, _fmt, ...)                                               \
-    BT_CPPLOGD_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGI_MEM(_memData, _memLen, _fmt, ...)                                               \
-    BT_CPPLOGI_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGW_MEM(_memData, _memLen, _fmt, ...)                                               \
-    BT_CPPLOGW_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGE_MEM(_memData, _memLen, _fmt, ...)                                               \
-    BT_CPPLOGE_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_fmt), ##__VA_ARGS__)
-#define BT_CPPLOGF_MEM(_memData, _memLen, _fmt, ...)                                               \
-    BT_CPPLOGF_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGT_MEM(_memData, _fmt, ...)                                                        \
+    BT_CPPLOGT_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGD_MEM(_memData, _fmt, ...)                                                        \
+    BT_CPPLOGD_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGI_MEM(_memData, _fmt, ...)                                                        \
+    BT_CPPLOGI_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGW_MEM(_memData, _fmt, ...)                                                        \
+    BT_CPPLOGW_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGE_MEM(_memData, _fmt, ...)                                                        \
+    BT_CPPLOGE_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGF_MEM(_memData, _fmt, ...)                                                        \
+    BT_CPPLOGF_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_fmt), ##__VA_ARGS__)
 
 /*
  * Calls logMemStr() on `_logger` to log using the level `_lvl`.
  */
-#define BT_CPPLOG_MEM_STR_EX(_lvl, _logger, _memData, _memLen, _msg)                               \
-    (_logger).logMemStr<(_lvl)>(__FILE__, __func__, __LINE__, (_memData), (_memLen), (_msg))
+#define BT_CPPLOG_MEM_STR_EX(_lvl, _logger, _memData, _msg)                                        \
+    (_logger).logMemStr<(_lvl)>(__FILE__, __func__, __LINE__, (_memData), (_msg))
 
 /*
  * BT_CPPLOG_MEM_STR_EX() with specific logging levels.
  */
-#define BT_CPPLOGT_MEM_STR_SPEC(_logger, _memData, _memLen, _msg)                                  \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::TRACE, (_logger), (_memData), (_memLen), (_msg))
-#define BT_CPPLOGD_MEM_STR_SPEC(_logger, _memData, _memLen, _msg)                                  \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::DEBUG, (_logger), (_memData), (_memLen), (_msg))
-#define BT_CPPLOGI_MEM_STR_SPEC(_logger, _memData, _memLen, _msg)                                  \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::INFO, (_logger), (_memData), (_memLen), (_msg))
-#define BT_CPPLOGW_MEM_STR_SPEC(_logger, _memData, _memLen, _msg)                                  \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::WARNING, (_logger), (_memData), (_memLen), (_msg))
-#define BT_CPPLOGE_MEM_STR_SPEC(_logger, _memData, _memLen, _msg)                                  \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::Error, (_logger), (_memData), (_memLen), (_msg))
-#define BT_CPPLOGF_MEM_STR_SPEC(_logger, _memData, _memLen, _msg)                                  \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::FATAL, (_logger), (_memData), (_memLen), (_msg))
+#define BT_CPPLOGT_MEM_STR_SPEC(_logger, _memData, _msg)                                           \
+    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::TRACE, (_logger), (_memData), (_msg))
+#define BT_CPPLOGD_MEM_STR_SPEC(_logger, _memData, _msg)                                           \
+    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::DEBUG, (_logger), (_memData), (_msg))
+#define BT_CPPLOGI_MEM_STR_SPEC(_logger, _memData, _msg)                                           \
+    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::INFO, (_logger), (_memData), (_msg))
+#define BT_CPPLOGW_MEM_STR_SPEC(_logger, _memData, _msg)                                           \
+    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::WARNING, (_logger), (_memData), (_msg))
+#define BT_CPPLOGE_MEM_STR_SPEC(_logger, _memData, _msg)                                           \
+    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::Error, (_logger), (_memData), (_msg))
+#define BT_CPPLOGF_MEM_STR_SPEC(_logger, _memData, _msg)                                           \
+    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::FATAL, (_logger), (_memData), (_msg))
 
 /*
  * BT_CPPLOG_MEM_STR_EX() with specific logging levels and using the
  * default logger.
  */
-#define BT_CPPLOGT_MEM_STR(_memData, _memLen, _msg)                                                \
-    BT_CPPLOGT_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_msg))
-#define BT_CPPLOGD_MEM_STR(_memData, _memLen, _msg)                                                \
-    BT_CPPLOGD_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_msg))
-#define BT_CPPLOGI_MEM_STR(_memData, _memLen, _msg)                                                \
-    BT_CPPLOGI_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_msg))
-#define BT_CPPLOGW_MEM_STR(_memData, _memLen, _msg)                                                \
-    BT_CPPLOGW_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_msg))
-#define BT_CPPLOGE_MEM_STR(_memData, _memLen, _msg)                                                \
-    BT_CPPLOGE_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_msg))
-#define BT_CPPLOGF_MEM_STR(_memData, _memLen, _msg)                                                \
-    BT_CPPLOGF_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_memLen), (_msg))
+#define BT_CPPLOGT_MEM_STR(_memData, _msg)                                                         \
+    BT_CPPLOGT_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_msg))
+#define BT_CPPLOGD_MEM_STR(_memData, _msg)                                                         \
+    BT_CPPLOGD_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_msg))
+#define BT_CPPLOGI_MEM_STR(_memData, _msg)                                                         \
+    BT_CPPLOGI_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_msg))
+#define BT_CPPLOGW_MEM_STR(_memData, _msg)                                                         \
+    BT_CPPLOGW_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_msg))
+#define BT_CPPLOGE_MEM_STR(_memData, _msg)                                                         \
+    BT_CPPLOGE_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_msg))
+#define BT_CPPLOGF_MEM_STR(_memData, _msg)                                                         \
+    BT_CPPLOGF_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_msg))
 
 /*
  * Calls logErrno() on `_logger` to log using the level `_lvl` and

@@ -15,6 +15,7 @@
 #include "common/common.h"
 #include "cpp-common/bt2c/fmt.hpp"
 #include "cpp-common/bt2c/logging.hpp"
+#include "cpp-common/bt2c/make-span.hpp"
 #include "cpp-common/vendor/fmt/format.h"
 
 #include "../bfcr/bfcr.hpp"
@@ -523,7 +524,7 @@ static enum ctf_msg_iter_status request_medium_bytes(struct ctf_msg_iter *msg_it
                         "packet-offset={}, cur={}, size={}, addr={}",
                         msg_it->buf.packet_offset, msg_it->buf.at, msg_it->buf.sz,
                         fmt::ptr(msg_it->buf.addr));
-        BT_CPPLOGT_MEM_SPEC(msg_it->logger, buffer_addr, buffer_sz,
+        BT_CPPLOGT_MEM_SPEC(msg_it->logger, bt2c::makeSpan(buffer_addr, buffer_sz),
                             "Returned bytes at {}:", fmt::ptr(buffer_addr));
     } else if (m_status == CTF_MSG_ITER_MEDIUM_STATUS_EOF) {
         /*
