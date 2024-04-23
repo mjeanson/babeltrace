@@ -171,10 +171,10 @@ cpp_common_libcpp_common_la_SOURCES = \
 	cpp-common/bt2c/glib-up.hpp \
 	cpp-common/bt2c/libc-up.hpp \
 	cpp-common/bt2c/logging.hpp \
+	cpp-common/bt2c/make-span.hpp \
 	cpp-common/bt2c/prio-heap.hpp \
 	cpp-common/bt2c/read-fixed-len-int.hpp \
 	cpp-common/bt2c/safe-ops.hpp \
-	cpp-common/bt2c/span.hpp \
 	cpp-common/bt2c/std-int.hpp \
 	cpp-common/bt2c/type-traits.hpp \
 	cpp-common/bt2c/uuid.hpp \

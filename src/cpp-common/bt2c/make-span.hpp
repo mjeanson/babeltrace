@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-#ifndef BABELTRACE_CPP_COMMON_BT2C_SPAN_HPP
-#define BABELTRACE_CPP_COMMON_BT2C_SPAN_HPP
+#ifndef BABELTRACE_CPP_COMMON_BT2C_MAKE_SPAN_HPP
+#define BABELTRACE_CPP_COMMON_BT2C_MAKE_SPAN_HPP
 
 #include "cpp-common/bt2s/span.hpp"
 
@@ -19,4 +19,4 @@ inline constexpr bt2s::span<T> makeSpan(T * const ptr, const size_t count) noexc
 
 } /* namespace bt2c */
 
-#endif /* BABELTRACE_CPP_COMMON_BT2C_SPAN_HPP */
+#endif /* BABELTRACE_CPP_COMMON_BT2C_MAKE_SPAN_HPP */

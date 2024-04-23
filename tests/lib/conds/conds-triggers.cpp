@@ -10,7 +10,7 @@
 
 #include "cpp-common/bt2/graph.hpp"
 #include "cpp-common/bt2c/c-string-view.hpp"
-#include "cpp-common/bt2c/span.hpp"
+#include "cpp-common/bt2c/make-span.hpp"
 #include "cpp-common/bt2s/make-unique.hpp"
 
 #include "clk-cls-compat-postconds-triggers.hpp"
