@@ -1728,6 +1728,11 @@ When possible, prefer using this over the C{nbsp}logging API.
 One important benefit is that this API uses {fmt} to format the logging
 message instead of `vsnprintf()`.
 
+`make-span.hpp`::
+    The function template `bt2c::makeSpan()` which is an alternative to
+    https://en.cppreference.com/w/cpp/language/class_template_argument_deduction[CTAD]
+    (a {cpp}17 feature).
+
 `prio-heap.hpp`::
     The `bt2c::PrioHeap` class template: an efficient heap data
     structure.
@@ -1814,6 +1819,11 @@ the `bt2s` namespace, instead of using this directly.
 +
 IMPORTANT: Use the symbols of `src/cpp-common/bt2s/span.hpp`, under the
 `bt2s` namespace, instead of using this directly.
++
+TIP: `src/cpp-common/bt2c/make-span.hpp` offers `bt2c::makeSpan()` which
+is an alternative to
+https://en.cppreference.com/w/cpp/language/class_template_argument_deduction[CTAD]
+(a {cpp}17 feature).
 
 `string-view-lite`::
     https://github.com/martinmoene/string-view-lite[string_view lite].
