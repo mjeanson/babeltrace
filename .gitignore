@@ -80,8 +80,10 @@ __pycache__
 *.swp
 *~
 .cache/
+.coverage
 .theia
 compile_commands.json
 cscope*
+htmlcov/
 /install/
 TAGS
