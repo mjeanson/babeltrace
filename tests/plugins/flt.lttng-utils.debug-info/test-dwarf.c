@@ -63,7 +63,7 @@ void test_bt_no_dwarf(const char *data_dir)
 static
 void test_bt_dwarf(const char *data_dir)
 {
-	int fd, ret, tag;
+	int fd, ret, tag = -1;
 	char *path;
 	char *die_name = NULL;
 	struct bt_dwarf_cu *cu = NULL;
