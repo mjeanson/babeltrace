@@ -26,10 +26,9 @@
 /src/plugins/ctf/common/src/metadata/tsdl/parser.output
 /src/bindings/python/bt2/bt2.egg-info
 /src/bindings/python/bt2/dist
+/src/cli/*.bin
 /src/cli/babeltrace2
-/src/cli/babeltrace2.bin
 /src/cli/babeltrace2-log
-/src/cli/babeltrace2-log.bin
 /src/common/config.h
 /src/common/config.h.in
 /src/common/version.i
