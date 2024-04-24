@@ -23,7 +23,6 @@
 /src/plugins/ctf/common/src/metadata/tsdl/lexer.cpp
 /src/plugins/ctf/common/src/metadata/tsdl/parser.*pp
 /src/plugins/ctf/common/src/metadata/tsdl/parser.output
-/src/bindings/python/bt2/bt2.egg-info
 /src/bindings/python/bt2/dist
 /src/cli/*.bin
 /src/cli/babeltrace2
@@ -59,6 +58,7 @@ cscope*
 *.html
 *.stamp
 *.swp
+*.egg-info
 .theia
 compile_commands.json
 /version
