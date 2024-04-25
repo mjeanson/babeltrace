@@ -10,6 +10,8 @@
 #include <cstdint>
 #include <vector>
 
+#include "c-string-view.hpp"
+
 namespace bt2c {
 
 class Logger;
@@ -22,7 +24,8 @@ class Logger;
  * If `fatalError` is true, log an error and appends an error
  * cause prior to throwing.  Otherwise, log at the debug level.
  */
-std::vector<std::uint8_t> dataFromFile(const char *path, const Logger& logger, bool fatalError);
+std::vector<std::uint8_t> dataFromFile(const CStringView path, const Logger& logger,
+                                       bool fatalError);
 
 } /* namespace bt2c */
 

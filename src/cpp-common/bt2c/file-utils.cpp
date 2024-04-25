@@ -13,14 +13,14 @@
 
 namespace bt2c {
 
-std::vector<std::uint8_t> dataFromFile(const char * const filePath, const Logger& logger,
+std::vector<std::uint8_t> dataFromFile(const CStringView filePath, const Logger& logger,
                                        const bool fatalError)
 {
     /*
      * Open a file stream and seek to the end of the stream to compute the size
      * of the buffer required.
     */
-    std::ifstream file {filePath, std::ios::binary | std::ios::ate};
+    std::ifstream file {filePath.data(), std::ios::binary | std::ios::ate};
 
     if (!file) {
         constexpr const char *msg = "No such file or directory: path=\"{}\"";
