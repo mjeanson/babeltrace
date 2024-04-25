@@ -1387,7 +1387,7 @@ lttng_live_msg_iter_next(bt_self_message_iterator *self_msg_it, bt_message_array
                      * that of the current candidate message. We
                      * must break the tie in a predictable manner.
                      */
-                    BT_CPPLOGD_STR_SPEC(
+                    BT_CPPLOGD_SPEC(
                         lttng_live_msg_iter->logger,
                         "Two of the next message candidates have the same timestamps, pick one deterministically.");
                     /*

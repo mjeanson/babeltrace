@@ -392,8 +392,7 @@ build_index_from_idx_file(struct ctf_fs_ds_file *ds_file, struct ctf_fs_ds_file_
     ctf_msg_iter_packet_properties props;
     int ret = ctf_msg_iter_get_packet_properties(msg_iter, &props);
     if (ret) {
-        BT_CPPLOGI_STR_SPEC(ds_file->logger,
-                            "Cannot read first packet's header and context fields.");
+        BT_CPPLOGI_SPEC(ds_file->logger, "Cannot read first packet's header and context fields.");
         return bt2s::nullopt;
     }
 
@@ -401,7 +400,7 @@ build_index_from_idx_file(struct ctf_fs_ds_file *ds_file, struct ctf_fs_ds_file_
         ctf_trace_class_borrow_stream_class_by_id(ds_file->metadata->tc, props.stream_class_id);
     BT_ASSERT(sc);
     if (!sc->default_clock_class) {
-        BT_CPPLOGI_STR_SPEC(ds_file->logger, "Cannot find stream class's default clock class.");
+        BT_CPPLOGI_SPEC(ds_file->logger, "Cannot find stream class's default clock class.");
         return bt2s::nullopt;
     }
 
@@ -448,8 +447,8 @@ build_index_from_idx_file(struct ctf_fs_ds_file *ds_file, struct ctf_fs_ds_file_
 
     const char *file_pos = g_mapped_file_get_contents(mapped_file.get()) + sizeof(*header);
     if (be32toh(header->magic) != CTF_INDEX_MAGIC) {
-        BT_CPPLOGW_STR_SPEC(ds_file->logger,
-                            "Invalid LTTng trace index: \"magic\" field validation failed");
+        BT_CPPLOGW_SPEC(ds_file->logger,
+                        "Invalid LTTng trace index: \"magic\" field validation failed");
         return bt2s::nullopt;
     }
 
@@ -522,7 +521,7 @@ build_index_from_idx_file(struct ctf_fs_ds_file *ds_file, struct ctf_fs_ds_file_
         ret = convert_cycles_to_ns(sc->default_clock_class, index_entry.timestamp_begin,
                                    &index_entry.timestamp_begin_ns);
         if (ret) {
-            BT_CPPLOGI_STR_SPEC(
+            BT_CPPLOGI_SPEC(
                 ds_file->logger,
                 "Failed to convert raw timestamp to nanoseconds since Epoch during index parsing");
             return bt2s::nullopt;
@@ -530,7 +529,7 @@ build_index_from_idx_file(struct ctf_fs_ds_file *ds_file, struct ctf_fs_ds_file_
         ret = convert_cycles_to_ns(sc->default_clock_class, index_entry.timestamp_end,
                                    &index_entry.timestamp_end_ns);
         if (ret) {
-            BT_CPPLOGI_STR_SPEC(
+            BT_CPPLOGI_SPEC(
                 ds_file->logger,
                 "Failed to convert raw timestamp to nanoseconds since Epoch during LTTng trace index parsing");
             return bt2s::nullopt;
@@ -574,8 +573,8 @@ static int init_index_entry(ctf_fs_ds_index_entry& entry, struct ctf_fs_ds_file 
         int ret = convert_cycles_to_ns(sc->default_clock_class, props->snapshots.beginning_clock,
                                        &entry.timestamp_begin_ns);
         if (ret) {
-            BT_CPPLOGI_STR_SPEC(ds_file->logger,
-                                "Failed to convert raw timestamp to nanoseconds since Epoch.");
+            BT_CPPLOGI_SPEC(ds_file->logger,
+                            "Failed to convert raw timestamp to nanoseconds since Epoch.");
             return ret;
         }
     } else {
@@ -590,8 +589,8 @@ static int init_index_entry(ctf_fs_ds_index_entry& entry, struct ctf_fs_ds_file 
         int ret = convert_cycles_to_ns(sc->default_clock_class, props->snapshots.end_clock,
                                        &entry.timestamp_end_ns);
         if (ret) {
-            BT_CPPLOGI_STR_SPEC(ds_file->logger,
-                                "Failed to convert raw timestamp to nanoseconds since Epoch.");
+            BT_CPPLOGI_SPEC(ds_file->logger,
+                            "Failed to convert raw timestamp to nanoseconds since Epoch.");
             return ret;
         }
     } else {
@@ -615,8 +614,8 @@ build_index_from_stream_file(struct ctf_fs_ds_file *ds_file, struct ctf_fs_ds_fi
         struct ctf_msg_iter_packet_properties props;
 
         if (currentPacketOffset.bytes() > ds_file->file->size) {
-            BT_CPPLOGE_STR_SPEC(ds_file->logger,
-                                "Unexpected current packet's offset (larger than file).");
+            BT_CPPLOGE_SPEC(ds_file->logger,
+                            "Unexpected current packet's offset (larger than file).");
             return bt2s::nullopt;
         } else if (currentPacketOffset.bytes() == ds_file->file->size) {
             /* No more data */

@@ -292,19 +292,6 @@ public:
     }
 
     /*
-     * Logs `msg` using the level `LevelV`.
-     *
-     * If `AppendCauseV` is true, this method also appends a cause to
-     * the error of the current thread using the same message.
-     */
-    template <Level LevelV, bool AppendCauseV>
-    void logStr(const char * const fileName, const char * const funcName, const unsigned int lineNo,
-                const char * const msg) const
-    {
-        this->_logStr<_StdLogWriter, LevelV, AppendCauseV>(fileName, funcName, lineNo, {}, "", msg);
-    }
-
-    /*
      * Like log() with the `Level::Error` level, but also throws a
      * default-constructed instance of `ExcT`.
      */
@@ -319,18 +306,6 @@ public:
     }
 
     /*
-     * Like logStr() with the `Level::Error` level, but also throws a
-     * default-constructed instance of `ExcT`.
-     */
-    template <bool AppendCauseV, typename ExcT>
-    [[noreturn]] void logErrorStrAndThrow(const char * const fileName, const char * const funcName,
-                                          const unsigned int lineNo, const char * const msg) const
-    {
-        this->logStr<Level::Error, AppendCauseV>(fileName, funcName, lineNo, msg);
-        throw ExcT {};
-    }
-
-    /*
      * Like log() with the `Level::Error` level, but also rethrows.
      */
     template <bool AppendCauseV, typename... ArgTs>
@@ -340,18 +315,6 @@ public:
     {
         this->log<Level::Error, AppendCauseV>(fileName, funcName, lineNo, fmt,
                                               std::forward<ArgTs>(args)...);
-        throw;
-    }
-
-    /*
-     * Like logStr() with the `Level::Error` level, but also rethrows.
-     */
-    template <bool AppendCauseV>
-    [[noreturn]] void logErrorStrAndRethrow(const char * const fileName,
-                                            const char * const funcName, const unsigned int lineNo,
-                                            const char * const msg) const
-    {
-        this->logStr<Level::Error, AppendCauseV>(fileName, funcName, lineNo, msg);
         throw;
     }
 
@@ -389,24 +352,6 @@ public:
     }
 
     /*
-     * Logs the message of `errno` using the level `LevelV`.
-     *
-     * The log message starts with `initMsg`, is followed with the
-     * message for `errno`, and then with `msg`.
-     *
-     * If `AppendCauseV` is true, this method also appends a cause to
-     * the error of the current thread using the same message.
-     */
-    template <Level LevelV, bool AppendCauseV>
-    void logErrnoStr(const char * const fileName, const char * const funcName,
-                     const unsigned int lineNo, const char * const initMsg,
-                     const char * const msg) const
-    {
-        this->_logStr<_InitMsgLogWriter, LevelV, AppendCauseV>(
-            fileName, funcName, lineNo, {}, this->_errnoIntroStr(initMsg).c_str(), msg);
-    }
-
-    /*
      * Like logErrno() with the `Level::Error` level, but also throws a
      * default-constructed instance of `ExcT`.
      */
@@ -422,20 +367,6 @@ public:
     }
 
     /*
-     * Like logErrnoStr() with the `Level::Error` level, but also throws
-     * a default-constructed instance of `ExcT`.
-     */
-    template <bool AppendCauseV, typename ExcT>
-    [[noreturn]] void
-    logErrorErrnoStrAndThrow(const char * const fileName, const char * const funcName,
-                             const unsigned int lineNo, const char * const initMsg,
-                             const char * const msg) const
-    {
-        this->logErrnoStr<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg, msg);
-        throw ExcT {};
-    }
-
-    /*
      * Like logErrno() with the `Level::Error` level, but also rethrows.
      */
     template <bool AppendCauseV, typename... ArgTs>
@@ -446,20 +377,6 @@ public:
     {
         this->logErrno<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg, fmt,
                                                    std::forward<ArgTs>(args)...);
-        throw;
-    }
-
-    /*
-     * Like logErrnoStr() with the `Level::Error` level, but also
-     * rethrows.
-     */
-    template <bool AppendCauseV>
-    [[noreturn]] void
-    logErrorErrnoStrAndRethrow(const char * const fileName, const char * const funcName,
-                               const unsigned int lineNo, const char * const initMsg,
-                               const char * const msg) const
-    {
-        this->logErrnoStr<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg, msg);
         throw;
     }
 
@@ -490,80 +407,61 @@ public:
                                                  std::forward<ArgTs>(args)...);
     }
 
-    /*
-     * Logs memory data using the level `LevelV`, starting with the
-     * message `msg`.
-     */
-    template <Level LevelV>
-    void logMemStr(const char * const fileName, const char * const funcName,
-                   const unsigned int lineNo, const MemData memData, const char * const msg) const
-    {
-        this->_logStr<_MemLogWriter, LevelV, false>(fileName, funcName, lineNo, memData, "", msg);
-    }
-
 private:
     /*
      * Formats a log message with fmt::format() given `fmt` and `args`,
-     * and then forwards everything to _logStr().
+     * and then:
+     *
+     * 1. Calls LogWriterT::write() with its arguments to log using the
+     *    level `LevelV`.
+     *
+     * 2. If `AppendCauseV` is true, this method also appends a cause to
+     *    the error of the current thread using the concatenation of
+     *    `initMsg` and `msg` as the message.
      */
     template <typename LogWriterT, Level LevelV, bool AppendCauseV, typename... ArgTs>
     void _log(const char * const fileName, const char * const funcName, const unsigned int lineNo,
               const MemData memData, const char * const initMsg, const char * const fmt,
               ArgTs&&...args) const
     {
+        const auto wouldLog = this->wouldLog(LevelV);
+
         /* Only format arguments if logging or appending an error cause */
-        if (G_UNLIKELY(this->wouldLog(LevelV) || AppendCauseV)) {
+        if (G_UNLIKELY(wouldLog || AppendCauseV)) {
             /*
              * Format arguments to our buffer (fmt::format_to() doesn't
              * append a null character).
              */
             _mBuf.clear();
+            BT_ASSERT(fmt);
             fmt::format_to(std::back_inserter(_mBuf), fmt, std::forward<ArgTs>(args)...);
             _mBuf.push_back('\0');
         }
 
-        this->_logStr<LogWriterT, LevelV, AppendCauseV>(fileName, funcName, lineNo, memData,
-                                                        initMsg, _mBuf.data());
-    }
-
-    /*
-     * Calls LogWriterT::write() with its arguments to log using the
-     * level `LevelV`.
-     *
-     * If `AppendCauseV` is true, this method also appends a cause to
-     * the error of the current thread using the concatenation of
-     * `initMsg` and `msg` as the message.
-     */
-    template <typename LogWriterT, Level LevelV, bool AppendCauseV>
-    void _logStr(const char * const fileName, const char * const funcName,
-                 const unsigned int lineNo, const MemData memData, const char * const initMsg,
-                 const char * const msg) const
-    {
-        /* Initial message and main message are required */
+        /* Initial message is required */
         BT_ASSERT(initMsg);
-        BT_ASSERT(msg);
 
         /* Log if needed */
-        if (this->wouldLog(LevelV)) {
+        if (wouldLog) {
             LogWriterT::write(fileName, funcName, lineNo, LevelV, _mTag.data(), memData, initMsg,
-                              msg);
+                              _mBuf.data());
         }
 
         /* Append an error cause if needed */
         if (AppendCauseV) {
             if (_mSelfMsgIter) {
                 bt_current_thread_error_append_cause_from_message_iterator(
-                    _mSelfMsgIter->libObjPtr(), fileName, lineNo, "%s%s", initMsg, msg);
+                    _mSelfMsgIter->libObjPtr(), fileName, lineNo, "%s%s", initMsg, _mBuf.data());
             } else if (_mSelfComp) {
                 bt_current_thread_error_append_cause_from_component(
-                    _mSelfComp->libObjPtr(), fileName, lineNo, "%s%s", initMsg, msg);
+                    _mSelfComp->libObjPtr(), fileName, lineNo, "%s%s", initMsg, _mBuf.data());
             } else if (_mSelfCompCls) {
                 bt_current_thread_error_append_cause_from_component_class(
-                    _mSelfCompCls->libObjPtr(), fileName, lineNo, "%s%s", initMsg, msg);
+                    _mSelfCompCls->libObjPtr(), fileName, lineNo, "%s%s", initMsg, _mBuf.data());
             } else {
                 BT_ASSERT(_mModuleName);
-                bt_current_thread_error_append_cause_from_unknown(_mModuleName->data(), fileName,
-                                                                  lineNo, "%s%s", initMsg, msg);
+                bt_current_thread_error_append_cause_from_unknown(
+                    _mModuleName->data(), fileName, lineNo, "%s%s", initMsg, _mBuf.data());
             }
         }
     }
@@ -642,39 +540,6 @@ inline const char *maybeNull(const char * const s) noexcept
 #define BT_CPPLOGF(_fmt, ...) BT_CPPLOGF_SPEC(_BT_CPPLOG_DEF_LOGGER, (_fmt), ##__VA_ARGS__)
 
 /*
- * Calls logStr() on `_logger` to log using the level `_lvl`.
- */
-#define BT_CPPLOG_STR_EX(_lvl, _logger, _msg)                                                      \
-    (_logger).template logStr<(_lvl), false>(__FILE__, __func__, __LINE__, (_msg))
-
-/*
- * BT_CPPLOG_STR_EX() with specific logging levels.
- */
-#define BT_CPPLOGT_STR_SPEC(_logger, _msg)                                                         \
-    BT_CPPLOG_STR_EX(bt2c::Logger::Level::Trace, (_logger), (_msg))
-#define BT_CPPLOGD_STR_SPEC(_logger, _msg)                                                         \
-    BT_CPPLOG_STR_EX(bt2c::Logger::Level::Debug, (_logger), (_msg))
-#define BT_CPPLOGI_STR_SPEC(_logger, _msg)                                                         \
-    BT_CPPLOG_STR_EX(bt2c::Logger::Level::Info, (_logger), (_msg))
-#define BT_CPPLOGW_STR_SPEC(_logger, _msg)                                                         \
-    BT_CPPLOG_STR_EX(bt2c::Logger::Level::Warning, (_logger), (_msg))
-#define BT_CPPLOGE_STR_SPEC(_logger, _msg)                                                         \
-    BT_CPPLOG_STR_EX(bt2c::Logger::Level::Error, (_logger), (_msg))
-#define BT_CPPLOGF_STR_SPEC(_logger, _msg)                                                         \
-    BT_CPPLOG_STR_EX(bt2c::Logger::Level::Fatal, (_logger), (_msg))
-
-/*
- * BT_CPPLOG_STR_EX() with specific logging levels and using the default
- * logger.
- */
-#define BT_CPPLOGT_STR(_msg) BT_CPPLOGT_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_msg))
-#define BT_CPPLOGD_STR(_msg) BT_CPPLOGD_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_msg))
-#define BT_CPPLOGI_STR(_msg) BT_CPPLOGI_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_msg))
-#define BT_CPPLOGW_STR(_msg) BT_CPPLOGW_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_msg))
-#define BT_CPPLOGE_STR(_msg) BT_CPPLOGE_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_msg))
-#define BT_CPPLOGF_STR(_msg) BT_CPPLOGF_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_msg))
-
-/*
  * Calls logMem() on `_logger` to log using the level `_lvl`.
  */
 #define BT_CPPLOG_MEM_EX(_lvl, _logger, _memData, _fmt, ...)                                       \
@@ -717,45 +582,6 @@ inline const char *maybeNull(const char * const s) noexcept
     BT_CPPLOGE_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_fmt), ##__VA_ARGS__)
 #define BT_CPPLOGF_MEM(_memData, _fmt, ...)                                                        \
     BT_CPPLOGF_MEM_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_fmt), ##__VA_ARGS__)
-
-/*
- * Calls logMemStr() on `_logger` to log using the level `_lvl`.
- */
-#define BT_CPPLOG_MEM_STR_EX(_lvl, _logger, _memData, _msg)                                        \
-    (_logger).template logMemStr<(_lvl)>(__FILE__, __func__, __LINE__, (_memData), (_msg))
-
-/*
- * BT_CPPLOG_MEM_STR_EX() with specific logging levels.
- */
-#define BT_CPPLOGT_MEM_STR_SPEC(_logger, _memData, _msg)                                           \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::TRACE, (_logger), (_memData), (_msg))
-#define BT_CPPLOGD_MEM_STR_SPEC(_logger, _memData, _msg)                                           \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::DEBUG, (_logger), (_memData), (_msg))
-#define BT_CPPLOGI_MEM_STR_SPEC(_logger, _memData, _msg)                                           \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::INFO, (_logger), (_memData), (_msg))
-#define BT_CPPLOGW_MEM_STR_SPEC(_logger, _memData, _msg)                                           \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::WARNING, (_logger), (_memData), (_msg))
-#define BT_CPPLOGE_MEM_STR_SPEC(_logger, _memData, _msg)                                           \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::Error, (_logger), (_memData), (_msg))
-#define BT_CPPLOGF_MEM_STR_SPEC(_logger, _memData, _msg)                                           \
-    BT_CPPLOG_MEM_STR_EX(bt2c::Logger::Level::FATAL, (_logger), (_memData), (_msg))
-
-/*
- * BT_CPPLOG_MEM_STR_EX() with specific logging levels and using the
- * default logger.
- */
-#define BT_CPPLOGT_MEM_STR(_memData, _msg)                                                         \
-    BT_CPPLOGT_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_msg))
-#define BT_CPPLOGD_MEM_STR(_memData, _msg)                                                         \
-    BT_CPPLOGD_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_msg))
-#define BT_CPPLOGI_MEM_STR(_memData, _msg)                                                         \
-    BT_CPPLOGI_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_msg))
-#define BT_CPPLOGW_MEM_STR(_memData, _msg)                                                         \
-    BT_CPPLOGW_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_msg))
-#define BT_CPPLOGE_MEM_STR(_memData, _msg)                                                         \
-    BT_CPPLOGE_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_msg))
-#define BT_CPPLOGF_MEM_STR(_memData, _msg)                                                         \
-    BT_CPPLOGF_MEM_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_memData), (_msg))
 
 /*
  * Calls logErrno() on `_logger` to log using the level `_lvl` and
@@ -803,46 +629,6 @@ inline const char *maybeNull(const char * const s) noexcept
     BT_CPPLOGF_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_fmt), ##__VA_ARGS__)
 
 /*
- * Calls logErrnoStr() on `_logger` to log using the level `_lvl` and
- * initial message `_initMsg`.
- */
-#define BT_CPPLOG_ERRNO_STR_EX(_lvl, _logger, _initMsg, _msg)                                      \
-    (_logger).template logErrnoStr<(_lvl), false>(__FILE__, __func__, __LINE__, (_initMsg), (_msg))
-
-/*
- * BT_CPPLOG_ERRNO_STR_EX() with specific logging levels.
- */
-#define BT_CPPLOGT_ERRNO_STR_SPEC(_logger, _initMsg, _msg)                                         \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Trace, (_logger), (_initMsg), (_msg))
-#define BT_CPPLOGD_ERRNO_STR_SPEC(_logger, _initMsg, _msg)                                         \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Debug, (_logger), (_initMsg), (_msg))
-#define BT_CPPLOGI_ERRNO_STR_SPEC(_logger, _initMsg, _msg)                                         \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Info, (_logger), (_initMsg), (_msg))
-#define BT_CPPLOGW_ERRNO_STR_SPEC(_logger, _initMsg, _msg)                                         \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Warning, (_logger), (_initMsg), (_msg))
-#define BT_CPPLOGE_ERRNO_STR_SPEC(_logger, _initMsg, _msg)                                         \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Error, (_logger), (_initMsg), (_msg))
-#define BT_CPPLOGF_ERRNO_STR_SPEC(_logger, _initMsg, _msg)                                         \
-    BT_CPPLOG_ERRNO_STR_EX(bt2c::Logger::Level::Fatal, (_logger), (_initMsg), (_msg))
-
-/*
- * BT_CPPLOG_ERRNO_STR_EX() with specific logging levels and using the
- * default logger.
- */
-#define BT_CPPLOGT_ERRNO_STR(_initMsg, _msg)                                                       \
-    BT_CPPLOGT_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
-#define BT_CPPLOGD_ERRNO_STR(_initMsg, _msg)                                                       \
-    BT_CPPLOGD_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
-#define BT_CPPLOGI_ERRNO_STR(_initMsg, _msg)                                                       \
-    BT_CPPLOGI_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
-#define BT_CPPLOGW_ERRNO_STR(_initMsg, _msg)                                                       \
-    BT_CPPLOGW_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
-#define BT_CPPLOGE_ERRNO_STR(_initMsg, _msg)                                                       \
-    BT_CPPLOGE_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
-#define BT_CPPLOGF_ERRNO_STR(_initMsg, _msg)                                                       \
-    BT_CPPLOGF_ERRNO_STR_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
-
-/*
  * Calls log() on `_logger` with the `Error` level to log an error and
  * append a cause to the error of the current thread.
  */
@@ -855,20 +641,6 @@ inline const char *maybeNull(const char * const s) noexcept
  */
 #define BT_CPPLOGE_APPEND_CAUSE(_fmt, ...)                                                         \
     BT_CPPLOGE_APPEND_CAUSE_SPEC(_BT_CPPLOG_DEF_LOGGER, (_fmt), ##__VA_ARGS__)
-
-/*
- * Calls logStr() on `_logger` with the `Error` level to log an error and
- * append a cause to the error of the current thread.
- */
-#define BT_CPPLOGE_STR_APPEND_CAUSE_SPEC(_logger, _msg)                                            \
-    (_logger).template logStr<bt2c::Logger::Level::Error, true>(__FILE__, __func__, __LINE__,      \
-                                                                (_msg))
-
-/*
- * BT_CPPLOGE_STR_APPEND_CAUSE_SPEC() using the default logger.
- */
-#define BT_CPPLOGE_STR_APPEND_CAUSE(_msg)                                                          \
-    BT_CPPLOGE_STR_APPEND_CAUSE_SPEC(_BT_CPPLOG_DEF_LOGGER, (_msg))
 
 /*
  * Calls logErrorAndThrow() on `_logger` to log an error, append a cause
@@ -886,21 +658,6 @@ inline const char *maybeNull(const char * const s) noexcept
     BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(_BT_CPPLOG_DEF_LOGGER, _excCls, (_fmt), ##__VA_ARGS__)
 
 /*
- * Calls logErrorStrAndThrow() on `_logger` to log an error, append a
- * cause to the error of the current thread, and throw an instance of
- * `_excCls`.
- */
-#define BT_CPPLOGE_STR_APPEND_CAUSE_AND_THROW_SPEC(_logger, _excCls, _msg)                         \
-    (_logger).template logErrorStrAndThrow<true, _excCls>(__FILE__, __func__, __LINE__, (_msg))
-
-/*
- * BT_CPPLOGE_STR_APPEND_CAUSE_AND_THROW_SPEC() using the default
- * logger.
- */
-#define BT_CPPLOGE_STR_APPEND_CAUSE_AND_THROW(_excCls, _msg)                                       \
-    BT_CPPLOGE_STR_APPEND_CAUSE_AND_THROW_SPEC(_BT_CPPLOG_DEF_LOGGER, _excCls, (_msg))
-
-/*
  * Calls logErrorAndRethrow() on `_logger` to log an error, append a
  * cause to the error of the current thread, and throw an instance of
  * `_excCls`.
@@ -915,21 +672,6 @@ inline const char *maybeNull(const char * const s) noexcept
     BT_CPPLOGE_APPEND_CAUSE_AND_RETHROW_SPEC(_BT_CPPLOG_DEF_LOGGER, (_fmt), ##__VA_ARGS__)
 
 /*
- * Calls logErrorStrAndRethrow() on `_logger` to log an error, append a
- * cause to the error of the current thread, and throw an instance of
- * `_excCls`.
- */
-#define BT_CPPLOGE_STR_APPEND_CAUSE_AND_RETHROW_SPEC(_logger, _msg)                                \
-    (_logger).template logErrorStrAndRethrow<true>(__FILE__, __func__, __LINE__, (_msg))
-
-/*
- * BT_CPPLOGE_STR_APPEND_CAUSE_AND_RETHROW_SPEC() using the default
- * logger.
- */
-#define BT_CPPLOGE_STR_APPEND_CAUSE_AND_RETHROW(_msg)                                              \
-    BT_CPPLOGE_STR_APPEND_CAUSE_AND_RETHROW_SPEC(_BT_CPPLOG_DEF_LOGGER, (_msg))
-
-/*
  * Calls logErrno() on `_logger` with the `Level::Error` level to log an
  * error and append a cause to the error of the current thread.
  */
@@ -942,20 +684,6 @@ inline const char *maybeNull(const char * const s) noexcept
  */
 #define BT_CPPLOGE_ERRNO_APPEND_CAUSE(_initMsg, _fmt, ...)                                         \
     BT_CPPLOGE_ERRNO_APPEND_CAUSE_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_fmt), ##__VA_ARGS__)
-
-/*
- * Calls logErrnoStr() on `_logger` with the `Level::Error` level to log
- * an error and append a cause to the error of the current thread.
- */
-#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_SPEC(_logger, _initMsg, _msg)                            \
-    (_logger).template logErrnoStr<bt2c::Logger::Level::Error, true>(__FILE__, __func__, __LINE__, \
-                                                                     (_initMsg), (_msg))
-
-/*
- * BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_SPEC() using the default logger.
- */
-#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE(_initMsg, _msg)                                          \
-    BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
 
 /*
  * Calls logErrorErrnoAndThrow() on `_logger` to log an error, append a
@@ -975,23 +703,6 @@ inline const char *maybeNull(const char * const s) noexcept
                                                  (_fmt), ##__VA_ARGS__)
 
 /*
- * Calls logErrorErrnoStrAndThrow() on `_logger` to log an error, append
- * a cause to the error of the current thread, and throw an instance of
- * `_excCls`.
- */
-#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_THROW_SPEC(_logger, _excCls, _initMsg, _msg)         \
-    (_logger).template logErrorErrnoStrAndThrow<true, _excCls>(__FILE__, __func__, __LINE__,       \
-                                                               (_initMsg), (_msg))
-
-/*
- * BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_THROW_SPEC() using the default
- * logger.
- */
-#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_THROW(_excCls, _initMsg, _msg)                       \
-    BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_THROW_SPEC(_BT_CPPLOG_DEF_LOGGER, _excCls, (_initMsg),   \
-                                                     (_msg))
-
-/*
  * Calls logErrorErrnoAndRethrow() on `_logger` to log an error, append
  * a cause to the error of the current thread, and throw an instance of
  * `_excCls`.
@@ -1007,21 +718,5 @@ inline const char *maybeNull(const char * const s) noexcept
 #define BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_RETHROW(_initMsg, _fmt, ...)                             \
     BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_RETHROW_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_fmt),      \
                                                    ##__VA_ARGS__)
-
-/*
- * Calls logErrorErrnoStrAndRethrow() on `_logger` to log an error,
- * append a cause to the error of the current thread, and throw an
- * instance of `_excCls`.
- */
-#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_RETHROW_SPEC(_logger, _initMsg, _msg)                \
-    (_logger).template logErrorErrnoStrAndRethrow<true>(__FILE__, __func__, __LINE__, (_initMsg),  \
-                                                        (_msg))
-
-/*
- * BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_RETHROW_SPEC() using the
- * default logger.
- */
-#define BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_RETHROW(_initMsg, _msg)                              \
-    BT_CPPLOGE_ERRNO_STR_APPEND_CAUSE_AND_RETHROW_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_msg))
 
 #endif /* BABELTRACE_CPP_COMMON_BT2C_LOGGING_HPP */

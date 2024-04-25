@@ -165,7 +165,7 @@ static int decode_packet(FILE *in_fp, FILE *out_fp, int byte_order, bool *is_uui
             toread = (header.packet_size - header.content_size) / CHAR_BIT;
             fseek_ret = fseek(in_fp, toread, SEEK_CUR);
             if (fseek_ret < 0) {
-                BT_CPPLOGW_STR_SPEC(logger, "Missing padding at the end of the metadata stream.");
+                BT_CPPLOGW_SPEC(logger, "Missing padding at the end of the metadata stream.");
             }
             break;
         }

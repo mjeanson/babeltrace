@@ -965,8 +965,7 @@ bt_component_class_sink_consume_method_status ctf_fs_sink_consume(bt_self_compon
                 break;
             case BT_MESSAGE_TYPE_MESSAGE_ITERATOR_INACTIVITY:
                 /* Ignore */
-                BT_CPPLOGD_STR_SPEC(fs_sink->logger,
-                                    "Ignoring message iterator inactivity message.");
+                BT_CPPLOGD_SPEC(fs_sink->logger, "Ignoring message iterator inactivity message.");
                 break;
             case BT_MESSAGE_TYPE_STREAM_BEGINNING:
                 status = handle_stream_beginning_msg(fs_sink, msg);

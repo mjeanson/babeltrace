@@ -31,7 +31,7 @@ thread_local const ctf_scanner *currentCtfScanner;
         std::string str(size, '\0');                                                               \
         int written = snprintf(&str[0], size + 1, (_fmt), ##args);                                 \
         BT_ASSERT(size == written);                                                                \
-        BT_CPPLOGT_STR_SPEC(currentCtfScanner->logger, str.c_str());                               \
+        BT_CPPLOGT_SPEC(currentCtfScanner->logger, "{}", str.c_str());                             \
     } while (0)
 
 /* Join two lists, put "add" at the end of "head".  */
@@ -803,8 +803,7 @@ static int set_parent_node(struct ctf_node *node,
 
 	switch (node->type) {
 	case NODE_ROOT:
-		BT_CPPLOGE_STR_SPEC(currentCtfScanner->logger,
-			"Trying to reparent root node.");
+		BT_CPPLOGE_SPEC(currentCtfScanner->logger, "Trying to reparent root node.");
 		return -EINVAL;
 
 	case NODE_EVENT:

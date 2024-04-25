@@ -406,7 +406,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
         bt_common_get_page_size(static_cast<int>(ctf_fs_trace->logger.level())) * 8,
         ctf_fs_ds_file_medops, ds_file.get(), nullptr, ctf_fs_trace->logger);
     if (!msg_iter) {
-        BT_CPPLOGE_STR_SPEC(ctf_fs_trace->logger, "Cannot create a CTF message iterator.");
+        BT_CPPLOGE_SPEC(ctf_fs_trace->logger, "Cannot create a CTF message iterator.");
         return -1;
     }
 
@@ -1282,7 +1282,7 @@ static int fix_packet_index_tracer_bugs(ctf_fs_trace *trace)
          * are needed. Failing to extract these entries is not
          * an error.
          */
-        BT_CPPLOGI_STR_SPEC(
+        BT_CPPLOGI_SPEC(
             trace->logger,
             "Cannot extract tracer information necessary to compare with buggy versions.");
         return 0;
@@ -1290,9 +1290,8 @@ static int fix_packet_index_tracer_bugs(ctf_fs_trace *trace)
 
     /* Check if the trace may be affected by old tracer bugs. */
     if (is_tracer_affected_by_lttng_event_after_packet_bug(&current_tracer_info)) {
-        BT_CPPLOGI_STR_SPEC(
-            trace->logger,
-            "Trace may be affected by LTTng tracer packet timestamp bug. Fixing up.");
+        BT_CPPLOGI_SPEC(trace->logger,
+                        "Trace may be affected by LTTng tracer packet timestamp bug. Fixing up.");
         ret = fix_index_lttng_event_after_packet_bug(trace);
         if (ret) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(trace->logger,
@@ -1303,9 +1302,8 @@ static int fix_packet_index_tracer_bugs(ctf_fs_trace *trace)
     }
 
     if (is_tracer_affected_by_barectf_event_before_packet_bug(&current_tracer_info)) {
-        BT_CPPLOGI_STR_SPEC(
-            trace->logger,
-            "Trace may be affected by barectf tracer packet timestamp bug. Fixing up.");
+        BT_CPPLOGI_SPEC(trace->logger,
+                        "Trace may be affected by barectf tracer packet timestamp bug. Fixing up.");
         ret = fix_index_barectf_event_before_packet_bug(trace);
         if (ret) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(trace->logger,

@@ -4436,7 +4436,7 @@ int ctf_visitor_generate_ir_visit_node(struct ctf_visitor_generate_ir *ctx, stru
 {
     int ret = 0;
 
-    BT_CPPLOGI_STR_SPEC(ctx->logger, "Visiting metadata's AST to generate CTF IR objects.");
+    BT_CPPLOGI_SPEC(ctx->logger, "Visiting metadata's AST to generate CTF IR objects.");
 
     switch (node->type) {
     case NODE_ROOT:
@@ -4472,7 +4472,7 @@ int ctf_visitor_generate_ir_visit_node(struct ctf_visitor_generate_ir *ctx, stru
             }
 
             if (!got_trace_decl) {
-                BT_CPPLOGD_STR_SPEC(ctx->logger, "Incomplete AST: need trace (`trace` block).");
+                BT_CPPLOGD_SPEC(ctx->logger, "Incomplete AST: need trace (`trace` block).");
                 ret = -EINCOMPLETE;
                 goto end;
             }

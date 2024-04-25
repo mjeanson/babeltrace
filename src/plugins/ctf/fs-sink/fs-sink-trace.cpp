@@ -157,8 +157,8 @@ static int append_lttng_trace_path_ust_uid(const struct fs_sink_trace *trace, GS
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(tc, "tracer_buffering_id");
     if (!v || !bt_value_is_signed_integer(v)) {
-        BT_CPPLOGI_STR_SPEC(trace->logger,
-                            "Couldn't get environment value: name=\"tracer_buffering_id\"");
+        BT_CPPLOGI_SPEC(trace->logger,
+                        "Couldn't get environment value: name=\"tracer_buffering_id\"");
         goto error;
     }
 
@@ -166,8 +166,8 @@ static int append_lttng_trace_path_ust_uid(const struct fs_sink_trace *trace, GS
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(tc, "architecture_bit_width");
     if (!v || !bt_value_is_signed_integer(v)) {
-        BT_CPPLOGI_STR_SPEC(trace->logger,
-                            "Couldn't get environment value: name=\"architecture_bit_width\"");
+        BT_CPPLOGI_SPEC(trace->logger,
+                        "Couldn't get environment value: name=\"architecture_bit_width\"");
         goto error;
     }
 
@@ -193,7 +193,7 @@ static int append_lttng_trace_path_ust_pid(const struct fs_sink_trace *trace, GS
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(tc, "procname");
     if (!v || !bt_value_is_string(v)) {
-        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"procname\"");
+        BT_CPPLOGI_SPEC(trace->logger, "Couldn't get environment value: name=\"procname\"");
         goto error;
     }
 
@@ -201,7 +201,7 @@ static int append_lttng_trace_path_ust_pid(const struct fs_sink_trace *trace, GS
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(tc, "vpid");
     if (!v || !bt_value_is_signed_integer(v)) {
-        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"vpid\"");
+        BT_CPPLOGI_SPEC(trace->logger, "Couldn't get environment value: name=\"vpid\"");
         goto error;
     }
 
@@ -209,8 +209,7 @@ static int append_lttng_trace_path_ust_pid(const struct fs_sink_trace *trace, GS
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(tc, "vpid_datetime");
     if (!v || !bt_value_is_string(v)) {
-        BT_CPPLOGI_STR_SPEC(trace->logger,
-                            "Couldn't get environment value: name=\"vpid_datetime\"");
+        BT_CPPLOGI_SPEC(trace->logger, "Couldn't get environment value: name=\"vpid_datetime\"");
         goto error;
     }
 
@@ -250,7 +249,7 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace, "tracer_name");
     if (!v || !bt_value_is_string(v)) {
-        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"tracer_name\"");
+        BT_CPPLOGI_SPEC(trace->logger, "Couldn't get environment value: name=\"tracer_name\"");
         goto error;
     }
 
@@ -263,7 +262,7 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace, "tracer_major");
     if (!v || !bt_value_is_signed_integer(v)) {
-        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"tracer_major\"");
+        BT_CPPLOGI_SPEC(trace->logger, "Couldn't get environment value: name=\"tracer_major\"");
         goto error;
     }
 
@@ -271,7 +270,7 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace, "tracer_minor");
     if (!v || !bt_value_is_signed_integer(v)) {
-        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"tracer_minor\"");
+        BT_CPPLOGI_SPEC(trace->logger, "Couldn't get environment value: name=\"tracer_minor\"");
         goto error;
     }
 
@@ -286,8 +285,7 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace, "hostname");
     if (!v || !bt_value_is_string(v)) {
-        BT_CPPLOGI_STR_SPEC(trace->logger,
-                            "Couldn't get environment value: name=\"tracer_hostname\"");
+        BT_CPPLOGI_SPEC(trace->logger, "Couldn't get environment value: name=\"tracer_hostname\"");
         goto error;
     }
 
@@ -295,7 +293,7 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace, "trace_name");
     if (!v || !bt_value_is_string(v)) {
-        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"trace_name\"");
+        BT_CPPLOGI_SPEC(trace->logger, "Couldn't get environment value: name=\"trace_name\"");
         goto error;
     }
 
@@ -304,8 +302,8 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace,
                                                               "trace_creation_datetime");
     if (!v || !bt_value_is_string(v)) {
-        BT_CPPLOGI_STR_SPEC(trace->logger,
-                            "Couldn't get environment value: name=\"trace_creation_datetime\"");
+        BT_CPPLOGI_SPEC(trace->logger,
+                        "Couldn't get environment value: name=\"trace_creation_datetime\"");
         goto error;
     }
 
@@ -319,7 +317,7 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
 
     v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace, "domain");
     if (!v || !bt_value_is_string(v)) {
-        BT_CPPLOGI_STR_SPEC(trace->logger, "Couldn't get environment value: name=\"domain\"");
+        BT_CPPLOGI_SPEC(trace->logger, "Couldn't get environment value: name=\"domain\"");
         goto error;
     }
 
@@ -332,8 +330,8 @@ static GString *make_lttng_trace_path_rel(const struct fs_sink_trace *trace)
         v = bt_trace_borrow_environment_entry_value_by_name_const(trace->ir_trace,
                                                                   "tracer_buffering_scheme");
         if (!v || !bt_value_is_string(v)) {
-            BT_CPPLOGI_STR_SPEC(trace->logger,
-                                "Couldn't get environment value: name=\"tracer_buffering_scheme\"");
+            BT_CPPLOGI_SPEC(trace->logger,
+                            "Couldn't get environment value: name=\"tracer_buffering_scheme\"");
             goto error;
         }
 

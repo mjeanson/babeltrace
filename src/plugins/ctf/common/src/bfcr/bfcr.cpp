@@ -176,14 +176,14 @@ static struct stack *stack_new(struct bt_bfcr *bfcr)
 
     stack = g_new0(struct stack, 1);
     if (!stack) {
-        BT_CPPLOGE_STR_SPEC(bfcr->logger, "Failed to allocate one stack.");
+        BT_CPPLOGE_SPEC(bfcr->logger, "Failed to allocate one stack.");
         goto error;
     }
 
     stack->bfcr = bfcr;
     stack->entries = g_array_new(FALSE, TRUE, sizeof(struct stack_entry));
     if (!stack->entries) {
-        BT_CPPLOGE_STR_SPEC(bfcr->logger, "Failed to allocate a GArray.");
+        BT_CPPLOGE_SPEC(bfcr->logger, "Failed to allocate a GArray.");
         goto error;
     }
 
@@ -675,8 +675,8 @@ read_bit_array_class_and_call_continue(struct bt_bfcr *bfcr,
     }
 
     /* We are here; it means we don't have enough data to decode this */
-    BT_CPPLOGT_STR_SPEC(
-        bfcr->logger, "Not enough data to read the next basic field: appending to stitch buffer.");
+    BT_CPPLOGT_SPEC(bfcr->logger,
+                    "Not enough data to read the next basic field: appending to stitch buffer.");
     stitch_append_from_remaining_buf(bfcr);
     status = BT_BFCR_STATUS_EOF;
 
@@ -734,8 +734,8 @@ read_bit_array_class_and_call_begin(struct bt_bfcr *bfcr,
     }
 
     /* We are here; it means we don't have enough data to decode this */
-    BT_CPPLOGT_STR_SPEC(bfcr->logger,
-                        "Not enough data to read the next basic field: setting stitch buffer.");
+    BT_CPPLOGT_SPEC(bfcr->logger,
+                    "Not enough data to read the next basic field: setting stitch buffer.");
     stitch_set_from_remaining_buf(bfcr);
     bfcr->state = BFCR_STATE_READ_BASIC_CONTINUE;
     status = BT_BFCR_STATUS_EOF;
@@ -1116,12 +1116,12 @@ static inline enum bt_bfcr_status handle_state(struct bt_bfcr *bfcr)
 
 struct bt_bfcr *bt_bfcr_create(struct bt_bfcr_cbs cbs, void *data, const bt2c::Logger& logger)
 {
-    BT_CPPLOGD_STR_SPEC(logger, "Creating binary field class reader (BFCR).");
+    BT_CPPLOGD_SPEC(logger, "Creating binary field class reader (BFCR).");
 
     bt_bfcr *bfcr = new bt_bfcr {logger};
     bfcr->stack = stack_new(bfcr);
     if (!bfcr->stack) {
-        BT_CPPLOGE_STR_SPEC(bfcr->logger, "Cannot create BFCR's stack.");
+        BT_CPPLOGE_SPEC(bfcr->logger, "Cannot create BFCR's stack.");
         bt_bfcr_destroy(bfcr);
         bfcr = NULL;
         goto end;
@@ -1216,7 +1216,7 @@ size_t bt_bfcr_start(struct bt_bfcr *bfcr, struct ctf_field_class *cls, const ui
     }
 
     /* Run the machine! */
-    BT_CPPLOGT_STR_SPEC(bfcr->logger, "Running the state machine.");
+    BT_CPPLOGT_SPEC(bfcr->logger, "Running the state machine.");
 
     while (true) {
         *status = handle_state(bfcr);
@@ -1249,7 +1249,7 @@ size_t bt_bfcr_continue(struct bt_bfcr *bfcr, const uint8_t *buf, size_t sz,
                     fmt::ptr(bfcr), fmt::ptr(buf), sz);
 
     /* Continue running the machine */
-    BT_CPPLOGT_STR_SPEC(bfcr->logger, "Running the state machine.");
+    BT_CPPLOGT_SPEC(bfcr->logger, "Running the state machine.");
 
     while (true) {
         *status = handle_state(bfcr);

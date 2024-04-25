@@ -13,7 +13,7 @@ namespace bt2mux {
 Comp::Comp(const bt2::SelfFilterComponent selfComp, const bt2::ConstMapValue params, void *) :
     bt2::UserFilterComponent<Comp, MsgIter> {selfComp, "PLUGIN/FLT.UTILS.MUXER"}
 {
-    BT_CPPLOGI_STR("Initializing component.");
+    BT_CPPLOGI("Initializing component.");
 
     /* No parameters expected */
     if (!params.isEmpty()) {
@@ -28,10 +28,10 @@ Comp::Comp(const bt2::SelfFilterComponent selfComp, const bt2::ConstMapValue par
     try {
         this->_addOutputPort("out");
     } catch (const bt2c::Error&) {
-        BT_CPPLOGE_STR_APPEND_CAUSE_AND_RETHROW("Failed to add a single output port.");
+        BT_CPPLOGE_APPEND_CAUSE_AND_RETHROW("Failed to add a single output port.");
     }
 
-    BT_CPPLOGI_STR("Initialized component.");
+    BT_CPPLOGI("Initialized component.");
 }
 
 void Comp::_inputPortConnected(const bt2::SelfComponentInputPort, const bt2::ConstOutputPort)
@@ -44,7 +44,7 @@ void Comp::_addAvailInputPort()
     try {
         this->_addInputPort(fmt::format("in{}", this->_inputPorts().length()));
     } catch (const bt2c::Error&) {
-        BT_CPPLOGE_STR_APPEND_CAUSE_AND_RETHROW("Failed to add an available input port.");
+        BT_CPPLOGE_APPEND_CAUSE_AND_RETHROW("Failed to add an available input port.");
     }
 
     BT_CPPLOGI("Added one available input port: name={}", this->_inputPorts().back().name());

@@ -550,7 +550,7 @@ static int relative_ptokens_to_field_path(GList *ptokens, struct ctf_field_path 
         ret = ptokens_to_field_path(ptokens, &tail_field_path, parent_class, cur_index, ctx);
         if (ret) {
             /* Not found... yet */
-            BT_CPPLOGD_STR_SPEC(ctx->logger, "Not found at this point.");
+            BT_CPPLOGD_SPEC(ctx->logger, "Not found at this point.");
             ctf_field_path_clear(&tail_field_path);
         } else {
             /* Found: stitch tail field path to head field path */

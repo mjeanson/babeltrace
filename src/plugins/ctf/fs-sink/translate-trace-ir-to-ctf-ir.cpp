@@ -880,13 +880,13 @@ static inline int translate_option_field_class(ctf::sink::TraceIrToCtfIrCtx *ctx
     append_to_parent_field_class(ctx, &fc->base);
     ret = cur_path_stack_push(ctx, NULL, false, content_ir_fc, &fc->base);
     if (ret) {
-        BT_CPPLOGE_STR_SPEC(ctx->logger, "Cannot translate option field class content.");
+        BT_CPPLOGE_SPEC(ctx->logger, "Cannot translate option field class content.");
         goto end;
     }
 
     ret = translate_field_class(ctx);
     if (ret) {
-        BT_CPPLOGE_STR_SPEC(ctx->logger, "Cannot translate option field class content.");
+        BT_CPPLOGE_SPEC(ctx->logger, "Cannot translate option field class content.");
         goto end;
     }
 
@@ -1071,13 +1071,13 @@ static inline int translate_static_array_field_class(ctf::sink::TraceIrToCtfIrCt
     append_to_parent_field_class(ctx, &fc->base.base);
     ret = cur_path_stack_push(ctx, NULL, false, elem_ir_fc, &fc->base.base);
     if (ret) {
-        BT_CPPLOGE_STR_SPEC(ctx->logger, "Cannot translate static array field class element.");
+        BT_CPPLOGE_SPEC(ctx->logger, "Cannot translate static array field class element.");
         goto end;
     }
 
     ret = translate_field_class(ctx);
     if (ret) {
-        BT_CPPLOGE_STR_SPEC(ctx->logger, "Cannot translate static array field class element.");
+        BT_CPPLOGE_SPEC(ctx->logger, "Cannot translate static array field class element.");
         goto end;
     }
 
@@ -1111,13 +1111,13 @@ static inline int translate_dynamic_array_field_class(ctf::sink::TraceIrToCtfIrC
     append_to_parent_field_class(ctx, &fc->base.base);
     ret = cur_path_stack_push(ctx, NULL, false, elem_ir_fc, &fc->base.base);
     if (ret) {
-        BT_CPPLOGE_STR_SPEC(ctx->logger, "Cannot translate dynamic array field class element.");
+        BT_CPPLOGE_SPEC(ctx->logger, "Cannot translate dynamic array field class element.");
         goto end;
     }
 
     ret = translate_field_class(ctx);
     if (ret) {
-        BT_CPPLOGE_STR_SPEC(ctx->logger, "Cannot translate dynamic array field class element.");
+        BT_CPPLOGE_SPEC(ctx->logger, "Cannot translate dynamic array field class element.");
         goto end;
     }
 

@@ -599,11 +599,11 @@ read_dscope_begin_state(struct ctf_msg_iter *msg_it, struct ctf_field_class *dsc
     switch (bfcr_status) {
     case BT_BFCR_STATUS_OK:
         /* Field class was read completely */
-        BT_CPPLOGT_STR_SPEC(msg_it->logger, "Field was completely decoded.");
+        BT_CPPLOGT_SPEC(msg_it->logger, "Field was completely decoded.");
         msg_it->state = done_state;
         break;
     case BT_BFCR_STATUS_EOF:
-        BT_CPPLOGT_STR_SPEC(msg_it->logger, "BFCR needs more data to decode field completely.");
+        BT_CPPLOGT_SPEC(msg_it->logger, "BFCR needs more data to decode field completely.");
         msg_it->state = continue_state;
         break;
     default:
@@ -655,12 +655,12 @@ static enum ctf_msg_iter_status read_dscope_continue_state(struct ctf_msg_iter *
     switch (bfcr_status) {
     case BT_BFCR_STATUS_OK:
         /* Type was read completely. */
-        BT_CPPLOGT_STR_SPEC(msg_it->logger, "Field was completely decoded.");
+        BT_CPPLOGT_SPEC(msg_it->logger, "Field was completely decoded.");
         msg_it->state = done_state;
         break;
     case BT_BFCR_STATUS_EOF:
         /* Stay in this continue state. */
-        BT_CPPLOGT_STR_SPEC(msg_it->logger, "BFCR needs more data to decode field completely.");
+        BT_CPPLOGT_SPEC(msg_it->logger, "BFCR needs more data to decode field completely.");
         break;
     default:
         BT_CPPLOGE_APPEND_CAUSE_SPEC(msg_it->logger,
@@ -2728,7 +2728,7 @@ void ctf_msg_iter_destroy(struct ctf_msg_iter *msg_it)
                     fmt::ptr(msg_it));
 
     if (msg_it->stack) {
-        BT_CPPLOGD_STR_SPEC(msg_it->logger, "Destroying field stack.");
+        BT_CPPLOGD_SPEC(msg_it->logger, "Destroying field stack.");
         stack_destroy(msg_it->stack);
     }
 
@@ -2761,7 +2761,7 @@ enum ctf_msg_iter_status ctf_msg_iter_get_next_message(struct ctf_msg_iter *msg_
     while (true) {
         status = handle_state(msg_it);
         if (G_UNLIKELY(status == CTF_MSG_ITER_STATUS_AGAIN)) {
-            BT_CPPLOGD_STR_SPEC(msg_it->logger, "Medium returned CTF_MSG_ITER_STATUS_AGAIN.");
+            BT_CPPLOGD_SPEC(msg_it->logger, "Medium returned CTF_MSG_ITER_STATUS_AGAIN.");
             goto end;
         } else if (G_UNLIKELY(status != CTF_MSG_ITER_STATUS_OK)) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(msg_it->logger,
@@ -2895,7 +2895,7 @@ static enum ctf_msg_iter_status decode_until_state(struct ctf_msg_iter *msg_it,
 
         status = handle_state(msg_it);
         if (G_UNLIKELY(status == CTF_MSG_ITER_STATUS_AGAIN)) {
-            BT_CPPLOGD_STR_SPEC(msg_it->logger, "Medium returned CTF_MSG_ITER_STATUS_AGAIN.");
+            BT_CPPLOGD_SPEC(msg_it->logger, "Medium returned CTF_MSG_ITER_STATUS_AGAIN.");
             goto end;
         } else if (G_UNLIKELY(status != CTF_MSG_ITER_STATUS_OK)) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(msg_it->logger,

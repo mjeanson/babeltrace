@@ -367,18 +367,17 @@ bool MsgIter::_HeapComparator::operator()(
              * the oldest one, that is, the one having the smallest
              * timestamp.
              */
-            BT_CPPLOGT_STR("Timestamp of message A is less than timestamp of message B: oldest=A");
+            BT_CPPLOGT("Timestamp of message A is less than timestamp of message B: oldest=A");
             return true;
         } else if (*msgTsA > *msgTsB) {
-            BT_CPPLOGT_STR(
-                "Timestamp of message A is greater than timestamp of message B: oldest=B");
+            BT_CPPLOGT("Timestamp of message A is greater than timestamp of message B: oldest=B");
             return false;
         }
     } else if (msgTsA && !msgTsB) {
-        BT_CPPLOGT_STR("Message A has a timestamp, but message B has none: oldest=B");
+        BT_CPPLOGT("Message A has a timestamp, but message B has none: oldest=B");
         return false;
     } else if (!msgTsA && msgTsB) {
-        BT_CPPLOGT_STR("Message B has a timestamp, but message A has none: oldest=A");
+        BT_CPPLOGT("Message B has a timestamp, but message A has none: oldest=A");
         return true;
     }
 

@@ -12,7 +12,7 @@
 #include "plugins/ctf/common/src/metadata/tsdl/parser-wrap.hpp"
 #include "plugins/ctf/common/src/metadata/tsdl/scanner.hpp"
 
-#define YY_FATAL_ERROR(_msg)	BT_CPPLOGF_STR_SPEC(currentCtfScanner->logger, _msg)
+#define YY_FATAL_ERROR(_msg)	BT_CPPLOGF_SPEC(currentCtfScanner->logger, "{}", _msg)
 
 #define PARSE_INTEGER_LITERAL(base)					\
 	do {								\

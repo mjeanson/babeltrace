@@ -45,7 +45,7 @@ objstack *objstack_create(const bt2c::Logger& parentLogger)
     objstack = new ::objstack {parentLogger};
     node = (objstack_node *) calloc(sizeof(struct objstack_node) + OBJSTACK_INIT_LEN, sizeof(char));
     if (!node) {
-        BT_CPPLOGE_STR_SPEC(objstack->logger, "Failed to allocate one object stack node.");
+        BT_CPPLOGE_SPEC(objstack->logger, "Failed to allocate one object stack node.");
         delete objstack;
         return NULL;
     }
@@ -94,7 +94,7 @@ static struct objstack_node *objstack_append_node(struct objstack *objstack)
     new_node = (objstack_node *) calloc(sizeof(struct objstack_node) + (last_node->len << 1),
                                         sizeof(char));
     if (!new_node) {
-        BT_CPPLOGE_STR_SPEC(objstack->logger, "Failed to allocate one object stack node.");
+        BT_CPPLOGE_SPEC(objstack->logger, "Failed to allocate one object stack node.");
         return NULL;
     }
     bt_list_add_tail(&new_node->node, &objstack->head);
