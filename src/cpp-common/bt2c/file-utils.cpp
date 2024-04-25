@@ -6,12 +6,15 @@
  */
 #include <fstream>
 
+#include "logging.hpp"
+
 #include "exc.hpp"
 #include "file-utils.hpp"
 
 namespace bt2c {
 
-std::vector<std::uint8_t> dataFromFile(const char * const filePath)
+std::vector<std::uint8_t> dataFromFile(const char * const filePath, const Logger& logger,
+                                       const bool fatalError)
 {
     /*
      * Open a file stream and seek to the end of the stream to compute the size
@@ -20,6 +23,14 @@ std::vector<std::uint8_t> dataFromFile(const char * const filePath)
     std::ifstream file {filePath, std::ios::binary | std::ios::ate};
 
     if (!file) {
+        constexpr const char *msg = "No such file or directory: path=\"{}\"";
+
+        if (fatalError) {
+            BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, msg, filePath);
+        } else {
+            BT_CPPLOGD_SPEC(logger, msg, filePath);
+        }
+
         throw NoSuchFileOrDirectoryError {};
     }
 

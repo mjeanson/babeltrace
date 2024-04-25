@@ -12,10 +12,17 @@
 
 namespace bt2c {
 
+class Logger;
+
 /*
  * Returns a vector of all the bytes contained in `path`.
+ *
+ * Throws `NoSuchFileOrDirectoryError` if the file does not exist.
+ *
+ * If `fatalError` is true, log an error and appends an error
+ * cause prior to throwing.  Otherwise, log at the debug level.
  */
-std::vector<std::uint8_t> dataFromFile(const char *path);
+std::vector<std::uint8_t> dataFromFile(const char *path, const Logger& logger, bool fatalError);
 
 } /* namespace bt2c */
 
