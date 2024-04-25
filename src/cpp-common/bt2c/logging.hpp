@@ -156,16 +156,6 @@ public:
     }
 
     /*
-     * Current logging level converted to a `bt_log_level` value.
-     *
-     * For legacy code.
-     */
-    bt_log_level cLevel() const noexcept
-    {
-        return static_cast<bt_log_level>(_mLevel);
-    }
-
-    /*
      * Whether or not this logger would log at the level `level`.
      */
     bool wouldLog(const Level level) const noexcept
