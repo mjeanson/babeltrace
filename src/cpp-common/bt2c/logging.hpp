@@ -275,10 +275,10 @@ public:
      */
     template <Level LevelV, bool AppendCauseV, typename... ArgTs>
     void log(const char * const fileName, const char * const funcName, const unsigned int lineNo,
-             const char * const fmt, ArgTs&&...args) const
+             fmt::format_string<ArgTs...> fmt, ArgTs&&...args) const
     {
-        this->_log<_StdLogWriter, LevelV, AppendCauseV>(fileName, funcName, lineNo, {}, "", fmt,
-                                                        std::forward<ArgTs>(args)...);
+        this->_log<_StdLogWriter, LevelV, AppendCauseV>(
+            fileName, funcName, lineNo, {}, "", std::move(fmt), std::forward<ArgTs>(args)...);
     }
 
     /*
@@ -287,10 +287,10 @@ public:
      */
     template <bool AppendCauseV, typename ExcT, typename... ArgTs>
     [[noreturn]] void logErrorAndThrow(const char * const fileName, const char * const funcName,
-                                       const unsigned int lineNo, const char * const fmt,
+                                       const unsigned int lineNo, fmt::format_string<ArgTs...> fmt,
                                        ArgTs&&...args) const
     {
-        this->log<Level::Error, AppendCauseV>(fileName, funcName, lineNo, fmt,
+        this->log<Level::Error, AppendCauseV>(fileName, funcName, lineNo, std::move(fmt),
                                               std::forward<ArgTs>(args)...);
         throw ExcT {};
     }
@@ -300,10 +300,10 @@ public:
      */
     template <bool AppendCauseV, typename... ArgTs>
     [[noreturn]] void logErrorAndRethrow(const char * const fileName, const char * const funcName,
-                                         const unsigned int lineNo, const char * const fmt,
-                                         ArgTs&&...args) const
+                                         const unsigned int lineNo,
+                                         fmt::format_string<ArgTs...> fmt, ArgTs&&...args) const
     {
-        this->log<Level::Error, AppendCauseV>(fileName, funcName, lineNo, fmt,
+        this->log<Level::Error, AppendCauseV>(fileName, funcName, lineNo, std::move(fmt),
                                               std::forward<ArgTs>(args)...);
         throw;
     }
@@ -333,12 +333,12 @@ public:
      */
     template <Level LevelV, bool AppendCauseV, typename... ArgTs>
     void logErrno(const char * const fileName, const char * const funcName,
-                  const unsigned int lineNo, const char * const initMsg, const char * const fmt,
-                  ArgTs&&...args) const
+                  const unsigned int lineNo, const char * const initMsg,
+                  fmt::format_string<ArgTs...> fmt, ArgTs&&...args) const
     {
-        this->_log<_InitMsgLogWriter, LevelV, AppendCauseV>(fileName, funcName, lineNo, {},
-                                                            this->_errnoIntroStr(initMsg).c_str(),
-                                                            fmt, std::forward<ArgTs>(args)...);
+        this->_log<_InitMsgLogWriter, LevelV, AppendCauseV>(
+            fileName, funcName, lineNo, {}, this->_errnoIntroStr(initMsg).c_str(), std::move(fmt),
+            std::forward<ArgTs>(args)...);
     }
 
     /*
@@ -348,11 +348,11 @@ public:
     template <bool AppendCauseV, typename ExcT, typename... ArgTs>
     [[noreturn]] void logErrorErrnoAndThrow(const char * const fileName,
                                             const char * const funcName, const unsigned int lineNo,
-                                            const char * const initMsg, const char * const fmt,
-                                            ArgTs&&...args) const
+                                            const char * const initMsg,
+                                            fmt::format_string<ArgTs...> fmt, ArgTs&&...args) const
     {
-        this->logErrno<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg, fmt,
-                                                   std::forward<ArgTs>(args)...);
+        this->logErrno<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg,
+                                                   std::move(fmt), std::forward<ArgTs>(args)...);
         throw ExcT {};
     }
 
@@ -360,13 +360,13 @@ public:
      * Like logErrno() with the `Level::Error` level, but also rethrows.
      */
     template <bool AppendCauseV, typename... ArgTs>
-    [[noreturn]] void logErrorErrnoAndRethrow(const char * const fileName,
-                                              const char * const funcName,
-                                              const unsigned int lineNo, const char * const initMsg,
-                                              const char * const fmt, ArgTs&&...args) const
+    [[noreturn]] void
+    logErrorErrnoAndRethrow(const char * const fileName, const char * const funcName,
+                            const unsigned int lineNo, const char * const initMsg,
+                            fmt::format_string<ArgTs...> fmt, ArgTs&&...args) const
     {
-        this->logErrno<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg, fmt,
-                                                   std::forward<ArgTs>(args)...);
+        this->logErrno<Level::Error, AppendCauseV>(fileName, funcName, lineNo, initMsg,
+                                                   std::move(fmt), std::forward<ArgTs>(args)...);
         throw;
     }
 
@@ -391,10 +391,10 @@ public:
      */
     template <Level LevelV, typename... ArgTs>
     void logMem(const char * const fileName, const char * const funcName, const unsigned int lineNo,
-                const MemData memData, const char * const fmt, ArgTs&&...args) const
+                const MemData memData, fmt::format_string<ArgTs...> fmt, ArgTs&&...args) const
     {
-        this->_log<_MemLogWriter, LevelV, false>(fileName, funcName, lineNo, memData, "", fmt,
-                                                 std::forward<ArgTs>(args)...);
+        this->_log<_MemLogWriter, LevelV, false>(fileName, funcName, lineNo, memData, "",
+                                                 std::move(fmt), std::forward<ArgTs>(args)...);
     }
 
 private:
@@ -411,7 +411,7 @@ private:
      */
     template <typename LogWriterT, Level LevelV, bool AppendCauseV, typename... ArgTs>
     void _log(const char * const fileName, const char * const funcName, const unsigned int lineNo,
-              const MemData memData, const char * const initMsg, const char * const fmt,
+              const MemData memData, const char * const initMsg, fmt::format_string<ArgTs...> fmt,
               ArgTs&&...args) const
     {
         const auto wouldLog = this->wouldLog(LevelV);
@@ -423,8 +423,7 @@ private:
              * append a null character).
              */
             _mBuf.clear();
-            BT_ASSERT(fmt);
-            fmt::format_to(std::back_inserter(_mBuf), fmt, std::forward<ArgTs>(args)...);
+            fmt::format_to(std::back_inserter(_mBuf), std::move(fmt), std::forward<ArgTs>(args)...);
             _mBuf.push_back('\0');
         }
 
