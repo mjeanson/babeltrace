@@ -13,7 +13,7 @@ namespace internal {
 
 template <typename T>
 using EnableIfIsWiseEnum =
-    typename std::enable_if<wise_enum::is_wise_enum<T>::value, const char *>::type;
+    typename std::enable_if<wise_enum::is_wise_enum<T>::value, wise_enum::string_type>::type;
 
 } /* namespace internal */
 
