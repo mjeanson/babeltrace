@@ -25,14 +25,9 @@ class LibPrePostCondsTestCase(unittest.TestCase):
 
 # a condition trigger descriptor (base)
 class _CondTriggerDescriptor:
-    def __init__(self, index: int, trigger_name: str, cond_id: str):
-        self._index = index
+    def __init__(self, trigger_name: str, cond_id: str):
         self._trigger_name = trigger_name
         self._cond_id = cond_id
-
-    @property
-    def index(self):
-        return self._index
 
     @property
     def trigger_name(self):
@@ -61,11 +56,12 @@ class _PostCondTriggerDescriptor(_CondTriggerDescriptor):
 def _test(self: unittest.TestCase, descriptor: _CondTriggerDescriptor):
     # Execute:
     #
-    #     $ conds-triggers run <index>
+    #     $ conds-triggers run <trigger-name>
     #
-    # where `<index>` is the descriptor's index.
+    # where `<trigger-name>` is the descriptor trigger name.
+    print("# Running trigger `{}`".format(descriptor.trigger_name))
     with subprocess.Popen(
-        [_CONDS_TRIGGERS_PATH, "run", str(descriptor.index)],
+        [_CONDS_TRIGGERS_PATH, "run", descriptor.trigger_name],
         stderr=subprocess.PIPE,
         universal_newlines=True,
     ) as proc:
@@ -95,7 +91,7 @@ def _cond_trigger_descriptors_from_json(json_descr_array: tjson.ArrayVal):
     descriptors = []  # type: list[_CondTriggerDescriptor]
     descriptor_names = set()  # type: set[str]
 
-    for index, json_descr in enumerate(json_descr_array.iter(tjson.ObjVal)):
+    for json_descr in json_descr_array.iter(tjson.ObjVal):
         # sanity check: check for duplicate
         trigger_name = json_descr.at("name", tjson.StrVal).val
 
@@ -114,7 +110,7 @@ def _cond_trigger_descriptors_from_json(json_descr_array: tjson.ArrayVal):
         else:
             raise ValueError("Invalid condition ID `{}`".format(cond_id))
 
-        descriptors.append(cond_type(index, trigger_name, cond_id))
+        descriptors.append(cond_type(trigger_name, cond_id))
         descriptor_names.add(trigger_name)
 
     return descriptors

@@ -4,8 +4,9 @@
  * Copyright (C) 2020 Philippe Proulx <pproulx@efficios.com>
  */
 
+#include <unordered_set>
+
 #include <glib.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include <babeltrace2/babeltrace.h>
@@ -48,28 +49,52 @@ void listCondTriggers(const CondTriggers& condTriggers) noexcept
     fmt::println("{}", condTriggerArray.dump());
 }
 
+void checkNamesUnique(const CondTriggers& condTriggers)
+{
+    std::unordered_set<std::string> names;
+
+    for (const auto& trigger : condTriggers) {
+        const auto res = names.insert(trigger->name());
+
+        if (!res.second) {
+            fmt::println(stderr, "Duplicate test name `{}`", trigger->name());
+            std::exit(1);
+        }
+    }
+}
+
 } /* namespace */
 
 void condMain(const bt2s::span<const char * const> argv, const CondTriggers& condTriggers) noexcept
 {
     BT_ASSERT(argv.size() >= 2);
+    checkNamesUnique(condTriggers);
 
     if (strcmp(argv[1], "list") == 0) {
         listCondTriggers(condTriggers);
     } else if (strcmp(argv[1], "run") == 0) {
         /*
-         * It's expected that calling `*condTriggers[index]` below
-         * aborts (calls bt_common_abort()). In this testing context, we
-         * don't want any custom abortion command to run.
+         * It's expected that calling the trigger below aborts (calls
+         * bt_common_abort()). In this testing context, we don't want
+         * any custom abortion command to run.
          */
         g_unsetenv("BABELTRACE_EXEC_ON_ABORT");
 
+        /* Find the trigger */
+        BT_ASSERT(argv.size() == 3);
+
+        const auto name = argv[2];
+        const auto it = std::find_if(condTriggers.begin(), condTriggers.end(),
+                                     [&](const CondTrigger::UP& trigger) {
+                                         return trigger->name() == name;
+                                     });
+
+        if (it == condTriggers.end()) {
+            fmt::println(stderr, "No trigger named `{}` found.", name);
+            std::exit(1);
+        }
+
         /* Call the trigger */
-        BT_ASSERT(argv.size() >= 3);
-
-        const auto index = atoi(argv[2]);
-
-        BT_ASSERT(index >= 0 && index < condTriggers.size());
-        (*condTriggers[index])();
+        (**it)();
     }
 }
