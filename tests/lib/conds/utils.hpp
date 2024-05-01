@@ -47,7 +47,7 @@ protected:
      * ID `condId` (_without_ any `pre:` or `post:` prefix), and the
      * optional name suffix `nameSuffix`.
      *
-     * The concatenation of `condId` and, if it's set, `-` and
+     * The concatenation of `condId` and, if it's set, `:` and
      * `*nameSuffix`, forms the name of the condition trigger. Get the
      * name of the created condition trigger with name().
      */
