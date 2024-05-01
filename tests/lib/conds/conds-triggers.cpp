@@ -70,7 +70,7 @@ CondTrigger::UP makeRunInCompInitTrigger(OnCompInitFunc func, const CondTrigger:
                                          const bt2c::CStringView nameSuffix = {})
 {
     return bt2s::make_unique<RunInCondTrigger<RunInDelegator>>(
-        RunInDelegator::makeOnCompInit(std::move(func)), type, condId, nameSuffix);
+        RunInDelegator::makeOnCompInit(std::move(func)), type, condId, 0u, nameSuffix);
 }
 
 bt2::IntegerFieldClass::Shared createUIntFc(const bt2::SelfComponent self)

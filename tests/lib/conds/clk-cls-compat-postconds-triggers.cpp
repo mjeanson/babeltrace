@@ -146,7 +146,7 @@ void addClkClsCompatTriggers(CondTriggers& triggers)
 
                 triggers.emplace_back(bt2s::make_unique<RunInCondTrigger<ClockClsCompatRunIn>>(
                     ClockClsCompatRunIn {msgType1, createClockCls1, msgType2, createClockCls2},
-                    CondTrigger::Type::Post, condId, fmt::format("{}-{}", msgType1, msgType2)));
+                    CondTrigger::Type::Post, condId, 0u, fmt::format("{}-{}", msgType1, msgType2)));
             }
         }
     };

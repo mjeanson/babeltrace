@@ -86,7 +86,7 @@ private:
 
 } /* namespace */
 
-void runIn(RunIn& runIn)
+void runIn(RunIn& runIn, const std::uint64_t graphMipVersion)
 {
     const auto srcCompCls = bt2::SourceComponentClass::create<RunInSource>();
 
@@ -94,7 +94,7 @@ void runIn(RunIn& runIn)
     bt2::QueryExecutor::create(*srcCompCls, "object-name", runIn)->query();
 
     /* Create graph */
-    const auto graph = bt2::Graph::create(0);
+    const auto graph = bt2::Graph::create(graphMipVersion);
 
     /* Add custom source component (executes `compCtxFunc`) */
     const auto srcComp = graph->addComponent(*srcCompCls, "the-source", runIn);
@@ -123,4 +123,11 @@ void runIn(RunIn& runIn)
 
     /* Run graph (executes `msgIterCtxFunc`) */
     graph->run();
+}
+
+void forEachMipVersion(const std::function<void(std::uint64_t)>& fn)
+{
+    for (std::uint64_t v = 0; v <= bt_get_maximal_mip_version(); ++v) {
+        fn(v);
+    }
 }

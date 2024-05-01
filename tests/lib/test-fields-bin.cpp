@@ -51,7 +51,7 @@ int main()
     plan_tests(NR_TESTS);
 
     TestStringClear testStringClear;
-    runIn(testStringClear);
+    runIn(testStringClear, 0);
 
     return exit_status();
 }

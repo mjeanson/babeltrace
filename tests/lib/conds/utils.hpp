@@ -115,9 +115,10 @@ class RunInCondTrigger : public CondTrigger
 {
 public:
     explicit RunInCondTrigger(RunInT runIn, const Type type, const std::string& condId,
+                              const std::uint64_t graphMipVersion,
                               const bt2c::CStringView nameSuffix = {}) :
         CondTrigger {type, condId, nameSuffix},
-        _mRunIn {std::move(runIn)}
+        _mRunIn {std::move(runIn)}, _mGraphMipVersion {graphMipVersion}
     {
     }
 
@@ -129,11 +130,12 @@ public:
 
     void operator()() noexcept override
     {
-        runIn(_mRunIn);
+        runIn(_mRunIn, _mGraphMipVersion);
     }
 
 private:
     RunInT _mRunIn;
+    std::uint64_t _mGraphMipVersion;
 };
 
 /*
