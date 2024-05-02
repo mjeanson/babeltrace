@@ -25,14 +25,13 @@ public:
         MsgIterInactivity,
     };
 
-    using CreateClockCls = bt2::ClockClass::Shared (*)(bt2::SelfComponent);
+    using CreateClockCls = std::function<bt2::ClockClass::Shared(bt2::SelfComponent)>;
 
-    explicit ClockClsCompatRunIn(const MsgType msgType1, const CreateClockCls createClockCls1,
-                                 const MsgType msgType2,
-                                 const CreateClockCls createClockCls2) noexcept :
+    explicit ClockClsCompatRunIn(const MsgType msgType1, CreateClockCls createClockCls1,
+                                 const MsgType msgType2, CreateClockCls createClockCls2) noexcept :
         _mMsgType1 {msgType1},
-        _mMsgType2 {msgType2}, _mCreateClockCls1 {createClockCls1},
-        _mCreateClockCls2 {createClockCls2}
+        _mMsgType2 {msgType2}, _mCreateClockCls1 {std::move(createClockCls1)},
+        _mCreateClockCls2 {std::move(createClockCls2)}
     {
     }
 
@@ -52,10 +51,11 @@ public:
 private:
     static bt2::Message::Shared _createOneMsg(const bt2::SelfMessageIterator self,
                                               const MsgType msgType,
-                                              const CreateClockCls createClockCls,
+                                              const CreateClockCls& createClockCls,
                                               const bt2::Trace trace)
     {
-        const auto clockCls = createClockCls(self.component());
+        const auto clockCls =
+            createClockCls ? createClockCls(self.component()) : bt2::ClockClass::Shared {};
 
         switch (msgType) {
         case MsgType::StreamBeg:
@@ -95,11 +95,6 @@ __attribute__((used)) const char *format_as(const ClockClsCompatRunIn::MsgType m
     bt_common_abort();
 }
 
-bt2::ClockClass::Shared noClockClass(bt2::SelfComponent) noexcept
-{
-    return bt2::ClockClass::Shared {};
-}
-
 const bt2c::Uuid uuidA {"f00aaf65-ebec-4eeb-85b2-fc255cf1aa8a"};
 const bt2c::Uuid uuidB {"03482981-a77b-4d7b-94c4-592bf9e91785"};
 
@@ -114,8 +109,8 @@ const bt2c::Uuid uuidB {"03482981-a77b-4d7b-94c4-592bf9e91785"};
 void addClkClsCompatTriggers(CondTriggers& triggers)
 {
     const auto addValidCases = [&triggers](
-                                   const ClockClsCompatRunIn::CreateClockCls createClockCls1,
-                                   const ClockClsCompatRunIn::CreateClockCls createClockCls2,
+                                   const ClockClsCompatRunIn::CreateClockCls& createClockCls1,
+                                   const ClockClsCompatRunIn::CreateClockCls& createClockCls2,
                                    const char * const condId) {
         /*
          * Add triggers for all possible combinations of message types.
@@ -129,9 +124,8 @@ void addClkClsCompatTriggers(CondTriggers& triggers)
         };
 
         const auto isInvalidCase = [](const ClockClsCompatRunIn::MsgType msgType,
-                                      const ClockClsCompatRunIn::CreateClockCls createClockCls) {
-            return msgType == ClockClsCompatRunIn::MsgType::MsgIterInactivity &&
-                   createClockCls == noClockClass;
+                                      const ClockClsCompatRunIn::CreateClockCls& createClockCls) {
+            return msgType == ClockClsCompatRunIn::MsgType::MsgIterInactivity && !createClockCls;
         };
 
         for (const auto msgType1 : msgTypes) {
@@ -152,7 +146,7 @@ void addClkClsCompatTriggers(CondTriggers& triggers)
     };
 
     addValidCases(
-        noClockClass,
+        {},
         [](const bt2::SelfComponent self) {
             return self.createClockClass();
         },
@@ -162,7 +156,7 @@ void addClkClsCompatTriggers(CondTriggers& triggers)
         [](const bt2::SelfComponent self) {
             return self.createClockClass();
         },
-        noClockClass,
+        {},
         "message-iterator-class-next-method:stream-class-has-clock-class-with-unix-epoch-origin");
 
     addValidCases(
@@ -184,7 +178,7 @@ void addClkClsCompatTriggers(CondTriggers& triggers)
             clockCls->originIsUnixEpoch(false).uuid(uuidA);
             return clockCls;
         },
-        noClockClass, "message-iterator-class-next-method:stream-class-has-clock-class-with-uuid");
+        {}, "message-iterator-class-next-method:stream-class-has-clock-class-with-uuid");
 
     addValidCases(
         [](const bt2::SelfComponent self) {
@@ -235,7 +229,7 @@ void addClkClsCompatTriggers(CondTriggers& triggers)
             clockCls->originIsUnixEpoch(false);
             return clockCls;
         },
-        noClockClass, "message-iterator-class-next-method:stream-class-has-clock-class");
+        {}, "message-iterator-class-next-method:stream-class-has-clock-class");
 
     addValidCases(
         [](const bt2::SelfComponent self) {
