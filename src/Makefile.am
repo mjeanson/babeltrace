@@ -158,6 +158,7 @@ cpp_common_libcpp_common_la_SOURCES = \
 	cpp-common/bt2/type-traits.hpp \
 	cpp-common/bt2/value.hpp \
 	cpp-common/bt2/wrap.hpp \
+	cpp-common/bt2c/aliases.hpp \
 	cpp-common/bt2c/align.hpp \
 	cpp-common/bt2c/bt2-value-from-json-val.cpp \
 	cpp-common/bt2c/bt2-value-from-json-val.hpp \
