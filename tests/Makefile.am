@@ -110,9 +110,22 @@ cpp_common_test_uuid_LDADD = \
 	$(COMMON_TEST_LDADD) \
 	$(top_builddir)/src/cpp-common/vendor/fmt/libfmt.la
 
+noinst_PROGRAMS += \
+	cpp-common/test-unicode-conv
+
+cpp_common_test_unicode_conv_SOURCES = \
+	cpp-common/test-unicode-conv.cpp
+
+cpp_common_test_unicode_conv_LDADD = \
+	$(top_builddir)/src/cpp-common/vendor/fmt/libfmt.la \
+	$(top_builddir)/src/cpp-common/libcpp-common.la \
+	$(top_builddir)/src/lib/libbabeltrace2.la \
+	$(COMMON_TEST_LDADD)
+
 TESTS_CPP_COMMON = \
 	cpp-common/test-c-string-view \
-	cpp-common/test-uuid
+	cpp-common/test-uuid \
+	cpp-common/test-unicode-conv
 
 TESTS_LIB = \
 	lib/test-bt-uuid \
