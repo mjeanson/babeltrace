@@ -20,22 +20,25 @@ public:
     {
         ExpectingNoClockClassGotOne =
             BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_NO_CLOCK_CLASS_GOT_ONE,
-        ExpectingOriginUnixGotNone =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_NONE,
-        ExpectingOriginUnixGotOther =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_OTHER,
-        ExpectingOriginUuidGotNone =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UUID_GOT_NONE,
-        ExpectingOriginUuidGotUnix =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UUID_GOT_UNIX,
-        ExpectingOriginUuidGotNoUuid =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UUID_GOT_NO_UUID,
-        ExpectingOriginUuidGotOtherUuid =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UUID_GOT_OTHER_UUID,
-        ExpectingOriginNoUuidGotNone =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_NO_UUID_GOT_NONE,
-        ExpectingOriginNoUuidGotOther =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_NO_UUID_GOT_OTHER,
+
+        ExpectingOriginUnixGotNoClockClass =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_NO_CLOCK_CLASS,
+        ExpectingOriginUnixGotUnknownOrigin =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_UNKNOWN_ORIGIN,
+
+        ExpectingOriginUnknownWithUuidGotNoClockClass =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_NO_CLOCK_CLASS,
+        ExpectingOriginUnknownWithUuidGotUnixOrigin =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_UNIX_ORIGIN,
+        ExpectingOriginUnknownWithUuidGotWithoutUuid =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_WITHOUT_UUID,
+        ExpectingOriginUnknownWithUuidGotOtherUuid =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_OTHER_UUID,
+
+        ExpectingOriginUnknownWithoutUuidGotNoClockClass =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITHOUT_UUID_GOT_NO_CLOCK_CLASS,
+        ExpectingOriginUnknownWithoutUuidGotOtherClockClass =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITHOUT_UUID_GOT_OTHER_CLOCK_CLASS,
     };
 
     explicit ClockCorrelationError(
@@ -90,11 +93,11 @@ private:
         /* Expect a clock with a Unix epoch origin. */
         OriginUnix,
 
-        /* Expect a clock without a Unix epoch origin, but with a UUID. */
-        OriginOtherUuid,
+        /* Expect a clock with an unknown origin, but with a UUID. */
+        OriginUnknownWithUuid,
 
-        /* Expect a clock without a Unix epoch origin and without a UUID. */
-        OriginOtherNoUuid,
+        /* Expect a clock with an unknown origin and without a UUID. */
+        OriginUnknownWithoutUuid,
     };
 
 public:

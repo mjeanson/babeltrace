@@ -260,9 +260,9 @@ void MsgIter::_validateMsgClkCls(const bt2::ConstMessage msg)
                 "Expecting no clock class, but got one: clock-class-addr={}, clock-class-name={}",
                 fmt::ptr(actualClkCls->libObjPtr()), actualClkCls->name());
 
-        case Type::ExpectingOriginUnixGotNone:
-        case Type::ExpectingOriginUuidGotNone:
-        case Type::ExpectingOriginNoUuidGotNone:
+        case Type::ExpectingOriginUnixGotNoClockClass:
+        case Type::ExpectingOriginUnknownWithUuidGotNoClockClass:
+        case Type::ExpectingOriginUnknownWithoutUuidGotNoClockClass:
             BT_CPPLOGE_APPEND_CAUSE_AND_THROW(
                 bt2::Error,
                 "Expecting a clock class, but got none: stream-class-addr={}, "
@@ -270,14 +270,14 @@ void MsgIter::_validateMsgClkCls(const bt2::ConstMessage msg)
                 fmt::ptr(error.streamCls()->libObjPtr()), error.streamCls()->name(),
                 error.streamCls()->id());
 
-        case Type::ExpectingOriginUnixGotOther:
+        case Type::ExpectingOriginUnixGotUnknownOrigin:
             BT_CPPLOGE_APPEND_CAUSE_AND_THROW(
                 bt2::Error,
                 "Expecting a clock class having a Unix epoch origin, but got one not having a Unix "
                 "epoch origin: clock-class-addr={}, clock-class-name={}",
                 fmt::ptr(actualClkCls->libObjPtr()), actualClkCls->name());
 
-        case Type::ExpectingOriginUuidGotUnix:
+        case Type::ExpectingOriginUnknownWithUuidGotUnixOrigin:
             BT_CPPLOGE_APPEND_CAUSE_AND_THROW(
                 bt2::Error,
                 "Expecting a clock class not having a Unix epoch origin, "
@@ -285,14 +285,14 @@ void MsgIter::_validateMsgClkCls(const bt2::ConstMessage msg)
                 "clock-class-addr={}, clock-class-name={}",
                 fmt::ptr(actualClkCls->libObjPtr()), actualClkCls->name());
 
-        case Type::ExpectingOriginUuidGotNoUuid:
+        case Type::ExpectingOriginUnknownWithUuidGotWithoutUuid:
             BT_CPPLOGE_APPEND_CAUSE_AND_THROW(
                 bt2::Error,
                 "Expecting a clock class with a UUID, but got one without a UUID: "
                 "clock-class-addr={}, clock-class-name={}",
                 fmt::ptr(actualClkCls->libObjPtr()), actualClkCls->name());
 
-        case Type::ExpectingOriginUuidGotOtherUuid:
+        case Type::ExpectingOriginUnknownWithUuidGotOtherUuid:
             BT_CPPLOGE_APPEND_CAUSE_AND_THROW(
                 bt2::Error,
                 "Expecting a clock class with a specific UUID, but got one with a different UUID: "
@@ -300,7 +300,7 @@ void MsgIter::_validateMsgClkCls(const bt2::ConstMessage msg)
                 fmt::ptr(actualClkCls->libObjPtr()), actualClkCls->name(), *refClkCls->uuid(),
                 *actualClkCls->uuid());
 
-        case Type::ExpectingOriginNoUuidGotOther:
+        case Type::ExpectingOriginUnknownWithoutUuidGotOtherClockClass:
             BT_CPPLOGE_APPEND_CAUSE_AND_THROW(
                 bt2::Error,
                 "Unexpected clock class: "

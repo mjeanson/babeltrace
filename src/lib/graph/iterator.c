@@ -697,41 +697,41 @@ void assert_post_dev_clock_classes_are_compatible_one(
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
 				"stream-class-has-no-clock-class", false,
 				"Expecting no clock class, got one.");
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_NONE:
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_NO_CLOCK_CLASS:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
 				"stream-class-has-clock-class-with-unix-epoch-origin", false,
 				"Expecting a clock class, got none.");
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_OTHER:
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_UNKNOWN_ORIGIN:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
 				"clock-class-has-unix-epoch-origin", false,
 				"Expecting a clock class with Unix epoch origin: %![cc-]+K",
 				actual_clock_cls);
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UUID_GOT_NONE:
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_NO_CLOCK_CLASS:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
 				"stream-class-has-clock-class-with-uuid", false,
 				"Expecting a clock class, got none.");
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UUID_GOT_UNIX:
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_UNIX_ORIGIN:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
 				"clock-class-has-non-unix-epoch-origin", false,
 				"Expecting a clock class without Unix epoch origin: %![cc-]+K",
 				actual_clock_cls);
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UUID_GOT_NO_UUID:
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_WITHOUT_UUID:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
 				"clock-class-has-uuid", false,
 				"Expecting a clock class with UUID:  %![cc-]+K",
 				actual_clock_cls);
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UUID_GOT_OTHER_UUID:
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_OTHER_UUID:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
 				"clock-class-has-expected-uuid", false,
 				"Expecting a clock class with UUID, got one with a different UUID: "
 				"%![cc-]+K, expected-uuid=%!u",
 				actual_clock_cls, bt_clock_class_get_uuid(ref_clock_cls));
 
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_NO_UUID_GOT_NONE:
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITHOUT_UUID_GOT_NO_CLOCK_CLASS:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
 				"stream-class-has-clock-class", false,
 				"Expecting a clock class, got none.");
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_NO_UUID_GOT_OTHER:
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITHOUT_UUID_GOT_OTHER_CLOCK_CLASS:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
 				"clock-class-is-expected", false,
 				"Unexpected clock class: %![expected-cc-]+K, %![actual-cc-]+K",
