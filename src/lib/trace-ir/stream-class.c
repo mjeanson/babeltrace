@@ -47,12 +47,7 @@ void destroy_stream_class(struct bt_object *obj)
 		stream_class->event_classes = NULL;
 	}
 
-	if (stream_class->name.str) {
-		g_string_free(stream_class->name.str, TRUE);
-		stream_class->name.str = NULL;
-		stream_class->name.value = NULL;
-	}
-
+	g_free(stream_class->name);
 	BT_LOGD_STR("Putting packet context field class.");
 	BT_OBJECT_PUT_REF_AND_RESET(stream_class->packet_context_fc);
 	BT_LOGD_STR("Putting event common context field class.");
@@ -114,12 +109,6 @@ struct bt_stream_class *create_stream_class_with_id(
 	if (!stream_class->user_attributes) {
 		BT_LIB_LOGE_APPEND_CAUSE(
 			"Failed to create a map value object.");
-		goto error;
-	}
-
-	stream_class->name.str = g_string_new(NULL);
-	if (!stream_class->name.str) {
-		BT_LIB_LOGE_APPEND_CAUSE("Failed to allocate a GString.");
 		goto error;
 	}
 
@@ -203,7 +192,7 @@ BT_EXPORT
 const char *bt_stream_class_get_name(const struct bt_stream_class *stream_class)
 {
 	BT_ASSERT_PRE_DEV_SC_NON_NULL(stream_class);
-	return stream_class->name.value;
+	return stream_class->name;
 }
 
 BT_EXPORT
@@ -215,8 +204,8 @@ enum bt_stream_class_set_name_status bt_stream_class_set_name(
 	BT_ASSERT_PRE_SC_NON_NULL(stream_class);
 	BT_ASSERT_PRE_NAME_NON_NULL(name);
 	BT_ASSERT_PRE_DEV_STREAM_CLASS_HOT(stream_class);
-	g_string_assign(stream_class->name.str, name);
-	stream_class->name.value = stream_class->name.str->str;
+	g_free(stream_class->name);
+	stream_class->name = g_strdup(name);
 	BT_LIB_LOGD("Set stream class's name: %!+S", stream_class);
 	return BT_FUNC_STATUS_OK;
 }

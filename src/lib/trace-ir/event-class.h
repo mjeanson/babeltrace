@@ -29,22 +29,12 @@ struct bt_event_class {
 	/* Owned by this */
 	struct bt_value *user_attributes;
 
-	struct {
-		GString *str;
-
-		/* NULL or `str->str` above */
-		const char *value;
-	} name;
+	gchar *name;
 
 	uint64_t id;
 	struct bt_property_uint log_level;
 
-	struct {
-		GString *str;
-
-		/* NULL or `str->str` above */
-		const char *value;
-	} emf_uri;
+	gchar *emf_uri;
 
 	/* Pool of `struct bt_event *` */
 	struct bt_object_pool event_pool;

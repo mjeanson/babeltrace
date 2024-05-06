@@ -35,18 +35,8 @@ void destroy_clock_class(struct bt_object *obj)
 	BT_LIB_LOGD("Destroying clock class: %!+K", clock_class);
 	BT_OBJECT_PUT_REF_AND_RESET(clock_class->user_attributes);
 
-	if (clock_class->name.str) {
-		g_string_free(clock_class->name.str, TRUE);
-		clock_class->name.str = NULL;
-		clock_class->name.value = NULL;
-	}
-
-	if (clock_class->description.str) {
-		g_string_free(clock_class->description.str, TRUE);
-		clock_class->description.str = NULL;
-		clock_class->description.value = NULL;
-	}
-
+	g_free(clock_class->name);
+	g_free(clock_class->description);
 	bt_object_pool_finalize(&clock_class->cs_pool);
 	g_free(clock_class);
 }
@@ -91,18 +81,6 @@ struct bt_clock_class *bt_clock_class_create(bt_self_component *self_comp)
 		goto error;
 	}
 
-	clock_class->name.str = g_string_new(NULL);
-	if (!clock_class->name.str) {
-		BT_LIB_LOGE_APPEND_CAUSE("Failed to allocate a GString.");
-		goto error;
-	}
-
-	clock_class->description.str = g_string_new(NULL);
-	if (!clock_class->description.str) {
-		BT_LIB_LOGE_APPEND_CAUSE("Failed to allocate a GString.");
-		goto error;
-	}
-
 	clock_class->frequency = UINT64_C(1000000000);
 	clock_class->origin_is_unix_epoch = BT_TRUE;
 	set_base_offset(clock_class);
@@ -132,7 +110,7 @@ BT_EXPORT
 const char *bt_clock_class_get_name(const struct bt_clock_class *clock_class)
 {
 	BT_ASSERT_PRE_DEV_CLK_CLS_NON_NULL(clock_class);
-	return clock_class->name.value;
+	return clock_class->name;
 }
 
 BT_EXPORT
@@ -143,8 +121,8 @@ enum bt_clock_class_set_name_status bt_clock_class_set_name(
 	BT_ASSERT_PRE_CLK_CLS_NON_NULL(clock_class);
 	BT_ASSERT_PRE_NAME_NON_NULL(name);
 	BT_ASSERT_PRE_DEV_CLOCK_CLASS_HOT(clock_class);
-	g_string_assign(clock_class->name.str, name);
-	clock_class->name.value = clock_class->name.str->str;
+	g_free(clock_class->name);
+	clock_class->name = g_strdup(name);
 	BT_LIB_LOGD("Set clock class's name: %!+K", clock_class);
 	return BT_FUNC_STATUS_OK;
 }
@@ -154,7 +132,7 @@ const char *bt_clock_class_get_description(
 		const struct bt_clock_class *clock_class)
 {
 	BT_ASSERT_PRE_DEV_CLK_CLS_NON_NULL(clock_class);
-	return clock_class->description.value;
+	return clock_class->description;
 }
 
 BT_EXPORT
@@ -165,8 +143,8 @@ enum bt_clock_class_set_description_status bt_clock_class_set_description(
 	BT_ASSERT_PRE_CLK_CLS_NON_NULL(clock_class);
 	BT_ASSERT_PRE_DESCR_NON_NULL(descr);
 	BT_ASSERT_PRE_DEV_CLOCK_CLASS_HOT(clock_class);
-	g_string_assign(clock_class->description.str, descr);
-	clock_class->description.value = clock_class->description.str->str;
+	g_free(clock_class->description);
+	clock_class->description = g_strdup(descr);
 	BT_LIB_LOGD("Set clock class's description: %!+K",
 		clock_class);
 	return BT_FUNC_STATUS_OK;

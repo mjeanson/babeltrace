@@ -26,12 +26,7 @@ struct bt_stream {
 	/* Owned by this */
 	struct bt_stream_class *class;
 
-	struct {
-		GString *str;
-
-		/* NULL or `str->str` above */
-		const char *value;
-	} name;
+	gchar *name;
 
 	uint64_t id;
 

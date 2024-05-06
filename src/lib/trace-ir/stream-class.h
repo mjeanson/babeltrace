@@ -23,12 +23,7 @@ struct bt_stream_class {
 	/* Owned by this */
 	struct bt_value *user_attributes;
 
-	struct {
-		GString *str;
-
-		/* NULL or `str->str` above */
-		const char *value;
-	} name;
+	gchar *name;
 
 	uint64_t id;
 	bool assigns_automatic_event_class_id;

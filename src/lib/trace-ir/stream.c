@@ -37,12 +37,7 @@ void destroy_stream(struct bt_object *obj)
 	BT_LIB_LOGD("Destroying stream object: %!+s", stream);
 	BT_OBJECT_PUT_REF_AND_RESET(stream->user_attributes);
 
-	if (stream->name.str) {
-		g_string_free(stream->name.str, TRUE);
-		stream->name.str = NULL;
-		stream->name.value = NULL;
-	}
-
+	g_free(stream->name);
 	BT_LOGD_STR("Putting stream's class.");
 	bt_object_put_ref(stream->class);
 	bt_object_pool_finalize(&stream->packet_pool);
@@ -111,12 +106,6 @@ struct bt_stream *create_stream_with_id(struct bt_stream_class *stream_class,
 	if (!stream->user_attributes) {
 		BT_LIB_LOGE_APPEND_CAUSE(
 			"Failed to create a map value object.");
-		goto error;
-	}
-
-	stream->name.str = g_string_new(NULL);
-	if (!stream->name.str) {
-		BT_LIB_LOGE_APPEND_CAUSE("Failed to allocate a GString.");
 		goto error;
 	}
 
@@ -211,7 +200,7 @@ BT_EXPORT
 const char *bt_stream_get_name(const struct bt_stream *stream)
 {
 	BT_ASSERT_PRE_DEV_STREAM_NON_NULL(stream);
-	return stream->name.value;
+	return stream->name;
 }
 
 BT_EXPORT
@@ -222,8 +211,8 @@ enum bt_stream_set_name_status bt_stream_set_name(struct bt_stream *stream,
 	BT_ASSERT_PRE_STREAM_NON_NULL(stream);
 	BT_ASSERT_PRE_NAME_NON_NULL(name);
 	BT_ASSERT_PRE_DEV_STREAM_HOT(stream);
-	g_string_assign(stream->name.str, name);
-	stream->name.value = stream->name.str->str;
+	g_free(stream->name);
+	stream->name = g_strdup(name);
 	BT_LIB_LOGD("Set stream's name: %!+s", stream);
 	return BT_FUNC_STATUS_OK;
 }

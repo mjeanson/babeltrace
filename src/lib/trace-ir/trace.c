@@ -105,11 +105,7 @@ void destroy_trace(struct bt_object *obj)
 		}
 	}
 
-	if (trace->name.str) {
-		g_string_free(trace->name.str, TRUE);
-		trace->name.str = NULL;
-		trace->name.value = NULL;
-	}
+	g_free(trace->name);
 
 	if (trace->environment) {
 		BT_LOGD_STR("Destroying environment attributes.");
@@ -170,12 +166,6 @@ struct bt_trace *bt_trace_create(struct bt_trace_class *tc)
 		goto error;
 	}
 
-	trace->name.str = g_string_new(NULL);
-	if (!trace->name.str) {
-		BT_LIB_LOGE_APPEND_CAUSE("Failed to allocate one GString.");
-		goto error;
-	}
-
 	trace->environment = bt_attributes_create();
 	if (!trace->environment) {
 		BT_LIB_LOGE_APPEND_CAUSE("Cannot create empty attributes object.");
@@ -205,7 +195,7 @@ BT_EXPORT
 const char *bt_trace_get_name(const struct bt_trace *trace)
 {
 	BT_ASSERT_PRE_DEV_TRACE_NON_NULL(trace);
-	return trace->name.value;
+	return trace->name;
 }
 
 BT_EXPORT
@@ -216,8 +206,8 @@ enum bt_trace_set_name_status bt_trace_set_name(struct bt_trace *trace,
 	BT_ASSERT_PRE_TRACE_NON_NULL(trace);
 	BT_ASSERT_PRE_NAME_NON_NULL(name);
 	BT_ASSERT_PRE_DEV_TRACE_HOT(trace);
-	g_string_assign(trace->name.str, name);
-	trace->name.value = trace->name.str->str;
+	g_free(trace->name);
+	trace->name = g_strdup(name);
 	BT_LIB_LOGD("Set trace's name: %!+t", trace);
 	return BT_FUNC_STATUS_OK;
 }

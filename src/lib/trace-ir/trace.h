@@ -31,12 +31,7 @@ struct bt_trace {
 	/* Owned by this */
 	struct bt_trace_class *class;
 
-	struct {
-		GString *str;
-
-		/* NULL or `str->str` above */
-		const char *value;
-	} name;
+	gchar *name;
 
 	struct {
 		bt_uuid_t uuid;

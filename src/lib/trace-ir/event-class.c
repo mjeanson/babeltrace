@@ -41,16 +41,8 @@ void destroy_event_class(struct bt_object *obj)
 	BT_LIB_LOGD("Destroying event class: %!+E", event_class);
 	BT_OBJECT_PUT_REF_AND_RESET(event_class->user_attributes);
 
-	if (event_class->name.str) {
-		g_string_free(event_class->name.str, TRUE);
-		event_class->name.str = NULL;
-	}
-
-	if (event_class->emf_uri.str) {
-		g_string_free(event_class->emf_uri.str, TRUE);
-		event_class->emf_uri.str = NULL;
-	}
-
+	g_free(event_class->name);
+	g_free(event_class->emf_uri);
 	BT_LOGD_STR("Putting context field class.");
 	BT_OBJECT_PUT_REF_AND_RESET(event_class->specific_context_fc);
 	BT_LOGD_STR("Putting payload field class.");
@@ -119,17 +111,6 @@ struct bt_event_class *create_event_class_with_id(
 	event_class->id = id;
 	bt_property_uint_init(&event_class->log_level,
 			BT_PROPERTY_AVAILABILITY_NOT_AVAILABLE, 0);
-	event_class->name.str = g_string_new(NULL);
-	if (!event_class->name.str) {
-		BT_LIB_LOGE_APPEND_CAUSE("Failed to allocate a GString.");
-		goto error;
-	}
-
-	event_class->emf_uri.str = g_string_new(NULL);
-	if (!event_class->emf_uri.str) {
-		BT_LIB_LOGE_APPEND_CAUSE("Failed to allocate a GString.");
-		goto error;
-	}
 
 	ret = bt_object_pool_initialize(&event_class->event_pool,
 		(bt_object_pool_new_object_func) bt_event_new,
@@ -187,7 +168,7 @@ BT_EXPORT
 const char *bt_event_class_get_name(const struct bt_event_class *event_class)
 {
 	BT_ASSERT_PRE_DEV_EC_NON_NULL(event_class);
-	return event_class->name.value;
+	return event_class->name;
 }
 
 BT_EXPORT
@@ -198,8 +179,8 @@ enum bt_event_class_set_name_status bt_event_class_set_name(
 	BT_ASSERT_PRE_EC_NON_NULL(event_class);
 	BT_ASSERT_PRE_NAME_NON_NULL(name);
 	BT_ASSERT_PRE_DEV_EVENT_CLASS_HOT(event_class);
-	g_string_assign(event_class->name.str, name);
-	event_class->name.value = event_class->name.str->str;
+	g_free(event_class->name);
+	event_class->name = g_strdup(name);
 	BT_LIB_LOGD("Set event class's name: %!+E", event_class);
 	return BT_FUNC_STATUS_OK;
 }
@@ -240,7 +221,7 @@ BT_EXPORT
 const char *bt_event_class_get_emf_uri(const struct bt_event_class *event_class)
 {
 	BT_ASSERT_PRE_DEV_EC_NON_NULL(event_class);
-	return event_class->emf_uri.value;
+	return event_class->emf_uri;
 }
 
 BT_EXPORT
@@ -252,8 +233,8 @@ enum bt_event_class_set_emf_uri_status bt_event_class_set_emf_uri(
 	BT_ASSERT_PRE_EC_NON_NULL(event_class);
 	BT_ASSERT_PRE_NON_NULL("emf-uri", emf_uri, "EMF URI");
 	BT_ASSERT_PRE_DEV_EVENT_CLASS_HOT(event_class);
-	g_string_assign(event_class->emf_uri.str, emf_uri);
-	event_class->emf_uri.value = event_class->emf_uri.str->str;
+	g_free(event_class->emf_uri);
+	event_class->emf_uri = g_strdup(emf_uri);
 	BT_LIB_LOGD("Set event class's EMF URI: %!+E", event_class);
 	return BT_FUNC_STATUS_OK;
 }

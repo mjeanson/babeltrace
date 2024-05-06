@@ -27,19 +27,8 @@ struct bt_clock_class {
 	/* Owned by this */
 	struct bt_value *user_attributes;
 
-	struct {
-		GString *str;
-
-		/* NULL or `str->str` above */
-		const char *value;
-	} name;
-
-	struct {
-		GString *str;
-
-		/* NULL or `str->str` above */
-		const char *value;
-	} description;
+	gchar *name;
+	gchar *description;
 
 	uint64_t frequency;
 	uint64_t precision;

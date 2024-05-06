@@ -497,8 +497,8 @@ static inline void format_trace(char **buf_ch, bool extended,
 {
 	char tmp_prefix[TMP_PREFIX_LEN];
 
-	if (trace->name.value) {
-		BUF_APPEND(", %sname=\"%s\"", PRFIELD(trace->name.value));
+	if (trace->name) {
+		BUF_APPEND(", %sname=\"%s\"", PRFIELD(trace->name));
 	}
 
 	if (!extended) {
@@ -534,9 +534,9 @@ static inline void format_stream_class(char **buf_ch, bool extended,
 
 	BUF_APPEND(", %sid=%" PRIu64, PRFIELD(stream_class->id));
 
-	if (stream_class->name.value) {
+	if (stream_class->name) {
 		BUF_APPEND(", %sname=\"%s\"",
-			PRFIELD(stream_class->name.value));
+			PRFIELD(stream_class->name));
 	}
 
 	if (!extended) {
@@ -593,9 +593,9 @@ static inline void format_event_class(char **buf_ch, bool extended,
 
 	BUF_APPEND(", %sid=%" PRIu64, PRFIELD(event_class->id));
 
-	if (event_class->name.value) {
+	if (event_class->name) {
 		BUF_APPEND(", %sname=\"%s\"",
-			PRFIELD(event_class->name.value));
+			PRFIELD(event_class->name));
 	}
 
 	if (!extended) {
@@ -610,9 +610,9 @@ static inline void format_event_class(char **buf_ch, bool extended,
 				(int) event_class->log_level.value)));
 	}
 
-	if (event_class->emf_uri.value) {
+	if (event_class->emf_uri) {
 		BUF_APPEND(", %semf-uri=\"%s\"",
-			PRFIELD(event_class->emf_uri.value));
+			PRFIELD(event_class->emf_uri));
 	}
 
 	BUF_APPEND(", %sspecific-context-fc-addr=%p, %spayload-fc-addr=%p",
@@ -649,8 +649,8 @@ static inline void format_stream(char **buf_ch, bool extended,
 
 	BUF_APPEND(", %sid=%" PRIu64, PRFIELD(stream->id));
 
-	if (stream->name.value) {
-		BUF_APPEND(", %sname=\"%s\"", PRFIELD(stream->name.value));
+	if (stream->name) {
+		BUF_APPEND(", %sname=\"%s\"", PRFIELD(stream->name));
 	}
 
 	if (!extended) {
@@ -777,8 +777,8 @@ static inline void format_clock_class(char **buf_ch, bool extended,
 {
 	char tmp_prefix[TMP_PREFIX_LEN];
 
-	if (clock_class->name.value) {
-		BUF_APPEND(", %sname=\"%s\"", PRFIELD(clock_class->name.value));
+	if (clock_class->name) {
+		BUF_APPEND(", %sname=\"%s\"", PRFIELD(clock_class->name));
 	}
 
 	BUF_APPEND(", %sfreq=%" PRIu64, PRFIELD(clock_class->frequency));
@@ -787,9 +787,9 @@ static inline void format_clock_class(char **buf_ch, bool extended,
 		return;
 	}
 
-	if (clock_class->description.value) {
+	if (clock_class->description) {
 		BUF_APPEND(", %spartial-descr=\"%.32s\"",
-			PRFIELD(clock_class->description.value));
+			PRFIELD(clock_class->description));
 	}
 
 	if (clock_class->uuid.value) {
