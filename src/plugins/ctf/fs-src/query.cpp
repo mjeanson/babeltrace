@@ -74,7 +74,7 @@ bt2::Value::Shared metadata_info_query(const bt2::ConstMapValue params, const bt
     ctf_metadata_decoder_up decoder = ctf_metadata_decoder_create(&decoder_cfg);
     if (!decoder) {
         BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(
-            logger, bt2::Error, "Cannot create metadata decoder: path=\"{}}\".", path);
+            logger, bt2::Error, "Cannot create metadata decoder: path=\"{}\".", path);
     }
 
     rewind(metadataFp.get());
