@@ -1065,6 +1065,13 @@
 	BT_ASSERT_PRE_MIP_VERSION_GE((_trace_class)->mip_version, _val)
 
 /*
+ * Asserts that the effective MIP version for `_trace` is greater than or
+ * equal to `_val`.
+ */
+#define BT_ASSERT_PRE_TRACE_MIP_VERSION_GE(_trace, _val)		\
+	BT_ASSERT_PRE_MIP_VERSION_GE((_trace)->class->mip_version, _val)
+
+/*
  * Asserts that the effective MIP version for `_stream_class` is greater than or
  * equal to `_val`.
  */

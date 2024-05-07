@@ -592,6 +592,10 @@ static inline void format_trace(char **buf_ch, bool extended,
 {
 	char tmp_prefix[TMP_PREFIX_LEN];
 
+	if (trace->ns) {
+		BUF_APPEND(", %snamespace=\"%s\"", PRFIELD(trace->ns));
+	}
+
 	if (trace->name) {
 		BUF_APPEND(", %sname=\"%s\"", PRFIELD(trace->name));
 	}

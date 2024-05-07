@@ -105,6 +105,7 @@ void destroy_trace(struct bt_object *obj)
 		}
 	}
 
+	g_free(trace->ns);
 	g_free(trace->name);
 
 	if (trace->class->mip_version >= 1) {
@@ -194,6 +195,29 @@ error:
 
 end:
 	return trace;
+}
+
+BT_EXPORT
+const char *bt_trace_get_namespace(const struct bt_trace *trace)
+{
+	BT_ASSERT_PRE_DEV_TRACE_NON_NULL(trace);
+	BT_ASSERT_PRE_TRACE_MIP_VERSION_GE(trace, 1);
+	return trace->ns;
+}
+
+BT_EXPORT
+enum bt_trace_set_namespace_status bt_trace_set_namespace(
+		struct bt_trace *trace, const char *ns)
+{
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TRACE_NON_NULL(trace);
+	BT_ASSERT_PRE_NAME_NON_NULL(ns);
+	BT_ASSERT_PRE_DEV_TRACE_HOT(trace);
+	BT_ASSERT_PRE_TRACE_MIP_VERSION_GE(trace, 1);
+	g_free(trace->ns);
+	trace->ns = g_strdup(ns);
+	BT_LIB_LOGD("Set trace's namespace: %!+t", trace);
+	return BT_FUNC_STATUS_OK;
 }
 
 BT_EXPORT

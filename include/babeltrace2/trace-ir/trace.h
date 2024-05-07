@@ -76,6 +76,20 @@ A trace has the following properties:
 
 <dl>
   <dt>
+    \anchor api-tir-trace-prop-ns
+    \bt_dt_opt Namespace
+    (only available when the class of the trace was created
+    from a \bt_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;1)
+  </dt>
+  <dd>
+    Namespace of the trace.
+
+    Use bt_trace_set_namespace() and
+    bt_trace_get_namespace().
+  </dd>
+
+  <dt>
     \anchor api-tir-trace-prop-name
     \bt_dt_opt Name
   </dt>
@@ -190,6 +204,9 @@ On success, the returned trace has the following property values:
   <tr>
     <th>Property
     <th>Value
+  <tr>
+    <td>\bt_mip version&nbsp;1: \ref api-tir-trace-prop-ns "Namespace"
+    <td>\em None
   <tr>
     <td>\ref api-tir-trace-prop-name "Name"
     <td>\em None
@@ -364,6 +381,78 @@ extern const bt_stream *bt_trace_borrow_stream_by_id_const(
 @name Properties
 @{
 */
+
+/*!
+@brief
+    Status codes for bt_trace_set_namespace().
+*/
+typedef enum bt_trace_set_namespace_status {
+	/*!
+	@brief
+	    Success.
+	*/
+	BT_TRACE_SET_NAMESPACE_STATUS_OK		= __BT_FUNC_STATUS_OK,
+
+	/*!
+	@brief
+	    Out of memory.
+	*/
+	BT_TRACE_SET_NAMESPACE_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
+} bt_trace_set_namespace_status;
+
+/*!
+@brief
+    Sets the namespace of the trace \bt_p{trace} to a copy of \bt_p{ns}.
+
+See the \ref api-tir-trace-prop-ns "namespace" property.
+
+@param[in] trace
+    Trace of which to set the namespace to \bt_p{ns}.
+@param[in] name
+    New namespace of \bt_p{trace} (copied).
+
+@retval #BT_TRACE_SET_NAMESPACE_STATUS_OK
+    Success.
+@retval #BT_TRACE_SET_NAMESPACE_STATUS_MEMORY_ERROR
+    Out of memory.
+
+@bt_pre_not_null{trace}
+@bt_pre_hot{trace}
+@bt_pre_trace_with_mip{trace, 1}
+@bt_pre_not_null{ns}
+
+@sa bt_trace_get_namespace() &mdash;
+    Returns the namespace of a trace.
+*/
+extern bt_trace_set_namespace_status bt_trace_set_namespace(bt_trace *trace,
+		const char *ns) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the namespace of the trace \bt_p{trace}.
+
+See the \ref api-tir-trace-prop-ns "namespace" property.
+
+If \bt_p{trace} has no namespace, this function returns \c NULL.
+
+@param[in] trace
+    Trace of which to get the namespace.
+
+@returns
+    @parblock
+    Namespace of \bt_p{trace}, or \c NULL if none.
+
+    The returned pointer remains valid as long as \bt_p{trace}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{trace}
+@bt_pre_stream_cls_with_mip{trace, 1}
+
+@sa bt_trace_set_namespace() &mdash;
+    Sets the namespace of a trace.
+*/
+extern const char *bt_trace_get_namespace(const bt_trace *trace) __BT_NOEXCEPT;
 
 /*!
 @brief

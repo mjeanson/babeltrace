@@ -31,6 +31,7 @@ struct bt_trace {
 	/* Owned by this */
 	struct bt_trace_class *class;
 
+	gchar *ns;
 	gchar *name;
 
 	union {
