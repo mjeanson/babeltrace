@@ -31,6 +31,7 @@ struct bt_event_class {
 
 	gchar *ns;
 	gchar *name;
+	gchar *uid;
 
 	uint64_t id;
 	struct bt_property_uint log_level;

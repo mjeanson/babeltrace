@@ -713,6 +713,10 @@ static inline void format_event_class(char **buf_ch, bool extended,
 		BUF_APPEND(", %sname=\"%s\"", PRFIELD(event_class->name));
 	}
 
+	if (event_class->uid) {
+		BUF_APPEND(", %suid=\"%s\"", PRFIELD(event_class->uid));
+	}
+
 	if (!extended) {
 		return;
 	}

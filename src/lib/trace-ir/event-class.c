@@ -43,6 +43,7 @@ void destroy_event_class(struct bt_object *obj)
 
 	g_free(event_class->ns);
 	g_free(event_class->name);
+	g_free(event_class->uid);
 	g_free(event_class->emf_uri);
 	BT_LOGD_STR("Putting context field class.");
 	BT_OBJECT_PUT_REF_AND_RESET(event_class->specific_context_fc);
@@ -206,6 +207,29 @@ enum bt_event_class_set_name_status bt_event_class_set_name(
 	g_free(event_class->name);
 	event_class->name = g_strdup(name);
 	BT_LIB_LOGD("Set event class's name: %!+E", event_class);
+	return BT_FUNC_STATUS_OK;
+}
+
+BT_EXPORT
+const char *bt_event_class_get_uid(const struct bt_event_class *event_class)
+{
+	BT_ASSERT_PRE_DEV_EC_NON_NULL(event_class);
+	BT_ASSERT_PRE_EC_MIP_VERSION_GE(event_class, 1);
+	return event_class->uid;
+}
+
+BT_EXPORT
+enum bt_event_class_set_uid_status bt_event_class_set_uid(
+		struct bt_event_class *event_class, const char *uid)
+{
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_EC_NON_NULL(event_class);
+	BT_ASSERT_PRE_EC_MIP_VERSION_GE(event_class, 1);
+	BT_ASSERT_PRE_NAME_NON_NULL(uid);
+	BT_ASSERT_PRE_DEV_EVENT_CLASS_HOT(event_class);
+	g_free(event_class->uid);
+	event_class->uid = g_strdup(uid);
+	BT_LIB_LOGD("Set event class's UID: %!+E", event_class);
 	return BT_FUNC_STATUS_OK;
 }
 
