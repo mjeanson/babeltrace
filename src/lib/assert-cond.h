@@ -1064,12 +1064,23 @@
 	BT_ASSERT_PRE_MIP_VERSION_GE((_trace_class)->mip_version, _val)
 
 /*
+ * Asserts that the effective MIP version for `_stream_class` is greater than or
+ * equal to `_val`.
+ */
+#define BT_ASSERT_PRE_SC_MIP_VERSION_GE(_stream_class, _val)			\
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(					\
+		bt_stream_class_borrow_trace_class_inline(_stream_class),	\
+		_val)
+
+/*
  * Asserts that the effective MIP version for `_field_class` is equal to `_val`.
  */
 #define BT_ASSERT_PRE_FC_MIP_VERSION_EQ(_field_class, _val)		\
 	BT_ASSERT_PRE_MIP_VERSION_EQ((_field_class)->mip_version, _val)
 
-/* Asserts that the effective MIP version for `_field_class` is equal to `_val`. */
+/*
+ * Asserts that the effective MIP version for `_field_class` is equal to `_val`.
+ */
 #define BT_ASSERT_PRE_DEV_FC_MIP_VERSION_EQ(_field_class, _val)		\
 	BT_ASSERT_PRE_DEV_MIP_VERSION_EQ((_field_class)->mip_version, _val)
 
@@ -1377,8 +1388,8 @@
 #define _BT_ASSERT_PRE_NAMESPACE_NAME	"Namespace"
 #define _BT_ASSERT_PRE_NAMESPACE_ID	"namespace"
 
-#define BT_ASSERT_PRE_NAMESPACE_NON_NULL(_name)				\
-	BT_ASSERT_PRE_NON_NULL(_BT_ASSERT_PRE_NAMESPACE_ID, (_name),	\
+#define BT_ASSERT_PRE_NAMESPACE_NON_NULL(_namespace)				\
+	BT_ASSERT_PRE_NON_NULL(_BT_ASSERT_PRE_NAMESPACE_ID, (_namespace),	\
 		_BT_ASSERT_PRE_NAMESPACE_NAME)
 
 #define _BT_ASSERT_PRE_DESCR_NAME	"Description"

@@ -177,6 +177,20 @@ A stream class has the following properties:
     Get a stream class's numeric ID with bt_stream_class_get_id().
   </dd>
 
+  <dt>
+    \anchor api-tir-stream-cls-prop-ns
+    \bt_dt_opt Namespace
+    (only available when the parent \bt_trace_cls was created
+    from a \bt_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;1)
+  </dt>
+  <dd>
+    Namespace of the stream class.
+
+    Use bt_stream_class_set_namespace() and
+    bt_stream_class_get_namespace().
+  </dd>
+
   <dt>\anchor api-tir-stream-cls-prop-name \bt_dt_opt Name</dt>
   <dd>
     Name of the stream class.
@@ -500,6 +514,9 @@ On success, the returned stream class has the following property values:
     <td>\ref api-tir-stream-cls-prop-id "Numeric ID"
     <td>Automatically assigned by \bt_p{trace_class}
   <tr>
+    <td>\bt_mip version&nbsp;1: \ref api-tir-stream-cls-prop-ns "namespace"
+    <td>\em None
+  <tr>
     <td>\ref api-tir-stream-cls-prop-name "Name"
     <td>\em None
   <tr>
@@ -590,6 +607,9 @@ On success, the returned stream class has the following property values:
   <tr>
     <td>\ref api-tir-stream-cls-prop-id "Numeric ID"
     <td>\bt_p{id}
+  <tr>
+    <td>\bt_mip version&nbsp;1: \ref api-tir-stream-cls-prop-ns "namespace"
+    <td>\em None
   <tr>
     <td>\ref api-tir-stream-cls-prop-name "Name"
     <td>\em None
@@ -836,6 +856,80 @@ See the \ref api-tir-stream-cls-prop-id "numeric ID" property.
     trace class.
 */
 extern uint64_t bt_stream_class_get_id(
+		const bt_stream_class *stream_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Status codes for bt_stream_class_set_namespace().
+*/
+typedef enum bt_stream_class_set_namespace_status {
+	/*!
+	@brief
+	    Success.
+	*/
+	BT_STREAM_CLASS_SET_NAMESPACE_STATUS_OK			= __BT_FUNC_STATUS_OK,
+
+	/*!
+	@brief
+	    Out of memory.
+	*/
+	BT_STREAM_CLASS_SET_NAMESPACE_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
+} bt_stream_class_set_namespace_status;
+
+/*!
+@brief
+    Sets the namespace of the stream class \bt_p{stream_class} to
+    a copy of \bt_p{ns}.
+
+See the \ref api-tir-stream-cls-prop-ns "namespace" property.
+
+@param[in] stream_class
+    Stream class of which to set the namespace to \bt_p{ns}.
+@param[in] name
+    New namespace of \bt_p{stream_class} (copied).
+
+@retval #BT_STREAM_CLASS_SET_NAMESPACE_STATUS_OK
+    Success.
+@retval #BT_STREAM_CLASS_SET_NAMESPACE_STATUS_MEMORY_ERROR
+    Out of memory.
+
+@bt_pre_not_null{stream_class}
+@bt_pre_hot{stream_class}
+@bt_pre_stream_cls_with_mip{stream_class, 1}
+@bt_pre_not_null{ns}
+
+@sa bt_stream_class_get_namespace() &mdash;
+    Returns the namespace of a stream class.
+*/
+extern bt_stream_class_set_namespace_status bt_stream_class_set_namespace(
+		bt_stream_class *stream_class, const char *ns) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the namespace of the stream class \bt_p{stream_class}.
+
+See the \ref api-tir-stream-cls-prop-ns "namespace" property.
+
+If \bt_p{stream_class} has no namespace, this function returns \c NULL.
+
+@param[in] stream_class
+    Stream class of which to get the namespace.
+
+@returns
+    @parblock
+    Namespace of \bt_p{stream_class}, or \c NULL if none.
+
+    The returned pointer remains valid as long as \bt_p{stream_class}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{stream_class}
+@bt_pre_stream_cls_with_mip{stream_class, 1}
+
+@sa bt_stream_class_set_namespace() &mdash;
+    Sets the namespace of a stream class.
+*/
+extern const char *bt_stream_class_get_namespace(
 		const bt_stream_class *stream_class) __BT_NOEXCEPT;
 
 /*!
