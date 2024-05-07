@@ -99,6 +99,20 @@ An event class has the following properties:
     Get an event class's numeric ID with bt_event_class_get_id().
   </dd>
 
+  <dt>
+    \anchor api-tir-ev-cls-prop-ns
+    \bt_dt_opt Namespace
+    (only available when the parent \bt_trace_cls was created
+    from a \bt_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;1)
+  </dt>
+  <dd>
+    Namespace of the event class.
+
+    Use bt_event_class_set_namespace() and
+    bt_event_class_get_namespace().
+  </dd>
+
   <dt>\anchor api-tir-ev-cls-prop-name \bt_dt_opt Name</dt>
   <dd>
     Name of the event class.
@@ -222,6 +236,9 @@ On success, the returned event class has the following property values:
     <td>\ref api-tir-ev-cls-prop-id "Numeric ID"
     <td>Automatically assigned by \bt_p{stream_class}
   <tr>
+    <td>\bt_mip version&nbsp;1: \ref api-tir-ev-cls-prop-ns "namespace"
+    <td>\em None
+  <tr>
     <td>\ref api-tir-ev-cls-prop-name "Name"
     <td>\em None
   <tr>
@@ -288,6 +305,9 @@ On success, the returned event class has the following property values:
   <tr>
     <td>\ref api-tir-ev-cls-prop-id "Numeric ID"
     <td>\bt_p{id}
+  <tr>
+    <td>\bt_mip version&nbsp;1: \ref api-tir-ev-cls-prop-ns "namespace"
+    <td>\em None
   <tr>
     <td>\ref api-tir-ev-cls-prop-name "Name"
     <td>\em None
@@ -397,6 +417,80 @@ See the \ref api-tir-ev-cls-prop-id "numeric ID" property.
 */
 extern uint64_t bt_event_class_get_id(
 		const bt_event_class *event_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Status codes for bt_event_class_set_namespace().
+*/
+typedef enum bt_event_class_set_namespace_status {
+	/*!
+	@brief
+	    Success.
+	*/
+	BT_EVENT_CLASS_SET_NAMESPACE_STATUS_OK			= __BT_FUNC_STATUS_OK,
+
+	/*!
+	@brief
+	    Out of memory.
+	*/
+	BT_EVENT_CLASS_SET_NAMESPACE_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
+} bt_event_class_set_namespace_status;
+
+/*!
+@brief
+    Sets the namespace of the event class \bt_p{event_class} to
+    a copy of \bt_p{ns}.
+
+See the \ref api-tir-ev-cls-prop-ns "namespace" property.
+
+@param[in] event_class
+    Event class of which to set the namespace to \bt_p{ns}.
+@param[in] name
+    New namespace of \bt_p{event_class} (copied).
+
+@retval #BT_EVENT_CLASS_SET_NAMESPACE_STATUS_OK
+    Success.
+@retval #BT_EVENT_CLASS_SET_NAMESPACE_STATUS_MEMORY_ERROR
+    Out of memory.
+
+@bt_pre_not_null{event_class}
+@bt_pre_hot{event_class}
+@bt_pre_ev_cls_with_mip{event_class, 1}
+@bt_pre_not_null{ns}
+
+@sa bt_event_class_get_namespace() &mdash;
+    Returns the namespace of an event class.
+*/
+extern bt_event_class_set_namespace_status bt_event_class_set_namespace(
+		bt_event_class *event_class, const char *ns) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the namespace of the event class \bt_p{event_class}.
+
+See the \ref api-tir-ev-cls-prop-ns "namespace" property.
+
+If \bt_p{event_class} has no namespace, this function returns \c NULL.
+
+@param[in] event_class
+    Event class of which to get the namespace.
+
+@returns
+    @parblock
+    Namespace of \bt_p{event_class}, or \c NULL if none.
+
+    The returned pointer remains valid as long as \bt_p{event_class}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{event_class}
+@bt_pre_ev_cls_with_mip{event_class, 1}
+
+@sa bt_event_class_set_namespace() &mdash;
+    Sets the namespace of a event class.
+*/
+extern const char *
+bt_event_class_get_namespace(const bt_event_class *event_class) __BT_NOEXCEPT;
 
 /*!
 @brief

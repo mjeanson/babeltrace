@@ -41,6 +41,7 @@ void destroy_event_class(struct bt_object *obj)
 	BT_LIB_LOGD("Destroying event class: %!+E", event_class);
 	BT_OBJECT_PUT_REF_AND_RESET(event_class->user_attributes);
 
+	g_free(event_class->ns);
 	g_free(event_class->name);
 	g_free(event_class->emf_uri);
 	BT_LOGD_STR("Putting context field class.");
@@ -162,6 +163,29 @@ struct bt_event_class *bt_event_class_create_with_id(
 		"Stream class automatically assigns event class IDs: "
 		"%![sc-]+S", stream_class);
 	return create_event_class_with_id(stream_class, id);
+}
+
+BT_EXPORT
+const char *bt_event_class_get_namespace(const struct bt_event_class *event_class)
+{
+	BT_ASSERT_PRE_DEV_EC_NON_NULL(event_class);
+	BT_ASSERT_PRE_EC_MIP_VERSION_GE(event_class, 1);
+	return event_class->ns;
+}
+
+BT_EXPORT
+enum bt_event_class_set_namespace_status bt_event_class_set_namespace(
+		struct bt_event_class *event_class, const char *ns)
+{
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_EC_NON_NULL(event_class);
+	BT_ASSERT_PRE_EC_MIP_VERSION_GE(event_class, 1);
+	BT_ASSERT_PRE_NAMESPACE_NON_NULL(ns);
+	BT_ASSERT_PRE_DEV_EVENT_CLASS_HOT(event_class);
+	g_free(event_class->ns);
+	event_class->ns = g_strdup(ns);
+	BT_LIB_LOGD("Set event class's namespace: %!+E", event_class);
+	return BT_FUNC_STATUS_OK;
 }
 
 BT_EXPORT

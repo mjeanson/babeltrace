@@ -29,6 +29,7 @@ struct bt_event_class {
 	/* Owned by this */
 	struct bt_value *user_attributes;
 
+	gchar *ns;
 	gchar *name;
 
 	uint64_t id;

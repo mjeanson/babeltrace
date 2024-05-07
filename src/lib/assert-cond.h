@@ -9,6 +9,7 @@
 #define BABELTRACE_LIB_ASSERT_COND_H
 
 #include "assert-cond-base.h"
+#include "trace-ir/trace-class.h" /* IWYU pragma: keep */
 
 #include <inttypes.h>
 
@@ -1070,6 +1071,15 @@
 #define BT_ASSERT_PRE_SC_MIP_VERSION_GE(_stream_class, _val)			\
 	BT_ASSERT_PRE_TC_MIP_VERSION_GE(					\
 		bt_stream_class_borrow_trace_class_inline(_stream_class),	\
+		_val)
+
+/*
+ * Asserts that the effective MIP version for `_event_class` is greater than or
+ * equal to `_val`.
+ */
+#define BT_ASSERT_PRE_EC_MIP_VERSION_GE(_event_class, _val)			\
+	BT_ASSERT_PRE_SC_MIP_VERSION_GE(					\
+		bt_event_class_borrow_stream_class_inline(_event_class),	\
 		_val)
 
 /*

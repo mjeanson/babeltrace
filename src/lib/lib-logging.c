@@ -697,9 +697,12 @@ static inline void format_event_class(char **buf_ch, bool extended,
 
 	BUF_APPEND(", %sid=%" PRIu64, PRFIELD(event_class->id));
 
+	if (event_class->ns) {
+		BUF_APPEND(", %snamespace=\"%s\"", PRFIELD(event_class->ns));
+	}
+
 	if (event_class->name) {
-		BUF_APPEND(", %sname=\"%s\"",
-			PRFIELD(event_class->name));
+		BUF_APPEND(", %sname=\"%s\"", PRFIELD(event_class->name));
 	}
 
 	if (!extended) {

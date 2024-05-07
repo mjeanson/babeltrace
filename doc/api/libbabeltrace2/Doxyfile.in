@@ -133,6 +133,7 @@ ALIASES                += bt_pre_field_with_mip{2}="@pre The class of \bt_p{\1} 
 ALIASES                += bt_pre_trace_with_mip{2}="@pre The \link api-tir-trace-cls class\endlink of \bt_p{\1} was created from a \bt_comp which belongs to a trace processing \bt_graph with the effective \bt_mip version&nbsp;\2."
 ALIASES                += bt_pre_clock_cls_with_mip{2}="@pre \bt_p{\1} was created from a \bt_comp which belongs to a trace processing \bt_graph with the effective \bt_mip version&nbsp;\2."
 ALIASES                += bt_pre_stream_cls_with_mip{2}="@pre \bt_p{\1} was created from a \bt_trace_cls which was created from a \bt_comp which belongs to a trace processing \bt_graph with the effective \bt_mip version&nbsp;\2."
+ALIASES                += bt_pre_ev_cls_with_mip{2}="@pre The parent \bt_trace_cls of \bt_p{\1} was created from a \bt_comp which belongs to a trace processing \bt_graph with the effective \bt_mip version&nbsp;\2."
 
 # Aliases: field class object types: singular
 ALIASES                += bt_fc="\link api-tir-fc field class\endlink"
