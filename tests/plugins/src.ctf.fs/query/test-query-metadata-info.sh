@@ -59,6 +59,7 @@ test_non_existent_trace_dir() {
 	empty_dir=$(mktemp -d)
 	stdout_file="$(mktemp -t actual-stdout.XXXXXX)"
 	stderr_file="$(mktemp -t actual-stderr.XXXXXX)"
+	stderr_file_no_crlf="$(mktemp -t actual-stderr-no-crlf.XXXXXX)"
 	query=("query" "src.ctf.fs" "metadata-info" "--params" "path=\"$empty_dir\"")
 
 	bt_cli "$stdout_file" "$stderr_file" \
@@ -73,12 +74,17 @@ test_non_existent_trace_dir() {
 		"${stderr_file}" \
 		"non existent trace dir: babeltrace produces an error stack"
 
+	# If TMPDIR is too long, the error message gets wrapped, and grep
+	# doesn't find the expected message.  As a quick workaround, remove
+	# newlines before searching.
+	bt_remove_crlf "$stderr_file" "$stderr_file_no_crlf"
+
 	bt_grep_ok \
-		"Failed to open metadata file: No such file or directory: path=\".*metadata\"" \
-		"$stderr_file" \
+		"No such file or directory:  *path=\".*metadata\"" \
+		"$stderr_file_no_crlf" \
 		"non existent trace dir: babeltrace produces the expected error message"
 
-	rm -f "${stdout_file}" "${stderr_file}"
+	rm -f "${stdout_file}" "${stderr_file}" "${stderr_file_no_crlf}"
 	rmdir "${empty_dir}"
 }
 

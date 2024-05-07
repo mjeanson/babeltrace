@@ -13,12 +13,13 @@
 #include <babeltrace2/babeltrace.h>
 
 #include "cpp-common/bt2/exc.hpp"
+#include "cpp-common/bt2c/file-utils.hpp"
 #include "cpp-common/bt2c/glib-up.hpp"
-#include "cpp-common/bt2c/libc-up.hpp"
 
 #include "plugins/common/param-validation/param-validation.h"
 
-#include "../common/src/metadata/tsdl/decoder.hpp"
+#include "../common/src/metadata/metadata-stream-parser-utils.hpp"
+#include "../common/src/metadata/tsdl/metadata-stream-decoder.hpp"
 #include "data-stream-file.hpp"
 #include "fs.hpp"
 #include "metadata.hpp"
@@ -53,53 +54,27 @@ bt2::Value::Shared metadata_info_query(const bt2::ConstMapValue params, const bt
     }
 
     const auto path = params["path"]->asString().value();
-    bt2c::FileUP metadataFp {ctf_fs_metadata_open_file(path, logger)};
-    if (!metadataFp) {
-        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2::Error,
-                                               "Cannot open trace metadata: path=\"{}\".", path);
+
+    try {
+        const auto buffer = bt2c::dataFromFile(fmt::format("{}/metadata", path), logger, true);
+        ctf::src::MetadataStreamDecoder decoder {logger};
+        auto plainText = decoder.decode(buffer);
+        const auto result = bt2::MapValue::create();
+
+        /*
+         * If the metadata does not already start with the plaintext metadata
+         * signature, prepend it.
+         */
+        if (plainText.rfind(METADATA_TEXT_SIG, 0) != 0) {
+            plainText.insert(0, std::string {METADATA_TEXT_SIG} + " */\n\n");
+        }
+
+        result->insert("text", plainText.data());
+        result->insert("is-packetized", decoder.pktInfo().has_value());
+        return result;
+    } catch (const bt2c::Error&) {
+        BT_CPPLOGE_APPEND_CAUSE_AND_RETHROW_SPEC(logger, "Error reading metadata file");
     }
-
-    bool is_packetized;
-    int bo;
-    int ret = ctf_metadata_decoder_is_packetized(metadataFp.get(), &is_packetized, &bo, logger);
-
-    if (ret) {
-        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(
-            logger, bt2::Error,
-            "Cannot check whether or not the metadata stream is packetized: path=\"{}\".", path);
-    }
-
-    ctf_metadata_decoder_config decoder_cfg {logger};
-    decoder_cfg.keep_plain_text = true;
-    ctf_metadata_decoder_up decoder = ctf_metadata_decoder_create(&decoder_cfg);
-    if (!decoder) {
-        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(
-            logger, bt2::Error, "Cannot create metadata decoder: path=\"{}\".", path);
-    }
-
-    rewind(metadataFp.get());
-    ctf_metadata_decoder_status decoder_status =
-        ctf_metadata_decoder_append_content(decoder.get(), metadataFp.get());
-    if (decoder_status) {
-        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(
-            logger, bt2::Error, "Cannot update metadata decoder's content: path=\"{}\".", path);
-    }
-
-    const char *plain_text = ctf_metadata_decoder_get_text(decoder.get());
-    std::string metadata_text;
-
-    if (strncmp(plain_text, METADATA_TEXT_SIG, sizeof(METADATA_TEXT_SIG) - 1) != 0) {
-        metadata_text = METADATA_TEXT_SIG;
-        metadata_text += " */\n\n";
-    }
-
-    metadata_text += plain_text;
-
-    const auto result = bt2::MapValue::create();
-    result->insert("text", metadata_text);
-    result->insert("is-packetized", is_packetized);
-
-    return result;
 }
 
 static void add_range(const bt2::MapValue info, const range& range, const char *range_name)
@@ -217,57 +192,29 @@ bt2::Value::Shared support_info_query(const bt2::ConstMapValue params, const bt2
 
     const auto input = params["input"]->asString().value();
 
-    bt2c::GCharUP metadataPath {g_build_filename(input, CTF_FS_METADATA_FILENAME, NULL)};
-    if (!metadataPath) {
-        BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2::Error, "Failed to read parameters");
-    }
+    const auto result = bt2::MapValue::create();
+    try {
+        const auto buffer = bt2c::dataFromFile(fmt::format("{}/metadata", input), logger, false);
+        const auto parseRet = ctf::src::parseMetadataStream({}, {}, buffer, logger);
 
-    double weight = 0;
-    char uuid_str[BT_UUID_STR_LEN + 1];
-    bool has_uuid = false;
-    bt2c::FileUP metadataFile {g_fopen(metadataPath.get(), "rb")};
-    if (metadataFile) {
-        enum ctf_metadata_decoder_status decoder_status;
-        bt_uuid_t uuid;
-
-        ctf_metadata_decoder_config metadata_decoder_config {logger};
-
-        ctf_metadata_decoder_up metadata_decoder =
-            ctf_metadata_decoder_create(&metadata_decoder_config);
-        if (!metadata_decoder) {
-            BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2::Error,
-                                                   "Failed to create metadata decoder");
-        }
-
-        decoder_status =
-            ctf_metadata_decoder_append_content(metadata_decoder.get(), metadataFile.get());
-        if (decoder_status != CTF_METADATA_DECODER_STATUS_OK) {
-            BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(
-                logger, bt2::Error, "Failed to append metadata content: metadata-decoder-status={}",
-                decoder_status);
-        }
+        BT_ASSERT(parseRet.traceCls);
 
         /*
-         * We were able to parse the metadata file, so we are
-         * confident it's a CTF trace.
+         * We were able to parse the metadata file, so we are confident it's a
+         * CTF trace.
          */
-        weight = 0.75;
-
-        /* If the trace has a UUID, return the stringified UUID as the group. */
-        if (ctf_metadata_decoder_get_trace_class_uuid(metadata_decoder.get(), uuid) == 0) {
-            bt_uuid_to_str(uuid, uuid_str);
-            has_uuid = true;
+        /* ⚠️ TODO: also consider namespace and name */
+        result->insert("weight", 0.75);
+        if (parseRet.traceCls->uid()) {
+            result->insert("group", *parseRet.traceCls->uid());
         }
-    }
-
-    const auto result = bt2::MapValue::create();
-    result->insert("weight", weight);
-
-    /* We are not supposed to have weight == 0 and a UUID. */
-    BT_ASSERT(weight > 0 || !has_uuid);
-
-    if (weight > 0 && has_uuid) {
-        result->insert("group", uuid_str);
+    } catch (const bt2c::NoSuchFileOrDirectoryError&) {
+        /*
+         * Failing to find the metadata file is not an error, it simply
+         * indicates that the directory is not a trace. Report appropriate
+         * weight of zero.
+         */
+        result->insert("weight", 0.0);
     }
 
     return result;
