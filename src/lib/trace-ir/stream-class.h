@@ -25,6 +25,7 @@ struct bt_stream_class {
 
 	gchar *ns;
 	gchar *name;
+	gchar *uid;
 
 	uint64_t id;
 	bool assigns_automatic_event_class_id;

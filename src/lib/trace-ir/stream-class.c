@@ -49,6 +49,7 @@ void destroy_stream_class(struct bt_object *obj)
 
 	g_free(stream_class->ns);
 	g_free(stream_class->name);
+	g_free(stream_class->uid);
 	BT_LOGD_STR("Putting packet context field class.");
 	BT_OBJECT_PUT_REF_AND_RESET(stream_class->packet_context_fc);
 	BT_LOGD_STR("Putting event common context field class.");
@@ -233,6 +234,30 @@ enum bt_stream_class_set_name_status bt_stream_class_set_name(
 	g_free(stream_class->name);
 	stream_class->name = g_strdup(name);
 	BT_LIB_LOGD("Set stream class's name: %!+S", stream_class);
+	return BT_FUNC_STATUS_OK;
+}
+
+BT_EXPORT
+const char *bt_stream_class_get_uid(const struct bt_stream_class *stream_class)
+{
+	BT_ASSERT_PRE_DEV_SC_NON_NULL(stream_class);
+	BT_ASSERT_PRE_SC_MIP_VERSION_GE(stream_class, 1);
+	return stream_class->uid;
+}
+
+BT_EXPORT
+enum bt_stream_class_set_uid_status bt_stream_class_set_uid(
+		struct bt_stream_class *stream_class,
+		const char *uid)
+{
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_SC_NON_NULL(stream_class);
+	BT_ASSERT_PRE_NAME_NON_NULL(uid);
+	BT_ASSERT_PRE_DEV_STREAM_CLASS_HOT(stream_class);
+	BT_ASSERT_PRE_SC_MIP_VERSION_GE(stream_class, 1);
+	g_free(stream_class->uid);
+	stream_class->uid = g_strdup(uid);
+	BT_LIB_LOGD("Set stream class's UID: %!+S", stream_class);
 	return BT_FUNC_STATUS_OK;
 }
 

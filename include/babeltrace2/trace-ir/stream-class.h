@@ -199,6 +199,21 @@ A stream class has the following properties:
   </dd>
 
   <dt>
+    \anchor api-tir-stream-cls-prop-uid
+    \bt_dt_opt UID
+    (only available when the parent \bt_trace_cls was created
+    from a \bt_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;1)
+  </dt>
+  <dd>
+    <a href="https://en.wikipedia.org/wiki/Unique_identifier">Unique identifier</a>
+    (UID) of the stream class.
+
+    Use bt_stream_class_set_uid() and
+    bt_stream_class_get_uid().
+  </dd>
+
+  <dt>
     \anchor api-tir-stream-cls-prop-def-clock-cls
     \bt_dt_opt Default clock class
   </dt>
@@ -520,6 +535,9 @@ On success, the returned stream class has the following property values:
     <td>\ref api-tir-stream-cls-prop-name "Name"
     <td>\em None
   <tr>
+    <td>\bt_mip version&nbsp;1: \ref api-tir-stream-cls-prop-uid "UID"
+    <td>\em None
+  <tr>
     <td>\ref api-tir-stream-cls-prop-def-clock-cls "Default clock class"
     <td>\em None
   <tr>
@@ -612,6 +630,9 @@ On success, the returned stream class has the following property values:
     <td>\em None
   <tr>
     <td>\ref api-tir-stream-cls-prop-name "Name"
+    <td>\em None
+  <tr>
+    <td>\bt_mip version&nbsp;1: \ref api-tir-stream-cls-prop-uid "UID"
     <td>\em None
   <tr>
     <td>\ref api-tir-stream-cls-prop-def-clock-cls "Default clock class"
@@ -1002,6 +1023,82 @@ If \bt_p{stream_class} has no name, this function returns \c NULL.
     Sets the name of a stream class.
 */
 extern const char *bt_stream_class_get_name(
+		const bt_stream_class *stream_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Status codes for bt_stream_class_set_uid().
+*/
+typedef enum bt_stream_class_set_uid_status {
+	/*!
+	@brief
+	    Success.
+	*/
+	BT_STREAM_CLASS_SET_UID_STATUS_OK			= __BT_FUNC_STATUS_OK,
+
+	/*!
+	@brief
+	    Out of memory.
+	*/
+	BT_STREAM_CLASS_SET_UID_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
+} bt_stream_class_set_uid_status;
+
+/*!
+@brief
+    Sets the
+    <a href="https://en.wikipedia.org/wiki/Unique_identifier">unique identifier</a> (UID)
+    of the stream class \bt_p{stream_class} to
+    a copy of \bt_p{uid}.
+
+See the \ref api-tir-stream-cls-prop-uid "UID" property.
+
+@param[in] stream_class
+    Stream class of which to set the UID to \bt_p{uid}.
+@param[in] name
+    New UID of \bt_p{stream_class} (copied).
+
+@retval #BT_STREAM_CLASS_SET_UID_STATUS_OK
+    Success.
+@retval #BT_STREAM_CLASS_SET_UID_STATUS_MEMORY_ERROR
+    Out of memory.
+
+@bt_pre_not_null{stream_class}
+@bt_pre_hot{stream_class}
+@bt_pre_stream_cls_with_mip{stream_class, 1}
+@bt_pre_not_null{uid}
+
+@sa bt_stream_class_get_uid() &mdash;
+    Returns the UID of a stream class.
+*/
+extern bt_stream_class_set_uid_status bt_stream_class_set_uid(
+		bt_stream_class *stream_class, const char *uid) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the UID of the stream class \bt_p{stream_class}.
+
+See the \ref api-tir-stream-cls-prop-uid "UID" property.
+
+If \bt_p{stream_class} has no UID, this function returns \c NULL.
+
+@param[in] stream_class
+    Stream class of which to get the UID.
+
+@returns
+    @parblock
+    UID of \bt_p{stream_class}, or \c NULL if none.
+
+    The returned pointer remains valid as long as \bt_p{stream_class}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{stream_class}
+@bt_pre_stream_cls_with_mip{stream_class, 1}
+
+@sa bt_stream_class_set_uid() &mdash;
+    Sets the UID of a stream class.
+*/
+extern const char *bt_stream_class_get_uid(
 		const bt_stream_class *stream_class) __BT_NOEXCEPT;
 
 /*!
