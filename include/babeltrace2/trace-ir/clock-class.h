@@ -878,6 +878,80 @@ extern const char *bt_clock_class_get_origin_uid(
 
 /*!
 @brief
+    Status codes for bt_clock_class_set_namespace().
+*/
+typedef enum bt_clock_class_set_namespace_status {
+	/*!
+	@brief
+	    Success.
+	*/
+	BT_CLOCK_CLASS_SET_NAMESPACE_STATUS_OK			= __BT_FUNC_STATUS_OK,
+
+	/*!
+	@brief
+	    Out of memory.
+	*/
+	BT_CLOCK_CLASS_SET_NAMESPACE_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
+} bt_clock_class_set_namespace_status;
+
+/*!
+@brief
+    Sets the namespace of the clock class \bt_p{clock_class} to
+    a copy of \bt_p{ns}.
+
+See the \ref api-tir-clock-cls-prop-iden "identity" property.
+
+@param[in] clock_class
+    Clock class of which to set the namespace to \bt_p{ns}.
+@param[in] namespace
+    New namespace of \bt_p{clock_class} (copied).
+
+@retval #BT_CLOCK_CLASS_SET_NAMESPACE_STATUS_OK
+    Success.
+@retval #BT_CLOCK_CLASS_SET_NAMESPACE_STATUS_MEMORY_ERROR
+    Out of memory.
+
+@bt_pre_not_null{clock_class}
+@bt_pre_hot{clock_class}
+@bt_pre_clock_cls_with_mip{clock_class, 1}
+@bt_pre_not_null{namespace}
+
+@sa bt_clock_class_get_namespace() &mdash;
+    Returns the namespace of a clock class.
+*/
+extern bt_clock_class_set_namespace_status bt_clock_class_set_namespace(
+		bt_clock_class *clock_class, const char *ns) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the namespace of the clock class \bt_p{clock_class}.
+
+See the \ref api-tir-clock-cls-prop-iden "identity" property.
+
+If \bt_p{clock_class} has no namespace, this function returns \c NULL.
+
+@param[in] clock_class
+    Clock class of which to get the namespace.
+
+@returns
+    @parblock
+    Namespace of \bt_p{clock_class}, or \c NULL if none.
+
+    The returned pointer remains valid as long as \bt_p{clock_class}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{clock_class}
+@bt_pre_clock_cls_with_mip{clock_class, 1}
+
+@sa bt_clock_class_set_namespace() &mdash;
+    Sets the namespace of a clock class.
+*/
+extern const char *bt_clock_class_get_namespace(
+		const bt_clock_class *clock_class) __BT_NOEXCEPT;
+
+/*!
+@brief
     Status codes for bt_clock_class_set_name().
 */
 typedef enum bt_clock_class_set_name_status {
@@ -947,6 +1021,81 @@ If \bt_p{clock_class} has no name, this function returns \c NULL.
 */
 extern const char *bt_clock_class_get_name(
 		const bt_clock_class *clock_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Status codes for bt_clock_class_set_uid().
+*/
+typedef enum bt_clock_class_set_uid_status {
+	/*!
+	@brief
+	    Success.
+	*/
+	BT_CLOCK_CLASS_SET_UID_STATUS_OK		= __BT_FUNC_STATUS_OK,
+
+	/*!
+	@brief
+	    Out of memory.
+	*/
+	BT_CLOCK_CLASS_SET_UID_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
+} bt_clock_class_set_uid_status;
+
+/*!
+@brief
+    Sets the
+    <a href="https://en.wikipedia.org/wiki/Unique_identifier">unique identifier</a>
+    (UID) of the clock class \bt_p{clock_class} to a copy of \bt_p{uid}.
+
+See the \ref api-tir-clock-cls-prop-iden "identity" property.
+
+@param[in] clock_class
+    Clock class of which to set the UID to \bt_p{uid}.
+@param[in] UID
+    New UID of \bt_p{clock_class} (copied).
+
+@retval #BT_CLOCK_CLASS_SET_UID_STATUS_OK
+    Success.
+@retval #BT_CLOCK_CLASS_SET_UID_STATUS_MEMORY_ERROR
+    Out of memory.
+
+@bt_pre_not_null{clock_class}
+@bt_pre_hot{clock_class}
+@bt_pre_clock_cls_with_mip{clock_class, 1}
+@bt_pre_not_null{uid}
+
+@sa bt_clock_class_get_uid() &mdash;
+    Returns the UID of a clock class.
+*/
+extern bt_clock_class_set_uid_status bt_clock_class_set_uid(
+		bt_clock_class *clock_class, const char *uid) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the UID of the clock class \bt_p{clock_class}.
+
+See the \ref api-tir-clock-cls-prop-iden "identity" property.
+
+If \bt_p{clock_class} has no UID, this function returns \c NULL.
+
+@param[in] clock_class
+    Clock class of which to get the UID.
+
+@returns
+    @parblock
+    UID of \bt_p{clock_class}, or \c NULL if none.
+
+    The returned pointer remains valid as long as \bt_p{clock_class}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{clock_class}
+@bt_pre_clock_cls_with_mip{clock_class, 1}
+
+@sa bt_clock_class_set_uid() &mdash;
+    Sets the UID of a clock class.
+*/
+extern const char *
+bt_clock_class_get_uid(const bt_clock_class *clock_class) __BT_NOEXCEPT;
 
 /*!
 @brief

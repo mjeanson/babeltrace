@@ -69,7 +69,9 @@ void destroy_clock_class(struct bt_object *obj)
 	BT_LIB_LOGD("Destroying clock class: %!+K", clock_class);
 	BT_OBJECT_PUT_REF_AND_RESET(clock_class->user_attributes);
 
+	g_free(clock_class->ns);
 	g_free(clock_class->name);
+	g_free(clock_class->uid);
 	g_free(clock_class->description);
 	free_clock_class_origin_data(clock_class);
 	bt_object_pool_finalize(&clock_class->cs_pool);
@@ -165,6 +167,30 @@ end:
 }
 
 BT_EXPORT
+const char *bt_clock_class_get_namespace(
+		const struct bt_clock_class *clock_class)
+{
+	BT_ASSERT_PRE_DEV_CLK_CLS_NON_NULL(clock_class);
+	BT_ASSERT_PRE_CC_MIP_VERSION_GE(clock_class, 1);
+	return clock_class->ns;
+}
+
+BT_EXPORT
+enum bt_clock_class_set_namespace_status bt_clock_class_set_namespace(
+		struct bt_clock_class *clock_class, const char *ns)
+{
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_CLK_CLS_NON_NULL(clock_class);
+	BT_ASSERT_PRE_NAME_NON_NULL(ns);
+	BT_ASSERT_PRE_DEV_CLOCK_CLASS_HOT(clock_class);
+	BT_ASSERT_PRE_CC_MIP_VERSION_GE(clock_class, 1);
+	g_free(clock_class->ns);
+	clock_class->ns = g_strdup(ns);
+	BT_LIB_LOGD("Set clock class's namespace: %!+K", clock_class);
+	return BT_FUNC_STATUS_OK;
+}
+
+BT_EXPORT
 const char *bt_clock_class_get_name(const struct bt_clock_class *clock_class)
 {
 	BT_ASSERT_PRE_DEV_CLK_CLS_NON_NULL(clock_class);
@@ -182,6 +208,30 @@ enum bt_clock_class_set_name_status bt_clock_class_set_name(
 	g_free(clock_class->name);
 	clock_class->name = g_strdup(name);
 	BT_LIB_LOGD("Set clock class's name: %!+K", clock_class);
+	return BT_FUNC_STATUS_OK;
+}
+
+BT_EXPORT
+const char *bt_clock_class_get_uid(const struct bt_clock_class *clock_class)
+{
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_DEV_CLK_CLS_NON_NULL(clock_class);
+	BT_ASSERT_PRE_CC_MIP_VERSION_GE(clock_class, 1);
+	return clock_class->uid;
+}
+
+BT_EXPORT
+enum bt_clock_class_set_uid_status bt_clock_class_set_uid(
+		struct bt_clock_class *clock_class, const char *uid)
+{
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_CLK_CLS_NON_NULL(clock_class);
+	BT_ASSERT_PRE_NAME_NON_NULL(uid);
+	BT_ASSERT_PRE_DEV_CLOCK_CLASS_HOT(clock_class);
+	BT_ASSERT_PRE_CC_MIP_VERSION_GE(clock_class, 1);
+	g_free(clock_class->uid);
+	clock_class->uid = g_strdup(uid);
+	BT_LIB_LOGD("Set clock class's UID: %!+K", clock_class);
 	return BT_FUNC_STATUS_OK;
 }
 

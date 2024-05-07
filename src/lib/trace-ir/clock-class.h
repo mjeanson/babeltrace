@@ -30,7 +30,9 @@ struct bt_clock_class {
 	/* Owned by this */
 	struct bt_value *user_attributes;
 
+	gchar *ns;
 	gchar *name;
+	gchar *uid;
 	gchar *description;
 
 	uint64_t frequency;
