@@ -1056,9 +1056,8 @@ next_stream_iterator_for_trace(struct lttng_live_msg_iter *lttng_live_msg_iter,
                  * deterministic way.
                  */
                 BT_ASSERT_DBG(stream_iter != youngest_candidate_stream_iter);
-                int ret = common_muxing_compare_messages(
-                    stream_iter->current_msg->libObjPtr(),
-                    youngest_candidate_stream_iter->current_msg->libObjPtr());
+                int ret = lttng_live_msg_iter->msgComparator.compare(
+                    *stream_iter->current_msg, *youngest_candidate_stream_iter->current_msg);
                 if (ret < 0) {
                     /*
                      * The `youngest_candidate_stream_iter->current_msg`
@@ -1163,9 +1162,8 @@ next_stream_iterator_for_session(struct lttng_live_msg_iter *lttng_live_msg_iter
                  * Order the messages in an arbitrary but
                  * deterministic way.
                  */
-                int ret = common_muxing_compare_messages(
-                    stream_iter->current_msg->libObjPtr(),
-                    youngest_candidate_stream_iter->current_msg->libObjPtr());
+                int ret = lttng_live_msg_iter->msgComparator.compare(
+                    *stream_iter->current_msg, *youngest_candidate_stream_iter->current_msg);
                 if (ret < 0) {
                     /*
                      * The `youngest_candidate_stream_iter->current_msg`
@@ -1366,9 +1364,8 @@ lttng_live_msg_iter_next(bt_self_message_iterator *self_msg_it, bt_message_array
                      * Order the messages in an arbitrary but
                      * deterministic way.
                      */
-                    int ret = common_muxing_compare_messages(
-                        candidate_stream_iter->current_msg->libObjPtr(),
-                        youngest_stream_iter->current_msg->libObjPtr());
+                    int ret = lttng_live_msg_iter->msgComparator.compare(
+                        *candidate_stream_iter->current_msg, *youngest_stream_iter->current_msg);
                     if (ret < 0) {
                         /*
                          * The `candidate_stream_iter->current_msg`

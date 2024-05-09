@@ -14,6 +14,8 @@
 #include "cpp-common/bt2/self-message-iterator-configuration.hpp"
 #include "cpp-common/bt2c/prio-heap.hpp"
 
+#include "plugins/common/muxing/muxing.hpp"
+
 #include "clock-correlation-validator/clock-correlation-validator.hpp"
 #include "upstream-msg-iter.hpp"
 
@@ -37,6 +39,9 @@ private:
 
     private:
         bt2c::Logger _mLogger;
+
+        /* Message comparator */
+        muxing::MessageComparator _mMsgComparator;
     };
 
 public:

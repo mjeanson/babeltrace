@@ -389,7 +389,7 @@ bool MsgIter::_HeapComparator::operator()(
      * message is considered older than the second, which corresponds to
      * this comparator returning `true`.
      */
-    const auto res = common_muxing_compare_messages(msgA.libObjPtr(), msgB.libObjPtr()) < 0;
+    const auto res = _mMsgComparator.compare(msgA, msgB) < 0;
 
     BT_CPPLOGT("Timestamps are considered equal; comparing other properties: oldest={}",
                res ? "A" : "B");

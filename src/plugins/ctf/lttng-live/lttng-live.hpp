@@ -19,6 +19,8 @@
 #include "cpp-common/bt2/message.hpp"
 #include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 
+#include "plugins/common/muxing/muxing.hpp"
+
 #include "../common/src/metadata/metadata-stream-parser-utils.hpp"
 #include "../common/src/msg-iter.hpp"
 #include "viewer-connection.hpp"
@@ -366,6 +368,8 @@ struct lttng_live_msg_iter
 
     /* True if the iterator was interrupted. */
     bool was_interrupted = false;
+
+    muxing::MessageComparator msgComparator;
 };
 
 enum lttng_live_iterator_status

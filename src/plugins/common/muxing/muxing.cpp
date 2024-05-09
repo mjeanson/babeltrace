@@ -4,912 +4,485 @@
  * Copyright 2019 Francis Deslauriers <francis.deslauriers@efficios.com>
  */
 
-#include <inttypes.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include <babeltrace2/babeltrace.h>
 
 #include "common/assert.h"
 #include "common/common.h"
-#include "common/macros.h"
 #include "common/uuid.h"
+#include "cpp-common/bt2/message.hpp"
 
 #include "muxing.hpp"
 
-struct message_to_compare
-{
-    const bt_message *msg;
-    const bt_trace *trace;
-    const bt_stream *stream;
-};
+namespace muxing {
 
-struct messages_to_compare
+/*
+ * Compares two optional objects.
+ *
+ * A non-empty object comes before an empty object. Two empty objects
+ * are equal.
+ *
+ * If the two objects are non-empty, then call `comparator` to compare
+ * the contents of both objects.
+ */
+template <typename ObjT, typename ComparatorT>
+int MessageComparator::_compareOptionals(const bt2s::optional<ObjT>& left,
+                                         const bt2s::optional<ObjT>& right,
+                                         ComparatorT comparator) noexcept
 {
-    struct message_to_compare left;
-    struct message_to_compare right;
-};
-
-static int message_type_weight(const bt_message_type msg_type)
-{
-    int weight;
-
-    switch (msg_type) {
-    case BT_MESSAGE_TYPE_STREAM_BEGINNING:
-        weight = 7;
-        break;
-    case BT_MESSAGE_TYPE_PACKET_BEGINNING:
-        weight = 6;
-        break;
-    case BT_MESSAGE_TYPE_EVENT:
-        weight = 5;
-        break;
-    case BT_MESSAGE_TYPE_DISCARDED_EVENTS:
-        weight = 4;
-        break;
-    case BT_MESSAGE_TYPE_PACKET_END:
-        weight = 3;
-        break;
-    case BT_MESSAGE_TYPE_MESSAGE_ITERATOR_INACTIVITY:
-        weight = 2;
-        break;
-    case BT_MESSAGE_TYPE_DISCARDED_PACKETS:
-        weight = 1;
-        break;
-    case BT_MESSAGE_TYPE_STREAM_END:
-        weight = 0;
-        break;
-    default:
-        bt_common_abort();
+    if (left && !right) {
+        return -1;
     }
 
-    return weight;
+    if (!left && right) {
+        return 1;
+    }
+    if (!left && !right) {
+        return 0;
+    }
+
+    return comparator(*left, *right);
 }
 
 /*
- * Compare 2 messages to order them in a deterministic way based on their
- * types.
- * Returns -1 is left message must go first
- * Returns 1 is right message must go first
+ * Compares two optional borrowed objects.
+ *
+ * A non-empty object comes before an empty object. Two empty objects
+ * are equal.
+ *
+ * If the two objects are non-empty, then call `comparator` to compare
+ * the contents of both objects.
  */
-static int compare_messages_by_type(struct messages_to_compare *msgs)
+template <typename ObjT, typename ComparatorT>
+int MessageComparator::_compareOptionalBorrowedObjects(
+    const bt2::OptionalBorrowedObject<ObjT> left, const bt2::OptionalBorrowedObject<ObjT> right,
+    ComparatorT comparator) noexcept
 {
-    bt_message_type left_msg_type = bt_message_get_type(msgs->left.msg);
-    bt_message_type right_msg_type = bt_message_get_type(msgs->right.msg);
+    if (left && !right) {
+        return -1;
+    }
 
-    return message_type_weight(right_msg_type) - message_type_weight(left_msg_type);
+    if (!left && right) {
+        return 1;
+    }
+    if (!left && !right) {
+        return 0;
+    }
+
+    return comparator(*left, *right);
 }
 
-static int compare_events(const bt_event *left_event, const bt_event *right_event)
+/*
+ * Compare two (nullable) strings.
+ *
+ * A non-null string comes before a null string. Two null strings
+ * are equal.
+ *
+ * If both strings aren't null, then compare them with `std::strcmp`.
+ */
+int MessageComparator::_compareStrings(const bt2c::CStringView left,
+                                       const bt2c::CStringView right) noexcept
 {
-    int ret = 0;
-    const bt_event_class *left_event_class, *right_event_class;
-    uint64_t left_event_class_id, right_event_class_id;
-    const char *left_event_class_name, *right_event_class_name, *left_event_class_emf_uri,
-        *right_event_class_emf_uri;
-    bt_event_class_log_level left_event_class_log_level, right_event_class_log_level;
-    bt_property_availability left_log_level_avail, right_log_level_avail;
-
-    left_event_class = bt_event_borrow_class_const(left_event);
-    right_event_class = bt_event_borrow_class_const(right_event);
-
-    left_event_class_id = bt_event_class_get_id(left_event_class);
-    right_event_class_id = bt_event_class_get_id(right_event_class);
-
-    if (left_event_class_id > right_event_class_id) {
-        ret = 1;
-        goto end;
-    } else if (left_event_class_id < right_event_class_id) {
-        ret = -1;
-        goto end;
+    if (left && !right) {
+        return -1;
     }
 
-    left_event_class_name = bt_event_class_get_name(left_event_class);
-    right_event_class_name = bt_event_class_get_name(right_event_class);
-    if (left_event_class_name && right_event_class_name) {
-        ret = strcmp(left_event_class_name, right_event_class_name);
-        if (ret != 0) {
-            goto end;
-        }
-    } else if (!left_event_class_name && right_event_class_name) {
-        ret = -1;
-        goto end;
-    } else if (left_event_class_name && !right_event_class_name) {
-        ret = 1;
-        goto end;
+    if (!left && right) {
+        return 1;
     }
 
-    left_log_level_avail =
-        bt_event_class_get_log_level(left_event_class, &left_event_class_log_level);
-    right_log_level_avail =
-        bt_event_class_get_log_level(right_event_class, &right_event_class_log_level);
-
-    if (left_log_level_avail == BT_PROPERTY_AVAILABILITY_AVAILABLE &&
-        right_log_level_avail == BT_PROPERTY_AVAILABILITY_AVAILABLE) {
-        ret = left_event_class_log_level - right_event_class_log_level;
-        if (ret) {
-            goto end;
-        }
-    } else if (left_log_level_avail == BT_PROPERTY_AVAILABILITY_AVAILABLE &&
-               right_log_level_avail == BT_PROPERTY_AVAILABILITY_NOT_AVAILABLE) {
-        ret = -1;
-        goto end;
-    } else if (left_log_level_avail == BT_PROPERTY_AVAILABILITY_NOT_AVAILABLE &&
-               right_log_level_avail == BT_PROPERTY_AVAILABILITY_AVAILABLE) {
-        ret = 1;
-        goto end;
+    if (!left && !right) {
+        return 0;
     }
 
-    left_event_class_emf_uri = bt_event_class_get_emf_uri(left_event_class);
-    right_event_class_emf_uri = bt_event_class_get_emf_uri(right_event_class);
-    if (left_event_class_emf_uri && right_event_class_emf_uri) {
-        ret = strcmp(left_event_class_emf_uri, right_event_class_emf_uri);
-        if (ret != 0) {
-            goto end;
-        }
-    } else if (!left_event_class_emf_uri && right_event_class_emf_uri) {
-        ret = -1;
-        goto end;
-    } else if (left_event_class_emf_uri && !right_event_class_emf_uri) {
-        ret = 1;
-        goto end;
-    }
-
-end:
-    return ret;
+    return std::strcmp(left, right);
 }
 
-static int compare_clock_classes(const bt_clock_class *left_cc, const bt_clock_class *right_cc)
+/*
+ * Returns a weight corresponding to `msgType` to sort message types in
+ * an arbitrary order.
+ *
+ * A lower weight means a higher priority (sorted before).
+ */
+int MessageComparator::_messageTypeWeight(const bt2::MessageType msgType) noexcept
 {
-    int ret;
-    const char *left_clock_class_name, *right_clock_class_name;
-    bt_uuid left_clock_class_uuid, right_clock_class_uuid;
-    uint64_t left_freq, right_freq, left_prec, right_prec;
-    bool left_origin_is_unix, right_origin_is_unix;
+    switch (msgType) {
+    case bt2::MessageType::StreamBeginning:
+        return 0;
 
-    left_clock_class_uuid = bt_clock_class_get_uuid(left_cc);
-    right_clock_class_uuid = bt_clock_class_get_uuid(right_cc);
+    case bt2::MessageType::PacketBeginning:
+        return 1;
 
-    if (left_clock_class_uuid && !right_clock_class_uuid) {
-        ret = -1;
-        goto end;
-    } else if (!left_clock_class_uuid && right_clock_class_uuid) {
-        ret = 1;
-        goto end;
-    } else if (left_clock_class_uuid && right_clock_class_uuid) {
-        ret = bt_uuid_compare(left_clock_class_uuid, right_clock_class_uuid);
-        if (ret != 0) {
-            goto end;
-        }
+    case bt2::MessageType::Event:
+        return 2;
+
+    case bt2::MessageType::DiscardedEvents:
+        return 3;
+
+    case bt2::MessageType::PacketEnd:
+        return 4;
+
+    case bt2::MessageType::MessageIteratorInactivity:
+        return 5;
+
+    case bt2::MessageType::DiscardedPackets:
+        return 6;
+
+    case bt2::MessageType::StreamEnd:
+        return 7;
     }
 
-    left_origin_is_unix = bt_clock_class_origin_is_unix_epoch(left_cc);
-    right_origin_is_unix = bt_clock_class_origin_is_unix_epoch(right_cc);
-
-    if (left_origin_is_unix != right_origin_is_unix) {
-        ret = left_origin_is_unix - right_origin_is_unix;
-        goto end;
-    }
-
-    left_clock_class_name = bt_clock_class_get_name(left_cc);
-    right_clock_class_name = bt_clock_class_get_name(right_cc);
-
-    if (left_clock_class_name && !right_clock_class_name) {
-        ret = -1;
-        goto end;
-    } else if (!left_clock_class_name && right_clock_class_name) {
-        ret = 1;
-        goto end;
-    } else if (left_clock_class_name && right_clock_class_name) {
-        ret = strcmp(left_clock_class_name, right_clock_class_name);
-        if (ret != 0) {
-            goto end;
-        }
-    }
-
-    left_freq = bt_clock_class_get_frequency(left_cc);
-    right_freq = bt_clock_class_get_frequency(right_cc);
-
-    ret = right_freq - left_freq;
-    if (ret != 0) {
-        goto end;
-    }
-
-    left_prec = bt_clock_class_get_precision(left_cc);
-    right_prec = bt_clock_class_get_precision(right_cc);
-
-    ret = right_prec - left_prec;
-    if (ret != 0) {
-        goto end;
-    }
-
-end:
-    return ret;
+    bt_common_abort();
 }
 
-static int compare_streams(const bt_stream *left_stream, const bt_stream *right_stream)
+/*
+ * Compares two values using operator<().
+ */
+template <typename T>
+int MessageComparator::_compareLt(const T left, const T right) noexcept
 {
-    int ret = 0;
-    const char *left_stream_name, *right_stream_name, *left_stream_class_name,
-        *right_stream_class_name;
-    const bt_stream_class *left_stream_class, *right_stream_class;
-    const bt_clock_class *left_cc, *right_cc;
+    if (left < right) {
+        return -1;
+    } else if (right < left) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
 
-    /*
-	 * No need to compare stream id as it was checked earlier and if we are
-	 * here it means they are identical or both absent.
-	 */
-    BT_ASSERT_DBG(bt_stream_get_id(left_stream) == bt_stream_get_id(right_stream));
+int MessageComparator::_compareMsgsTypes(const bt2::MessageType left,
+                                         const bt2::MessageType right) noexcept
+{
+    return _compareLt(_messageTypeWeight(left), _messageTypeWeight(right));
+}
 
-    /* Compare stream name. */
-    left_stream_name = bt_stream_get_name(left_stream);
-    right_stream_name = bt_stream_get_name(right_stream);
+int MessageComparator::_compareUuids(const bt2c::UuidView left, const bt2c::UuidView right) noexcept
+{
+    return bt_uuid_compare(left.data(), right.data());
+}
 
-    if (left_stream_name && right_stream_name) {
-        ret = strcmp(left_stream_name, right_stream_name);
-        if (ret != 0) {
-            goto end;
-        }
-    } else if (!left_stream_name && right_stream_name) {
-        ret = -1;
-        goto end;
-    } else if (left_stream_name && !right_stream_name) {
-        ret = 1;
-        goto end;
+int MessageComparator::_compareOptUuids(const bt2s::optional<const bt2c::UuidView>& left,
+                                        const bt2s::optional<const bt2c::UuidView>& right) noexcept
+{
+    return _compareOptionals(left, right, _compareUuids);
+}
+
+int MessageComparator::_compareEventClasses(const bt2::ConstEventClass left,
+                                            const bt2::ConstEventClass right) noexcept
+{
+    if (const auto ret = _compareLt(left.id(), right.id())) {
+        return ret;
     }
 
-    left_stream_class = bt_stream_borrow_class_const(left_stream);
-    right_stream_class = bt_stream_borrow_class_const(right_stream);
-
-    /*
-	 * No need to compare stream class id as it was checked earlier and if
-	 * we are here it means they are identical.
-	 */
-    BT_ASSERT_DBG(bt_stream_class_get_id(left_stream_class) ==
-                  bt_stream_class_get_id(right_stream_class));
-
-    /* Compare stream class name. */
-    left_stream_class_name = bt_stream_class_get_name(left_stream_class);
-    right_stream_class_name = bt_stream_class_get_name(right_stream_class);
-
-    if (left_stream_class_name && right_stream_class_name) {
-        ret = strcmp(left_stream_class_name, right_stream_class_name);
-        if (ret != 0) {
-            goto end;
-        }
-    } else if (!left_stream_class_name && right_stream_class_name) {
-        ret = -1;
-        goto end;
-    } else if (left_stream_class_name && !right_stream_class_name) {
-        ret = 1;
-        goto end;
+    if (const auto ret = _compareStrings(left.name(), right.name())) {
+        return ret;
     }
 
-    /* Compare stream class automatic event class id assignment. */
-    if (bt_stream_class_assigns_automatic_event_class_id(left_stream_class) &&
-        !bt_stream_class_assigns_automatic_event_class_id(right_stream_class)) {
-        ret = 1;
-        goto end;
-    } else if (!bt_stream_class_assigns_automatic_event_class_id(left_stream_class) &&
-               bt_stream_class_assigns_automatic_event_class_id(right_stream_class)) {
-        ret = -1;
-        goto end;
+    if (const auto ret = _compareOptionals(left.logLevel(), right.logLevel(),
+                                           _compareLt<bt2::EventClassLogLevel>)) {
+        return ret;
     }
 
-    /* Compare stream class automatic stream id assignment. */
-    if (bt_stream_class_assigns_automatic_stream_id(left_stream_class) &&
-        !bt_stream_class_assigns_automatic_stream_id(right_stream_class)) {
-        ret = 1;
-        goto end;
-    } else if (!bt_stream_class_assigns_automatic_stream_id(left_stream_class) &&
-               bt_stream_class_assigns_automatic_stream_id(right_stream_class)) {
-        ret = -1;
-        goto end;
+    return _compareStrings(left.emfUri(), right.emfUri());
+}
+
+int MessageComparator::_compareClockClasses(const bt2::ConstClockClass left,
+                                            const bt2::ConstClockClass right) noexcept
+{
+    if (const auto ret = _compareOptUuids(left.uuid(), right.uuid())) {
+        return ret;
+    }
+
+    if (const auto ret = _compareLt(left.origin().isUnixEpoch(), right.origin().isUnixEpoch())) {
+        return ret;
+    }
+
+    if (const auto ret = _compareStrings(left.name(), right.name())) {
+        return ret;
+    }
+
+    if (const auto ret = _compareLt(left.frequency(), right.frequency())) {
+        return ret;
+    }
+
+    return _compareLt(left.precision(), right.precision());
+}
+
+int MessageComparator::_compareStreamsSameIds(const bt2::ConstStream left,
+                                              const bt2::ConstStream right) noexcept
+{
+    BT_ASSERT_DBG(left.id() == right.id());
+
+    if (const auto ret = _compareStrings(left.name(), right.name())) {
+        return ret;
+    }
+
+    const auto leftCls = left.cls();
+    const auto rightCls = right.cls();
+
+    BT_ASSERT_DBG(leftCls.id() == rightCls.id());
+
+    if (const auto ret = _compareStrings(leftCls.name(), rightCls.name())) {
+        return ret;
+    }
+
+    if (const auto ret = _compareLt(leftCls.assignsAutomaticEventClassId(),
+                                    rightCls.assignsAutomaticEventClassId())) {
+        return ret;
+    }
+
+    if (const auto ret =
+            _compareLt(leftCls.assignsAutomaticStreamId(), rightCls.assignsAutomaticStreamId())) {
+        return ret;
     }
 
     /* Compare stream class support of discarded events. */
-    if (bt_stream_class_supports_discarded_events(left_stream_class) &&
-        !bt_stream_class_supports_discarded_events(right_stream_class)) {
-        ret = 1;
-        goto end;
-    } else if (!bt_stream_class_supports_discarded_events(left_stream_class) &&
-               bt_stream_class_supports_discarded_events(right_stream_class)) {
-        ret = -1;
-        goto end;
+    if (const auto ret =
+            _compareLt(leftCls.supportsDiscardedEvents(), rightCls.supportsDiscardedEvents())) {
+        return ret;
     }
 
     /* Compare stream class discarded events default clock snapshot. */
-    if (bt_stream_class_discarded_events_have_default_clock_snapshots(left_stream_class) &&
-        !bt_stream_class_discarded_events_have_default_clock_snapshots(right_stream_class)) {
-        ret = 1;
-        goto end;
-    } else if (!bt_stream_class_discarded_events_have_default_clock_snapshots(left_stream_class) &&
-               bt_stream_class_discarded_events_have_default_clock_snapshots(right_stream_class)) {
-        ret = -1;
-        goto end;
+    if (const auto ret = _compareLt(leftCls.discardedEventsHaveDefaultClockSnapshots(),
+                                    rightCls.discardedEventsHaveDefaultClockSnapshots())) {
+        return ret;
     }
 
     /* Compare stream class support of packets. */
-    if (bt_stream_class_supports_packets(left_stream_class) &&
-        !bt_stream_class_supports_packets(right_stream_class)) {
-        ret = 1;
-        goto end;
-    } else if (!bt_stream_class_supports_packets(left_stream_class) &&
-               bt_stream_class_supports_packets(right_stream_class)) {
-        ret = -1;
-        goto end;
+    if (const auto ret = _compareLt(leftCls.supportsPackets(), rightCls.supportsPackets())) {
+        return ret;
     }
 
-    if (bt_stream_class_supports_packets(left_stream_class)) {
+    if (leftCls.supportsPackets()) {
         /*
 		* Compare stream class presence of discarded packets beginning default
 		* clock snapshot.
 		*/
-        if (bt_stream_class_packets_have_beginning_default_clock_snapshot(left_stream_class) &&
-            !bt_stream_class_packets_have_beginning_default_clock_snapshot(right_stream_class)) {
-            ret = 1;
-            goto end;
-        } else if (!bt_stream_class_packets_have_beginning_default_clock_snapshot(
-                       left_stream_class) &&
-                   bt_stream_class_packets_have_beginning_default_clock_snapshot(
-                       right_stream_class)) {
-            ret = -1;
-            goto end;
+        if (const auto ret = _compareLt(leftCls.packetsHaveBeginningClockSnapshot(),
+                                        rightCls.packetsHaveBeginningClockSnapshot())) {
+            return ret;
         }
 
         /*
 		* Compare stream class presence of discarded packets end default clock
 		* snapshot.
 		*/
-        if (bt_stream_class_packets_have_end_default_clock_snapshot(left_stream_class) &&
-            !bt_stream_class_packets_have_end_default_clock_snapshot(right_stream_class)) {
-            ret = 1;
-            goto end;
-        } else if (!bt_stream_class_packets_have_end_default_clock_snapshot(left_stream_class) &&
-                   bt_stream_class_packets_have_end_default_clock_snapshot(right_stream_class)) {
-            ret = -1;
-            goto end;
+        if (const auto ret = _compareLt(leftCls.packetsHaveEndClockSnapshot(),
+                                        rightCls.packetsHaveEndClockSnapshot())) {
+            return ret;
         }
 
         /* Compare stream class support of discarded packets. */
-        if (bt_stream_class_supports_discarded_packets(left_stream_class) &&
-            !bt_stream_class_supports_discarded_packets(right_stream_class)) {
-            ret = 1;
-            goto end;
-        } else if (!bt_stream_class_supports_discarded_packets(left_stream_class) &&
-                   bt_stream_class_supports_discarded_packets(right_stream_class)) {
-            ret = -1;
-            goto end;
+        if (const auto ret = _compareLt(leftCls.supportsDiscardedPackets(),
+                                        rightCls.supportsDiscardedPackets())) {
+            return ret;
         }
 
         /* Compare stream class discarded packets default clock snapshot. */
-        if (bt_stream_class_discarded_packets_have_default_clock_snapshots(left_stream_class) &&
-            !bt_stream_class_discarded_packets_have_default_clock_snapshots(right_stream_class)) {
-            ret = 1;
-            goto end;
-        } else if (!bt_stream_class_discarded_packets_have_default_clock_snapshots(
-                       left_stream_class) &&
-                   bt_stream_class_discarded_packets_have_default_clock_snapshots(
-                       right_stream_class)) {
-            ret = -1;
-            goto end;
+        if (const auto ret = _compareLt(leftCls.discardedPacketsHaveDefaultClockSnapshots(),
+                                        rightCls.discardedPacketsHaveDefaultClockSnapshots())) {
+            return ret;
         }
     }
 
     /* Compare the clock classes associated to the stream classes. */
-    left_cc = bt_stream_class_borrow_default_clock_class_const(left_stream_class);
-    right_cc = bt_stream_class_borrow_default_clock_class_const(right_stream_class);
-
-    if (!left_cc && !right_cc) {
-        ret = compare_clock_classes(left_cc, right_cc);
-
-        if (ret != 0) {
-            goto end;
-        }
-    } else if (left_cc && !right_cc) {
-        ret = -1;
-        goto end;
-    } else if (!left_cc && right_cc) {
-        ret = 1;
-        goto end;
-    }
-
-end:
-    return ret;
+    return _compareOptionalBorrowedObjects(leftCls.defaultClockClass(),
+                                           rightCls.defaultClockClass(), _compareClockClasses);
 }
 
-static int compare_clock_snapshots(const bt_clock_snapshot *left_cs,
-                                   const bt_clock_snapshot *right_cs)
+int MessageComparator::_compareClockSnapshots(const bt2::ConstClockSnapshot left,
+                                              const bt2::ConstClockSnapshot right) noexcept
 {
-    uint64_t left_cs_value = bt_clock_snapshot_get_value(left_cs);
-    uint64_t right_cs_value = bt_clock_snapshot_get_value(right_cs);
-
-    return left_cs_value - right_cs_value;
+    return _compareLt(left.value(), right.value());
 }
 
-static const bt_stream *borrow_stream(const bt_message *msg)
-{
-    bt_message_type msg_type = bt_message_get_type(msg);
-    const bt_stream *stream = NULL;
-    const bt_packet *packet = NULL;
-    const bt_event *event = NULL;
+namespace {
 
-    switch (msg_type) {
-    case BT_MESSAGE_TYPE_STREAM_BEGINNING:
-        stream = bt_message_stream_beginning_borrow_stream_const(msg);
-        break;
-    case BT_MESSAGE_TYPE_STREAM_END:
-        stream = bt_message_stream_end_borrow_stream_const(msg);
-        break;
-    case BT_MESSAGE_TYPE_PACKET_BEGINNING:
-        packet = bt_message_packet_beginning_borrow_packet_const(msg);
-        stream = bt_packet_borrow_stream_const(packet);
-        break;
-    case BT_MESSAGE_TYPE_PACKET_END:
-        packet = bt_message_packet_end_borrow_packet_const(msg);
-        stream = bt_packet_borrow_stream_const(packet);
-        break;
-    case BT_MESSAGE_TYPE_EVENT:
-        event = bt_message_event_borrow_event_const(msg);
-        stream = bt_event_borrow_stream_const(event);
-        break;
-    case BT_MESSAGE_TYPE_DISCARDED_EVENTS:
-        stream = bt_message_discarded_events_borrow_stream_const(msg);
-        break;
-    case BT_MESSAGE_TYPE_DISCARDED_PACKETS:
-        stream = bt_message_discarded_packets_borrow_stream_const(msg);
-        break;
-    case BT_MESSAGE_TYPE_MESSAGE_ITERATOR_INACTIVITY:
-        goto end;
-    default:
-        bt_common_abort();
+bt2::OptionalBorrowedObject<bt2::ConstStream> borrowStream(const bt2::ConstMessage msg) noexcept
+{
+    switch (msg.type()) {
+    case bt2::MessageType::StreamBeginning:
+        return msg.asStreamBeginning().stream();
+
+    case bt2::MessageType::StreamEnd:
+        return msg.asStreamEnd().stream();
+
+    case bt2::MessageType::PacketBeginning:
+        return msg.asPacketBeginning().packet().stream();
+
+    case bt2::MessageType::PacketEnd:
+        return msg.asPacketEnd().packet().stream();
+
+    case bt2::MessageType::Event:
+        return msg.asEvent().event().stream();
+
+    case bt2::MessageType::DiscardedEvents:
+        return msg.asDiscardedEvents().stream();
+
+    case bt2::MessageType::DiscardedPackets:
+        return msg.asDiscardedPackets().stream();
+
+    case bt2::MessageType::MessageIteratorInactivity:
+        return {};
     }
 
-end:
-    return stream;
+    bt_common_abort();
 }
 
-static const bt_trace *borrow_trace(const bt_message *msg)
+} /* namespace */
+
+int MessageComparator::_compareMessagesSameType(const bt2::ConstMessage left,
+                                                const bt2::ConstMessage right) noexcept
 {
-    const bt_trace *trace = NULL;
-    const bt_stream *stream = NULL;
+    BT_ASSERT_DBG(left.type() == right.type());
 
-    stream = borrow_stream(msg);
-    if (stream) {
-        trace = bt_stream_borrow_trace_const(stream);
-    }
+    switch (left.type()) {
+    case bt2::MessageType::StreamBeginning:
+    case bt2::MessageType::StreamEnd:
+    case bt2::MessageType::PacketBeginning:
+    case bt2::MessageType::PacketEnd:
+        return _compareStreamsSameIds(*borrowStream(left), *borrowStream(right));
 
-    return trace;
-}
-
-static int compare_messages_by_trace_name(struct messages_to_compare *msgs)
-{
-    int ret = 0;
-    const char *left_trace_name = NULL, *right_trace_name = NULL;
-
-    if (msgs->left.trace && !msgs->right.trace) {
-        ret = -1;
-        goto end;
-    }
-
-    if (!msgs->left.trace && msgs->right.trace) {
-        ret = 1;
-        goto end;
-    }
-
-    if (!msgs->left.trace && !msgs->right.trace) {
-        ret = 0;
-        goto end;
-    }
-
-    left_trace_name = bt_trace_get_name(msgs->left.trace);
-    right_trace_name = bt_trace_get_name(msgs->right.trace);
-
-    if (left_trace_name && !right_trace_name) {
-        ret = -1;
-        goto end;
-    }
-
-    if (!left_trace_name && right_trace_name) {
-        ret = 1;
-        goto end;
-    }
-
-    if (!left_trace_name && !right_trace_name) {
-        ret = 0;
-        goto end;
-    }
-
-    ret = strcmp(left_trace_name, right_trace_name);
-end:
-    return ret;
-}
-
-static int compare_messages_by_trace_uuid(struct messages_to_compare *msgs)
-{
-    int ret = 0;
-    bt_uuid left_trace_uuid = NULL, right_trace_uuid = NULL;
-
-    if (msgs->left.trace && !msgs->right.trace) {
-        ret = -1;
-        goto end;
-    }
-
-    if (!msgs->left.trace && msgs->right.trace) {
-        ret = 1;
-        goto end;
-    }
-
-    if (!msgs->left.trace && !msgs->right.trace) {
-        ret = 0;
-        goto end;
-    }
-
-    left_trace_uuid = bt_trace_get_uuid(msgs->left.trace);
-    right_trace_uuid = bt_trace_get_uuid(msgs->right.trace);
-
-    if (left_trace_uuid && !right_trace_uuid) {
-        ret = -1;
-        goto end;
-    }
-
-    if (!left_trace_uuid && right_trace_uuid) {
-        ret = 1;
-        goto end;
-    }
-
-    if (!left_trace_uuid && !right_trace_uuid) {
-        ret = 0;
-        goto end;
-    }
-
-    ret = bt_uuid_compare(left_trace_uuid, right_trace_uuid);
-end:
-    return ret;
-}
-
-static int compare_messages_by_stream_class_id(struct messages_to_compare *msgs)
-{
-    int ret = 0;
-    uint64_t left_stream_class_id = 0, right_stream_class_id = 0;
-
-    if (msgs->left.stream && !msgs->right.stream) {
-        ret = -1;
-        goto end;
-    }
-
-    if (!msgs->left.stream && msgs->right.stream) {
-        ret = 1;
-        goto end;
-    }
-
-    if (!msgs->left.stream && !msgs->right.stream) {
-        ret = 0;
-        goto end;
-    }
-
-    left_stream_class_id = bt_stream_class_get_id(bt_stream_borrow_class_const(msgs->left.stream));
-
-    right_stream_class_id =
-        bt_stream_class_get_id(bt_stream_borrow_class_const(msgs->right.stream));
-
-    if (left_stream_class_id == right_stream_class_id) {
-        ret = 0;
-        goto end;
-    }
-
-    ret = (left_stream_class_id < right_stream_class_id) ? -1 : 1;
-
-end:
-    return ret;
-}
-
-static int compare_messages_by_stream_id(struct messages_to_compare *msgs)
-{
-    int ret = 0;
-    uint64_t left_stream_id = 0, right_stream_id = 0;
-
-    if (msgs->left.stream && !msgs->right.stream) {
-        ret = -1;
-        goto end;
-    }
-
-    if (!msgs->left.stream && msgs->right.stream) {
-        ret = 1;
-        goto end;
-    }
-
-    if (!msgs->left.stream && !msgs->right.stream) {
-        ret = 0;
-        goto end;
-    }
-
-    left_stream_id = bt_stream_get_id(msgs->left.stream);
-    right_stream_id = bt_stream_get_id(msgs->right.stream);
-
-    if (left_stream_id == right_stream_id) {
-        ret = 0;
-        goto end;
-    }
-
-    ret = (left_stream_id < right_stream_id) ? -1 : 1;
-
-end:
-    return ret;
-}
-
-static int compare_messages_same_type(struct messages_to_compare *msgs)
-{
-    int ret = 0;
-
-    /*
-	 * Both messages are of the same type, we must compare characteristics of
-	 * the messages such as the attributes of the event in a event message.
-	 */
-    BT_ASSERT_DBG(bt_message_get_type(msgs->left.msg) == bt_message_get_type(msgs->right.msg));
-
-    switch (bt_message_get_type(msgs->left.msg)) {
-    case BT_MESSAGE_TYPE_STREAM_BEGINNING:
-        /* Fall-through */
-    case BT_MESSAGE_TYPE_STREAM_END:
-        /* Fall-through */
-    case BT_MESSAGE_TYPE_PACKET_BEGINNING:
-        /* Fall-through */
-    case BT_MESSAGE_TYPE_PACKET_END:
-        ret = compare_streams(msgs->left.stream, msgs->right.stream);
-        if (ret) {
-            goto end;
-        }
-
-        break;
-    case BT_MESSAGE_TYPE_EVENT:
+    case bt2::MessageType::Event:
     {
-        const bt_event *left_event, *right_event;
-        left_event = bt_message_event_borrow_event_const(msgs->left.msg);
-        right_event = bt_message_event_borrow_event_const(msgs->right.msg);
+        const auto leftEvent = left.asEvent().event();
+        const auto rightEvent = right.asEvent().event();
 
-        ret = compare_events(left_event, right_event);
-        if (ret) {
-            goto end;
+        if (const auto ret = _compareEventClasses(leftEvent.cls(), rightEvent.cls())) {
+            return ret;
         }
 
-        ret = compare_streams(msgs->left.stream, msgs->right.stream);
-        if (ret) {
-            goto end;
-        }
-        break;
+        return _compareStreamsSameIds(leftEvent.stream(), rightEvent.stream());
     }
-    case BT_MESSAGE_TYPE_DISCARDED_EVENTS:
-    {
-        const bt_stream_class *left_stream_class;
-        bt_property_availability left_event_count_avail, right_event_count_avail;
-        uint64_t left_event_count, right_event_count;
 
+    case bt2::MessageType::DiscardedEvents:
+    {
         /*
 		 * Compare streams first to check if there is a
 		 * mismatch about discarded event related configuration
 		 * in the stream class.
 		 */
-        ret = compare_streams(msgs->left.stream, msgs->right.stream);
-        if (ret) {
-            goto end;
+
+        const auto leftDiscEv = left.asDiscardedEvents();
+        const auto rightDiscEv = right.asDiscardedEvents();
+
+        if (const auto ret = _compareStreamsSameIds(leftDiscEv.stream(), rightDiscEv.stream())) {
+            return ret;
         }
 
-        left_stream_class = bt_stream_borrow_class_const(msgs->left.stream);
-        if (bt_stream_class_discarded_events_have_default_clock_snapshots(left_stream_class)) {
-            const bt_clock_snapshot *left_beg_cs =
-                bt_message_discarded_events_borrow_beginning_default_clock_snapshot_const(
-                    msgs->left.msg);
-            const bt_clock_snapshot *right_beg_cs =
-                bt_message_discarded_events_borrow_beginning_default_clock_snapshot_const(
-                    msgs->right.msg);
-            const bt_clock_snapshot *left_end_cs =
-                bt_message_discarded_events_borrow_end_default_clock_snapshot_const(msgs->left.msg);
-            const bt_clock_snapshot *right_end_cs =
-                bt_message_discarded_events_borrow_end_default_clock_snapshot_const(
-                    msgs->right.msg);
+        if (leftDiscEv.stream().cls().discardedEventsHaveDefaultClockSnapshots()) {
+            const auto leftBegCs = leftDiscEv.beginningDefaultClockSnapshot();
+            const auto rightBegCs = rightDiscEv.beginningDefaultClockSnapshot();
+            const auto leftEndCs = leftDiscEv.endDefaultClockSnapshot();
+            const auto rightEndCs = rightDiscEv.endDefaultClockSnapshot();
 
-            ret = compare_clock_snapshots(left_beg_cs, right_beg_cs);
-            if (ret) {
-                goto end;
+            if (const auto ret = _compareClockSnapshots(leftBegCs, rightBegCs)) {
+                return ret;
             }
 
-            ret = compare_clock_snapshots(left_end_cs, right_end_cs);
-            if (ret) {
-                goto end;
+            if (const auto ret = _compareClockSnapshots(leftEndCs, rightEndCs)) {
+                return ret;
             }
 
-            ret = compare_clock_classes(bt_clock_snapshot_borrow_clock_class_const(left_beg_cs),
-                                        bt_clock_snapshot_borrow_clock_class_const(right_beg_cs));
-            if (ret != 0) {
-                goto end;
+            if (const auto ret =
+                    _compareClockClasses(leftBegCs.clockClass(), rightBegCs.clockClass())) {
+                return ret;
             }
         }
 
-        left_event_count_avail =
-            bt_message_discarded_events_get_count(msgs->left.msg, &left_event_count);
-        right_event_count_avail =
-            bt_message_discarded_events_get_count(msgs->right.msg, &right_event_count);
-        if (left_event_count_avail == BT_PROPERTY_AVAILABILITY_AVAILABLE &&
-            right_event_count_avail == BT_PROPERTY_AVAILABILITY_AVAILABLE) {
-            ret = left_event_count - right_event_count;
-            if (ret != 0) {
-                goto end;
-            }
-        } else if (left_event_count_avail == BT_PROPERTY_AVAILABILITY_AVAILABLE &&
-                   right_event_count_avail == BT_PROPERTY_AVAILABILITY_NOT_AVAILABLE) {
-            ret = -1;
-            goto end;
-        } else if (left_event_count_avail == BT_PROPERTY_AVAILABILITY_NOT_AVAILABLE &&
-                   right_event_count_avail == BT_PROPERTY_AVAILABILITY_AVAILABLE) {
-            ret = 1;
-            goto end;
-        }
-
-        break;
+        return _compareOptionals(leftDiscEv.count(), rightDiscEv.count(),
+                                 _compareLt<std::uint64_t>);
     }
-    case BT_MESSAGE_TYPE_DISCARDED_PACKETS:
+    case bt2::MessageType::DiscardedPackets:
     {
-        const bt_stream_class *left_stream_class;
-        bt_property_availability left_packet_count_avail, right_packet_count_avail;
-        uint64_t left_packet_count, right_packet_count;
+        const auto leftDiscPkts = left.asDiscardedPackets();
+        const auto rightDiscPkts = right.asDiscardedPackets();
 
         /*
 		 * Compare streams first to check if there is a
 		 * mismatch about discarded packets related
 		 * configuration in the stream class.
 		 */
-        ret = compare_streams(msgs->left.stream, msgs->right.stream);
-        if (ret) {
-            goto end;
+        if (const auto ret =
+                _compareStreamsSameIds(leftDiscPkts.stream(), rightDiscPkts.stream())) {
+            return ret;
         }
 
-        left_stream_class = bt_stream_borrow_class_const(msgs->left.stream);
+        if (leftDiscPkts.stream().cls().discardedPacketsHaveDefaultClockSnapshots()) {
+            const auto leftBegCs = leftDiscPkts.beginningDefaultClockSnapshot();
+            const auto rightBegCs = rightDiscPkts.beginningDefaultClockSnapshot();
+            const auto leftEndCs = leftDiscPkts.endDefaultClockSnapshot();
+            const auto rightEndCs = rightDiscPkts.endDefaultClockSnapshot();
 
-        if (bt_stream_class_discarded_packets_have_default_clock_snapshots(left_stream_class)) {
-            const bt_clock_snapshot *left_beg_cs =
-                bt_message_discarded_packets_borrow_beginning_default_clock_snapshot_const(
-                    msgs->left.msg);
-            const bt_clock_snapshot *right_beg_cs =
-                bt_message_discarded_packets_borrow_beginning_default_clock_snapshot_const(
-                    msgs->right.msg);
-            const bt_clock_snapshot *left_end_cs =
-                bt_message_discarded_packets_borrow_end_default_clock_snapshot_const(
-                    msgs->left.msg);
-            const bt_clock_snapshot *right_end_cs =
-                bt_message_discarded_packets_borrow_end_default_clock_snapshot_const(
-                    msgs->right.msg);
-
-            ret = compare_clock_snapshots(left_beg_cs, right_beg_cs);
-            if (ret) {
-                goto end;
+            if (const auto ret = _compareClockSnapshots(leftBegCs, rightBegCs)) {
+                return ret;
             }
 
-            ret = compare_clock_snapshots(left_end_cs, right_end_cs);
-            if (ret) {
-                goto end;
+            if (const auto ret = _compareClockSnapshots(leftEndCs, rightEndCs)) {
+                return ret;
             }
 
-            ret = compare_clock_classes(bt_clock_snapshot_borrow_clock_class_const(left_beg_cs),
-                                        bt_clock_snapshot_borrow_clock_class_const(right_beg_cs));
-            if (ret != 0) {
-                goto end;
+            if (const auto ret =
+                    _compareClockClasses(leftBegCs.clockClass(), rightBegCs.clockClass())) {
+                return ret;
             }
         }
 
-        left_packet_count_avail =
-            bt_message_discarded_packets_get_count(msgs->left.msg, &left_packet_count);
-        right_packet_count_avail =
-            bt_message_discarded_packets_get_count(msgs->right.msg, &right_packet_count);
-        if (left_packet_count_avail == BT_PROPERTY_AVAILABILITY_AVAILABLE &&
-            right_packet_count_avail == BT_PROPERTY_AVAILABILITY_AVAILABLE) {
-            ret = left_packet_count - right_packet_count;
-            if (ret != 0) {
-                goto end;
-            }
-        } else if (left_packet_count_avail == BT_PROPERTY_AVAILABILITY_AVAILABLE &&
-                   right_packet_count_avail == BT_PROPERTY_AVAILABILITY_NOT_AVAILABLE) {
-            ret = -1;
-            goto end;
-        } else if (left_packet_count_avail == BT_PROPERTY_AVAILABILITY_NOT_AVAILABLE &&
-                   right_packet_count_avail == BT_PROPERTY_AVAILABILITY_AVAILABLE) {
-            ret = 1;
-            goto end;
-        }
-
-        break;
+        return _compareOptionals(leftDiscPkts.count(), leftDiscPkts.count(),
+                                 _compareLt<std::uint64_t>);
     }
-    case BT_MESSAGE_TYPE_MESSAGE_ITERATOR_INACTIVITY:
+    case bt2::MessageType::MessageIteratorInactivity:
     {
-        const bt_clock_snapshot *left_cs =
-            bt_message_message_iterator_inactivity_borrow_clock_snapshot_const(msgs->left.msg);
-        const bt_clock_snapshot *right_cs =
-            bt_message_message_iterator_inactivity_borrow_clock_snapshot_const(msgs->right.msg);
+        const auto leftCs = left.asMessageIteratorInactivity().clockSnapshot();
+        const auto rightCs = right.asMessageIteratorInactivity().clockSnapshot();
 
-        ret = compare_clock_snapshots(left_cs, right_cs);
-        if (ret != 0) {
-            goto end;
+        if (const auto ret = _compareClockSnapshots(leftCs, rightCs)) {
+            return ret;
         }
 
-        ret = compare_clock_classes(bt_clock_snapshot_borrow_clock_class_const(left_cs),
-                                    bt_clock_snapshot_borrow_clock_class_const(right_cs));
-        if (ret != 0) {
-            goto end;
-        }
-
-        break;
+        return _compareClockClasses(leftCs.clockClass(), rightCs.clockClass());
     }
-    default:
-        bt_common_abort();
     }
 
-end:
-    return ret;
+    bt_common_abort();
 }
 
-int common_muxing_compare_messages(const bt_message *left_msg, const bt_message *right_msg)
+int MessageComparator::compare(const bt2::ConstMessage left,
+                               const bt2::ConstMessage right) const noexcept
 {
-    int ret = 0;
-    struct messages_to_compare msgs;
+    BT_ASSERT_DBG(left.libObjPtr() != right.libObjPtr());
 
-    BT_ASSERT_DBG(left_msg != right_msg);
+    if (const auto ret = _compareOptionalBorrowedObjects(
+            borrowStream(left), borrowStream(right),
+            [](const bt2::ConstStream leftStream, const bt2::ConstStream rightStream) {
+                const auto leftTrace = leftStream.trace();
+                const auto rightTrace = rightStream.trace();
 
-    msgs.left.msg = left_msg;
-    msgs.left.trace = borrow_trace(left_msg);
-    msgs.left.stream = borrow_stream(left_msg);
+                /* Compare trace UUIDs. */
+                if (const auto ret = _compareOptUuids(leftTrace.uuid(), rightTrace.uuid())) {
+                    return ret;
+                }
 
-    msgs.right.msg = right_msg;
-    msgs.right.trace = borrow_trace(right_msg);
-    msgs.right.stream = borrow_stream(right_msg);
+                /* Compare trace names. */
+                if (const auto ret = _compareStrings(leftTrace.name(), rightTrace.name())) {
+                    return ret;
+                }
 
-    /* Same timestamp: compare trace UUIDs. */
-    ret = compare_messages_by_trace_uuid(&msgs);
-    if (ret) {
-        goto end;
+                /* Compare stream class IDs. */
+                if (const auto ret = _compareLt(leftStream.cls().id(), rightStream.cls().id())) {
+                    return ret;
+                }
+
+                /* Compare stream IDs. */
+                return _compareLt(leftStream.id(), rightStream.id());
+            })) {
+        return ret;
     }
 
-    /* Same timestamp and trace UUID: compare trace names. */
-    ret = compare_messages_by_trace_name(&msgs);
-    if (ret) {
-        goto end;
+    if (const auto ret = _compareMsgsTypes(left.type(), right.type())) {
+        return ret;
     }
 
-    /*
-	 * Same timestamp, trace name, and trace UUID: compare stream class
-	 * IDs.
-	 */
-    ret = compare_messages_by_stream_class_id(&msgs);
-    if (ret) {
-        goto end;
-    }
-
-    /*
-	 * Same timestamp, trace name, trace UUID, and stream class ID: compare
-	 * stream IDs.
-	 */
-    ret = compare_messages_by_stream_id(&msgs);
-    if (ret) {
-        goto end;
-    }
-
-    if (bt_message_get_type(msgs.left.msg) != bt_message_get_type(msgs.right.msg)) {
-        /*
-		 * The messages are of different type, we order (arbitrarily)
-		 * in the following way:
-		 * SB < PB < EV < DE < MI < PE < DP < SE
-		 */
-        ret = compare_messages_by_type(&msgs);
-        if (ret) {
-            goto end;
-        }
-    } else {
-        /* The messages are of the same type. */
-        ret = compare_messages_same_type(&msgs);
-        if (ret) {
-            goto end;
-        }
-    }
-
-end:
-    return ret;
+    return _compareMessagesSameType(left, right);
 }
+
+} /* namespace muxing */
