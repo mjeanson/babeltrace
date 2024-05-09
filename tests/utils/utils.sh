@@ -239,6 +239,16 @@ bt_diff() {
 	local -r expected_file=$1
 	local -r actual_file=$2
 
+	if [[ ! -e $expected_file ]]; then
+		echo "ERROR: expected file \`$expected_file\` doesn't exist" >&2
+		return 1
+	fi
+
+	if [[ ! -e $actual_file ]]; then
+		echo "ERROR: actual file \`$actual_file\` doesn't exist" >&2
+		return 1
+	fi
+
 	diff -u <(bt_remove_cr_inline "$expected_file") <(bt_remove_cr_inline "$actual_file") 1>&2
 }
 

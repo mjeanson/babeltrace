@@ -22,7 +22,7 @@ test_pass() {
     local -r mp_path=$1
     local -r output_dir=$(mktemp -d)
 
-    run_python "$BT_TESTS_PYTHON_BIN" "$data_dir/data_from_mp.py" "$mp_path" "$output_dir"
+    bt_run_in_py_env "$BT_TESTS_PYTHON_BIN" "$data_dir/data_from_mp.py" "$mp_path" "$output_dir"
 
     local -r res_path=$(mktemp)
 
