@@ -21,13 +21,27 @@ data_dir=$BT_TESTS_DATADIR/plugins/src.ctf.fs/field
 test_pass() {
     local -r mp_path=$1
     local -r output_dir=$(mktemp -d)
+    local -r py_cmd=(
+        "$BT_TESTS_PYTHON_BIN" "$data_dir/data_from_mp.py"
+        "$mp_path" "$output_dir"
+    )
 
-    bt_run_in_py_env "$BT_TESTS_PYTHON_BIN" "$data_dir/data_from_mp.py" "$mp_path" "$output_dir"
+    if ! bt_run_in_py_env "${py_cmd[@]}"; then
+        fail "Failed to run \`${py_cmd[*]}\`"
+        return 1
+    fi
 
     local -r res_path=$(mktemp)
-
-    bt_cli "$res_path" /dev/null --plugin-path="$data_dir" \
+    local -r cli_cmd=(
+        "$res_path" /dev/null --plugin-path="$data_dir"
         -c sink.test-text.single "$output_dir/trace"
+    )
+
+    if ! bt_cli "${cli_cmd[@]}"; then
+        fail "Failed to run \`bt_cli ${cli_cmd[*]}\`"
+        return 1
+    fi
+
     bt_diff "$res_path" "$output_dir/expect"
     ok $? "$mp_path"
     rm -rf "$output_dir" "$res_path"
