@@ -261,8 +261,8 @@ string_format_libstring_format_la_SOURCES = \
 	string-format/format-error.h
 
 plugins_common_muxing_libmuxing_la_SOURCES = \
-	plugins/common/muxing/muxing.c \
-	plugins/common/muxing/muxing.h
+	plugins/common/muxing/muxing.cpp \
+	plugins/common/muxing/muxing.hpp
 
 plugins_common_param_validation_libparam_validation_la_SOURCES = \
 	plugins/common/param-validation/param-validation.c \

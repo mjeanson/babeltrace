@@ -19,7 +19,7 @@
 #include "cpp-common/bt2s/make-unique.hpp"
 #include "cpp-common/vendor/fmt/format.h"
 
-#include "plugins/common/muxing/muxing.h"
+#include "plugins/common/muxing/muxing.hpp"
 #include "plugins/common/param-validation/param-validation.h"
 
 #include "data-stream.hpp"
