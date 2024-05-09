@@ -156,8 +156,8 @@ public:
     ErrorTestCase(CreateClockClass createClockClass1Param, CreateClockClass createClockClass2Param,
                   const char * const testName, const char * const expectedCauseMsg) :
         _mCreateClockClass1 {createClockClass1Param},
-        _mCreateClockClass2 {createClockClass2Param}, _mTestName {testName}, _mExpectedCauseMsg {
-                                                                                 expectedCauseMsg}
+        _mCreateClockClass2 {createClockClass2Param}, _mTestName {testName},
+        _mExpectedCauseMsg {expectedCauseMsg}
     {
     }
 

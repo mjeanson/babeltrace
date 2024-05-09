@@ -31,8 +31,8 @@ public:
                                  const MsgType msgType2,
                                  const CreateClockCls createClockCls2) noexcept :
         _mMsgType1 {msgType1},
-        _mMsgType2 {msgType2}, _mCreateClockCls1 {createClockCls1}, _mCreateClockCls2 {
-                                                                        createClockCls2}
+        _mMsgType2 {msgType2}, _mCreateClockCls1 {createClockCls1},
+        _mCreateClockCls2 {createClockCls2}
     {
     }
 

@@ -95,8 +95,8 @@ struct ctf_fs_msg_iter_data
     using UP = std::unique_ptr<ctf_fs_msg_iter_data>;
 
     explicit ctf_fs_msg_iter_data(bt_self_message_iterator *selfMsgIter) :
-        self_msg_iter {selfMsgIter}, logger {bt2::SelfMessageIterator {self_msg_iter},
-                                             "PLUGIN/SRC.CTF.FS/MSG-ITER"}
+        self_msg_iter {selfMsgIter},
+        logger {bt2::SelfMessageIterator {self_msg_iter}, "PLUGIN/SRC.CTF.FS/MSG-ITER"}
     {
     }
 

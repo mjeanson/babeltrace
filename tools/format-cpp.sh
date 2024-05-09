@@ -4,7 +4,7 @@
 #
 # Copyright (C) 2020-2023 Philippe Proulx <pproulx@efficios.com>
 
-expected_formatter_major_version=15
+expected_formatter_major_version=16
 
 # Runs the formatter, returning 1 if it's not the expected version.
 #

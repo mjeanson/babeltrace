@@ -79,9 +79,8 @@ public:
      * `tag`.
      */
     explicit Logger(const bt2::SelfComponent selfComp, std::string tag) noexcept :
-        _mSelfComp {selfComp}, _mLevel {static_cast<Level>(selfComp.loggingLevel())}, _mTag {
-                                                                                          std::move(
-                                                                                              tag)}
+        _mSelfComp {selfComp}, _mLevel {static_cast<Level>(selfComp.loggingLevel())},
+        _mTag {std::move(tag)}
     {
     }
 
@@ -142,8 +141,8 @@ public:
      */
     explicit Logger(const Logger& other, std::string newTag) :
         _mSelfCompCls {other._mSelfCompCls}, _mSelfComp {other._mSelfComp},
-        _mSelfMsgIter {other._mSelfMsgIter},
-        _mModuleName {other._mModuleName}, _mLevel {other._mLevel}, _mTag {std::move(newTag)}
+        _mSelfMsgIter {other._mSelfMsgIter}, _mModuleName {other._mModuleName},
+        _mLevel {other._mLevel}, _mTag {std::move(newTag)}
     {
     }
 
