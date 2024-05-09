@@ -45,29 +45,6 @@ extern "C" {
 #define BT_IF_DEV_MODE(txt)
 #endif
 
-/*
- * Yield `ref`'s value while setting `ref` to NULL.
- *
- * This can be used to give a strong reference to a callee:
- *
- *   add_foo_to_list(list, BT_MOVE_REF(foo));
- *
- * or in a simple assignment:
- *
- *   my_struct->foo = BT_MOVE_REF(foo);
- *
- * When moving a reference in a function call, the reference is given to the
- * callee even if that function call fails, so make sure the called function
- * is written accordingly.
- */
-
-#define BT_MOVE_REF(ref) 		\
-	({				\
-		__typeof__(ref) _ref = ref;	\
-		ref = NULL;		\
-		_ref;			\
-	})
-
 /* Wrapper for g_array_index that adds bound checking.  */
 #define bt_g_array_index(a, t, i)		\
 	g_array_index((a), t, ({ BT_ASSERT_DBG((i) < (a)->len); (i); }))
