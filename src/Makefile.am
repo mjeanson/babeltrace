@@ -172,6 +172,7 @@ cpp_common_libcpp_common_la_SOURCES = \
 	cpp-common/bt2c/file-utils.hpp \
 	cpp-common/bt2c/fmt.hpp \
 	cpp-common/bt2c/glib-up.hpp \
+	cpp-common/bt2c/join.hpp \
 	cpp-common/bt2c/json-val.cpp \
 	cpp-common/bt2c/json-val.hpp \
 	cpp-common/bt2c/json-val-req.cpp \
