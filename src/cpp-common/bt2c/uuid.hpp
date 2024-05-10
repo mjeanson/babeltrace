@@ -220,6 +220,13 @@ public:
         return this->_view().isNil();
     }
 
+    static bool isValidUuidStr(const bt2s::string_view str) noexcept
+    {
+        std::array<Val, Uuid::size()> tmp;
+
+        return bt_uuid_from_str(str.data(), str.data() + str.size(), tmp.data()) == 0;
+    }
+
 private:
     /*
      * std::copy_n() won't throw when simply copying bytes below,
