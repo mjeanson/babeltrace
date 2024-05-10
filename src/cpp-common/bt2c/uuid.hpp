@@ -135,7 +135,7 @@ public:
         this->_setFromPtr(uuid);
     }
 
-    explicit Uuid(const bt2c::CStringView str) noexcept
+    explicit Uuid(const CStringView str) noexcept
     {
         const auto ret = bt_uuid_from_c_str(str.data(), _mUuid.data());
         BT_ASSERT(ret == 0);
