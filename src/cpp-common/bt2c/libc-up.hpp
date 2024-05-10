@@ -13,7 +13,7 @@
 namespace bt2c {
 namespace internal {
 
-struct FileCloserDeleter
+struct FileCloserDeleter final
 {
     void operator()(std::FILE * const f) noexcept
     {
