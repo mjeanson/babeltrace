@@ -1554,7 +1554,7 @@ public:
         return _Spec::packetContextFieldClass(this->libObjPtr());
     }
 
-    CommonStreamClass eventCommonContextFieldClass(const StructureFieldClass fc) const
+    CommonStreamClass commonEventContextFieldClass(const StructureFieldClass fc) const
     {
         static_assert(!std::is_const<LibObjT>::value,
                       "Not available with `bt2::ConstStreamClass`.");
@@ -1569,9 +1569,9 @@ public:
         return *this;
     }
 
-    OptionalBorrowedObject<_StructureFieldClass> eventCommonContextFieldClass() const noexcept
+    OptionalBorrowedObject<_StructureFieldClass> commonEventContextFieldClass() const noexcept
     {
-        return _Spec::eventCommonContextFieldClass(this->libObjPtr());
+        return _Spec::commonEventContextFieldClass(this->libObjPtr());
     }
 
     template <typename LibValT>
