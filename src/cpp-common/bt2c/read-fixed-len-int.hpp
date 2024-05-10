@@ -16,8 +16,8 @@
 namespace bt2c {
 
 /*
- * Reads a fixed-length integer of unknown byte order into a value of integral
- * type `IntT` from the buffer `buf` and returns it.
+ * Reads a fixed-length integer of unknown byte order into a value of
+ * integral type `IntT` from the buffer `buf` and returns it.
  */
 template <typename IntT>
 IntT readFixedLenInt(const std::uint8_t * const buf)
@@ -41,8 +41,8 @@ IntT readFixedLenIntLe(const std::uint8_t * const buf)
 }
 
 /*
- * Reads a fixed-length big-endian integer into a value of integral
- * type `IntT` from the buffer `buf` and returns it.
+ * Reads a fixed-length big-endian integer into a value of integral type
+ * `IntT` from the buffer `buf` and returns it.
  */
 template <typename IntT>
 IntT readFixedLenIntBe(const std::uint8_t * const buf)
