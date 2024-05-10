@@ -248,7 +248,7 @@ inline UuidView::operator Uuid() const noexcept
     return Uuid {*this};
 }
 
-static inline std::string format_as(const bt2c::Uuid& uuid)
+inline std::string format_as(const bt2c::Uuid& uuid)
 {
     return uuid.str();
 }
