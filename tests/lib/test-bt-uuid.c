@@ -40,7 +40,7 @@ static const char invalid_str_5[] = "4542ad19-9e4f-4931-8261-2101c3e089ae7";
 static const char invalid_str_6[] = "XX0123";
 
 static
-void run_test_bt_uuid_from_str(void)
+void run_test_bt_uuid_from_c_str(void)
 {
 	int ret;
 	bt_uuid_t uuid1;
@@ -48,41 +48,41 @@ void run_test_bt_uuid_from_str(void)
 	/*
 	 * Parse valid UUID strings, expect success.
 	 */
-	ret = bt_uuid_from_str(valid_str_1, uuid1);
-	ok(ret == 0, "bt_uuid_from_str - Parse valid string '%s', expect success", valid_str_1);
+	ret = bt_uuid_from_c_str(valid_str_1, uuid1);
+	ok(ret == 0, "bt_uuid_from_c_str - Parse valid string '%s', expect success", valid_str_1);
 
-	ret = bt_uuid_from_str(valid_str_2, uuid1);
-	ok(ret == 0, "bt_uuid_from_str - Parse valid string '%s', expect success", valid_str_2);
+	ret = bt_uuid_from_c_str(valid_str_2, uuid1);
+	ok(ret == 0, "bt_uuid_from_c_str - Parse valid string '%s', expect success", valid_str_2);
 
-	ret = bt_uuid_from_str(valid_str_3, uuid1);
-	ok(ret == 0, "bt_uuid_from_str - Parse valid string '%s', expect success", valid_str_3);
+	ret = bt_uuid_from_c_str(valid_str_3, uuid1);
+	ok(ret == 0, "bt_uuid_from_c_str - Parse valid string '%s', expect success", valid_str_3);
 
-	ret = bt_uuid_from_str(valid_str_4, uuid1);
-	ok(ret == 0, "bt_uuid_from_str - Parse valid string '%s', expect success", valid_str_4);
+	ret = bt_uuid_from_c_str(valid_str_4, uuid1);
+	ok(ret == 0, "bt_uuid_from_c_str - Parse valid string '%s', expect success", valid_str_4);
 
-	ret = bt_uuid_from_str(valid_str_5, uuid1);
-	ok(ret == 0, "bt_uuid_from_str - Parse valid string '%s', expect success", valid_str_5);
+	ret = bt_uuid_from_c_str(valid_str_5, uuid1);
+	ok(ret == 0, "bt_uuid_from_c_str - Parse valid string '%s', expect success", valid_str_5);
 
 	/*
 	 * Parse invalid UUID strings, expect failure.
 	 */
-	ret = bt_uuid_from_str(invalid_str_1, uuid1);
-	ok(ret != 0, "bt_uuid_from_str - Parse invalid string '%s', expect failure", invalid_str_1);
+	ret = bt_uuid_from_c_str(invalid_str_1, uuid1);
+	ok(ret != 0, "bt_uuid_from_c_str - Parse invalid string '%s', expect failure", invalid_str_1);
 
-	ret = bt_uuid_from_str(invalid_str_2, uuid1);
-	ok(ret != 0, "bt_uuid_from_str - Parse invalid string '%s', expect failure", invalid_str_2);
+	ret = bt_uuid_from_c_str(invalid_str_2, uuid1);
+	ok(ret != 0, "bt_uuid_from_c_str - Parse invalid string '%s', expect failure", invalid_str_2);
 
-	ret = bt_uuid_from_str(invalid_str_3, uuid1);
-	ok(ret != 0, "bt_uuid_from_str - Parse invalid string '%s', expect failure", invalid_str_3);
+	ret = bt_uuid_from_c_str(invalid_str_3, uuid1);
+	ok(ret != 0, "bt_uuid_from_c_str - Parse invalid string '%s', expect failure", invalid_str_3);
 
-	ret = bt_uuid_from_str(invalid_str_4, uuid1);
-	ok(ret != 0, "bt_uuid_from_str - Parse invalid string '%s', expect failure", invalid_str_4);
+	ret = bt_uuid_from_c_str(invalid_str_4, uuid1);
+	ok(ret != 0, "bt_uuid_from_c_str - Parse invalid string '%s', expect failure", invalid_str_4);
 
-	ret = bt_uuid_from_str(invalid_str_5, uuid1);
-	ok(ret != 0, "bt_uuid_from_str - Parse invalid string '%s', expect failure", invalid_str_5);
+	ret = bt_uuid_from_c_str(invalid_str_5, uuid1);
+	ok(ret != 0, "bt_uuid_from_c_str - Parse invalid string '%s', expect failure", invalid_str_5);
 
-	ret = bt_uuid_from_str(invalid_str_6, uuid1);
-	ok(ret != 0, "bt_uuid_from_str - Parse invalid string '%s', expect failure", invalid_str_6);
+	ret = bt_uuid_from_c_str(invalid_str_6, uuid1);
+	ok(ret != 0, "bt_uuid_from_c_str - Parse invalid string '%s', expect failure", invalid_str_6);
 }
 
 static
@@ -106,12 +106,12 @@ void run_test_bt_uuid_compare(void)
 	int ret;
 	bt_uuid_t uuid1, uuid2;
 
-	bt_uuid_from_str(valid_str_1, uuid1);
-	bt_uuid_from_str(valid_str_1, uuid2);
+	bt_uuid_from_c_str(valid_str_1, uuid1);
+	bt_uuid_from_c_str(valid_str_1, uuid2);
 	ret = bt_uuid_compare(uuid1, uuid2);
 	ok(ret == 0, "bt_uuid_compare - Compare same UUID, expect success");
 
-	bt_uuid_from_str(valid_str_2, uuid2);
+	bt_uuid_from_c_str(valid_str_2, uuid2);
 	ret = bt_uuid_compare(uuid1, uuid2);
 	ok(ret != 0, "bt_uuid_compare - Compare different UUID, expect failure");
 	ok(ret < 0, "bt_uuid_compare - Compare different UUID, expect uuid1 smaller");
@@ -166,7 +166,7 @@ void run_test(void)
 {
 	plan_tests(NR_TESTS);
 
-	run_test_bt_uuid_from_str();
+	run_test_bt_uuid_from_c_str();
 	run_test_bt_uuid_to_str();
 	run_test_bt_uuid_compare();
 	run_test_bt_uuid_copy();

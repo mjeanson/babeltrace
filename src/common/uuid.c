@@ -58,21 +58,35 @@ void bt_uuid_to_str(const bt_uuid_t uuid_in, char *str_out)
 	snprintf(str_out, BT_UUID_STR_LEN + 1, BT_UUID_FMT, BT_UUID_FMT_VALUES(uuid_in));
 }
 
-int bt_uuid_from_str(const char *str_in, bt_uuid_t uuid_out)
+int bt_uuid_from_c_str(const char *str, bt_uuid_t uuid_out)
+{
+	BT_ASSERT_DBG(str);
+	return bt_uuid_from_str(str, str + strlen(str), uuid_out);
+}
+
+int bt_uuid_from_str(const char *begin, const char *end, bt_uuid_t uuid_out)
 {
 	int ret = 0;
 	bt_uuid_t uuid_scan;
 
 	BT_ASSERT_DBG(uuid_out);
-	BT_ASSERT_DBG(str_in);
+	BT_ASSERT_DBG(begin);
+	BT_ASSERT_DBG(end);
 
-	if (strnlen(str_in, BT_UUID_STR_LEN + 1) != BT_UUID_STR_LEN) {
+	if (end - begin != BT_UUID_STR_LEN) {
 		ret = -1;
 		goto end;
 	}
 
-	/* Scan to a temporary location in case of a partial match. */
-	if (sscanf(str_in, BT_UUID_FMT, BT_UUID_SCAN_VALUES(uuid_scan)) != BT_UUID_LEN) {
+	/*
+	 * Scan to a temporary location in case of a partial match.
+	 *
+	 * It's safe to use `begin` here even without a null terminator
+	 * because we know the string from `begin` to `end` is large
+	 * enough to contain a UUID string.
+	 */
+	if (sscanf(begin, BT_UUID_FMT, BT_UUID_SCAN_VALUES(uuid_scan)) !=
+			BT_UUID_LEN) {
 		ret = -1;
 	}
 

@@ -575,7 +575,7 @@ static inline int ctf_ast_get_unary_uuid(struct bt_list_head *head, bt_uuid_t uu
         }
 
         src_string = node->u.unary_expression.u.string;
-        ret = bt_uuid_from_str(src_string, uuid);
+        ret = bt_uuid_from_c_str(src_string, uuid);
         if (ret) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(logger, "Cannot parse UUID: uuid=\"{}\"", src_string);
             goto end;

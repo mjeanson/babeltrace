@@ -137,7 +137,7 @@ public:
 
     explicit Uuid(const bt2c::CStringView str) noexcept
     {
-        const auto ret = bt_uuid_from_str(str.data(), _mUuid.data());
+        const auto ret = bt_uuid_from_c_str(str.data(), _mUuid.data());
         BT_ASSERT(ret == 0);
     }
 
