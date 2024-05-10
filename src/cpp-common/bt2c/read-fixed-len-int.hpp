@@ -37,7 +37,7 @@ IntT readFixedLenInt(const std::uint8_t * const buf)
 template <typename IntT>
 IntT readFixedLenIntLe(const std::uint8_t * const buf)
 {
-    return bt2c::littleEndianToNative(readFixedLenInt<IntT>(buf));
+    return littleEndianToNative(readFixedLenInt<IntT>(buf));
 }
 
 /*
@@ -47,7 +47,7 @@ IntT readFixedLenIntLe(const std::uint8_t * const buf)
 template <typename IntT>
 IntT readFixedLenIntBe(const std::uint8_t * const buf)
 {
-    return bt2c::bigEndianToNative(readFixedLenInt<IntT>(buf));
+    return bigEndianToNative(readFixedLenInt<IntT>(buf));
 }
 
 } /* namespace bt2c */
