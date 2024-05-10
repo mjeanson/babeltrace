@@ -12,7 +12,7 @@
 namespace ctf {
 namespace src {
 
-struct ClkClsCfg
+struct ClkClsCfg final
 {
     std::int64_t offsetSec = 0;
     std::int64_t offsetNanoSec = 0;
