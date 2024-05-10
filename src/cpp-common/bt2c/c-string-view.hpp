@@ -176,7 +176,7 @@ public:
         return _mStr[i];
     }
 
-    bool startsWith(const bt2c::CStringView prefix) const noexcept
+    bool startsWith(const CStringView prefix) const noexcept
     {
         BT_ASSERT_DBG(_mStr);
         BT_ASSERT_DBG(prefix);
