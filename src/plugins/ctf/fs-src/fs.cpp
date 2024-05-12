@@ -367,16 +367,7 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
         return -1;
     }
 
-    if (begin_ns == -1) {
-        /*
-         * No beginning timestamp to sort the stream files
-         * within a stream file group, so consider that this
-         * file must be the only one within its group.
-         */
-        stream_instance_id.reset();
-    }
-
-    if (!stream_instance_id) {
+    if (!stream_instance_id || begin_ns == -1) {
         /*
          * No stream instance ID or no beginning timestamp:
          * create a unique stream file group for this stream
@@ -385,12 +376,11 @@ static int add_ds_file_to_ds_file_group(struct ctf_fs_trace *ctf_fs_trace, const
          * group.
          */
         ctf_fs_trace->ds_file_groups.emplace_back(bt2s::make_unique<ctf_fs_ds_file_group>(
-            ctf_fs_trace, *sc, UINT64_C(-1), std::move(*index)));
+            ctf_fs_trace, *sc, stream_instance_id ? *stream_instance_id : UINT64_C(-1),
+            std::move(*index)));
         ctf_fs_trace->ds_file_groups.back()->insert_ds_file_info_sorted(std::move(ds_file_info));
         return 0;
     }
-
-    BT_ASSERT(begin_ns != -1);
 
     /* Find an existing stream file group with this ID */
     ctf_fs_ds_file_group *ds_file_group = NULL;
