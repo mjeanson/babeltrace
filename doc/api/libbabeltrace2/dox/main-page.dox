@@ -112,13 +112,13 @@ to learn even more about the \bt_name project and its core concepts.
     parts of the API to accomplish real tasks.
   </dd>
 
-  <dt><a class="el" href="modules.html">API reference</a></dt>
+  <dt><a class="el" href="topics.html">API reference</a></dt>
   <dd>
     Documents all the \bt_name C functions, definitions, macros,
     enumerators, and types.
 
-    Each documentation module describes its API thoroughly and how it's
-    related to other modules.
+    Each page describes its API thoroughly and how it's
+    related to other APIs.
   </dd>
 </dl>
 */

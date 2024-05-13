@@ -39,8 +39,8 @@ pass it to bt_component_class_source_create() or
 bt_component_class_filter_create() to set it as the created component
 class's message iterator class.
 
-A message iterator class has <em>methods</em>. This module essentially
-offers:
+A message iterator class has <em>methods</em>. This API
+essentially offers:
 
 - Message iterator class method type definitions.
 

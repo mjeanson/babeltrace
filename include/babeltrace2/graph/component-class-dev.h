@@ -32,11 +32,11 @@ A <strong><em>component class</em></strong> is the class of a \bt_comp:
 @image html component.png
 
 @attention
-    This module (component class development API) offers functions to
+    This API (component class development API) offers functions to
     programmatically create component classes. To get the properties of
     an existing component class, see \ref api-comp-cls.
 
-A component class has <em>methods</em>. This module essentially
+A component class has <em>methods</em>. This API essentially
 offers:
 
 - Component class method type definitions.
@@ -84,7 +84,7 @@ See \ref api-comp-cls-dev-methods "Methods" to learn more about the
 different types of component class methods.
 
 A component class is a \ref api-fund-shared-object "shared object": see
-the \ref api-comp-cls module for the reference count functions.
+the \ref api-comp-cls API for the reference count functions.
 
 Some library functions \ref api-fund-freezing "freeze" component classes
 on success. The documentation of those functions indicate this

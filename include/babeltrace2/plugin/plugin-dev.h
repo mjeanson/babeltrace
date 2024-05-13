@@ -49,13 +49,14 @@ extern "C" {
 @brief
     Shared object plugin development.
 
-This module offers macros to create a \bt_name shared object plugin.
+This API offers macros to create a \bt_name shared
+object plugin.
 
-Behind the scenes, the <code>BT_PLUGIN_*()</code> macros of this module
-create and fill global tables which are located in sections of the
-shared object with specific names. The \ref api-plugin functions can
-load the resulting shared object file and create corresponding
-\bt_plugin objects.
+Behind the scenes, the <code>BT_PLUGIN_*()</code> macros of this
+API create and fill global tables which are located in
+sections of the shared object with specific names. The \ref api-plugin
+functions can load the resulting shared object file and create
+corresponding \bt_plugin objects.
 
 See \ref guide-comp-link-plugin-so.
 
@@ -192,7 +193,7 @@ You can repeat steps 5 to 7 to add more than one component class to a
 given plugin.
 
 See \ref example-simple-plugin-def-file for a concrete example of how
-to use the macros of this module.
+to use the macros of this API.
 
 <h1>\anchor api-plugin-dev-custom-plugin-id Custom plugin ID</h1>
 

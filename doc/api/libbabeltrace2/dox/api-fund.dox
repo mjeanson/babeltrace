@@ -35,7 +35,7 @@ that it meets its
 when it returns.
 
 The function descriptions in the
-<a class="el" href="modules.html">API reference modules</a>
+<a class="el" href="topics.html">API reference</a>
 list all their preconditions and postconditions, if any.
 
 The libbabeltrace2 public functions offer a
@@ -126,7 +126,7 @@ object type A inherits an object type B, then you can use both the A and
 B API functions with an object of type A. For example, because an
 \bt_enum_fc \em is conceptually an \bt_int_fc, you can use any integer
 field class function with an enumeration field class.
-The <a class="el" href="modules.html">API reference modules</a> always
+The <a class="el" href="topics.html">API reference pages</a> always
 indicate the inheritance relations.
 
 @subsection api-fund-object-shared-unique Shared vs. unique objects
@@ -199,7 +199,7 @@ Some \bt_name objects are \em shared while some others are \em unique:
 
     Because you cannot get a new unique object reference, you \em must
     ensure that you own the unique object's owner to keep it alive. The
-    <a class="el" href="modules.html">API reference modules</a> make it
+    <a class="el" href="topics.html">API reference pages</a> make it
     clear, depending on the context, which
     shared object is the ultimate owner of a given unique object.
 
@@ -212,7 +212,7 @@ Some \bt_name objects are \em shared while some others are \em unique:
   </dd>
 </dl>
 
-In the <a class="el" href="modules.html">API reference</a>, each module
+In the <a class="el" href="topics.html">API reference</a>, each page
 indicates whether the documented objects are shared or unique.
 
 @subsection api-fund-freezing Object freezing
@@ -233,7 +233,7 @@ When an object becomes frozen, its contained objects, if any, also
 become frozen, recursively.
 
 There's no function to check whether or not a given object is frozen.
-Because the <a class="el" href="modules.html">API reference modules</a>
+Because the <a class="el" href="topics.html">API reference pages</a>
 document which functions freeze which objects,
 the "frozen" property is only useful for libbabeltrace2 to catch
 programming errors (\ref api-fund-pre-post "precondition checks").
@@ -264,7 +264,7 @@ be contained in some collection. For example, all \bt_val objects have
 the type #bt_value because an \bt_array_val can contain different
 types of values. You must be careful to only call the functions which
 apply to a specific type of such objects.
-The <a class="el" href="modules.html">API reference modules</a> make
+The <a class="el" href="topics.html">API reference pages</a> make
 this clear in the precondition section. Such objects always have a
 <code>*_get_type()</code> function to get the object's exact type
 enumerator. For example, bt_value_get_type() returns the type enumerator
@@ -374,7 +374,7 @@ if (status != BT_VALUE_COPY_STATUS_OK) {
 }
 @endcode
 
-The <a class="el" href="modules.html">API reference modules</a>
+The <a class="el" href="topics.html">API reference pages</a>
 document, for each function, what each return status enumerator means.
 
 Some functions return properties or objects by output parameter. When

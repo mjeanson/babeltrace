@@ -31,9 +31,9 @@ A <strong><em>component class</em></strong> is the class of a \bt_comp:
 @image html component.png
 
 @attention
-    This module (component class API) offers basic, read-only functions
-    to get component class properties. To \em create a component class,
-    see \ref api-comp-cls-dev or \ref api-plugin-dev.
+    This API (component class API) offers basic,
+    read-only functions to get component class properties. To \em create
+    a component class, see \ref api-comp-cls-dev or \ref api-plugin-dev.
 
 You can instantiate a given component class many times, with different
 initialization parameters, to create many components with the

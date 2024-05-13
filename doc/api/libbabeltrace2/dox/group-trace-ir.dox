@@ -8,8 +8,8 @@
     domain objects and concepts (contents of \bt_p_msg).
 
 The \bt_name
-<strong><em>trace IR</em></strong> (intermediate representation) modules
-contain everything you need to represent tracing domain concepts and
+<strong><em>trace IR</em></strong> (intermediate representation) API
+offers everything you need to represent tracing domain concepts and
 objects so that many \bt_p_comp, written by different authors, can
 exchange trace metadata and data.
 

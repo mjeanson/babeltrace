@@ -28,8 +28,8 @@ extern "C" {
 @brief
     Error reporting functions and macros.
 
-This module contains functions and macros to report rich errors from a
-user function (a \bt_comp_cls method, a
+This API offers functions and macros to report rich
+errors from a user function (a \bt_comp_cls method, a
 \ref api-qexec "query operation", or a trace processing \bt_graph
 listener, for example) to any function caller.
 

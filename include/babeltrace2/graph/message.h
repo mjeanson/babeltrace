@@ -848,7 +848,7 @@ version as rarely as possible. When it is required, though, it's a
 welcome tool to make the project evolve gracefully.
 
 The Message Interchange Protocol has no dedicated documentation as this
-very message module (and its submodules, like \ref api-tir)
+very message API (and its contained APIs, like \ref api-tir)
 documentation is enough. You can consider that all the
 functions of the message and trace IR objects have an implicit MIP
 version \ref api-fund-pre-post "precondition". When a given

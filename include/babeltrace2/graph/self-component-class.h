@@ -31,9 +31,9 @@ The #bt_self_component_class, #bt_self_component_class_source,
 private views of a \bt_comp_cls from within a component class
 \ref api-comp-cls-dev-class-meth "class method".
 
-As of \bt_name_version_min_maj, this module only contains functions
-to \ref api-fund-c-typing "upcast" the "self" (private) types to their
-public #bt_component_class, #bt_component_class_source,
+As of \bt_name_version_min_maj, this API only offers
+functions to \ref api-fund-c-typing "upcast" the "self" (private) types
+to their public #bt_component_class, #bt_component_class_source,
 #bt_component_class_filter, and #bt_component_class_sink counterparts.
 */
 

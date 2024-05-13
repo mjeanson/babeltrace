@@ -25,7 +25,7 @@ extern "C" {
 @brief
     General purpose utilities.
 
-This module contains general purpose utilities.
+This API offers general purpose utilities.
 */
 
 /*! @{ */

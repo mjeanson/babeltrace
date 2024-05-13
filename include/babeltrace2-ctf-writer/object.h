@@ -20,7 +20,7 @@ extern "C" {
 #include <babeltrace2-ctf-writer/object.h>
 @endcode
 
-The macros and functions of this module are everything that is needed
+The macros and functions of this API are everything that is needed
 to handle the <strong><em>reference counting</em></strong> of
 Babeltrace objects.
 
