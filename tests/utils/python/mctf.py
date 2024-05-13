@@ -76,6 +76,27 @@ def _normand_parse(
         ) from e
 
 
+def _reformat_ctf_2_metadata(content: str):
+    import json
+
+    json_seq_fragments = []  # type: list[str]
+
+    for fragment in json.loads(content):
+        json_seq_fragments.append("\x1e{}".format(json.dumps(fragment, indent=2)))
+
+    return "\n".join(json_seq_fragments)
+
+
+def _reformat_metadata(content: str):
+    content = content.strip() + "\n"
+
+    if content.startswith("["):
+        # CTF 2: JSON array to JSON text sequence
+        return _reformat_ctf_2_metadata(content)
+
+    return content
+
+
 def _generate_from_part(
     part: moultipart.Part,
     base_dir: str,
@@ -85,7 +106,9 @@ def _generate_from_part(
 ):
     content = part.content
 
-    if part.header_info != "metadata":
+    if part.header_info == "metadata":
+        content = _reformat_metadata(content)
+    else:
         res = _normand_parse(part, normand_vars, normand_labels)
         content = res.data
         normand_vars = res.variables
