@@ -7,8 +7,8 @@
  * http://www.efficios.com/ctf
  */
 
-#ifndef BABELTRACE_CTF_WRITER_FIELDS_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_FIELDS_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_FIELDS_H
+#define BABELTRACE_CTF_WRITER_FIELDS_H
 
 #include <glib.h>
 #include <inttypes.h>
@@ -807,4 +807,4 @@ bt_ctf_bool bt_ctf_field_is_set_recursive(
 	return bt_ctf_field_common_is_set_recursive((void *) field);
 }
 
-#endif /* BABELTRACE_CTF_WRITER_FIELDS_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_FIELDS_H */

@@ -4,8 +4,8 @@
  * Copyright (c) 2017 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef CTF_METADATA_LOGGING_H
-#define CTF_METADATA_LOGGING_H
+#ifndef BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_LOGGING_HPP
+#define BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_LOGGING_HPP
 
 #include <babeltrace2/babeltrace.h>
 
@@ -23,4 +23,4 @@
 #define _BT_CPPLOGE_APPEND_CAUSE_LINENO(logger, _lineno, _msg, args...)                            \
     BT_CPPLOGE_APPEND_CAUSE_SPEC((logger), "At line {} in metadata stream: " _msg, _lineno, ##args)
 
-#endif /* CTF_METADATA_LOGGING_H */
+#endif /* BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_LOGGING_HPP */

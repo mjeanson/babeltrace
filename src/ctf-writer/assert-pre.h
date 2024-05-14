@@ -5,8 +5,8 @@
  * Copyright (c) 2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_CTF_WRITER_ASSERT_PRE_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_ASSERT_PRE_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_ASSERT_PRE_H
+#define BABELTRACE_CTF_WRITER_ASSERT_PRE_H
 
 /*
  * The macros in this header use macros defined in "logging/log.h". We
@@ -142,4 +142,4 @@
 		"Index is out of bounds: index=%" PRIu64 ", "		\
 		"count=%" PRIu64, (uint64_t) (_index), (uint64_t) (_length))
 
-#endif /* BABELTRACE_CTF_WRITER_ASSERT_PRE_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_ASSERT_PRE_H */

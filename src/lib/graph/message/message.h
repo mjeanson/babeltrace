@@ -5,8 +5,8 @@
  * Copyright 2015 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_MESSAGE_MESSAGE_INTERNAL_H
-#define BABELTRACE_GRAPH_MESSAGE_MESSAGE_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_MESSAGE_MESSAGE_H
+#define BABELTRACE_LIB_GRAPH_MESSAGE_MESSAGE_H
 
 /* Protection: this file uses BT_LIB_LOG*() macros directly */
 #ifndef BT_LIB_LOG_SUPPORTED
@@ -92,4 +92,4 @@ void bt_message_unlink_graph(struct bt_message *msg);
 # define bt_message_freeze(_x)
 #endif /* BT_DEV_MODE */
 
-#endif /* BABELTRACE_GRAPH_MESSAGE_MESSAGE_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_MESSAGE_MESSAGE_H */

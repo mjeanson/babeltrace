@@ -4,8 +4,8 @@
  * Copyright (C) 2011-2013 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  */
 
-#ifndef _BABELTRACE_UTC_H
-#define _BABELTRACE_UTC_H
+#ifndef BABELTRACE_COMPAT_UTC_H
+#define BABELTRACE_COMPAT_UTC_H
 
 #include <time.h>
 
@@ -86,4 +86,4 @@ time_t bt_timegm(struct tm *tm)
 
 #endif
 
-#endif /* _BABELTRACE_UTC_H */
+#endif /* BABELTRACE_COMPAT_UTC_H */

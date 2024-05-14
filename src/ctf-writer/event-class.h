@@ -4,8 +4,8 @@
  * Copyright 2013, 2014 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_CTF_WRITER_EVENT_CLASS_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_EVENT_CLASS_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_EVENT_CLASS_H
+#define BABELTRACE_CTF_WRITER_EVENT_CLASS_H
 
 #include "common/assert.h"
 #include "common/macros.h"
@@ -371,4 +371,4 @@ end:
 	return ret;
 }
 
-#endif /* BABELTRACE_CTF_WRITER_EVENT_CLASS_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_EVENT_CLASS_H */

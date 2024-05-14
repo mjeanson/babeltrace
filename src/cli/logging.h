@@ -4,8 +4,8 @@
  * Copyright (C) 2017 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef CLI_LOGGING_H
-#define CLI_LOGGING_H
+#ifndef BABELTRACE_CLI_LOGGING_H
+#define BABELTRACE_CLI_LOGGING_H
 
 #define BT_LOG_OUTPUT_LEVEL bt_cli_log_level
 #include "logging/log.h"
@@ -24,4 +24,4 @@ BT_LOG_LEVEL_EXTERN_SYMBOL(bt_cli_log_level);
 #define BT_CLI_LOGW_APPEND_CAUSE(_fmt, ...)				\
 	BT_CLI_LOG_AND_APPEND(BT_LOG_WARNING, _fmt, ##__VA_ARGS__)
 
-#endif /* CLI_LOGGING_H */
+#endif /* BABELTRACE_CLI_LOGGING_H */

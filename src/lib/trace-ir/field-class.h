@@ -5,8 +5,8 @@
  * Copyright 2013, 2014 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_TRACE_IR_FIELD_CLASSES_INTERNAL_H
-#define BABELTRACE_TRACE_IR_FIELD_CLASSES_INTERNAL_H
+#ifndef BABELTRACE_LIB_TRACE_IR_FIELD_CLASS_H
+#define BABELTRACE_LIB_TRACE_IR_FIELD_CLASS_H
 
 #include <babeltrace2/trace-ir/clock-class.h>
 #include <babeltrace2/trace-ir/field-class.h>
@@ -247,4 +247,4 @@ void _bt_named_field_class_freeze(const struct bt_named_field_class *named_fc);
 void bt_field_class_make_part_of_trace_class(
 		const struct bt_field_class *field_class);
 
-#endif /* BABELTRACE_TRACE_IR_FIELD_CLASSES_INTERNAL_H */
+#endif /* BABELTRACE_LIB_TRACE_IR_FIELD_CLASS_H */

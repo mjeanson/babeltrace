@@ -5,8 +5,8 @@
  * Copyright 2017 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_CONNECTION_INTERNAL_H
-#define BABELTRACE_GRAPH_CONNECTION_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_CONNECTION_H
+#define BABELTRACE_LIB_GRAPH_CONNECTION_H
 
 #include <babeltrace2/graph/connection.h>
 #include "lib/object.h"
@@ -60,4 +60,4 @@ struct bt_graph *bt_connection_borrow_graph(struct bt_connection *conn)
 	return (void *) conn->base.parent;
 }
 
-#endif /* BABELTRACE_GRAPH_CONNECTION_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_CONNECTION_H */

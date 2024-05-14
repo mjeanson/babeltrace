@@ -4,8 +4,8 @@
  * Copyright 2010 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  */
 
-#ifndef _BABELTRACE_COMPILER_H
-#define _BABELTRACE_COMPILER_H
+#ifndef BABELTRACE_COMPAT_COMPILER_H
+#define BABELTRACE_COMPAT_COMPILER_H
 
 #include <stddef.h>	/* for offsetof */
 
@@ -21,4 +21,4 @@
 
 #define BT_ARRAY_SIZE(arr)	(sizeof(arr) / sizeof((arr)[0]))
 
-#endif /* _BABELTRACE_COMPILER_H */
+#endif /* BABELTRACE_COMPAT_COMPILER_H */

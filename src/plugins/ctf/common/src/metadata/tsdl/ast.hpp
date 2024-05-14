@@ -4,8 +4,8 @@
  * Copyright 2011-2012 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  */
 
-#ifndef _CTF_AST_H
-#define _CTF_AST_H
+#ifndef BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_AST_HPP
+#define BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_AST_HPP
 
 #include <memory>
 
@@ -608,4 +608,4 @@ end:
     return ret;
 }
 
-#endif /* _CTF_AST_H */
+#endif /* BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_AST_HPP */

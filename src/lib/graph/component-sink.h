@@ -5,8 +5,8 @@
  * Copyright 2015 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_COMPONENT_SINK_INTERNAL_H
-#define BABELTRACE_GRAPH_COMPONENT_SINK_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_COMPONENT_SINK_H
+#define BABELTRACE_LIB_GRAPH_COMPONENT_SINK_H
 
 #include <stdbool.h>
 
@@ -22,4 +22,4 @@ struct bt_component_sink {
 
 struct bt_component *bt_component_sink_create(void);
 
-#endif /* BABELTRACE_GRAPH_COMPONENT_SINK_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_COMPONENT_SINK_H */

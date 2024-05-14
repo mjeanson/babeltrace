@@ -6,8 +6,8 @@
  * Babeltrace - DWARF Information Reader
  */
 
-#ifndef _BABELTRACE_DWARF_H
-#define _BABELTRACE_DWARF_H
+#ifndef BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_DWARF_H
+#define BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_DWARF_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -201,4 +201,4 @@ int bt_dwarf_die_get_call_line(struct bt_dwarf_die *die,
 int bt_dwarf_die_contains_addr(struct bt_dwarf_die *die, uint64_t addr,
 		bool *contains);
 
-#endif	/* _BABELTRACE_DWARF_H */
+#endif /* BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_DWARF_H */

@@ -5,8 +5,8 @@
  * Copyright 2016 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_MESSAGE_EVENT_INTERNAL_H
-#define BABELTRACE_GRAPH_MESSAGE_EVENT_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_MESSAGE_EVENT_H
+#define BABELTRACE_LIB_GRAPH_MESSAGE_EVENT_H
 
 #include "compat/compiler.h"
 #include <babeltrace2/trace-ir/event-class.h>
@@ -34,4 +34,4 @@ void bt_message_event_destroy(struct bt_message *msg);
 }
 #endif
 
-#endif /* BABELTRACE_GRAPH_MESSAGE_EVENT_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_MESSAGE_EVENT_H */

@@ -5,8 +5,8 @@
  * Copyright 2015 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_MESSAGE_ITERATOR_CLASS_INTERNAL_H
-#define BABELTRACE_GRAPH_MESSAGE_ITERATOR_CLASS_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_MESSAGE_ITERATOR_CLASS_H
+#define BABELTRACE_LIB_GRAPH_MESSAGE_ITERATOR_CLASS_H
 
 #include <babeltrace2/graph/message-iterator-class.h>
 #include <babeltrace2/types.h>
@@ -38,4 +38,4 @@ void _bt_message_iterator_class_freeze(
 # define bt_message_iterator_class_freeze(_cls)
 #endif
 
-#endif /* BABELTRACE_GRAPH_MESSAGE_ITERATOR_CLASS_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_MESSAGE_ITERATOR_CLASS_H */

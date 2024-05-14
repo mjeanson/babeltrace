@@ -8,8 +8,8 @@
  * BabelTrace - LTTng-live client Component
  */
 
-#ifndef BABELTRACE_PLUGIN_CTF_LTTNG_LIVE_H
-#define BABELTRACE_PLUGIN_CTF_LTTNG_LIVE_H
+#ifndef BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_LTTNG_LIVE_HPP
+#define BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_LTTNG_LIVE_HPP
 
 #include <glib.h>
 #include <stdint.h>
@@ -451,4 +451,4 @@ bool lttng_live_graph_is_canceled(struct lttng_live_msg_iter *msg_iter);
 void lttng_live_stream_iterator_set_state(struct lttng_live_stream_iterator *stream_iter,
                                           enum lttng_live_stream_state new_state);
 
-#endif /* BABELTRACE_PLUGIN_CTF_LTTNG_LIVE_H */
+#endif /* BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_LTTNG_LIVE_HPP */

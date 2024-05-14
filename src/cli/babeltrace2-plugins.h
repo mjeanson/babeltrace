@@ -6,8 +6,8 @@
  * Babeltrace trace converter - CLI tool's configuration
  */
 
-#ifndef CLI_BABELTRACE_PLUGINS_H
-#define CLI_BABELTRACE_PLUGINS_H
+#ifndef BABELTRACE_CLI_BABELTRACE2_PLUGINS_H
+#define BABELTRACE_CLI_BABELTRACE2_PLUGINS_H
 
 #include <babeltrace2/babeltrace.h>
 #include "common/macros.h"
@@ -23,4 +23,4 @@ const bt_plugin *borrow_loaded_plugin_by_index(size_t index);
 const bt_plugin *borrow_loaded_plugin_by_name(const char *name);
 
 
-#endif /* CLI_BABELTRACE_PLUGINS_H */
+#endif /* BABELTRACE_CLI_BABELTRACE2_PLUGINS_H */

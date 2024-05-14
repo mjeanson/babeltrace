@@ -6,8 +6,8 @@
  * BabelTrace - Trace Trimmer Plug-in
  */
 
-#ifndef BABELTRACE_PLUGINS_UTILS_TRIMMER_H
-#define BABELTRACE_PLUGINS_UTILS_TRIMMER_H
+#ifndef BABELTRACE_PLUGINS_UTILS_TRIMMER_TRIMMER_H
+#define BABELTRACE_PLUGINS_UTILS_TRIMMER_TRIMMER_H
 
 #include "common/macros.h"
 #include <babeltrace2/babeltrace.h>
@@ -39,4 +39,4 @@ void trimmer_msg_iter_finalize(bt_self_message_iterator *self_msg_iter);
 }
 #endif
 
-#endif /* BABELTRACE_PLUGINS_UTILS_TRIMMER_H */
+#endif /* BABELTRACE_PLUGINS_UTILS_TRIMMER_TRIMMER_H */

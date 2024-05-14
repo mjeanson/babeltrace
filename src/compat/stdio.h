@@ -4,8 +4,8 @@
  * Copyright (C) 2015 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  */
 
-#ifndef _BABELTRACE_COMPAT_STDIO_H
-#define _BABELTRACE_COMPAT_STDIO_H
+#ifndef BABELTRACE_COMPAT_STDIO_H
+#define BABELTRACE_COMPAT_STDIO_H
 
 #include <stdio.h>
 #include <errno.h>
@@ -109,4 +109,4 @@ ssize_t bt_getline(char **lineptr, size_t *n, FILE *stream)
 	return linelen - 1;	/* Count don't include final \0. */
 }
 
-#endif /* _BABELTRACE_COMPAT_STDIO_H */
+#endif /* BABELTRACE_COMPAT_STDIO_H */

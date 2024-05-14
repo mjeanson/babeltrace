@@ -5,8 +5,8 @@
  * Copyright 2014 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_TRACE_IR_TRACE_CLASS_INTERNAL_H
-#define BABELTRACE_TRACE_IR_TRACE_CLASS_INTERNAL_H
+#ifndef BABELTRACE_LIB_TRACE_IR_TRACE_CLASS_H
+#define BABELTRACE_LIB_TRACE_IR_TRACE_CLASS_H
 
 #include <babeltrace2/trace-ir/trace-class.h>
 #include <babeltrace2/trace-ir/field-class.h>
@@ -40,4 +40,4 @@ void _bt_trace_class_freeze(const struct bt_trace_class *trace_class);
 # define bt_trace_class_freeze(_tc)
 #endif
 
-#endif /* BABELTRACE_TRACE_IR_TRACE_CLASS_INTERNAL_H */
+#endif /* BABELTRACE_LIB_TRACE_IR_TRACE_CLASS_H */

@@ -4,8 +4,8 @@
  * Copyright 2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef _CTF_META_H
-#define _CTF_META_H
+#ifndef BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_CTF_META_HPP
+#define BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_CTF_META_HPP
 
 #include <glib.h>
 #include <stdint.h>
@@ -1773,4 +1773,4 @@ end:
     return ret_entry;
 }
 
-#endif /* _CTF_META_H */
+#endif /* BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_CTF_META_HPP */

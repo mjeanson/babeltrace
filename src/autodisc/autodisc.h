@@ -4,8 +4,8 @@
  * Copyright (C) 2019 EfficiOS Inc. and Linux Foundation
  */
 
-#ifndef AUTODISC_AUTODISC_H
-#define AUTODISC_AUTODISC_H
+#ifndef BABELTRACE_AUTODISC_AUTODISC_H
+#define BABELTRACE_AUTODISC_AUTODISC_H
 
 #include <glib.h>
 
@@ -71,4 +71,4 @@ auto_source_discovery_status auto_discover_source_components(
 		struct auto_source_discovery *auto_disc,
 		const bt_interrupter *interrupter);
 
-#endif /* AUTODISC_AUTODISC_H */
+#endif /* BABELTRACE_AUTODISC_AUTODISC_H */

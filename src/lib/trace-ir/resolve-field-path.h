@@ -7,8 +7,8 @@
  * http://www.efficios.com/ctf
  */
 
-#ifndef BABELTRACE_TRACE_IR_RESOLVE_FIELD_PATH_INTERNAL
-#define BABELTRACE_TRACE_IR_RESOLVE_FIELD_PATH_INTERNAL
+#ifndef BABELTRACE_LIB_TRACE_IR_RESOLVE_FIELD_PATH_H
+#define BABELTRACE_LIB_TRACE_IR_RESOLVE_FIELD_PATH_H
 
 #include <babeltrace2/trace-ir/field-class.h>
 #include <babeltrace2/trace-ir/field-path.h>
@@ -25,4 +25,4 @@ int bt_resolve_field_paths(struct bt_field_class *field_class,
 		struct bt_resolve_field_path_context *ctx,
 		const char *api_func);
 
-#endif /* BABELTRACE_TRACE_IR_RESOLVE_FIELD_PATH_INTERNAL */
+#endif /* BABELTRACE_LIB_TRACE_IR_RESOLVE_FIELD_PATH_H */

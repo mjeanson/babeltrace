@@ -4,8 +4,8 @@
  * Copyright 2017 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_PLUGIN_TEXT_DMESG_DMESG_H
-#define BABELTRACE_PLUGIN_TEXT_DMESG_DMESG_H
+#ifndef BABELTRACE_PLUGINS_TEXT_DMESG_DMESG_H
+#define BABELTRACE_PLUGINS_TEXT_DMESG_DMESG_H
 
 #include <stdbool.h>
 #include "common/macros.h"
@@ -38,4 +38,4 @@ dmesg_msg_iter_can_seek_beginning(
 bt_message_iterator_class_seek_beginning_method_status dmesg_msg_iter_seek_beginning(
 		bt_self_message_iterator *message_iterator);
 
-#endif /* BABELTRACE_PLUGIN_TEXT_DMESG_DMESG_H */
+#endif /* BABELTRACE_PLUGINS_TEXT_DMESG_DMESG_H */

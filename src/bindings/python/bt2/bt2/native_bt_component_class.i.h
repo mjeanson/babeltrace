@@ -4,6 +4,9 @@
  * Copyright (c) 2017 Philippe Proulx <pproulx@efficios.com>
  */
 
+#ifndef BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_COMPONENT_CLASS_I_H
+#define BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_COMPONENT_CLASS_I_H
+
 #include "logging/comp-logging.h"
 #include "compat/glib.h"
 
@@ -1524,3 +1527,5 @@ bt_component_class_sink *bt_bt2_component_class_sink_create(
 end:
 	return component_class_sink;
 }
+
+#endif /* BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_COMPONENT_CLASS_I_H */

@@ -7,8 +7,8 @@
  * http://www.efficios.com/ctf
  */
 
-#ifndef BABELTRACE_CTF_WRITER_STREAM_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_STREAM_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_STREAM_H
+#define BABELTRACE_CTF_WRITER_STREAM_H
 
 #include "common/assert.h"
 #include "common/macros.h"
@@ -84,4 +84,4 @@ struct bt_ctf_stream *bt_ctf_stream_create_with_id(
 		struct bt_ctf_stream_class *stream_class,
 		const char *name, uint64_t id);
 
-#endif /* BABELTRACE_CTF_WRITER_STREAM_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_STREAM_H */

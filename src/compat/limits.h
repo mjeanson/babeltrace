@@ -4,8 +4,8 @@
  * Copyright (C) 2014 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef _BABELTRACE_LIMITS_H
-#define _BABELTRACE_LIMITS_H
+#ifndef BABELTRACE_COMPAT_LIMITS_H
+#define BABELTRACE_COMPAT_LIMITS_H
 
 #include <limits.h>
 
@@ -34,4 +34,4 @@
 #define PATH_MAX 4096
 #endif /* __GNU__ */
 
-#endif /* _BABELTRACE_LIMITS_H */
+#endif /* BABELTRACE_COMPAT_LIMITS_H */

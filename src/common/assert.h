@@ -5,8 +5,8 @@
  * Copyright (c) 2018-2019 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_ASSERT_INTERNAL_H
-#define BABELTRACE_ASSERT_INTERNAL_H
+#ifndef BABELTRACE_COMMON_ASSERT_H
+#define BABELTRACE_COMMON_ASSERT_H
 
 #include <assert.h>
 #include <glib.h>
@@ -63,4 +63,4 @@ extern void bt_common_assert_failed(const char *file, int line,
 }
 #endif
 
-#endif /* BABELTRACE_ASSERT_INTERNAL_H */
+#endif /* BABELTRACE_COMMON_ASSERT_H */

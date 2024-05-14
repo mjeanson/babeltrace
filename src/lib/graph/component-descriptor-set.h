@@ -5,8 +5,8 @@
  * Copyright 2017 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_COMPONENT_DESCRIPTOR_SET_INTERNAL_H
-#define BABELTRACE_GRAPH_COMPONENT_DESCRIPTOR_SET_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_COMPONENT_DESCRIPTOR_SET_H
+#define BABELTRACE_LIB_GRAPH_COMPONENT_DESCRIPTOR_SET_H
 
 #include <babeltrace2/graph/graph.h>
 #include <babeltrace2/graph/component-descriptor-set.h>
@@ -39,4 +39,4 @@ struct bt_component_descriptor_set {
 	GPtrArray *sinks;
 };
 
-#endif /* BABELTRACE_GRAPH_COMPONENT_DESCRIPTOR_SET_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_COMPONENT_DESCRIPTOR_SET_H */

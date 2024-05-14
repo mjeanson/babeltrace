@@ -5,8 +5,8 @@
  * Copyright 2015 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_OBJECT_INTERNAL_H
-#define BABELTRACE_OBJECT_INTERNAL_H
+#ifndef BABELTRACE_LIB_OBJECT_H
+#define BABELTRACE_LIB_OBJECT_H
 
 #include "common/assert.h"
 #include <stdbool.h>
@@ -347,4 +347,4 @@ void bt_object_put_ref(const void *ptr)
 		(_var_src) = NULL;		\
 	} while (0)
 
-#endif /* BABELTRACE_OBJECT_INTERNAL_H */
+#endif /* BABELTRACE_LIB_OBJECT_H */

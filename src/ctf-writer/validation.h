@@ -4,8 +4,8 @@
  * Copyright 2016 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_CTF_WRITER_VALIDATION_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_VALIDATION_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_VALIDATION_H
+#define BABELTRACE_CTF_WRITER_VALIDATION_H
 
 #include "common/macros.h"
 
@@ -106,4 +106,4 @@ void bt_ctf_validation_replace_types(struct bt_ctf_trace_common *trace,
 void bt_ctf_validation_output_put_types(
 		struct bt_ctf_validation_output *output);
 
-#endif /* BABELTRACE_CTF_WRITER_VALIDATION_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_VALIDATION_H */

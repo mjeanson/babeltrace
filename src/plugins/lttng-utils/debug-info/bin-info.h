@@ -6,8 +6,8 @@
  * Babeltrace - Executable and Shared Object Debug Info Reader
  */
 
-#ifndef _BABELTRACE_BIN_INFO_H
-#define _BABELTRACE_BIN_INFO_H
+#ifndef BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_BIN_INFO_H
+#define BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_BIN_INFO_H
 
 #include <babeltrace2/babeltrace.h>
 #include <stdint.h>
@@ -218,4 +218,4 @@ int bin_info_get_bin_loc(struct bin_info *bin, uint64_t addr, char **bin_loc);
  */
 void source_location_destroy(struct source_location *src_loc);
 
-#endif	/* _BABELTRACE_BIN_INFO_H */
+#endif /* BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_BIN_INFO_H */

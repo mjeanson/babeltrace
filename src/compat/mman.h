@@ -4,8 +4,8 @@
  * Copyright (C) 2015-2016  Michael Jeanson <mjeanson@efficios.com>
  */
 
-#ifndef _BABELTRACE_COMPAT_MMAN_H
-#define _BABELTRACE_COMPAT_MMAN_H
+#ifndef BABELTRACE_COMPAT_MMAN_H
+#define BABELTRACE_COMPAT_MMAN_H
 
 #ifdef __MINGW32__
 
@@ -76,4 +76,4 @@ size_t bt_mmap_get_offset_align_size(int log_level)
 # endif
 #endif
 
-#endif /* _BABELTRACE_COMPAT_MMAN_H */
+#endif /* BABELTRACE_COMPAT_MMAN_H */

@@ -7,8 +7,8 @@
  * Babeltrace - CTF binary field class reader (BFCR)
  */
 
-#ifndef CTF_BFCR_H
-#define CTF_BFCR_H
+#ifndef BABELTRACE_PLUGINS_CTF_COMMON_SRC_BFCR_BFCR_HPP
+#define BABELTRACE_PLUGINS_CTF_COMMON_SRC_BFCR_BFCR_HPP
 
 #include <stddef.h>
 #include <stdint.h>
@@ -355,4 +355,4 @@ size_t bt_bfcr_continue(struct bt_bfcr *bfcr, const uint8_t *buf, size_t sz,
 
 void bt_bfcr_set_unsigned_int_cb(struct bt_bfcr *bfcr, bt_bfcr_unsigned_int_cb_func cb);
 
-#endif /* CTF_BFCR_H */
+#endif /* BABELTRACE_PLUGINS_CTF_COMMON_SRC_BFCR_BFCR_HPP */

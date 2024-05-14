@@ -4,8 +4,8 @@
  * Copyright (C) 2015 Michael Jeanson <mjeanson@efficios.com>
  */
 
-#ifndef _BABELTRACE_COMPAT_STDLIB_H
-#define _BABELTRACE_COMPAT_STDLIB_H
+#ifndef BABELTRACE_COMPAT_STDLIB_H
+#define BABELTRACE_COMPAT_STDLIB_H
 
 /*
  * This compat wrapper can be removed and replaced by g_mkdtemp() when we bump
@@ -58,4 +58,4 @@ end:
 
 #endif
 
-#endif /* _BABELTRACE_COMPAT_STDLIB_H */
+#endif /* BABELTRACE_COMPAT_STDLIB_H */

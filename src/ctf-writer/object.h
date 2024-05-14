@@ -4,8 +4,8 @@
  * Copyright 2015 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_CTF_WRITER_OBJECT_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_OBJECT_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_OBJECT_H
+#define BABELTRACE_CTF_WRITER_OBJECT_H
 
 #include "common/macros.h"
 #include "common/assert.h"
@@ -296,4 +296,4 @@ void bt_ctf_object_put_no_null_check(struct bt_ctf_object *obj)
 	}
 }
 
-#endif /* BABELTRACE_CTF_WRITER_OBJECT_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_OBJECT_H */

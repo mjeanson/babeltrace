@@ -7,8 +7,8 @@
  * http://www.efficios.com/ctf
  */
 
-#ifndef BABELTRACE_INTEGER_RANGE_SET_INTERNAL_H
-#define BABELTRACE_INTEGER_RANGE_SET_INTERNAL_H
+#ifndef BABELTRACE_LIB_INTEGER_RANGE_SET_H
+#define BABELTRACE_LIB_INTEGER_RANGE_SET_H
 
 #include <stdbool.h>
 #include <glib.h>
@@ -53,4 +53,4 @@ bool bt_integer_range_set_unsigned_has_overlaps(
 bool bt_integer_range_set_signed_has_overlaps(
 		const struct bt_integer_range_set *range_set);
 
-#endif /* BABELTRACE_INTEGER_RANGE_SET_INTERNAL_H */
+#endif /* BABELTRACE_LIB_INTEGER_RANGE_SET_H */

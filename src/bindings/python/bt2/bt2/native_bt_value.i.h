@@ -4,6 +4,9 @@
  * Copyright (c) 2016 Philippe Proulx <pproulx@efficios.com>
  */
 
+#ifndef BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_VALUE_I_H
+#define BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_VALUE_I_H
+
 struct bt_value_map_get_keys_data {
 	struct bt_value *keys;
 };
@@ -46,3 +49,5 @@ error:
 end:
 	return data.keys;
 }
+
+#endif /* BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_VALUE_I_H */

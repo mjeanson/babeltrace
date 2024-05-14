@@ -5,8 +5,8 @@
  * Copyright (c) 2015 EfficiOS Inc. and Linux Foundation
  */
 
-#ifndef BABELTRACE_TRACE_IR_ATTRIBUTES_H
-#define BABELTRACE_TRACE_IR_ATTRIBUTES_H
+#ifndef BABELTRACE_LIB_TRACE_IR_ATTRIBUTES_H
+#define BABELTRACE_LIB_TRACE_IR_ATTRIBUTES_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,4 +40,4 @@ int bt_attributes_freeze(const struct bt_value *attr_obj);
 }
 #endif
 
-#endif /* BABELTRACE_TRACE_IR_ATTRIBUTES_H */
+#endif /* BABELTRACE_LIB_TRACE_IR_ATTRIBUTES_H */

@@ -5,8 +5,8 @@
  * Copyright (c) 2018-2020 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_ASSERT_COND_BASE_INTERNAL_H
-#define BABELTRACE_ASSERT_COND_BASE_INTERNAL_H
+#ifndef BABELTRACE_LIB_ASSERT_COND_BASE_H
+#define BABELTRACE_LIB_ASSERT_COND_BASE_H
 
 /*
  * The macros in this header use macros defined in "lib/logging.h". We
@@ -165,4 +165,4 @@ void bt_lib_assert_cond_failed(const char *cond_type, const char *func,
  */
 #define BT_ASSERT_COND_SUPPORTED
 
-#endif /* BABELTRACE_ASSERT_COND_BASE_INTERNAL_H */
+#endif /* BABELTRACE_LIB_ASSERT_COND_BASE_H */

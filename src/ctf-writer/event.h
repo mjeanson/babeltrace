@@ -7,8 +7,8 @@
  * http://www.efficios.com/ctf
  */
 
-#ifndef BABELTRACE_CTF_WRITER_EVENT_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_EVENT_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_EVENT_H
+#define BABELTRACE_CTF_WRITER_EVENT_H
 
 #include <stdbool.h>
 
@@ -249,4 +249,4 @@ struct bt_ctf_stream_class *bt_ctf_event_class_borrow_stream_class(
 		BT_CTF_TO_COMMON(event_class)));
 }
 
-#endif /* BABELTRACE_CTF_WRITER_EVENT_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_EVENT_H */

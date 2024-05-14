@@ -6,8 +6,8 @@
  * Common Trace Format Object Stack.
  */
 
-#ifndef _OBJSTACK_H
-#define _OBJSTACK_H
+#ifndef BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_OBJSTACK_HPP
+#define BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_OBJSTACK_HPP
 
 #include <cstddef>
 
@@ -26,4 +26,4 @@ void objstack_destroy(struct objstack *objstack);
  */
 void *objstack_alloc(struct objstack *objstack, size_t len);
 
-#endif /* _OBJSTACK_H */
+#endif /* BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_OBJSTACK_HPP */

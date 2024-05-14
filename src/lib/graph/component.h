@@ -5,8 +5,8 @@
  * Copyright 2015 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_COMPONENT_INTERNAL_H
-#define BABELTRACE_GRAPH_COMPONENT_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_COMPONENT_H
+#define BABELTRACE_LIB_GRAPH_COMPONENT_H
 
 #include <babeltrace2/graph/component.h>
 #include <babeltrace2/graph/component-class.h>
@@ -109,4 +109,4 @@ void bt_component_add_destroy_listener(struct bt_component *component,
 void bt_component_remove_destroy_listener(struct bt_component *component,
 		bt_component_destroy_listener_func func, void *data);
 
-#endif /* BABELTRACE_GRAPH_COMPONENT_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_COMPONENT_H */

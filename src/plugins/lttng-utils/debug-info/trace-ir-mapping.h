@@ -4,8 +4,8 @@
  * Copyright 2019 Francis Deslauriers francis.deslauriers@efficios.com>
  */
 
-#ifndef BABELTRACE_PLUGIN_DEBUG_INFO_TRACE_IR_MAPPING_H
-#define BABELTRACE_PLUGIN_DEBUG_INFO_TRACE_IR_MAPPING_H
+#ifndef BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_TRACE_IR_MAPPING_H
+#define BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_TRACE_IR_MAPPING_H
 
 #include <glib.h>
 
@@ -261,4 +261,4 @@ struct trace_ir_metadata_maps *borrow_metadata_maps_from_input_event_class(
 			bt_event_class_borrow_stream_class_const(in_event_class));
 }
 
-#endif /* BABELTRACE_PLUGIN_DEBUG_INFO_TRACE_IR_MAPPING_H */
+#endif /* BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_TRACE_IR_MAPPING_H */

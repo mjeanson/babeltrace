@@ -4,8 +4,8 @@
  * Copyright 2017-2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_QUERY_EXECUTOR_INTERNAL_H
-#define BABELTRACE_GRAPH_QUERY_EXECUTOR_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_QUERY_EXECUTOR_H
+#define BABELTRACE_LIB_GRAPH_QUERY_EXECUTOR_H
 
 #include <glib.h>
 
@@ -44,4 +44,4 @@ struct bt_query_executor {
 	enum bt_logging_level log_level;
 };
 
-#endif /* BABELTRACE_GRAPH_QUERY_EXECUTOR_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_QUERY_EXECUTOR_H */

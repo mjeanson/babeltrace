@@ -4,8 +4,8 @@
  * Copyright (c) 2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_PROPERTY_INTERNAL_H
-#define BABELTRACE_PROPERTY_INTERNAL_H
+#ifndef BABELTRACE_LIB_PROPERTY_H
+#define BABELTRACE_LIB_PROPERTY_H
 
 #include "common/assert.h"
 #include <babeltrace2/babeltrace.h>
@@ -38,4 +38,4 @@ void bt_property_uint_init(struct bt_property_uint *prop,
 	prop->value = value;
 }
 
-#endif /* BABELTRACE_PROPERTY_INTERNAL_H */
+#endif /* BABELTRACE_LIB_PROPERTY_H */

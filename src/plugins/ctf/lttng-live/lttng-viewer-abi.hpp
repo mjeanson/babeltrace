@@ -6,8 +6,8 @@
  * Copyright (C) 2013 David Goulet <dgoulet@efficios.com>
  */
 
-#ifndef LTTNG_VIEWER_ABI_H
-#define LTTNG_VIEWER_ABI_H
+#ifndef BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_LTTNG_VIEWER_ABI_HPP
+#define BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_LTTNG_VIEWER_ABI_HPP
 
 #include <stdint.h>
 
@@ -359,4 +359,4 @@ struct lttng_viewer_detach_session_response
     uint32_t status;
 } __attribute__((__packed__));
 
-#endif /* LTTNG_VIEWER_ABI_H */
+#endif /* BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_LTTNG_VIEWER_ABI_HPP */

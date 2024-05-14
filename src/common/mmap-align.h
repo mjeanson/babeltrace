@@ -4,8 +4,8 @@
  * Copyright 2010 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  */
 
-#ifndef _BABELTRACE_MMAP_ALIGN_H
-#define _BABELTRACE_MMAP_ALIGN_H
+#ifndef BABELTRACE_COMMON_MMAP_ALIGN_H
+#define BABELTRACE_COMMON_MMAP_ALIGN_H
 
 #include "common/align.h"
 #include <stdlib.h>
@@ -95,4 +95,4 @@ void mmap_align_set_addr(struct mmap_align_data *mma, void *addr)
 	mma->addr = addr;
 }
 
-#endif /* _BABELTRACE_MMAP_ALIGN_H */
+#endif /* BABELTRACE_COMMON_MMAP_ALIGN_H */

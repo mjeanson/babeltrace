@@ -4,6 +4,9 @@
  * Copyright (c) 2017 Philippe Proulx <pproulx@efficios.com>
  */
 
+#ifndef BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_GRAPH_I_H
+#define BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_GRAPH_I_H
+
 static bt_graph_listener_func_status port_added_listener(
 	const void *component,
 	swig_type_info *component_swig_type,
@@ -257,3 +260,5 @@ bt_bt2_graph_add_sink_component(
 		component_class, name, params, obj == Py_None ? NULL : obj,
 		log_level, component);
 }
+
+#endif /* BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_GRAPH_I_H */

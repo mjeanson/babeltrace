@@ -7,8 +7,8 @@
  * http://www.efficios.com/ctf
  */
 
-#ifndef BABELTRACE_CTF_WRITER_STREAM_CLASS_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_STREAM_CLASS_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_STREAM_CLASS_H
+#define BABELTRACE_CTF_WRITER_STREAM_CLASS_H
 
 #include "common/assert.h"
 #include "common/macros.h"
@@ -508,4 +508,4 @@ int bt_ctf_stream_class_map_clock_class(
 		struct bt_ctf_field_type *packet_context_type,
 		struct bt_ctf_field_type *event_header_type);
 
-#endif /* BABELTRACE_CTF_WRITER_STREAM_CLASS_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_STREAM_CLASS_H */

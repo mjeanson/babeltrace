@@ -5,8 +5,8 @@
  * Copyright 2013, 2014 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_TRACE_IR_EVENT_INTERNAL_H
-#define BABELTRACE_TRACE_IR_EVENT_INTERNAL_H
+#ifndef BABELTRACE_LIB_TRACE_IR_EVENT_H
+#define BABELTRACE_LIB_TRACE_IR_EVENT_H
 
 /* Protection: this file uses BT_LIB_LOG*() macros directly */
 #ifndef BT_LIB_LOG_SUPPORTED
@@ -148,4 +148,4 @@ void bt_event_recycle(struct bt_event *event)
 	bt_object_put_ref_no_null_check(&event_class->base);
 }
 
-#endif /* BABELTRACE_TRACE_IR_EVENT_INTERNAL_H */
+#endif /* BABELTRACE_LIB_TRACE_IR_EVENT_H */

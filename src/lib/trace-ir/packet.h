@@ -4,8 +4,8 @@
  * Copyright 2016-2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_TRACE_IR_PACKET_INTERNAL_H
-#define BABELTRACE_TRACE_IR_PACKET_INTERNAL_H
+#ifndef BABELTRACE_LIB_TRACE_IR_PACKET_H
+#define BABELTRACE_LIB_TRACE_IR_PACKET_H
 
 #include <stdbool.h>
 #include <babeltrace2/trace-ir/clock-snapshot.h>
@@ -37,4 +37,4 @@ void bt_packet_recycle(struct bt_packet *packet);
 
 void bt_packet_destroy(struct bt_packet *packet);
 
-#endif /* BABELTRACE_TRACE_IR_PACKET_INTERNAL_H */
+#endif /* BABELTRACE_LIB_TRACE_IR_PACKET_H */

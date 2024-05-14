@@ -4,8 +4,8 @@
  * Copyright (c) 1991, 1993 The Regents of the University of California.
  */
 
-#ifndef _BABELTRACE_CRC32_H
-#define _BABELTRACE_CRC32_H
+#ifndef BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_CRC32_H
+#define BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_CRC32_H
 
 #include <stdint.h>
 #include <stdio.h>
@@ -24,4 +24,4 @@
  */
 int crc32(int fd, uint32_t *crc);
 
-#endif	/* _BABELTRACE_CRC32_H */
+#endif /* BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_CRC32_H */

@@ -5,8 +5,8 @@
  * Copyright (c) 2018-2020 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_ASSERT_COND_INTERNAL_H
-#define BABELTRACE_ASSERT_COND_INTERNAL_H
+#ifndef BABELTRACE_LIB_ASSERT_COND_H
+#define BABELTRACE_LIB_ASSERT_COND_H
 
 #include "assert-cond-base.h"
 
@@ -1270,4 +1270,4 @@
 	BT_ASSERT_PRE_DEV_NON_NULL(_BT_ASSERT_PRE_KEY_ID, (_key),	\
 		_BT_ASSERT_PRE_KEY_NAME)
 
-#endif /* BABELTRACE_ASSERT_COND_INTERNAL_H */
+#endif /* BABELTRACE_LIB_ASSERT_COND_H */

@@ -4,8 +4,8 @@
  * Copyright 2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef _CTF_META_VISITORS_H
-#define _CTF_META_VISITORS_H
+#ifndef BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_CTF_META_VISITORS_HPP
+#define BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_CTF_META_VISITORS_HPP
 
 #include <babeltrace2/babeltrace.h>
 
@@ -43,4 +43,4 @@ int ctf_trace_class_validate(struct ctf_trace_class *ctf_tc, const bt2c::Logger&
 void ctf_trace_class_warn_meaningless_header_fields(struct ctf_trace_class *ctf_tc,
                                                     const bt2c::Logger& parentLogger);
 
-#endif /* _CTF_META_VISITORS_H */
+#endif /* BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_CTF_META_VISITORS_HPP */

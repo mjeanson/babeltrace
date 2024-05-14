@@ -5,8 +5,8 @@
  * Copyright 2013, 2014 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_TRACE_IR_EVENT_CLASS_INTERNAL_H
-#define BABELTRACE_TRACE_IR_EVENT_CLASS_INTERNAL_H
+#ifndef BABELTRACE_LIB_TRACE_IR_EVENT_CLASS_H
+#define BABELTRACE_LIB_TRACE_IR_EVENT_CLASS_H
 
 #include <babeltrace2/trace-ir/field-class.h>
 #include <babeltrace2/trace-ir/field.h>
@@ -58,4 +58,4 @@ struct bt_stream_class *bt_event_class_borrow_stream_class_inline(
 	return (void *) bt_object_borrow_parent(&event_class->base);
 }
 
-#endif /* BABELTRACE_TRACE_IR_EVENT_CLASS_INTERNAL_H */
+#endif /* BABELTRACE_LIB_TRACE_IR_EVENT_CLASS_H */

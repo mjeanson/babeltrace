@@ -4,8 +4,8 @@
  * Copyright 2019 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_PLUGIN_CTF_FS_SINK_FS_SINK_STREAM_H
-#define BABELTRACE_PLUGIN_CTF_FS_SINK_FS_SINK_STREAM_H
+#ifndef BABELTRACE_PLUGINS_CTF_FS_SINK_FS_SINK_STREAM_HPP
+#define BABELTRACE_PLUGINS_CTF_FS_SINK_FS_SINK_STREAM_HPP
 
 #include <glib.h>
 #include <stdint.h>
@@ -179,4 +179,4 @@ int fs_sink_stream_open_packet(struct fs_sink_stream *stream, const bt_clock_sna
 
 int fs_sink_stream_close_packet(struct fs_sink_stream *stream, const bt_clock_snapshot *cs);
 
-#endif /* BABELTRACE_PLUGIN_CTF_FS_SINK_FS_SINK_STREAM_H */
+#endif /* BABELTRACE_PLUGINS_CTF_FS_SINK_FS_SINK_STREAM_HPP */

@@ -5,8 +5,8 @@
  * Copyright 2016 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_PLUGIN_PLUGIN_SO_INTERNAL_H
-#define BABELTRACE_PLUGIN_PLUGIN_SO_INTERNAL_H
+#ifndef BABELTRACE_LIB_PLUGIN_PLUGIN_SO_H
+#define BABELTRACE_LIB_PLUGIN_PLUGIN_SO_H
 
 #include <glib.h>
 #include <gmodule.h>
@@ -45,4 +45,4 @@ int bt_plugin_so_create_all_from_static(bool fail_on_load_error,
 void bt_plugin_so_on_add_component_class(struct bt_plugin *plugin,
 		struct bt_component_class *comp_class);
 
-#endif /* BABELTRACE_PLUGIN_PLUGIN_SO_INTERNAL_H */
+#endif /* BABELTRACE_LIB_PLUGIN_PLUGIN_SO_H */

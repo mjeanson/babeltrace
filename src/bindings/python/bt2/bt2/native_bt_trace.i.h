@@ -4,6 +4,9 @@
  * Copyright (c) 2016 Philippe Proulx <pproulx@efficios.com>
  */
 
+#ifndef BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_TRACE_I_H
+#define BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_TRACE_I_H
+
 static void
 trace_destroyed_listener(const bt_trace *trace, void *py_callable)
 {
@@ -46,3 +49,5 @@ int bt_bt2_trace_add_destruction_listener(bt_trace *trace,
 
 	return status;
 }
+
+#endif /* BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_TRACE_I_H */

@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: MIT
  */
 
+#ifndef BABELTRACE_CPP_COMMON_BT2C_FMT_HPP
+#define BABELTRACE_CPP_COMMON_BT2C_FMT_HPP
+
 #include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 #include "cpp-common/vendor/wise-enum/wise_enum.h"
 
@@ -41,3 +44,5 @@ inline std::string format_as(const UuidView uuid)
 }
 
 } /* namespace bt2c */
+
+#endif /* BABELTRACE_CPP_COMMON_BT2C_FMT_HPP */

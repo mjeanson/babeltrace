@@ -5,8 +5,8 @@
  * Copyright 2016 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_CTF_WRITER_RESOLVE_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_RESOLVE_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_RESOLVE_H
+#define BABELTRACE_CTF_WRITER_RESOLVE_H
 
 #include <babeltrace2-ctf-writer/field-types.h>
 #include "common/macros.h"
@@ -48,4 +48,4 @@ int bt_ctf_resolve_types(struct bt_ctf_private_value *environment,
 		struct bt_ctf_field_type_common *event_payload_type,
 		enum bt_ctf_resolve_flag flags);
 
-#endif /* BABELTRACE_CTF_WRITER_RESOLVE_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_RESOLVE_H */

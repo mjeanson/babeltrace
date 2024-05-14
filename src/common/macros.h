@@ -4,8 +4,8 @@
  * Copyright 2012 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  */
 
-#ifndef _BABELTRACE_INTERNAL_H
-#define _BABELTRACE_INTERNAL_H
+#ifndef BABELTRACE_COMMON_MACROS_H
+#define BABELTRACE_COMMON_MACROS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -96,4 +96,4 @@ extern "C" {
 }
 #endif
 
-#endif
+#endif /* BABELTRACE_COMMON_MACROS_H */

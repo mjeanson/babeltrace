@@ -4,8 +4,8 @@
  * Copyright 2010 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  */
 
-#ifndef _BABELTRACE_ALIGN_H
-#define _BABELTRACE_ALIGN_H
+#ifndef BABELTRACE_COMMON_ALIGN_H
+#define BABELTRACE_COMMON_ALIGN_H
 
 #include "compat/compiler.h"
 #include "compat/limits.h"
@@ -19,4 +19,4 @@
 			((__typeof__(p)) BT_ALIGN_FLOOR((unsigned long) (p), a))
 #define BT_IS_ALIGNED(x, a)	(((x) & ((__typeof__(x)) (a) - 1)) == 0)
 
-#endif /* _BABELTRACE_ALIGN_H */
+#endif /* BABELTRACE_COMMON_ALIGN_H */

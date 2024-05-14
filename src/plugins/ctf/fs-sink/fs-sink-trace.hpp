@@ -4,8 +4,8 @@
  * Copyright 2019 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_PLUGIN_CTF_FS_SINK_FS_SINK_TRACE_H
-#define BABELTRACE_PLUGIN_CTF_FS_SINK_FS_SINK_TRACE_H
+#ifndef BABELTRACE_PLUGINS_CTF_FS_SINK_FS_SINK_TRACE_HPP
+#define BABELTRACE_PLUGINS_CTF_FS_SINK_FS_SINK_TRACE_HPP
 
 #include <glib.h>
 
@@ -62,4 +62,4 @@ struct fs_sink_trace *fs_sink_trace_create(struct fs_sink_comp *fs_sink, const b
 
 void fs_sink_trace_destroy(struct fs_sink_trace *trace);
 
-#endif /* BABELTRACE_PLUGIN_CTF_FS_SINK_FS_SINK_TRACE_H */
+#endif /* BABELTRACE_PLUGINS_CTF_FS_SINK_FS_SINK_TRACE_HPP */

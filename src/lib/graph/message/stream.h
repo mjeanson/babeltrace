@@ -5,8 +5,8 @@
  * Copyright 2016 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_MESSAGE_STREAM_INTERNAL_H
-#define BABELTRACE_GRAPH_MESSAGE_STREAM_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_MESSAGE_STREAM_H
+#define BABELTRACE_LIB_GRAPH_MESSAGE_STREAM_H
 
 #include <babeltrace2/graph/message.h>
 
@@ -38,4 +38,4 @@ const char *bt_message_stream_clock_snapshot_state_string(
 }
 
 
-#endif /* BABELTRACE_GRAPH_MESSAGE_STREAM_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_MESSAGE_STREAM_H */

@@ -4,8 +4,8 @@
  * Copyright 2013, 2014 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_CTF_WRITER_WRITER_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_WRITER_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_WRITER_H
+#define BABELTRACE_CTF_WRITER_WRITER_H
 
 #include <dirent.h>
 #include <glib.h>
@@ -48,4 +48,4 @@ const char *bt_ctf_get_byte_order_string(enum bt_ctf_byte_order byte_order);
 
 void bt_ctf_writer_freeze(struct bt_ctf_writer *writer);
 
-#endif /* BABELTRACE_CTF_WRITER_WRITER_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_WRITER_H */

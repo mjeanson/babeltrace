@@ -4,6 +4,9 @@
  * Copyright (c) 2017 Philippe Proulx <pproulx@efficios.com>
  */
 
+#ifndef BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_LOG_AND_APPEND_ERROR_H
+#define BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_LOG_AND_APPEND_ERROR_H
+
 #include <stdbool.h>
 
 #include "logging/comp-logging.h"
@@ -249,3 +252,5 @@ void logw_exception_clear(int active_log_level)
 		false, NULL, NULL, NULL, NULL);
 	PyErr_Clear();
 }
+
+#endif /* BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_LOG_AND_APPEND_ERROR_H */

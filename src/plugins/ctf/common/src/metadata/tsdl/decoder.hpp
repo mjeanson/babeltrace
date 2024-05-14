@@ -4,8 +4,8 @@
  * Copyright 2016-2017 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef _METADATA_DECODER_H
-#define _METADATA_DECODER_H
+#ifndef BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_DECODER_HPP
+#define BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_DECODER_HPP
 
 #include <stdio.h>
 
@@ -191,4 +191,4 @@ static inline bool ctf_metadata_decoder_is_packet_version_valid(unsigned int maj
     return major == 1 && minor == 8;
 }
 
-#endif /* _METADATA_DECODER_H */
+#endif /* BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_DECODER_HPP */

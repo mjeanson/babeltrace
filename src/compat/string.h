@@ -4,8 +4,8 @@
  * Copyright (C) 2013 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  */
 
-#ifndef _BABELTRACE_COMPAT_STRING_H
-#define _BABELTRACE_COMPAT_STRING_H
+#ifndef BABELTRACE_COMPAT_STRING_H
+#define BABELTRACE_COMPAT_STRING_H
 
 #include <string.h>
 #include <stdlib.h>
@@ -71,4 +71,4 @@ end:
 }
 #endif /* HAVE_STRNDUP */
 
-#endif /* _BABELTRACE_COMPAT_STRING_H */
+#endif /* BABELTRACE_COMPAT_STRING_H */

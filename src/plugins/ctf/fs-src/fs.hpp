@@ -7,8 +7,8 @@
  * BabelTrace - CTF on File System Component
  */
 
-#ifndef BABELTRACE_PLUGIN_CTF_FS_H
-#define BABELTRACE_PLUGIN_CTF_FS_H
+#ifndef BABELTRACE_PLUGINS_CTF_FS_SRC_FS_HPP
+#define BABELTRACE_PLUGINS_CTF_FS_SRC_FS_HPP
 
 #include <glib.h>
 
@@ -199,4 +199,4 @@ ctf::src::fs::Parameters read_src_fs_parameters(bt2::ConstMapValue params,
 
 std::string ctf_fs_make_port_name(ctf_fs_ds_file_group *ds_file_group);
 
-#endif /* BABELTRACE_PLUGIN_CTF_FS_H */
+#endif /* BABELTRACE_PLUGINS_CTF_FS_SRC_FS_HPP */

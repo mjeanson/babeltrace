@@ -6,8 +6,8 @@
  * BabelTrace - CTF on File System Component
  */
 
-#ifndef BABELTRACE_PLUGIN_CTF_FS_QUERY_H
-#define BABELTRACE_PLUGIN_CTF_FS_QUERY_H
+#ifndef BABELTRACE_PLUGINS_CTF_FS_SRC_QUERY_HPP
+#define BABELTRACE_PLUGINS_CTF_FS_SRC_QUERY_HPP
 
 #include "cpp-common/bt2/value.hpp"
 
@@ -23,4 +23,4 @@ bt2::Value::Shared trace_infos_query(bt2::ConstMapValue params, const bt2c::Logg
 
 bt2::Value::Shared support_info_query(bt2::ConstMapValue params, const bt2c::Logger& logger);
 
-#endif /* BABELTRACE_PLUGIN_CTF_FS_QUERY_H */
+#endif /* BABELTRACE_PLUGINS_CTF_FS_SRC_QUERY_HPP */

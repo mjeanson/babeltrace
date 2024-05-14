@@ -4,8 +4,8 @@
  * Copyright (C) 2020-2023 EfficiOS, inc.
  */
 
-#ifndef TESTS_LIB_UTILS_RUN_IN_HPP
-#define TESTS_LIB_UTILS_RUN_IN_HPP
+#ifndef BABELTRACE_TESTS_LIB_UTILS_RUN_IN_HPP
+#define BABELTRACE_TESTS_LIB_UTILS_RUN_IN_HPP
 
 #include <babeltrace2/babeltrace.h>
 
@@ -52,4 +52,4 @@ public:
  */
 void runIn(RunIn& runIn);
 
-#endif /* TESTS_LIB_UTILS_RUN_IN_HPP */
+#endif /* BABELTRACE_TESTS_LIB_UTILS_RUN_IN_HPP */

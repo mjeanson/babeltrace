@@ -5,8 +5,8 @@
  * Copyright 2015 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_MESSAGE_ITERATOR_INTERNAL_H
-#define BABELTRACE_GRAPH_MESSAGE_ITERATOR_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_ITERATOR_H
+#define BABELTRACE_LIB_GRAPH_ITERATOR_H
 
 #include "common/macros.h"
 #include "lib/object.h"
@@ -189,4 +189,4 @@ const char *bt_message_iterator_state_string(
 	}
 };
 
-#endif /* BABELTRACE_GRAPH_MESSAGE_ITERATOR_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_ITERATOR_H */

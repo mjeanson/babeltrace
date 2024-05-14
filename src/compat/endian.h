@@ -6,8 +6,8 @@
  * endian.h compatibility layer.
  */
 
-#ifndef _BABELTRACE_ENDIAN_H
-#define _BABELTRACE_ENDIAN_H
+#ifndef BABELTRACE_COMPAT_ENDIAN_H
+#define BABELTRACE_COMPAT_ENDIAN_H
 
 #ifdef __FreeBSD__
 #include <sys/endian.h>
@@ -221,4 +221,4 @@
 #endif /* __FLOAT_WORD_ORDER */
 #endif /* FLOAT_WORD_ORDER */
 
-#endif /* _BABELTRACE_ENDIAN_H */
+#endif /* BABELTRACE_COMPAT_ENDIAN_H */

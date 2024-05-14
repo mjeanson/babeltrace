@@ -6,8 +6,8 @@
  * Contributed by Ulrich Drepper <drepper@redhat.com>, 2002.
  */
 
-#ifndef _BT_LIST_H
-#define _BT_LIST_H	1
+#ifndef BABELTRACE_COMMON_LIST_H
+#define BABELTRACE_COMMON_LIST_H
 
 /* The definitions of this file are adopted from those which can be
    found in the Linux kernel headers to enable people familiar with
@@ -163,4 +163,4 @@ static inline void bt_list_replace_init(struct bt_list_head *old,
 }
 #endif
 
-#endif	/* _BT_LIST_H */
+#endif /* BABELTRACE_COMMON_LIST_H */

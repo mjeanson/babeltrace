@@ -4,8 +4,8 @@
  * Copyright 2017 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_CTF_WRITER_CLOCK_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_CLOCK_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_CLOCK_H
+#define BABELTRACE_CTF_WRITER_CLOCK_H
 
 #include <babeltrace2-ctf-writer/clock.h>
 #include "common/macros.h"
@@ -28,4 +28,4 @@ int bt_ctf_clock_get_value(struct bt_ctf_clock *clock, uint64_t *value);
 void bt_ctf_clock_class_serialize(struct bt_ctf_clock_class *clock_class,
 		struct metadata_context *context);
 
-#endif /* BABELTRACE_CTF_WRITER_CLOCK_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_CLOCK_H */

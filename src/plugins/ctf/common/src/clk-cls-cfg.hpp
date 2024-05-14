@@ -4,8 +4,8 @@
  * Copyright (c) 2022 EfficiOS Inc. and Linux Foundation
  */
 
-#ifndef CTF_COMMON_SRC_CLK_CLS_CFG_HPP
-#define CTF_COMMON_SRC_CLK_CLS_CFG_HPP
+#ifndef BABELTRACE_PLUGINS_CTF_COMMON_SRC_CLK_CLS_CFG_HPP
+#define BABELTRACE_PLUGINS_CTF_COMMON_SRC_CLK_CLS_CFG_HPP
 
 #include <cstdint>
 
@@ -22,4 +22,4 @@ struct ClkClsCfg
 } /* namespace src */
 } /* namespace ctf */
 
-#endif /* CTF_COMMON_SRC_CLK_CLS_CFG_HPP */
+#endif /* BABELTRACE_PLUGINS_CTF_COMMON_SRC_CLK_CLS_CFG_HPP */

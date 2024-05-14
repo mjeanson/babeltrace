@@ -4,8 +4,8 @@
  * Copyright (C) 2019 Michael Jeanson <mjeanson@efficios.com>
  */
 
-#ifndef _BABELTRACE_COMMON_UUID_H
-#define _BABELTRACE_COMMON_UUID_H
+#ifndef BABELTRACE_COMMON_UUID_H
+#define BABELTRACE_COMMON_UUID_H
 
 #include <inttypes.h>
 #include <stdint.h>
@@ -47,4 +47,4 @@ void bt_uuid_copy(bt_uuid_t uuid_dest, const bt_uuid_t uuid_src);
 }
 #endif
 
-#endif /* _BABELTRACE_COMMON_UUID_H */
+#endif /* BABELTRACE_COMMON_UUID_H */

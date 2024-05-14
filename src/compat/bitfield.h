@@ -4,8 +4,8 @@
  * Copyright 2010-2019 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  */
 
-#ifndef _BABELTRACE_BITFIELD_H
-#define _BABELTRACE_BITFIELD_H
+#ifndef BABELTRACE_COMPAT_BITFIELD_H
+#define BABELTRACE_COMPAT_BITFIELD_H
 
 #include <stdint.h>	/* C99 5.2.4.2 Numerical limits */
 #include <stdbool.h>	/* C99 7.16 bool type */
@@ -506,4 +506,4 @@ do {									\
 
 #endif
 
-#endif /* _BABELTRACE_BITFIELD_H */
+#endif /* BABELTRACE_COMPAT_BITFIELD_H */

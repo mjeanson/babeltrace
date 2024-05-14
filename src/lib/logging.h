@@ -4,8 +4,8 @@
  * Copyright 2017-2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_LIB_LOGGING_INTERNAL_H
-#define BABELTRACE_LIB_LOGGING_INTERNAL_H
+#ifndef BABELTRACE_LIB_LOGGING_H
+#define BABELTRACE_LIB_LOGGING_H
 
 #include <stdarg.h>
 
@@ -86,4 +86,4 @@ void bt_lib_maybe_log_and_append_cause(const char *func, const char *file,
 
 #define BT_LIB_LOG_SUPPORTED
 
-#endif /* BABELTRACE_LIB_LOGGING_INTERNAL_H */
+#endif /* BABELTRACE_LIB_LOGGING_H */

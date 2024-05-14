@@ -4,6 +4,9 @@
  * Copyright (c) 2019 Efficios, Inc.
  */
 
+#ifndef BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_ERROR_I_H
+#define BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_ERROR_I_H
+
 #include <string-format/format-error.h>
 
 static
@@ -41,3 +44,5 @@ PyObject *bt_bt2_format_bt_error(const bt_error *error)
 
 	return py_error_str;
 }
+
+#endif /* BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_ERROR_I_H */

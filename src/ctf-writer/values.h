@@ -5,8 +5,8 @@
  * Copyright (c) 2015-2017 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_CTF_WRITER_VALUES_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_VALUES_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_VALUES_H
+#define BABELTRACE_CTF_WRITER_VALUES_H
 
 #include <babeltrace2-ctf-writer/types.h>
 
@@ -293,4 +293,4 @@ const char *bt_ctf_value_type_string(enum bt_ctf_value_type type)
 	}
 };
 
-#endif /* BABELTRACE_CTF_WRITER_VALUES_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_VALUES_H */

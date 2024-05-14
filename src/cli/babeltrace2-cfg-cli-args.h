@@ -4,8 +4,8 @@
  * Copyright 2016-2017 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef CLI_BABELTRACE_CFG_CLI_ARGS_H
-#define CLI_BABELTRACE_CFG_CLI_ARGS_H
+#ifndef BABELTRACE_CLI_BABELTRACE2_CFG_CLI_ARGS_H
+#define BABELTRACE_CLI_BABELTRACE2_CFG_CLI_ARGS_H
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -49,4 +49,4 @@ enum bt_config_cli_args_status bt_config_cli_args_create(int argc,
 		const bt_value *initial_plugin_paths,
 		const bt_interrupter *interrupter);
 
-#endif /* CLI_BABELTRACE_CFG_CLI_ARGS_H */
+#endif /* BABELTRACE_CLI_BABELTRACE2_CFG_CLI_ARGS_H */

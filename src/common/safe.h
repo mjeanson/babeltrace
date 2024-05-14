@@ -4,6 +4,9 @@
  * Copyright 2012 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  */
 
+#ifndef BABELTRACE_COMMON_SAFE_H
+#define BABELTRACE_COMMON_SAFE_H
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -46,3 +49,5 @@ bool bt_safe_to_add_uint64(uint64_t a, uint64_t b)
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* BABELTRACE_COMMON_SAFE_H */

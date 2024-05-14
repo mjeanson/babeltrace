@@ -4,8 +4,8 @@
  * Copyright 2017-2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_TRACE_IR_UTILS_INTERNAL_H
-#define BABELTRACE_TRACE_IR_UTILS_INTERNAL_H
+#ifndef BABELTRACE_LIB_TRACE_IR_UTILS_H
+#define BABELTRACE_LIB_TRACE_IR_UTILS_H
 
 #include <babeltrace2/trace-ir/field-class.h>
 #include <stdbool.h>
@@ -155,4 +155,4 @@ bool bt_util_value_is_in_range_unsigned(unsigned int size, uint64_t value)
 	return value <= max_value;
 }
 
-#endif /* BABELTRACE_TRACE_IR_UTILS_INTERNAL_H */
+#endif /* BABELTRACE_LIB_TRACE_IR_UTILS_H */

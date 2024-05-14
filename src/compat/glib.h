@@ -4,8 +4,8 @@
  * Copyright (C) 2015 Michael Jeanson <mjeanson@efficios.com>
  */
 
-#ifndef _BABELTRACE_COMPAT_GLIB_H
-#define _BABELTRACE_COMPAT_GLIB_H
+#ifndef BABELTRACE_COMPAT_GLIB_H
+#define BABELTRACE_COMPAT_GLIB_H
 
 #include <glib.h>
 
@@ -59,4 +59,4 @@ end:
 }
 #endif
 
-#endif /* _BABELTRACE_COMPAT_GLIB_H */
+#endif /* BABELTRACE_COMPAT_GLIB_H */

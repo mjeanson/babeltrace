@@ -4,8 +4,8 @@
  * Copyright 2017-2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_TRACE_IR_CLOCK_SNAPSHOT_INTERNAL_H
-#define BABELTRACE_TRACE_IR_CLOCK_SNAPSHOT_INTERNAL_H
+#ifndef BABELTRACE_LIB_TRACE_IR_CLOCK_SNAPSHOT_H
+#define BABELTRACE_LIB_TRACE_IR_CLOCK_SNAPSHOT_H
 
 #include "lib/object.h"
 #include <stdbool.h>
@@ -68,4 +68,4 @@ struct bt_clock_snapshot *bt_clock_snapshot_create(
 
 void bt_clock_snapshot_recycle(struct bt_clock_snapshot *clock_snapshot);
 
-#endif /* BABELTRACE_TRACE_IR_CLOCK_SNAPSHOT_INTERNAL_H */
+#endif /* BABELTRACE_LIB_TRACE_IR_CLOCK_SNAPSHOT_H */

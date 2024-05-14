@@ -7,8 +7,8 @@
  * http://www.efficios.com/ctf
  */
 
-#ifndef BABELTRACE_CTF_WRITER_FIELD_TYPES_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_FIELD_TYPES_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_FIELD_TYPES_H
+#define BABELTRACE_CTF_WRITER_FIELD_TYPES_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -671,4 +671,4 @@ int bt_ctf_field_type_serialize_recursive(struct bt_ctf_field_type *type,
 
 struct bt_ctf_field_type *bt_ctf_field_type_copy(struct bt_ctf_field_type *ft);
 
-#endif /* BABELTRACE_CTF_WRITER_FIELD_TYPES_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_FIELD_TYPES_H */

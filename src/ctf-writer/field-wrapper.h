@@ -4,8 +4,8 @@
  * Copyright 2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_CTF_WRITER_FIELD_WRAPPER_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_FIELD_WRAPPER_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_FIELD_WRAPPER_H
+#define BABELTRACE_CTF_WRITER_FIELD_WRAPPER_H
 
 #include "common/macros.h"
 
@@ -27,4 +27,4 @@ void bt_ctf_field_wrapper_destroy(struct bt_ctf_field_wrapper *field);
 struct bt_ctf_field_wrapper *bt_ctf_field_wrapper_create(
 		struct bt_ctf_object_pool *pool, struct bt_ctf_field_type *ft);
 
-#endif /* BABELTRACE_CTF_WRITER_FIELD_WRAPPER_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_FIELD_WRAPPER_H */

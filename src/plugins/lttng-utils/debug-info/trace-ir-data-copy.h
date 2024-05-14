@@ -7,8 +7,8 @@
  * Babeltrace - Trace IR data object copy
  */
 
-#ifndef BABELTRACE_PLUGIN_DEBUG_INFO_TRACE_DATA_COPY_H
-#define BABELTRACE_PLUGIN_DEBUG_INFO_TRACE_DATA_COPY_H
+#ifndef BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_TRACE_IR_DATA_COPY_H
+#define BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_TRACE_IR_DATA_COPY_H
 
 #include <babeltrace2/babeltrace.h>
 
@@ -31,4 +31,4 @@ enum debug_info_trace_ir_mapping_status copy_field_content(
 		const bt_field *in_field, bt_field *out_field,
 		bt_logging_level log_level, bt_self_component *self_comp);
 
-#endif /* BABELTRACE_PLUGIN_DEBUG_INFO_TRACE_DATA_COPY_H */
+#endif /* BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_TRACE_IR_DATA_COPY_H */

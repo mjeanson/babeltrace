@@ -4,6 +4,9 @@
  * Copyright (c) 2016 Philippe Proulx <pproulx@efficios.com>
  */
 
+#ifndef BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_AUTODISC_I_H
+#define BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_AUTODISC_I_H
+
 #include <autodisc/autodisc.h>
 #include <common/common.h>
 
@@ -209,3 +212,5 @@ end:
 
 	return result;
 }
+
+#endif /* BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_AUTODISC_I_H */

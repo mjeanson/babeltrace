@@ -4,8 +4,8 @@
  * Copyright 2016 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_CTF_WRITER_VISITOR_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_VISITOR_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_VISITOR_H
+#define BABELTRACE_CTF_WRITER_VISITOR_H
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -29,4 +29,4 @@ int bt_ctf_visitor_helper(struct bt_ctf_visitor_object *root,
 		bt_ctf_visitor visitor,
 		void *data);
 
-#endif /* BABELTRACE_CTF_WRITER_VISITOR_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_VISITOR_H */

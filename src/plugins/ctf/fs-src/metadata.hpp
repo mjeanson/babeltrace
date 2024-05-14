@@ -4,8 +4,8 @@
  * Copyright 2016 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef CTF_FS_METADATA_H
-#define CTF_FS_METADATA_H
+#ifndef BABELTRACE_PLUGINS_CTF_FS_SRC_METADATA_HPP
+#define BABELTRACE_PLUGINS_CTF_FS_SRC_METADATA_HPP
 
 #include <stdio.h>
 
@@ -28,4 +28,4 @@ FILE *ctf_fs_metadata_open_file(const char *trace_path, const bt2c::Logger& logg
 
 bool ctf_metadata_is_packetized(FILE *fp, int *byte_order);
 
-#endif /* CTF_FS_METADATA_H */
+#endif /* BABELTRACE_PLUGINS_CTF_FS_SRC_METADATA_HPP */

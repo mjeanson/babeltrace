@@ -7,8 +7,8 @@
  * http://www.efficios.com/ctf
  */
 
-#ifndef BABELTRACE_CTF_WRITER_TRACE_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_TRACE_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_TRACE_H
+#define BABELTRACE_CTF_WRITER_TRACE_H
 
 #include "common/macros.h"
 #include "common/uuid.h"
@@ -350,4 +350,4 @@ bt_ctf_trace_get_environment_field_value_by_name(
 int bt_ctf_trace_visit(struct bt_ctf_trace *trace,
 		bt_ctf_visitor visitor, void *data);
 
-#endif /* BABELTRACE_CTF_WRITER_TRACE_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_TRACE_H */

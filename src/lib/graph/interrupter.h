@@ -4,8 +4,8 @@
  * Copyright (c) 2019 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_INTERRUPTER_INTERNAL_H
-#define BABELTRACE_GRAPH_INTERRUPTER_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_INTERRUPTER_H
+#define BABELTRACE_LIB_GRAPH_INTERRUPTER_H
 
 #include <stdbool.h>
 
@@ -40,4 +40,4 @@ end:
 	return is_set;
 }
 
-#endif /* BABELTRACE_GRAPH_INTERRUPTER_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_INTERRUPTER_H */

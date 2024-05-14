@@ -4,8 +4,8 @@
  * Copyright (C) 2020 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef TESTS_LIB_CONDS_UTILS_HPP
-#define TESTS_LIB_CONDS_UTILS_HPP
+#ifndef BABELTRACE_TESTS_LIB_CONDS_UTILS_HPP
+#define BABELTRACE_TESTS_LIB_CONDS_UTILS_HPP
 
 #include <functional>
 #include <memory>
@@ -180,4 +180,4 @@ using CondTriggers = std::vector<CondTrigger::UP>;
  */
 void condMain(const bt2s::span<const char * const> argv, const CondTriggers& triggers) noexcept;
 
-#endif /* TESTS_LIB_CONDS_UTILS_HPP */
+#endif /* BABELTRACE_TESTS_LIB_CONDS_UTILS_HPP */

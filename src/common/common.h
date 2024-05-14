@@ -5,8 +5,8 @@
  * Copyright (c) 2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_COMMON_INTERNAL_H
-#define BABELTRACE_COMMON_INTERNAL_H
+#ifndef BABELTRACE_COMMON_COMMON_H
+#define BABELTRACE_COMMON_COMMON_H
 
 #include <errno.h>
 #include <glib.h>
@@ -781,4 +781,4 @@ const char *bt_common_message_type_string(enum bt_message_type type)
 }
 #endif
 
-#endif /* BABELTRACE_COMMON_INTERNAL_H */
+#endif /* BABELTRACE_COMMON_COMMON_H */

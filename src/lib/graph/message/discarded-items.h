@@ -4,8 +4,8 @@
  * Copyright 2019 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_MESSAGE_DISCARDED_ITEMS_INTERNAL_H
-#define BABELTRACE_GRAPH_MESSAGE_DISCARDED_ITEMS_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_MESSAGE_DISCARDED_ITEMS_H
+#define BABELTRACE_LIB_GRAPH_MESSAGE_DISCARDED_ITEMS_H
 
 #include <glib.h>
 #include "lib/trace-ir/clock-snapshot.h"
@@ -23,4 +23,4 @@ struct bt_message_discarded_items {
 	struct bt_property_uint count;
 };
 
-#endif /* BABELTRACE_GRAPH_MESSAGE_DISCARDED_ITEMS_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_MESSAGE_DISCARDED_ITEMS_H */

@@ -8,8 +8,8 @@
  * Babeltrace - Debug information Plugin
  */
 
-#ifndef BABELTRACE_PLUGIN_DEBUG_INFO_H
-#define BABELTRACE_PLUGIN_DEBUG_INFO_H
+#ifndef BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_DEBUG_INFO_H
+#define BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_DEBUG_INFO_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -55,4 +55,4 @@ bt_message_iterator_class_seek_beginning_method_status debug_info_msg_iter_seek_
 
 void debug_info_msg_iter_finalize(bt_self_message_iterator *it);
 
-#endif /* BABELTRACE_PLUGIN_DEBUG_INFO_H */
+#endif /* BABELTRACE_PLUGINS_LTTNG_UTILS_DEBUG_INFO_DEBUG_INFO_H */

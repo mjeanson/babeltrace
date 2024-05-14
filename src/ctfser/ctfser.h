@@ -9,8 +9,8 @@
  * http://www.efficios.com/ctf
  */
 
-#ifndef BABELTRACE_CTFSER_INTERNAL_H
-#define BABELTRACE_CTFSER_INTERNAL_H
+#ifndef BABELTRACE_CTFSER_CTFSER_H
+#define BABELTRACE_CTFSER_CTFSER_H
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -562,4 +562,4 @@ const char *bt_ctfser_get_file_path(struct bt_ctfser *ctfser)
 	return ctfser->path->str;
 }
 
-#endif /* BABELTRACE_CTFSER_INTERNAL_H */
+#endif /* BABELTRACE_CTFSER_CTFSER_H */

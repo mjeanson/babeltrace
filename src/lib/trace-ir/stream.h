@@ -5,8 +5,8 @@
  * Copyright 2013, 2014 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_TRACE_IR_STREAM_INTERNAL_H
-#define BABELTRACE_TRACE_IR_STREAM_INTERNAL_H
+#ifndef BABELTRACE_LIB_TRACE_IR_STREAM_H
+#define BABELTRACE_LIB_TRACE_IR_STREAM_H
 
 #include <babeltrace2/trace-ir/stream.h>
 #include "lib/object.h"
@@ -51,4 +51,4 @@ struct bt_trace *bt_stream_borrow_trace_inline(const struct bt_stream *stream)
 	return (void *) bt_object_borrow_parent(&stream->base);
 }
 
-#endif /* BABELTRACE_TRACE_IR_STREAM_INTERNAL_H */
+#endif /* BABELTRACE_LIB_TRACE_IR_STREAM_H */

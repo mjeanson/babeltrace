@@ -5,8 +5,8 @@
  * Copyright 2017 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_GRAPH_INTERNAL_H
-#define BABELTRACE_GRAPH_GRAPH_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_GRAPH_H
+#define BABELTRACE_LIB_GRAPH_GRAPH_H
 
 /* Protection: this file uses BT_LIB_LOG*() macros directly */
 #ifndef BT_LIB_LOG_SUPPORTED
@@ -172,4 +172,4 @@ void bt_graph_make_faulty(struct bt_graph *graph)
 	BT_LIB_LOGI("Set graph's state to faulty: %![graph-]+g", graph);
 }
 
-#endif /* BABELTRACE_GRAPH_GRAPH_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_GRAPH_H */

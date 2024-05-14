@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-#ifndef BABELTRACE_CPP_COMMON_FILE_UTILS_HPP
-#define BABELTRACE_CPP_COMMON_FILE_UTILS_HPP
+#ifndef BABELTRACE_CPP_COMMON_BT2C_FILE_UTILS_HPP
+#define BABELTRACE_CPP_COMMON_BT2C_FILE_UTILS_HPP
 
 #include <cstdint>
 #include <vector>
@@ -19,4 +19,4 @@ std::vector<std::uint8_t> dataFromFile(const char *path);
 
 } /* namespace bt2c */
 
-#endif /* BABELTRACE_CPP_COMMON_FILE_UTILS_HPP */
+#endif /* BABELTRACE_CPP_COMMON_BT2C_FILE_UTILS_HPP */

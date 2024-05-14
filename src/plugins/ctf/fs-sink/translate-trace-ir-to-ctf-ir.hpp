@@ -4,8 +4,8 @@
  * Copyright 2019 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_PLUGIN_CTF_FS_SINK_TRANSLATE_TRACE_IR_TO_CTF_IR_H
-#define BABELTRACE_PLUGIN_CTF_FS_SINK_TRANSLATE_TRACE_IR_TO_CTF_IR_H
+#ifndef BABELTRACE_PLUGINS_CTF_FS_SINK_TRANSLATE_TRACE_IR_TO_CTF_IR_HPP
+#define BABELTRACE_PLUGINS_CTF_FS_SINK_TRANSLATE_TRACE_IR_TO_CTF_IR_HPP
 
 #include <babeltrace2/babeltrace.h>
 
@@ -22,4 +22,4 @@ int try_translate_stream_class_trace_ir_to_ctf_ir(struct fs_sink_comp *fs_sink,
 struct fs_sink_ctf_trace *translate_trace_trace_ir_to_ctf_ir(struct fs_sink_comp *fs_sink,
                                                              const bt_trace *ir_trace);
 
-#endif /* BABELTRACE_PLUGIN_CTF_FS_SINK_TRANSLATE_TRACE_IR_TO_CTF_IR_H */
+#endif /* BABELTRACE_PLUGINS_CTF_FS_SINK_TRANSLATE_TRACE_IR_TO_CTF_IR_HPP */

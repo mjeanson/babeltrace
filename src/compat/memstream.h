@@ -6,8 +6,8 @@
  * memstream compatibility layer.
  */
 
-#ifndef _BABELTRACE_FORMAT_CTF_MEMSTREAM_H
-#define _BABELTRACE_FORMAT_CTF_MEMSTREAM_H
+#ifndef BABELTRACE_COMPAT_MEMSTREAM_H
+#define BABELTRACE_COMPAT_MEMSTREAM_H
 
 #ifdef BABELTRACE_HAVE_FMEMOPEN
 #include <stdio.h>
@@ -344,4 +344,4 @@ error_free:
 
 #endif /* BABELTRACE_HAVE_OPEN_MEMSTREAM */
 
-#endif /* _BABELTRACE_FORMAT_CTF_MEMSTREAM_H */
+#endif /* BABELTRACE_COMPAT_MEMSTREAM_H */

@@ -5,8 +5,8 @@
  * Copyright 2013, 2014 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_TRACE_IR_FIELDS_INTERNAL_H
-#define BABELTRACE_TRACE_IR_FIELDS_INTERNAL_H
+#ifndef BABELTRACE_LIB_TRACE_IR_FIELD_H
+#define BABELTRACE_LIB_TRACE_IR_FIELD_H
 
 #include "lib/object.h"
 #include <babeltrace2/types.h>
@@ -161,4 +161,4 @@ struct bt_field *bt_field_create(struct bt_field_class *class);
 
 void bt_field_destroy(struct bt_field *field);
 
-#endif /* BABELTRACE_TRACE_IR_FIELDS_INTERNAL_H */
+#endif /* BABELTRACE_LIB_TRACE_IR_FIELD_H */

@@ -5,8 +5,8 @@
  * Copyright (C) 2016 Michael Jeanson <mjeanson@efficios.com>
  */
 
-#ifndef _BABELTRACE_INCLUDE_COMPAT_TIME_H
-#define _BABELTRACE_INCLUDE_COMPAT_TIME_H
+#ifndef BABELTRACE_COMPAT_TIME_H
+#define BABELTRACE_COMPAT_TIME_H
 
 #include <time.h>
 #include <stdlib.h>
@@ -78,4 +78,5 @@ struct tm *bt_localtime_r(const time_t *timep, struct tm *result)
 }
 
 #endif /* __MINGW32__ */
-#endif /* _BABELTRACE_INCLUDE_COMPAT_TIME_H */
+
+#endif /* BABELTRACE_COMPAT_TIME_H */

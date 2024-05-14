@@ -5,8 +5,8 @@
  * Copyright 2015 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_PLUGIN_PLUGIN_INTERNAL_H
-#define BABELTRACE_PLUGIN_PLUGIN_INTERNAL_H
+#ifndef BABELTRACE_LIB_PLUGIN_PLUGIN_H
+#define BABELTRACE_LIB_PLUGIN_PLUGIN_H
 
 #include "common/common.h"
 #include "lib/graph/component-class.h"
@@ -446,4 +446,4 @@ end:
 	return;
 }
 
-#endif /* BABELTRACE_PLUGIN_PLUGIN_INTERNAL_H */
+#endif /* BABELTRACE_LIB_PLUGIN_PLUGIN_H */

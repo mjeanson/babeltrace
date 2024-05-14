@@ -4,8 +4,8 @@
  * Copyright (c) 2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_OBJECT_POOL_INTERNAL_H
-#define BABELTRACE_OBJECT_POOL_INTERNAL_H
+#ifndef BABELTRACE_LIB_OBJECT_POOL_H
+#define BABELTRACE_LIB_OBJECT_POOL_H
 
 /*
  * This is a generic object pool to avoid memory allocation/deallocation
@@ -151,4 +151,4 @@ void bt_object_pool_recycle_object(struct bt_object_pool *pool, void *obj)
 		pool, pool->size, pool->objects->len, obj);
 }
 
-#endif /* BABELTRACE_OBJECT_POOL_INTERNAL_H */
+#endif /* BABELTRACE_LIB_OBJECT_POOL_H */

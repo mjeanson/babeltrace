@@ -4,8 +4,8 @@
  * Copyright 2011-2012 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  */
 
-#ifndef _CTF_SCANNER_SYMBOLS
-#define _CTF_SCANNER_SYMBOLS
+#ifndef BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_SCANNER_SYMBOLS_HPP
+#define BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_SCANNER_SYMBOLS_HPP
 
 #define yy_create_buffer    bt_yy_create_buffer
 #define yy_delete_buffer    bt_yy_delete_buffer
@@ -37,4 +37,4 @@
 #define yyset_lval          bt_yyset_lval
 #define yyset_out           bt_yyset_out
 
-#endif /* _CTF_SCANNER_SYMBOLS */
+#endif /* BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_SCANNER_SYMBOLS_HPP */

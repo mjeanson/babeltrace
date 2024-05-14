@@ -4,8 +4,8 @@
  * Copyright (c) 2019 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_ERROR_INTERNAL_H
-#define BABELTRACE_ERROR_INTERNAL_H
+#ifndef BABELTRACE_LIB_ERROR_H
+#define BABELTRACE_LIB_ERROR_H
 
 #include <stdarg.h>
 #include <glib.h>
@@ -97,4 +97,4 @@ int bt_error_append_cause_from_message_iterator(
 		const char *file_name, uint64_t line_no,
 		const char *msg_fmt, va_list args);
 
-#endif /* BABELTRACE_ERROR_INTERNAL_H */
+#endif /* BABELTRACE_LIB_ERROR_H */

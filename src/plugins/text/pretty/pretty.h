@@ -4,8 +4,8 @@
  * Copyright 2016 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_PLUGIN_TEXT_PRETTY_PRETTY_H
-#define BABELTRACE_PLUGIN_TEXT_PRETTY_PRETTY_H
+#ifndef BABELTRACE_PLUGINS_TEXT_PRETTY_PRETTY_H
+#define BABELTRACE_PLUGINS_TEXT_PRETTY_PRETTY_H
 
 #include <glib.h>
 #include <stdio.h>
@@ -117,4 +117,4 @@ int pretty_print_discarded_items(struct pretty_component *pretty,
 
 void pretty_print_init(void);
 
-#endif /* BABELTRACE_PLUGIN_TEXT_PRETTY_PRETTY_H */
+#endif /* BABELTRACE_PLUGINS_TEXT_PRETTY_PRETTY_H */

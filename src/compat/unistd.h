@@ -4,8 +4,8 @@
  * Copyright (C) 2016 Michael Jeanson <mjeanson@efficios.com>
  */
 
-#ifndef _BABELTRACE_COMPAT_UNISTD_H
-#define _BABELTRACE_COMPAT_UNISTD_H
+#ifndef BABELTRACE_COMPAT_UNISTD_H
+#define BABELTRACE_COMPAT_UNISTD_H
 
 #include <unistd.h>
 
@@ -39,4 +39,5 @@ long bt_sysconf(int name)
 }
 
 #endif
-#endif /* _BABELTRACE_COMPAT_UNISTD_H */
+
+#endif /* BABELTRACE_COMPAT_UNISTD_H */

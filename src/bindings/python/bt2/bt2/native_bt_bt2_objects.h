@@ -4,8 +4,10 @@
  * Copyright (c) 2017 Philippe Proulx <pproulx@efficios.com>
  */
 
-#include "logging/comp-logging.h"
+#ifndef BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_BT2_OBJECTS_H
+#define BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_BT2_OBJECTS_H
 
+#include "logging/comp-logging.h"
 
 /*
  * Useful Python objects.
@@ -70,3 +72,5 @@ void bt_bt2_exit_handler(void)
 	Py_XDECREF(py_mod_bt2_exc_stop_type);
 	Py_XDECREF(py_mod_bt2_exc_unknown_object_type);
 }
+
+#endif /* BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_BT2_OBJECTS_H */

@@ -4,8 +4,8 @@
  * Copyright (c) 2015-2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_VALUES_INTERNAL_H
-#define BABELTRACE_VALUES_INTERNAL_H
+#ifndef BABELTRACE_LIB_VALUE_H
+#define BABELTRACE_LIB_VALUE_H
 
 #include <glib.h>
 #include <babeltrace2/babeltrace.h>
@@ -59,4 +59,4 @@ void _bt_value_freeze(const struct bt_value *object);
 # define bt_value_freeze(_value)
 #endif /* BT_DEV_MODE */
 
-#endif /* BABELTRACE_VALUES_INTERNAL_H */
+#endif /* BABELTRACE_LIB_VALUE_H */

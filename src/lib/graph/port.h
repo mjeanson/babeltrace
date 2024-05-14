@@ -5,8 +5,8 @@
  * Copyright 2017 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_PORT_INTERNAL_H
-#define BABELTRACE_GRAPH_PORT_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_PORT_H
+#define BABELTRACE_LIB_GRAPH_PORT_H
 
 #include <babeltrace2/graph/port.h>
 
@@ -46,4 +46,4 @@ const char *bt_port_type_string(enum bt_port_type port_type)
 	}
 }
 
-#endif /* BABELTRACE_GRAPH_PORT_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_PORT_H */

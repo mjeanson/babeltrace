@@ -5,8 +5,8 @@
  * Copyright 2016 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_MESSAGE_PACKET_INTERNAL_H
-#define BABELTRACE_GRAPH_MESSAGE_PACKET_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_MESSAGE_PACKET_H
+#define BABELTRACE_LIB_GRAPH_MESSAGE_PACKET_H
 
 #include "compat/compiler.h"
 #include <babeltrace2/trace-ir/packet.h>
@@ -30,4 +30,4 @@ struct bt_message *bt_message_packet_end_new(struct bt_graph *graph);
 
 void bt_message_packet_end_recycle(struct bt_message *msg);
 
-#endif /* BABELTRACE_GRAPH_MESSAGE_PACKET_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_MESSAGE_PACKET_H */

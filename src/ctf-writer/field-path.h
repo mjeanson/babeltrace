@@ -7,8 +7,8 @@
  * http://www.efficios.com/ctf
  */
 
-#ifndef BABELTRACE_CTF_WRITER_FIELD_PATH_INTERNAL
-#define BABELTRACE_CTF_WRITER_FIELD_PATH_INTERNAL
+#ifndef BABELTRACE_CTF_WRITER_FIELD_PATH_H
+#define BABELTRACE_CTF_WRITER_FIELD_PATH_H
 
 #include "common/common.h"
 #include "common/assert.h"
@@ -47,4 +47,4 @@ int64_t bt_ctf_field_path_get_index_count(
 int bt_ctf_field_path_get_index(
 		const struct bt_ctf_field_path *field_path, uint64_t index);
 
-#endif /* BABELTRACE_CTF_WRITER_FIELD_PATH_INTERNAL */
+#endif /* BABELTRACE_CTF_WRITER_FIELD_PATH_H */

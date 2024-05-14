@@ -6,8 +6,8 @@
  * Babeltrace trace converter - CLI tool's configuration
  */
 
-#ifndef CLI_BABELTRACE_CFG_H
-#define CLI_BABELTRACE_CFG_H
+#ifndef BABELTRACE_CLI_BABELTRACE2_CFG_H
+#define BABELTRACE_CLI_BABELTRACE2_CFG_H
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -120,4 +120,4 @@ int bt_config_append_plugin_paths(bt_value *plugin_paths,
 
 void bt_config_connection_destroy(struct bt_config_connection *connection);
 
-#endif /* CLI_BABELTRACE_CFG_H */
+#endif /* BABELTRACE_CLI_BABELTRACE2_CFG_H */

@@ -5,8 +5,8 @@
  * Copyright 2013, 2014 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_TRACE_IR_CLOCK_CLASS_INTERNAL_H
-#define BABELTRACE_TRACE_IR_CLOCK_CLASS_INTERNAL_H
+#ifndef BABELTRACE_LIB_TRACE_IR_CLOCK_CLASS_H
+#define BABELTRACE_LIB_TRACE_IR_CLOCK_CLASS_H
 
 #include <babeltrace2/trace-ir/clock-class.h>
 #include "lib/object.h"
@@ -89,4 +89,4 @@ int bt_clock_class_clock_value_from_ns_from_origin(
 		raw_value) ? BT_FUNC_STATUS_OVERFLOW_ERROR : BT_FUNC_STATUS_OK;
 }
 
-#endif /* BABELTRACE_TRACE_IR_CLOCK_CLASS_INTERNAL_H */
+#endif /* BABELTRACE_LIB_TRACE_IR_CLOCK_CLASS_H */

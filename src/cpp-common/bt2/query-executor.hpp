@@ -121,4 +121,4 @@ using ConstQueryExecutor = CommonQueryExecutor<const bt_query_executor>;
 
 } /* namespace bt2 */
 
-#endif /* BABELTRACE_CPP_COMMON_BT2_QUERY_EXECUTOR_HPP  */
+#endif /* BABELTRACE_CPP_COMMON_BT2_QUERY_EXECUTOR_HPP */

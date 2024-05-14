@@ -4,8 +4,8 @@
  * Copyright 2016-2019 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef SRC_PARAMS_PARSE_VALUE_PARSE_H
-#define SRC_PARAMS_PARSE_VALUE_PARSE_H
+#ifndef BABELTRACE_PARAM_PARSE_PARAM_PARSE_H
+#define BABELTRACE_PARAM_PARSE_PARAM_PARSE_H
 
 #include <babeltrace2/babeltrace.h>
 
@@ -15,4 +15,4 @@
 
 bt_value *bt_param_parse(const char *arg, GString *ini_error);
 
-#endif /* SRC_VALUE_PARSE_VALUE_PARSE_H */
+#endif /* BABELTRACE_PARAM_PARSE_PARAM_PARSE_H */

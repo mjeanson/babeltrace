@@ -4,8 +4,8 @@
  * Copyright (C) 2016 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef CTF_FS_DS_FILE_H
-#define CTF_FS_DS_FILE_H
+#ifndef BABELTRACE_PLUGINS_CTF_FS_SRC_DATA_STREAM_FILE_HPP
+#define BABELTRACE_PLUGINS_CTF_FS_SRC_DATA_STREAM_FILE_HPP
 
 #include <memory>
 #include <string>
@@ -201,4 +201,4 @@ ctf_fs_ds_group_medops_data_create(struct ctf_fs_ds_file_group *ds_file_group,
 
 void ctf_fs_ds_group_medops_data_reset(struct ctf_fs_ds_group_medops_data *data);
 
-#endif /* CTF_FS_DS_FILE_H */
+#endif /* BABELTRACE_PLUGINS_CTF_FS_SRC_DATA_STREAM_FILE_HPP */

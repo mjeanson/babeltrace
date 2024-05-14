@@ -4,8 +4,8 @@
  * Copyright 2017 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_PLUGINS_UTILS_COUNTER_H
-#define BABELTRACE_PLUGINS_UTILS_COUNTER_H
+#ifndef BABELTRACE_PLUGINS_UTILS_COUNTER_COUNTER_H
+#define BABELTRACE_PLUGINS_UTILS_COUNTER_COUNTER_H
 
 #include <glib.h>
 #include <babeltrace2/babeltrace.h>
@@ -54,4 +54,4 @@ bt_component_class_sink_consume_method_status counter_consume(bt_self_component_
 }
 #endif
 
-#endif /* BABELTRACE_PLUGINS_UTILS_COUNTER_H */
+#endif /* BABELTRACE_PLUGINS_UTILS_COUNTER_COUNTER_H */

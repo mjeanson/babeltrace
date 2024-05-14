@@ -4,8 +4,8 @@
  * Copyright 2019 EfficiOS Inc.
  */
 
-#ifndef BABELTRACE_PLUGINS_CTF_COMMON_METADATA_PARSER_WRAP_H
-#define BABELTRACE_PLUGINS_CTF_COMMON_METADATA_PARSER_WRAP_H
+#ifndef BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_PARSER_WRAP_HPP
+#define BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_PARSER_WRAP_HPP
 
 /*
  * Small wrapper around the bison-generated parser.h to conditionally define
@@ -24,4 +24,4 @@
 #include "plugins/ctf/common/src/metadata/tsdl/parser.hpp"
 #undef ALLOW_INCLUDE_PARSER_H
 
-#endif
+#endif /* BABELTRACE_PLUGINS_CTF_COMMON_SRC_METADATA_TSDL_PARSER_WRAP_HPP */

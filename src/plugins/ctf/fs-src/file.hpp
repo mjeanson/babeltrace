@@ -4,8 +4,8 @@
  * Copyright (C) 2016 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef CTF_FS_FILE_H
-#define CTF_FS_FILE_H
+#ifndef BABELTRACE_PLUGINS_CTF_FS_SRC_FILE_HPP
+#define BABELTRACE_PLUGINS_CTF_FS_SRC_FILE_HPP
 
 #include <memory>
 #include <string>
@@ -35,4 +35,4 @@ struct ctf_fs_file
 
 int ctf_fs_file_open(struct ctf_fs_file *file, const char *mode);
 
-#endif /* CTF_FS_FILE_H */
+#endif /* BABELTRACE_PLUGINS_CTF_FS_SRC_FILE_HPP */

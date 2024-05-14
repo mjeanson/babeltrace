@@ -5,8 +5,8 @@
  * Copyright 2015 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_COMPONENT_CLASS_INTERNAL_H
-#define BABELTRACE_GRAPH_COMPONENT_CLASS_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_COMPONENT_CLASS_H
+#define BABELTRACE_LIB_GRAPH_COMPONENT_CLASS_H
 
 #include <babeltrace2/graph/component-class.h>
 #include <babeltrace2/graph/component.h>
@@ -103,4 +103,4 @@ bool bt_component_class_has_message_iterator_class(
 		component_class->type == BT_COMPONENT_CLASS_TYPE_FILTER;
 }
 
-#endif /* BABELTRACE_GRAPH_COMPONENT_CLASS_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_COMPONENT_CLASS_H */

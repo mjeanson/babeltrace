@@ -4,8 +4,8 @@
  * Copyright 2013, 2014 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_CTF_WRITER_CLOCK_CLASS_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_CLOCK_CLASS_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_CLOCK_CLASS_H
+#define BABELTRACE_CTF_WRITER_CLOCK_CLASS_H
 
 #include "common/macros.h"
 #include "object-pool.h"
@@ -78,4 +78,4 @@ const uint8_t *bt_ctf_clock_class_get_uuid(
 int bt_ctf_clock_class_set_uuid(struct bt_ctf_clock_class *clock_class,
 		const uint8_t *uuid);
 
-#endif /* BABELTRACE_CTF_WRITER_CLOCK_CLASS_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_CLOCK_CLASS_H */

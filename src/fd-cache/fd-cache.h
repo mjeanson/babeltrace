@@ -6,8 +6,8 @@
  * Babeltrace - File descriptor cache
  */
 
-#ifndef BABELTRACE_FD_CACHE_INTERNAL_H
-#define BABELTRACE_FD_CACHE_INTERNAL_H
+#ifndef BABELTRACE_FD_CACHE_FD_CACHE_H
+#define BABELTRACE_FD_CACHE_FD_CACHE_H
 
 #include "common/macros.h"
 
@@ -36,4 +36,4 @@ struct bt_fd_cache_handle *bt_fd_cache_get_handle(struct bt_fd_cache *fdc,
 void bt_fd_cache_put_handle(struct bt_fd_cache *fdc,
 		struct bt_fd_cache_handle *handle);
 
-#endif /* BABELTRACE_FD_CACHE_INTERNAL_H */
+#endif /* BABELTRACE_FD_CACHE_FD_CACHE_H */

@@ -5,8 +5,8 @@
  * Copyright 2015 Jérémie Galarneau <jeremie.galarneau@efficios.com>
  */
 
-#ifndef BABELTRACE_GRAPH_COMPONENT_SOURCE_INTERNAL_H
-#define BABELTRACE_GRAPH_COMPONENT_SOURCE_INTERNAL_H
+#ifndef BABELTRACE_LIB_GRAPH_COMPONENT_SOURCE_H
+#define BABELTRACE_LIB_GRAPH_COMPONENT_SOURCE_H
 
 #include "component.h"
 
@@ -16,4 +16,4 @@ struct bt_component_source {
 
 struct bt_component *bt_component_source_create(void);
 
-#endif /* BABELTRACE_GRAPH_COMPONENT_SOURCE_INTERNAL_H */
+#endif /* BABELTRACE_LIB_GRAPH_COMPONENT_SOURCE_H */

@@ -7,8 +7,8 @@
  * http://www.efficios.com/ctf
  */
 
-#ifndef BABELTRACE_TRACE_IR_FIELD_PATH_INTERNAL
-#define BABELTRACE_TRACE_IR_FIELD_PATH_INTERNAL
+#ifndef BABELTRACE_LIB_TRACE_IR_FIELD_PATH_H
+#define BABELTRACE_LIB_TRACE_IR_FIELD_PATH_H
 
 #include "lib/object.h"
 #include <babeltrace2/trace-ir/field-path.h>
@@ -71,4 +71,4 @@ const char *bt_field_path_item_type_string(enum bt_field_path_item_type type)
 	}
 };
 
-#endif /* BABELTRACE_TRACE_IR_FIELD_PATH_INTERNAL */
+#endif /* BABELTRACE_LIB_TRACE_IR_FIELD_PATH_H */

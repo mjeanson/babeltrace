@@ -6,8 +6,8 @@
  * fcntl compatibility layer.
  */
 
-#ifndef _BABELTRACE_COMPAT_FCNTL_H
-#define _BABELTRACE_COMPAT_FCNTL_H
+#ifndef BABELTRACE_COMPAT_FCNTL_H
+#define BABELTRACE_COMPAT_FCNTL_H
 
 #include "common/common.h"
 
@@ -216,4 +216,4 @@ end:
 }
 #endif /* #else #ifdef BABELTRACE_HAVE_POSIX_FALLOCATE */
 
-#endif /* _BABELTRACE_COMPAT_FCNTL_H */
+#endif /* BABELTRACE_COMPAT_FCNTL_H */

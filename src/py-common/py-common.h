@@ -6,8 +6,8 @@
  * Copyright (c) 2019 Simon Marchi <simon.marchi@efficios.com>
  */
 
-#ifndef BABELTRACE_PY_COMMON_INTERNAL_H
-#define BABELTRACE_PY_COMMON_INTERNAL_H
+#ifndef BABELTRACE_PY_COMMON_PY_COMMON_H
+#define BABELTRACE_PY_COMMON_PY_COMMON_H
 
 #include <glib.h>
 #include <Python.h>
@@ -46,4 +46,4 @@ GString *bt_py_common_format_exception(PyObject *py_exc_type,
  */
 GString *bt_py_common_format_current_exception(int log_level);
 
-#endif /* BABELTRACE_PY_COMMON_INTERNAL_H */
+#endif /* BABELTRACE_PY_COMMON_PY_COMMON_H */

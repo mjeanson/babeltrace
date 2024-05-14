@@ -4,8 +4,8 @@
  * Copyright 2019 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_PLUGIN_CTF_FS_SINK_FS_SINK_H
-#define BABELTRACE_PLUGIN_CTF_FS_SINK_FS_SINK_H
+#ifndef BABELTRACE_PLUGINS_CTF_FS_SINK_FS_SINK_HPP
+#define BABELTRACE_PLUGINS_CTF_FS_SINK_FS_SINK_HPP
 
 #include <glib.h>
 
@@ -67,4 +67,4 @@ ctf_fs_sink_graph_is_configured(bt_self_component_sink *component);
 
 void ctf_fs_sink_finalize(bt_self_component_sink *component);
 
-#endif /* BABELTRACE_PLUGIN_CTF_FS_SINK_FS_SINK_H */
+#endif /* BABELTRACE_PLUGINS_CTF_FS_SINK_FS_SINK_HPP */

@@ -4,8 +4,8 @@
  * Copyright 2016 Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
  */
 
-#ifndef LTTNG_LIVE_VIEWER_CONNECTION_H
-#define LTTNG_LIVE_VIEWER_CONNECTION_H
+#ifndef BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_VIEWER_CONNECTION_HPP
+#define BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_VIEWER_CONNECTION_HPP
 
 #include <string>
 
@@ -111,4 +111,4 @@ lttng_live_create_viewer_session(struct lttng_live_msg_iter *lttng_live_msg_iter
 bt2::Value::Shared
 live_viewer_connection_list_sessions(struct live_viewer_connection *viewer_connection);
 
-#endif /* LTTNG_LIVE_VIEWER_CONNECTION_H */
+#endif /* BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_VIEWER_CONNECTION_HPP */

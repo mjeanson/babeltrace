@@ -4,6 +4,9 @@
  * Copyright (c) 2017 Philippe Proulx <pproulx@efficios.com>
  */
 
+#ifndef BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_MESSAGE_ITERATOR_I_H
+#define BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_MESSAGE_ITERATOR_I_H
+
 static
 bt_message_iterator_create_from_message_iterator_status
 bt_bt2_message_iterator_create_from_message_iterator(
@@ -116,3 +119,5 @@ static PyObject *bt_bt2_self_component_port_input_get_msg_range(
 		&messages, &message_count);
 	return get_msg_range_common(status, messages, message_count);
 }
+
+#endif /* BABELTRACE_BINDINGS_PYTHON_BT2_BT2_NATIVE_BT_MESSAGE_ITERATOR_I_H */

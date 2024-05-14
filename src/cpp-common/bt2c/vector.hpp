@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-#ifndef SRC_CPP_COMMON_VECTOR_HPP
-#define SRC_CPP_COMMON_VECTOR_HPP
+#ifndef BABELTRACE_CPP_COMMON_BT2C_VECTOR_HPP
+#define BABELTRACE_CPP_COMMON_BT2C_VECTOR_HPP
 
 #include <vector>
 
@@ -34,4 +34,4 @@ void vectorFastRemove(std::vector<T, AllocatorT>& vec,
 
 } /* namespace bt2c */
 
-#endif /* SRC_CPP_COMMON_VECTOR_HPP */
+#endif /* BABELTRACE_CPP_COMMON_BT2C_VECTOR_HPP */

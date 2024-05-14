@@ -4,8 +4,8 @@
  * Copyright (C) 2019 EfficiOS, Inc.
  */
 
-#ifndef _BABELTRACE_STRING_FORMAT_FORMAT_ERROR_H
-#define _BABELTRACE_STRING_FORMAT_FORMAT_ERROR_H
+#ifndef BABELTRACE_STRING_FORMAT_FORMAT_ERROR_H
+#define BABELTRACE_STRING_FORMAT_FORMAT_ERROR_H
 
 #include <babeltrace2/babeltrace.h>
 #include <common/common.h>
@@ -24,4 +24,4 @@ gchar *format_bt_error(
 		bt_logging_level log_level,
 		enum bt_common_color_when use_colors);
 
-#endif /* _BABELTRACE_STRING_FORMAT_FORMAT_ERROR_H */
+#endif /* BABELTRACE_STRING_FORMAT_FORMAT_ERROR_H */

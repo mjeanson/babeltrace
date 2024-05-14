@@ -7,8 +7,8 @@
  * Babeltrace - CTF message iterator
  */
 
-#ifndef CTF_MSG_ITER_H
-#define CTF_MSG_ITER_H
+#ifndef BABELTRACE_PLUGINS_CTF_COMMON_SRC_MSG_ITER_MSG_ITER_HPP
+#define BABELTRACE_PLUGINS_CTF_COMMON_SRC_MSG_ITER_MSG_ITER_HPP
 
 #include <stddef.h>
 #include <stdint.h>
@@ -362,4 +362,4 @@ void ctf_msg_iter_reset_for_next_stream_file(struct ctf_msg_iter *msg_it);
 
 void ctf_msg_iter_set_dry_run(struct ctf_msg_iter *msg_it, bool val);
 
-#endif /* CTF_MSG_ITER_H */
+#endif /* BABELTRACE_PLUGINS_CTF_COMMON_SRC_MSG_ITER_MSG_ITER_HPP */

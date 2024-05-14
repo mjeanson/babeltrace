@@ -5,8 +5,8 @@
  * Copyright (c) 2018 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_CTF_WRITER_OBJECT_POOL_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_OBJECT_POOL_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_OBJECT_POOL_H
+#define BABELTRACE_CTF_WRITER_OBJECT_POOL_H
 
 /*
  * This is a generic object pool to avoid memory allocation/deallocation
@@ -165,4 +165,4 @@ void bt_ctf_object_pool_recycle_object(struct bt_ctf_object_pool *pool, void *ob
 #endif
 }
 
-#endif /* BABELTRACE_CTF_WRITER_OBJECT_POOL_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_OBJECT_POOL_H */

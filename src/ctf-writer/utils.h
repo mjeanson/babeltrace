@@ -4,8 +4,8 @@
  * Copyright 2019 EfficiOS, Inc
  */
 
-#ifndef BABELTRACE_CTF_WRITER_UTILS_INTERNAL_H
-#define BABELTRACE_CTF_WRITER_UTILS_INTERNAL_H
+#ifndef BABELTRACE_CTF_WRITER_UTILS_H
+#define BABELTRACE_CTF_WRITER_UTILS_H
 
 #include "common/macros.h"
 #include <babeltrace2-ctf-writer/field-types.h>
@@ -204,4 +204,4 @@ end:
 	return str;
 }
 
-#endif /* BABELTRACE_CTF_WRITER_UTILS_INTERNAL_H */
+#endif /* BABELTRACE_CTF_WRITER_UTILS_H */

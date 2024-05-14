@@ -4,8 +4,8 @@
  * Copyright 2016 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef LTTNG_LIVE_METADATA_H
-#define LTTNG_LIVE_METADATA_H
+#ifndef BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_METADATA_HPP
+#define BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_METADATA_HPP
 
 #include <stdint.h>
 
@@ -16,4 +16,4 @@ int lttng_live_metadata_create_stream(struct lttng_live_session *session, uint64
 
 enum lttng_live_iterator_status lttng_live_metadata_update(struct lttng_live_trace *trace);
 
-#endif /* LTTNG_LIVE_METADATA_H */
+#endif /* BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_METADATA_HPP */

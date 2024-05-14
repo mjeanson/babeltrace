@@ -4,8 +4,8 @@
  * Copyright 2018-2019 Philippe Proulx <pproulx@efficios.com>
  */
 
-#ifndef BABELTRACE_PLUGIN_CTF_FS_SINK_FS_SINK_CTF_META_H
-#define BABELTRACE_PLUGIN_CTF_FS_SINK_FS_SINK_CTF_META_H
+#ifndef BABELTRACE_PLUGINS_CTF_FS_SINK_FS_SINK_CTF_META_HPP
+#define BABELTRACE_PLUGINS_CTF_FS_SINK_FS_SINK_CTF_META_HPP
 
 #include <glib.h>
 #include <stdint.h>
@@ -935,4 +935,4 @@ static inline struct fs_sink_ctf_trace *fs_sink_ctf_trace_create(const bt_trace 
     return trace;
 }
 
-#endif /* BABELTRACE_PLUGIN_CTF_FS_SINK_FS_SINK_CTF_META_H */
+#endif /* BABELTRACE_PLUGINS_CTF_FS_SINK_FS_SINK_CTF_META_HPP */
