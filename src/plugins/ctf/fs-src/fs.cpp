@@ -27,7 +27,6 @@
 #include "../common/src/metadata/ctf-ir.hpp"
 #include "../common/src/metadata/tsdl/ctf-meta-configure-ir-trace.hpp"
 #include "../common/src/msg-iter.hpp"
-#include "../common/src/msg-iter/msg-iter.hpp"
 #include "../common/src/pkt-props.hpp"
 #include "data-stream-file.hpp"
 #include "file.hpp"

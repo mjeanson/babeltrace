@@ -305,23 +305,15 @@ plugins_ctf_common_metadata_libctf_ast_la_SOURCES = \
 	plugins/ctf/common/src/metadata/tsdl/parser-wrap.hpp \
 	plugins/ctf/common/src/metadata/tsdl/scanner.hpp \
 	plugins/ctf/common/src/metadata/tsdl/scanner-symbols.hpp \
-	plugins/ctf/common/src/metadata/tsdl/decoder.cpp \
-	plugins/ctf/common/src/metadata/tsdl/decoder.hpp \
-	plugins/ctf/common/src/metadata/tsdl/decoder-packetized-file-stream-to-buf.cpp \
-	plugins/ctf/common/src/metadata/tsdl/decoder-packetized-file-stream-to-buf.hpp \
 	plugins/ctf/common/src/metadata/tsdl/logging.hpp \
 	plugins/ctf/common/src/metadata/tsdl/ctf-meta.hpp \
 	plugins/ctf/common/src/metadata/tsdl/ctf-meta-visitors.hpp \
 	plugins/ctf/common/src/metadata/tsdl/ctf-meta-validate.cpp \
 	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-meanings.cpp \
-	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-in-ir.cpp \
 	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-default-clock-classes.cpp \
 	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-text-array-sequence.cpp \
 	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-alignments.cpp \
-	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-value-storing-indexes.cpp \
-	plugins/ctf/common/src/metadata/tsdl/ctf-meta-update-stream-class-config.cpp \
 	plugins/ctf/common/src/metadata/tsdl/ctf-meta-warn-meaningless-header-fields.cpp \
-	plugins/ctf/common/src/metadata/tsdl/ctf-meta-translate.cpp \
 	plugins/ctf/common/src/metadata/tsdl/ctf-meta-resolve.cpp \
 	plugins/ctf/common/src/metadata/tsdl/ctf-meta-configure-ir-trace.cpp \
 	plugins/ctf/common/src/metadata/tsdl/ctf-meta-configure-ir-trace.hpp
@@ -688,8 +680,6 @@ plugins_ctf_babeltrace_plugin_ctf_la_SOURCES = \
 	plugins/ctf/common/metadata/ctf-ir.cpp \
 	plugins/ctf/common/metadata/int-range.hpp \
 	plugins/ctf/common/metadata/int-range-set.hpp \
-	plugins/ctf/common/src/bfcr/bfcr.cpp \
-	plugins/ctf/common/src/bfcr/bfcr.hpp \
 	plugins/ctf/common/src/clk-cls-cfg.hpp \
 	plugins/ctf/common/src/item-seq/item.cpp \
 	plugins/ctf/common/src/item-seq/item.hpp \
@@ -735,8 +725,6 @@ plugins_ctf_babeltrace_plugin_ctf_la_SOURCES = \
 	plugins/ctf/common/src/metadata/tsdl/metadata-stream-decoder.hpp \
 	plugins/ctf/common/src/msg-iter.cpp \
 	plugins/ctf/common/src/msg-iter.hpp \
-	plugins/ctf/common/src/msg-iter/msg-iter.cpp \
-	plugins/ctf/common/src/msg-iter/msg-iter.hpp \
 	plugins/ctf/common/src/null-cp-finder.hpp \
 	plugins/ctf/common/src/pkt-props.cpp \
 	plugins/ctf/common/src/pkt-props.hpp \

@@ -379,8 +379,6 @@ struct ctf_trace_class
     /* Owned by this */
     struct ctf_field_class *packet_header_fc;
 
-    uint64_t stored_value_count;
-
     /* Array of `struct ctf_clock_class *` (owned by this) */
     GPtrArray *clock_classes;
 
@@ -391,16 +389,6 @@ struct ctf_trace_class
     GArray *env_entries;
 
     bool is_translated;
-
-    /* Weak, set during translation */
-    bt_trace_class *ir_tc;
-
-    struct
-    {
-        bool lttng_crash;
-        bool lttng_event_after_packet;
-        bool barectf_event_before_packet;
-    } quirks;
 };
 
 static inline ctf_field_class_bit_array *ctf_field_class_as_bit_array(ctf_field_class *fc)

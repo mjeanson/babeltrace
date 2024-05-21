@@ -17,8 +17,6 @@
 
 #include "common/assert.h"
 #include "common/list.h"
-#include "cpp-common/bt2/self-component-port.hpp"
-#include "cpp-common/bt2/trace-ir.hpp"
 #include "cpp-common/bt2c/logging.hpp"
 #include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 
@@ -483,22 +481,14 @@ struct ctf_visitor_generate_ir
 {
     using UP = std::unique_ptr<ctf_visitor_generate_ir>;
 
-    explicit ctf_visitor_generate_ir(
-        const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfCompParam,
-        bt2c::Logger loggerParam) noexcept :
-        logger {std::move(loggerParam)},
-        selfComp {selfCompParam}
+    explicit ctf_visitor_generate_ir(const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/CTF/VISITOR-GENERATE-IR"}
     {
     }
 
     ~ctf_visitor_generate_ir();
 
     bt2c::Logger logger;
-
-    bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp;
-
-    /* Trace IR trace class being filled (owned by this) */
-    bt2::TraceClass::Shared trace_class;
 
     /* CTF meta trace being filled (owned by this) */
     struct ctf_trace_class *ctf_tc = nullptr;
@@ -513,15 +503,7 @@ struct ctf_visitor_generate_ir
     bool is_lttng = false;
 };
 
-ctf_visitor_generate_ir::UP
-ctf_visitor_generate_ir_create(const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
-                               const bt2c::Logger& parentLogger);
-
-bt2::TraceClass::Shared
-ctf_visitor_generate_ir_get_ir_trace_class(struct ctf_visitor_generate_ir *visitor);
-
-struct ctf_trace_class *
-ctf_visitor_generate_ir_borrow_ctf_trace_class(struct ctf_visitor_generate_ir *visitor);
+ctf_visitor_generate_ir::UP ctf_visitor_generate_ir_create(const bt2c::Logger& parentLogger);
 
 int ctf_visitor_generate_ir_visit_node(struct ctf_visitor_generate_ir *visitor,
                                        struct ctf_node *node);
@@ -573,12 +555,6 @@ error:
     /* This always returns NULL */
     return g_string_free(str, TRUE);
 }
-
-#ifndef BT_COMP_LOG_CUR_LVL
-#    define BT_AST_LOG_LEVEL_UNUSED_ATTR __attribute__((unused))
-#else
-#    define BT_AST_LOG_LEVEL_UNUSED_ATTR
-#endif
 
 static inline int ctf_ast_get_unary_uuid(struct bt_list_head *head, bt_uuid_t uuid,
                                          const bt2c::Logger& logger)
