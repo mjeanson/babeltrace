@@ -65,8 +65,18 @@ const JsonObjVal& JsonVal::asObj() const noexcept
     return static_cast<const JsonObjVal&>(*this);
 }
 
+void JsonVal::accept(JsonValVisitor& visitor) const
+{
+    this->_accept(visitor);
+}
+
 JsonNullVal::JsonNullVal(TextLoc loc) noexcept : JsonVal {Type::Null, std::move(loc)}
 {
+}
+
+void JsonNullVal::_accept(JsonValVisitor& visitor) const
+{
+    visitor.visit(*this);
 }
 
 #ifdef BT_DEBUG_MODE
@@ -104,6 +114,11 @@ JsonArrayVal::JsonArrayVal(Container&& vals, TextLoc loc) :
 #endif
 }
 
+void JsonArrayVal::_accept(JsonValVisitor& visitor) const
+{
+    visitor.visit(*this);
+}
+
 JsonObjVal::JsonObjVal(Container&& vals, TextLoc loc) :
     JsonCompoundVal {std::move(vals), std::move(loc)}
 {
@@ -112,6 +127,11 @@ JsonObjVal::JsonObjVal(Container&& vals, TextLoc loc) :
         return elem.second;
     }));
 #endif
+}
+
+void JsonObjVal::_accept(JsonValVisitor& visitor) const
+{
+    visitor.visit(*this);
 }
 
 JsonNullVal::UP createJsonVal(TextLoc loc)

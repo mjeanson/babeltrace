@@ -69,6 +69,50 @@ class JsonArrayVal;
 class JsonObjVal;
 
 /*
+ * Visitor of JSON value.
+ */
+class JsonValVisitor
+{
+protected:
+    explicit JsonValVisitor() = default;
+
+public:
+    virtual ~JsonValVisitor() = default;
+
+    virtual void visit(const JsonNullVal&)
+    {
+    }
+
+    virtual void visit(const JsonBoolVal&)
+    {
+    }
+
+    virtual void visit(const JsonSIntVal&)
+    {
+    }
+
+    virtual void visit(const JsonUIntVal&)
+    {
+    }
+
+    virtual void visit(const JsonRealVal&)
+    {
+    }
+
+    virtual void visit(const JsonStrVal&)
+    {
+    }
+
+    virtual void visit(const JsonArrayVal&)
+    {
+    }
+
+    virtual void visit(const JsonObjVal&)
+    {
+    }
+};
+
+/*
  * Abstract base class for any JSON value.
  */
 class JsonVal
@@ -92,6 +136,8 @@ public:
     JsonVal(JsonVal&&) = delete;
     JsonVal& operator=(const JsonVal&) = delete;
     JsonVal& operator=(JsonVal&&) = delete;
+
+    virtual ~JsonVal() = default;
 
     /*
      * Type of this JSON value.
@@ -213,7 +259,14 @@ public:
      */
     const JsonObjVal& asObj() const noexcept;
 
+    /*
+     * Accepts the visitor `visitor` to visit this JSON value.
+     */
+    void accept(JsonValVisitor& visitor) const;
+
 private:
+    virtual void _accept(JsonValVisitor& visitor) const = 0;
+
     /* JSON value type */
     Type _mType;
 
@@ -234,6 +287,9 @@ public:
      * Builds a JSON null value located at `loc`.
      */
     explicit JsonNullVal(TextLoc loc) noexcept;
+
+private:
+    void _accept(JsonValVisitor& visitor) const override;
 };
 
 /*
@@ -273,6 +329,12 @@ public:
     const ValT& operator*() const noexcept
     {
         return _mVal;
+    }
+
+private:
+    void _accept(JsonValVisitor& visitor) const override
+    {
+        visitor.visit(*this);
     }
 
 private:
@@ -363,6 +425,9 @@ public:
         BT_ASSERT_DBG(index < this->_mVals.size());
         return *_mVals[index];
     }
+
+private:
+    void _accept(JsonValVisitor& visitor) const override;
 };
 
 /*
@@ -573,6 +638,9 @@ public:
     {
         return _mVals.find(key) != _mVals.end();
     }
+
+private:
+    void _accept(JsonValVisitor& visitor) const override;
 };
 
 /*
