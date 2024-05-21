@@ -32,7 +32,7 @@ struct ctf_fs_trace
     explicit ctf_fs_trace(const ctf::src::ClkClsCfg& clkClsCfg,
                           const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
                           const bt2c::Logger& parentLogger) :
-        logger {parentLogger, "PLUGIN/SRC.CTF.FS/TRACE"},
+        _mLogger {parentLogger, "PLUGIN/SRC.CTF.FS/TRACE"},
         _mClkClsCfg {clkClsCfg}, _mSelfComp {selfComp}
     {
     }
@@ -52,10 +52,8 @@ struct ctf_fs_trace
 
     void parseMetadata(const bt2c::ConstBytes buffer)
     {
-        _mParseRet = ctf::src::parseMetadataStream(_mSelfComp, _mClkClsCfg, buffer, this->logger);
+        _mParseRet = ctf::src::parseMetadataStream(_mSelfComp, _mClkClsCfg, buffer, _mLogger);
     }
-
-    bt2c::Logger logger;
 
     bt2::Trace::Shared trace;
 
@@ -67,6 +65,7 @@ struct ctf_fs_trace
     uint64_t next_stream_id = 0;
 
 private:
+    bt2c::Logger _mLogger;
     ctf::src::ClkClsCfg _mClkClsCfg;
     bt2::OptionalBorrowedObject<bt2::SelfComponent> _mSelfComp;
     bt2s::optional<ctf::src::MetadataStreamParser::ParseRet> _mParseRet;
