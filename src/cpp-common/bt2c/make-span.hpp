@@ -17,6 +17,12 @@ inline constexpr bt2s::span<T> makeSpan(T * const ptr, const size_t count) noexc
     return nonstd::make_span(ptr, count);
 }
 
+template <class T>
+inline constexpr bt2s::span<T> makeSpan(T *first, T *last) noexcept
+{
+    return nonstd::make_span(first, last);
+}
+
 } /* namespace bt2c */
 
 #endif /* BABELTRACE_CPP_COMMON_BT2C_MAKE_SPAN_HPP */

@@ -703,10 +703,26 @@ plugins_ctf_babeltrace_plugin_ctf_la_SOURCES = \
 	plugins/ctf/common/src/item-seq/medium.hpp \
 	plugins/ctf/common/src/metadata/ctf-ir.cpp \
 	plugins/ctf/common/src/metadata/ctf-ir.hpp \
+	plugins/ctf/common/src/metadata/json/ctf-2-fc-builder.cpp \
+	plugins/ctf/common/src/metadata/json/ctf-2-fc-builder.hpp \
+	plugins/ctf/common/src/metadata/json/ctf-2-metadata-stream-parser.cpp \
+	plugins/ctf/common/src/metadata/json/ctf-2-metadata-stream-parser.hpp \
+	plugins/ctf/common/src/metadata/json/fcs-with-role.cpp \
+	plugins/ctf/common/src/metadata/json/fcs-with-role.hpp \
+	plugins/ctf/common/src/metadata/json/key-fc-types.cpp \
+	plugins/ctf/common/src/metadata/json/key-fc-types.hpp \
+	plugins/ctf/common/src/metadata/json/normalize-field-locs.cpp \
+	plugins/ctf/common/src/metadata/json/normalize-field-locs.hpp \
+	plugins/ctf/common/src/metadata/json/resolve-fcs-with-int-sel.cpp \
+	plugins/ctf/common/src/metadata/json/resolve-fcs-with-int-sel.hpp \
 	plugins/ctf/common/src/metadata/json/strings.cpp \
 	plugins/ctf/common/src/metadata/json/strings.hpp \
+	plugins/ctf/common/src/metadata/json/utils.cpp \
+	plugins/ctf/common/src/metadata/json/utils.hpp \
 	plugins/ctf/common/src/metadata/json/val-req.cpp \
 	plugins/ctf/common/src/metadata/json/val-req.hpp \
+	plugins/ctf/common/src/metadata/json/validate-scope-fc-roles.cpp \
+	plugins/ctf/common/src/metadata/json/validate-scope-fc-roles.hpp \
 	plugins/ctf/common/src/metadata/metadata-stream-parser.cpp \
 	plugins/ctf/common/src/metadata/metadata-stream-parser.hpp \
 	plugins/ctf/common/src/metadata/normalize-clk-offset.cpp \
