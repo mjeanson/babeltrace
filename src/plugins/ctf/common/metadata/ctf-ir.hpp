@@ -1026,7 +1026,7 @@ public:
     /*
      * Length of instances of this field class.
      */
-    const bt2c::DataLen len() const noexcept
+    bt2c::DataLen len() const noexcept
     {
         return _mLen;
     }

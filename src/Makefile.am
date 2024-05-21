@@ -685,6 +685,8 @@ plugins_ctf_babeltrace_plugin_ctf_la_SOURCES = \
 	plugins/ctf/common/src/bfcr/bfcr.cpp \
 	plugins/ctf/common/src/bfcr/bfcr.hpp \
 	plugins/ctf/common/src/clk-cls-cfg.hpp \
+	plugins/ctf/common/src/metadata/ctf-ir.cpp \
+	plugins/ctf/common/src/metadata/ctf-ir.hpp \
 	plugins/ctf/common/src/msg-iter/msg-iter.cpp \
 	plugins/ctf/common/src/msg-iter/msg-iter.hpp \
 	plugins/ctf/fs-sink/fs-sink.cpp \
