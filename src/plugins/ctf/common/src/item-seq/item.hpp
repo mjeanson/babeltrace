@@ -13,6 +13,7 @@
 #include "cpp-common/bt2c/aliases.hpp"
 #include "cpp-common/bt2c/data-len.hpp"
 #include "cpp-common/bt2s/string-view.hpp"
+#include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 #include "cpp-common/vendor/wise-enum/wise_enum.h"
 
 #include "../metadata/ctf-ir.hpp"

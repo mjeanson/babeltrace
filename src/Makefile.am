@@ -693,6 +693,8 @@ plugins_ctf_babeltrace_plugin_ctf_la_SOURCES = \
 	plugins/ctf/common/src/item-seq/item-seq-iter.hpp \
 	plugins/ctf/common/src/item-seq/item-visitor.cpp \
 	plugins/ctf/common/src/item-seq/item-visitor.hpp \
+	plugins/ctf/common/src/item-seq/logging-item-visitor.cpp \
+	plugins/ctf/common/src/item-seq/logging-item-visitor.hpp \
 	plugins/ctf/common/src/item-seq/medium.cpp \
 	plugins/ctf/common/src/item-seq/medium.hpp \
 	plugins/ctf/common/src/metadata/ctf-ir.cpp \
