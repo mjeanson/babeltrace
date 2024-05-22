@@ -703,6 +703,8 @@ plugins_ctf_babeltrace_plugin_ctf_la_SOURCES = \
 	plugins/ctf/common/src/metadata/ctf-ir.hpp \
 	plugins/ctf/common/src/metadata/tsdl/metadata-stream-decoder.cpp \
 	plugins/ctf/common/src/metadata/tsdl/metadata-stream-decoder.hpp \
+	plugins/ctf/common/src/msg-iter.cpp \
+	plugins/ctf/common/src/msg-iter.hpp \
 	plugins/ctf/common/src/msg-iter/msg-iter.cpp \
 	plugins/ctf/common/src/msg-iter/msg-iter.hpp \
 	plugins/ctf/common/src/null-cp-finder.hpp \
@@ -749,7 +751,8 @@ plugins_ctf_babeltrace_plugin_ctf_la_LDFLAGS = \
 plugins_ctf_babeltrace_plugin_ctf_la_LIBADD = \
 	plugins/ctf/common/metadata/libctf-parser.la \
 	plugins/ctf/common/metadata/libctf-ast.la \
-	plugins/common/param-validation/libparam-validation.la
+	plugins/common/param-validation/libparam-validation.la \
+	cpp-common/libcpp-common.la
 
 if BABELTRACE_BUILD_WITH_MINGW
 plugins_ctf_babeltrace_plugin_ctf_la_LIBADD += -lws2_32

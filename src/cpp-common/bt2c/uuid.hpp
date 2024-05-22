@@ -248,6 +248,11 @@ inline UuidView::operator Uuid() const noexcept
     return Uuid {*this};
 }
 
+static inline std::string format_as(const bt2c::Uuid& uuid)
+{
+    return uuid.str();
+}
+
 } /* namespace bt2c */
 
 #endif /* BABELTRACE_CPP_COMMON_BT2C_UUID_HPP */
