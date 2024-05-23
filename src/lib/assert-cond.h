@@ -1356,6 +1356,13 @@
 	BT_ASSERT_PRE_DEV_NON_NULL(_BT_ASSERT_PRE_UUID_ID, (_uuid),	\
 		_BT_ASSERT_PRE_UUID_NAME)
 
+#define _BT_ASSERT_PRE_UID_NAME	"Unique identifier"
+#define _BT_ASSERT_PRE_UID_ID	"uid"
+
+#define BT_ASSERT_PRE_UID_NON_NULL(_uid)				\
+	BT_ASSERT_PRE_NON_NULL(_BT_ASSERT_PRE_UID_ID, (_uid),		\
+		_BT_ASSERT_PRE_UID_NAME)
+
 #define _BT_ASSERT_PRE_KEY_NAME	"Key"
 #define _BT_ASSERT_PRE_KEY_ID	"key"
 

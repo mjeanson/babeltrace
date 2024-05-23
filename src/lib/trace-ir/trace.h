@@ -33,12 +33,18 @@ struct bt_trace {
 
 	gchar *name;
 
-	struct {
-		bt_uuid_t uuid;
+	union {
+		/* Used for MIP == 0 */
+		struct {
+			bt_uuid_t uuid;
 
-		/* NULL or `uuid` above */
-		bt_uuid value;
-	} uuid;
+			/* NULL or `uuid` above */
+			bt_uuid value;
+		} uuid;
+
+		/* Used for MIP >= 1 */
+		gchar *uid;
+	} uid_or_uuid;
 
 	struct bt_value *environment;
 

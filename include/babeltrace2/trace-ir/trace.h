@@ -86,18 +86,40 @@ A trace has the following properties:
   </dd>
 
   <dt>
-    \anchor api-tir-trace-prop-uuid
-    \bt_dt_opt UUID
+    \bt_dt_opt Depending on the effective \bt_mip (MIP) version of the
+    trace processing \bt_graph:
   </dt>
   <dd>
-    <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a>
-    of the trace.
+    <dl>
+      <dt>
+        \anchor api-tir-trace-prop-uuid
+        MIP&nbsp;0: UUID
+      </dt>
+      <dd>
+        <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a>
+        of the trace.
 
-    The trace's UUID uniquely identifies the trace.
+        The trace's UUID uniquely identifies the trace.
 
-    Use bt_trace_set_uuid() and bt_trace_get_uuid().
+        Use bt_trace_set_uuid() and bt_trace_get_uuid().
+      </dd>
+
+      <dt>
+        \anchor api-tir-trace-prop-uid
+        MIP&nbsp;1: UID
+      </dt>
+      <dd>
+        <a href="https://en.wikipedia.org/wiki/Unique_identifier">Unique identifier</a>
+        (UID) of the trace.
+
+        The combination of the trace's
+        \link api-tir-trace-prop-name name\endlink and UID
+        uniquely identifies the trace.
+
+        Use bt_trace_set_uid() and bt_trace_get_uid().
+      </dd>
+    </dl>
   </dd>
-
   <dt>
     \anchor api-tir-trace-prop-env
     \bt_dt_opt Environment
@@ -172,7 +194,10 @@ On success, the returned trace has the following property values:
     <td>\ref api-tir-trace-prop-name "Name"
     <td>\em None
   <tr>
-    <td>\ref api-tir-trace-prop-uuid "UUID"
+    <td>\bt_mip (MIP) version&nbsp;0: \ref api-tir-trace-prop-uuid "UUID"
+    <td>\em None
+  <tr>
+    <td>MIP&nbsp;1: \ref api-tir-trace-prop-uid "UID"
     <td>\em None
   <tr>
     <td>\ref api-tir-trace-prop-env "Environment"
@@ -416,6 +441,16 @@ extern const char *bt_trace_get_name(const bt_trace *trace) __BT_NOEXCEPT;
     <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a>
     of the trace \bt_p{trace} to a copy of \bt_p{uuid}.
 
+@note
+    @parblock
+    This function is only available when the class of \bt_p{trace} was
+    created from a \bt_comp which belongs to a trace processing
+    \bt_graph with the effective \bt_mip (MIP) version&nbsp;0.
+
+    With MIP&nbsp;1, see the
+    \ref api-tir-trace-prop-uid "UID" property.
+    @endparblock
+
 See the \ref api-tir-trace-prop-uuid "UUID" property.
 
 @param[in] trace
@@ -425,6 +460,7 @@ See the \ref api-tir-trace-prop-uuid "UUID" property.
 
 @bt_pre_not_null{trace}
 @bt_pre_hot{trace}
+@bt_pre_trace_with_mip{trace, 0}
 @bt_pre_not_null{uuid}
 
 @sa bt_trace_get_uuid() &mdash;
@@ -434,7 +470,35 @@ extern void bt_trace_set_uuid(bt_trace *trace, bt_uuid uuid) __BT_NOEXCEPT;
 
 /*!
 @brief
+    Status codes for bt_trace_set_uid().
+*/
+typedef enum bt_trace_set_uid_status {
+	/*!
+	@brief
+	    Success.
+	*/
+	BT_TRACE_SET_UID_STATUS_OK		= __BT_FUNC_STATUS_OK,
+
+	/*!
+	@brief
+	    Out of memory.
+	*/
+	BT_TRACE_SET_UID_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
+} bt_trace_set_uid_status;
+
+/*!
+@brief
     Returns the UUID of the trace \bt_p{trace}.
+
+@note
+    @parblock
+    This function is only available when the class of \bt_p{trace} was
+    created from a \bt_comp which belongs to a trace processing
+    \bt_graph with the effective \bt_mip (MIP) version&nbsp;0.
+
+    With MIP&nbsp;1, see the
+    \ref api-tir-trace-prop-uid "UID" property.
+    @endparblock
 
 See the \ref api-tir-trace-prop-uuid "UUID" property.
 
@@ -452,11 +516,62 @@ If \bt_p{trace} has no UUID, this function returns \c NULL.
     @endparblock
 
 @bt_pre_not_null{trace}
+@bt_pre_trace_with_mip{trace, 0}
 
 @sa bt_trace_set_uuid() &mdash;
     Sets the UUID of a trace.
 */
 extern bt_uuid bt_trace_get_uuid(const bt_trace *trace) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Sets the
+    <a href="https://en.wikipedia.org/wiki/Unique_identifier">unique identifier</a>
+    (UID) of \bt_p{trace} to a copy of \bt_p{uid}.
+
+See the \ref api-tir-trace-prop-uid "UID" property.
+
+@param[in] trace
+    Trace of which to set the UID to \bt_p{uid}.
+@param[in] uid
+    New UID of \bt_p{trace} (copied).
+
+@bt_pre_not_null{trace}
+@bt_pre_hot{trace}
+@bt_pre_trace_with_mip{trace, 1}
+@bt_pre_not_null{uid}
+
+@sa bt_trace_get_uid() &mdash;
+    Returns the UID of a trace.
+*/
+extern bt_trace_set_uid_status bt_trace_set_uid(bt_trace *trace, const char *uid);
+
+/*!
+@brief
+    Returns the UID of the trace \bt_p{trace}.
+
+See the \ref api-tir-trace-prop-uid "UID" property.
+
+If \bt_p{trace} has no UID, this function returns \c NULL.
+
+@param[in] trace
+    Trace of which to get the UID.
+
+@returns
+    @parblock
+    UID of \bt_p{trace}, or \c NULL if none.
+
+    The returned pointer remains valid as long as \bt_p{trace}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{trace}
+@bt_pre_trace_with_mip{trace, 1}
+
+@sa bt_trace_set_uid() &mdash;
+    Sets the UID of a trace.
+*/
+extern const char *bt_trace_get_uid(const bt_trace *trace);
 
 /*!
 @brief

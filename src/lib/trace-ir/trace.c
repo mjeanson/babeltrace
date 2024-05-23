@@ -107,6 +107,11 @@ void destroy_trace(struct bt_object *obj)
 
 	g_free(trace->name);
 
+	if (trace->class->mip_version >= 1) {
+		g_free(trace->uid_or_uuid.uid);
+		trace->uid_or_uuid.uid = NULL;
+	}
+
 	if (trace->environment) {
 		BT_LOGD_STR("Destroying environment attributes.");
 		bt_attributes_destroy(trace->environment);
@@ -216,7 +221,16 @@ BT_EXPORT
 bt_uuid bt_trace_get_uuid(const struct bt_trace *trace)
 {
 	BT_ASSERT_PRE_DEV_TRACE_NON_NULL(trace);
-	return trace->uuid.value;
+	BT_ASSERT_PRE_TC_MIP_VERSION_EQ(trace->class, 0);
+	return trace->uid_or_uuid.uuid.value;
+}
+
+BT_EXPORT
+const char *bt_trace_get_uid(const bt_trace *trace)
+{
+	BT_ASSERT_PRE_DEV_TRACE_NON_NULL(trace);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace->class, 1);
+	return trace->uid_or_uuid.uid;
 }
 
 BT_EXPORT
@@ -225,9 +239,23 @@ void bt_trace_set_uuid(struct bt_trace *trace, bt_uuid uuid)
 	BT_ASSERT_PRE_TRACE_NON_NULL(trace);
 	BT_ASSERT_PRE_UUID_NON_NULL(uuid);
 	BT_ASSERT_PRE_DEV_TRACE_HOT(trace);
-	bt_uuid_copy(trace->uuid.uuid, uuid);
-	trace->uuid.value = trace->uuid.uuid;
+	BT_ASSERT_PRE_TC_MIP_VERSION_EQ(trace->class, 0);
+	bt_uuid_copy(trace->uid_or_uuid.uuid.uuid, uuid);
+	trace->uid_or_uuid.uuid.value = trace->uid_or_uuid.uuid.uuid;
 	BT_LIB_LOGD("Set trace's UUID: %!+t", trace);
+}
+
+BT_EXPORT
+enum bt_trace_set_uid_status bt_trace_set_uid(bt_trace *trace, const char *uid)
+{
+	BT_ASSERT_PRE_TRACE_NON_NULL(trace);
+	BT_ASSERT_PRE_DEV_TRACE_HOT(trace);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace->class, 1);
+	BT_ASSERT_PRE_UID_NON_NULL(uid);
+	g_free(trace->uid_or_uuid.uid);
+	trace->uid_or_uuid.uid = g_strdup(uid);
+	BT_LIB_LOGD("Set trace's UID: %!+t", trace);
+	return BT_FUNC_STATUS_OK;
 }
 
 static

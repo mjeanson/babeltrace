@@ -566,8 +566,14 @@ static inline void format_trace(char **buf_ch, bool extended,
 		return;
 	}
 
-	if (trace->uuid.value) {
-		BUF_APPEND_UUID(trace->uuid.value);
+	if (trace->class->mip_version >= 1) {
+		if (trace->uid_or_uuid.uid) {
+			BUF_APPEND(", %suid=\"%s\"", PRFIELD(trace->uid_or_uuid.uid));
+		}
+	} else {
+		if (trace->uid_or_uuid.uuid.value) {
+			BUF_APPEND_UUID(trace->uid_or_uuid.uuid.value);
+		}
 	}
 
 	BUF_APPEND(", %sis-frozen=%d", PRFIELD(trace->frozen));
