@@ -518,37 +518,42 @@ int bt_resolve_field_paths(struct bt_field_class *fc,
 			BT_FIELD_CLASS_TYPE_OPTION_WITH_SELECTOR_FIELD)) {
 		struct bt_field_class_option_with_selector_field *opt_fc = (void *) fc;
 
-		BT_ASSERT(opt_fc->selector_fc);
-		BT_ASSERT(!opt_fc->selector_field_path);
-		opt_fc->selector_field_path = resolve_field_path(
-			fc, opt_fc->selector_fc, ctx, __func__);
-		if (!opt_fc->selector_field_path) {
-			ret = -1;
-			goto end;
+		if (opt_fc->selector_field_xref_kind == FIELD_XREF_KIND_PATH) {
+			BT_ASSERT(opt_fc->selector_field.path.class);
+			BT_ASSERT(!opt_fc->selector_field.path.path);
+			opt_fc->selector_field.path.path = resolve_field_path(
+				fc, opt_fc->selector_field.path.class, ctx, __func__);
+			if (!opt_fc->selector_field.path.path) {
+				ret = -1;
+				goto end;
+			}
 		}
 	} else if (fc->type == BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITH_LENGTH_FIELD) {
 		struct bt_field_class_array_dynamic *dyn_array_fc = (void *) fc;
 
-		BT_ASSERT(dyn_array_fc->length_fc);
-		BT_ASSERT(!dyn_array_fc->length_field_path);
-		dyn_array_fc->length_field_path = resolve_field_path(
-			fc, dyn_array_fc->length_fc, ctx, __func__);
-		if (!dyn_array_fc->length_field_path) {
-			ret = -1;
-			goto end;
+		if (dyn_array_fc->length_field.xref_kind == FIELD_XREF_KIND_PATH) {
+			BT_ASSERT(dyn_array_fc->length_field.path.class);
+			BT_ASSERT(!dyn_array_fc->length_field.path.path);
+			dyn_array_fc->length_field.path.path = resolve_field_path(
+				fc, dyn_array_fc->length_field.path.class, ctx, __func__);
+			if (!dyn_array_fc->length_field.path.path) {
+				ret = -1;
+				goto end;
+			}
 		}
 	} else if (bt_field_class_type_is(fc->type,
 			BT_FIELD_CLASS_TYPE_VARIANT_WITH_SELECTOR_FIELD)) {
 		struct bt_field_class_variant_with_selector_field *var_fc =
 			(void *) fc;
 
-		if (var_fc->selector_fc) {
-			BT_ASSERT(!var_fc->selector_field_path);
-			var_fc->selector_field_path =
+		if (var_fc->selector_field_xref_kind == FIELD_XREF_KIND_PATH) {
+			BT_ASSERT(var_fc->selector_field.path.class);
+			BT_ASSERT(!var_fc->selector_field.path.path);
+			var_fc->selector_field.path.path =
 				resolve_field_path(fc,
-					(void *) var_fc->selector_fc, ctx,
+					(void *) var_fc->selector_field.path.class, ctx,
 					__func__);
-			if (!var_fc->selector_field_path) {
+			if (!var_fc->selector_field.path.path) {
 				ret = -1;
 				goto end;
 			}

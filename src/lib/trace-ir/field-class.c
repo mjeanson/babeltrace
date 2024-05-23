@@ -1216,10 +1216,18 @@ void destroy_option_field_class(struct bt_object *obj)
 		struct bt_field_class_option_with_selector_field *with_sel_fc =
 			(void *) obj;
 
-		BT_LOGD_STR("Putting selector field path.");
-		BT_OBJECT_PUT_REF_AND_RESET(with_sel_fc->selector_field_path);
-		BT_LOGD_STR("Putting selector field class.");
-		BT_OBJECT_PUT_REF_AND_RESET(with_sel_fc->selector_fc);
+		switch (with_sel_fc->selector_field_xref_kind) {
+		case FIELD_XREF_KIND_PATH:
+			BT_LOGD_STR("Putting selector field path.");
+			BT_OBJECT_PUT_REF_AND_RESET(with_sel_fc->selector_field.path.path);
+			BT_LOGD_STR("Putting selector field class.");
+			BT_OBJECT_PUT_REF_AND_RESET(with_sel_fc->selector_field.path.class);
+			break;
+		case FIELD_XREF_KIND_LOCATION:
+			BT_LOGD_STR("Putting selector field location.");
+			BT_OBJECT_PUT_REF_AND_RESET(with_sel_fc->selector_field.location);
+			break;
+		};
 
 		if (fc->common.type != BT_FIELD_CLASS_TYPE_OPTION_WITH_BOOL_SELECTOR_FIELD) {
 			struct bt_field_class_option_with_selector_field_integer *with_int_sel_fc =
@@ -1239,14 +1247,16 @@ struct bt_field_class *create_option_field_class(
 		enum bt_field_class_type fc_type,
 		struct bt_field_class *content_fc,
 		struct bt_field_class *selector_fc,
+		const struct bt_field_location *selector_fl,
 		const char *api_func)
 {
 	struct bt_field_class_option *opt_fc = NULL;
 
-	BT_ASSERT_PRE_NO_ERROR_FROM_FUNC(api_func);
-	BT_ASSERT_PRE_TC_NON_NULL_FROM_FUNC(api_func, trace_class);
 	BT_ASSERT_PRE_NON_NULL_FROM_FUNC(api_func, "content-field-class",
 		content_fc, "Content field class");
+
+	BT_ASSERT(!(selector_fc && selector_fl));
+
 	BT_LIB_LOGD("Creating option field class: "
 		"type=%s, %![content-fc-]+F, %![sel-fc-]+F",
 		bt_common_field_class_type_string(fc_type),
@@ -1255,21 +1265,12 @@ struct bt_field_class *create_option_field_class(
 	if (fc_type != BT_FIELD_CLASS_TYPE_OPTION_WITHOUT_SELECTOR_FIELD) {
 		struct bt_field_class_option_with_selector_field *opt_with_sel_fc = NULL;
 
-		BT_ASSERT_PRE_NON_NULL_FROM_FUNC(api_func,
-			"selector-field-class", selector_fc,
-			"Selector field class");
+		BT_ASSERT(selector_fc || selector_fl);
 
 		if (fc_type == BT_FIELD_CLASS_TYPE_OPTION_WITH_BOOL_SELECTOR_FIELD) {
-			BT_ASSERT_PRE_FC_HAS_TYPE_FROM_FUNC(api_func,
-				"selector-field-class", selector_fc,
-				"boolean-field-class", BT_FIELD_CLASS_TYPE_BOOL,
-				"Selector field class");
 			opt_with_sel_fc = (void *) g_new0(
 				struct bt_field_class_option_with_selector_field_bool, 1);
 		} else {
-			BT_ASSERT_PRE_FC_IS_INT_FROM_FUNC(api_func,
-				"selector-field-class",
-				selector_fc, "Selector field class");
 			opt_with_sel_fc = (void *) g_new0(
 				struct bt_field_class_option_with_selector_field_integer, 1);
 		}
@@ -1280,10 +1281,21 @@ struct bt_field_class *create_option_field_class(
 			goto error;
 		}
 
-		opt_with_sel_fc->selector_fc = selector_fc;
-		bt_object_get_ref_no_null_check(opt_with_sel_fc->selector_fc);
+		if (selector_fc) {
+			opt_with_sel_fc->selector_field_xref_kind = FIELD_XREF_KIND_PATH;
+			opt_with_sel_fc->selector_field.path.class = selector_fc;
+			bt_object_get_ref_no_null_check(opt_with_sel_fc->selector_field.path.class);
+		} else {
+			opt_with_sel_fc->selector_field_xref_kind = FIELD_XREF_KIND_LOCATION;
+			opt_with_sel_fc->selector_field.location = selector_fl;
+			bt_object_get_ref_no_null_check(opt_with_sel_fc->selector_field.location);
+		}
+
 		opt_fc = (void *) opt_with_sel_fc;
 	} else {
+		BT_ASSERT(!selector_fc);
+		BT_ASSERT(!selector_fl);
+
 		opt_fc = g_new0(struct bt_field_class_option, 1);
 		if (!opt_fc) {
 			BT_LIB_LOGE_APPEND_CAUSE(
@@ -1307,8 +1319,6 @@ struct bt_field_class *create_option_field_class(
 		bt_field_class_freeze(selector_fc);
 	}
 
-	BT_LIB_LOGD("Created option field class object: "
-		"%![opt-fc-]+F, %![sel-fc-]+F", opt_fc, selector_fc);
 	goto end;
 
 error:
@@ -1323,9 +1333,41 @@ struct bt_field_class *bt_field_class_option_without_selector_create(
 		struct bt_trace_class *trace_class,
 		struct bt_field_class *content_fc)
 {
-	return create_option_field_class(trace_class,
+	struct bt_field_class *fc;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_TC_MIP_VERSION_EQ(trace_class, 0);
+
+	fc = create_option_field_class(trace_class,
 		BT_FIELD_CLASS_TYPE_OPTION_WITHOUT_SELECTOR_FIELD,
-		content_fc, NULL, __func__);
+		content_fc, NULL, NULL, __func__);
+
+	BT_LIB_LOGD("Created option field class without selector field class: "
+		"%![opt-fc-]+F", fc);
+
+	return fc;
+}
+
+BT_EXPORT
+struct bt_field_class *bt_field_class_option_without_selector_field_location_create(
+		struct bt_trace_class *trace_class,
+		struct bt_field_class *content_fc)
+{
+	struct bt_field_class *fc;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace_class, 1);
+
+	fc = create_option_field_class(trace_class,
+		BT_FIELD_CLASS_TYPE_OPTION_WITHOUT_SELECTOR_FIELD,
+		content_fc, NULL, NULL, __func__);
+
+	BT_LIB_LOGD("Created option field class without selector field location: "
+		"%![opt-fc-]+F", fc);
+
+	return fc;
 }
 
 BT_EXPORT
@@ -1334,12 +1376,47 @@ struct bt_field_class *bt_field_class_option_with_selector_field_bool_create(
 		struct bt_field_class *content_fc,
 		struct bt_field_class *selector_fc)
 {
-	BT_ASSERT_PRE_NO_ERROR();
-	BT_ASSERT_PRE_TC_MIP_VERSION_EQ(trace_class, 0);
+	struct bt_field_class *fc;
 
-	return create_option_field_class(trace_class,
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_TC_MIP_VERSION_EQ(trace_class, 0);
+	BT_ASSERT_PRE_SELECTOR_FC_NON_NULL(selector_fc);
+	BT_ASSERT_PRE_FC_HAS_TYPE("selector-field-class", selector_fc,
+			"boolean-field-class", BT_FIELD_CLASS_TYPE_BOOL,
+			"Selector field class");
+
+	fc = create_option_field_class(trace_class,
 		BT_FIELD_CLASS_TYPE_OPTION_WITH_BOOL_SELECTOR_FIELD,
-		content_fc, selector_fc, __func__);
+		content_fc, selector_fc, NULL, __func__);
+
+	BT_LIB_LOGD("Created option field class with boolean selector field class: "
+		"%![opt-fc-]+F, %![sel-fc-]+F", fc, selector_fc);
+
+	return fc;
+}
+
+BT_EXPORT
+struct bt_field_class *bt_field_class_option_with_selector_field_location_bool_create(
+		struct bt_trace_class *trace_class,
+		struct bt_field_class *content_fc,
+		const struct bt_field_location *selector_fl)
+{
+	struct bt_field_class *fc;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace_class, 1);
+	BT_ASSERT_PRE_SELECTOR_FL_NON_NULL(selector_fl);
+
+	fc = create_option_field_class(trace_class,
+		BT_FIELD_CLASS_TYPE_OPTION_WITH_BOOL_SELECTOR_FIELD,
+		content_fc, NULL, selector_fl, __func__);
+
+	BT_LIB_LOGD("Created option field class with boolean selector field location: "
+		"%![opt-fc-]+F, %![sel-fl-]+L", fc, selector_fl);
+
+	return fc;
 }
 
 BT_EXPORT
@@ -1355,13 +1432,17 @@ bt_field_class_option_with_selector_field_integer_unsigned_create(
 		(const void *) u_range_set;
 
 	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
 	BT_ASSERT_PRE_TC_MIP_VERSION_EQ(trace_class, 0);
+	BT_ASSERT_PRE_SELECTOR_FC_NON_NULL(selector_fc);
+	BT_ASSERT_PRE_FC_IS_UNSIGNED_INT("selector-field-class",
+		selector_fc, "Selector field class");
 	BT_ASSERT_PRE_INT_RANGE_SET_NON_NULL(range_set);
 	BT_ASSERT_PRE_INT_RANGE_SET_NOT_EMPTY(range_set);
+
  	fc = (void *) create_option_field_class(trace_class,
 		BT_FIELD_CLASS_TYPE_OPTION_WITH_UNSIGNED_INTEGER_SELECTOR_FIELD,
-		content_fc, selector_fc, __func__);
-
+		content_fc, selector_fc, NULL, __func__);
 	if (!fc) {
 		goto end;
 	}
@@ -1369,6 +1450,46 @@ bt_field_class_option_with_selector_field_integer_unsigned_create(
 	fc->range_set = range_set;
 	bt_object_get_ref_no_null_check(fc->range_set);
 	bt_integer_range_set_freeze(range_set);
+
+	BT_LIB_LOGD("Created option field class with unsigned integer selector field class: "
+		"%![opt-fc-]+F, %![sel-fc-]+F", fc, selector_fc);
+
+end:
+	return (void *) fc;
+}
+
+BT_EXPORT
+struct bt_field_class *
+bt_field_class_option_with_selector_field_location_integer_unsigned_create(
+		struct bt_trace_class *trace_class,
+		struct bt_field_class *content_fc,
+		const struct bt_field_location *selector_fl,
+		const struct bt_integer_range_set_unsigned *u_range_set)
+{
+	struct bt_field_class_option_with_selector_field_integer *fc;
+	const struct bt_integer_range_set *range_set =
+		(const void *) u_range_set;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace_class, 1);
+	BT_ASSERT_PRE_SELECTOR_FL_NON_NULL(selector_fl);
+	BT_ASSERT_PRE_INT_RANGE_SET_NON_NULL(range_set);
+	BT_ASSERT_PRE_INT_RANGE_SET_NOT_EMPTY(range_set);
+
+ 	fc = (void *) create_option_field_class(trace_class,
+		BT_FIELD_CLASS_TYPE_OPTION_WITH_UNSIGNED_INTEGER_SELECTOR_FIELD,
+		content_fc, NULL, selector_fl, __func__);
+	if (!fc) {
+		goto end;
+	}
+
+	fc->range_set = range_set;
+	bt_object_get_ref_no_null_check(fc->range_set);
+	bt_integer_range_set_freeze(range_set);
+
+	BT_LIB_LOGD("Created option field class with unsigned integer selector field location: "
+		"%![opt-fc-]+F, %![sel-fl-]+L", fc, selector_fl);
 
 end:
 	return (void *) fc;
@@ -1387,13 +1508,17 @@ bt_field_class_option_with_selector_field_integer_signed_create(
 		(const void *) i_range_set;
 
 	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
 	BT_ASSERT_PRE_TC_MIP_VERSION_EQ(trace_class, 0);
+	BT_ASSERT_PRE_SELECTOR_FC_NON_NULL(selector_fc);
+	BT_ASSERT_PRE_FC_IS_SIGNED_INT("selector-field-class",
+		selector_fc, "Selector field class");
 	BT_ASSERT_PRE_INT_RANGE_SET_NON_NULL(range_set);
 	BT_ASSERT_PRE_INT_RANGE_SET_NOT_EMPTY(range_set);
+
  	fc = (void *) create_option_field_class(trace_class,
 		BT_FIELD_CLASS_TYPE_OPTION_WITH_SIGNED_INTEGER_SELECTOR_FIELD,
-		content_fc, selector_fc, __func__);
-
+		content_fc, selector_fc, NULL, __func__);
 	if (!fc) {
 		goto end;
 	}
@@ -1401,6 +1526,46 @@ bt_field_class_option_with_selector_field_integer_signed_create(
 	fc->range_set = range_set;
 	bt_object_get_ref_no_null_check(fc->range_set);
 	bt_integer_range_set_freeze(range_set);
+
+	BT_LIB_LOGD("Created option field class with signed integer selector field class: "
+		"%![opt-fc-]+F, %![sel-fc-]+F", fc, selector_fc);
+
+end:
+	return (void *) fc;
+}
+
+BT_EXPORT
+struct bt_field_class *
+bt_field_class_option_with_selector_field_location_integer_signed_create(
+		struct bt_trace_class *trace_class,
+		struct bt_field_class *content_fc,
+		const struct bt_field_location *selector_fl,
+		const struct bt_integer_range_set_signed *i_range_set)
+{
+	struct bt_field_class_option_with_selector_field_integer *fc;
+	const struct bt_integer_range_set *range_set =
+		(const void *) i_range_set;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace_class, 1);
+	BT_ASSERT_PRE_SELECTOR_FL_NON_NULL(selector_fl);
+	BT_ASSERT_PRE_INT_RANGE_SET_NON_NULL(range_set);
+	BT_ASSERT_PRE_INT_RANGE_SET_NOT_EMPTY(range_set);
+
+ 	fc = (void *) create_option_field_class(trace_class,
+		BT_FIELD_CLASS_TYPE_OPTION_WITH_SIGNED_INTEGER_SELECTOR_FIELD,
+		content_fc, NULL, selector_fl, __func__);
+	if (!fc) {
+		goto end;
+	}
+
+	fc->range_set = range_set;
+	bt_object_get_ref_no_null_check(fc->range_set);
+	bt_integer_range_set_freeze(range_set);
+
+	BT_LIB_LOGD("Created option field class with signed integer selector field location: "
+		"%![opt-fc-]+F, %![sel-fl-]+L", fc, selector_fl);
 
 end:
 	return (void *) fc;
@@ -1439,7 +1604,23 @@ bt_field_class_option_with_selector_field_borrow_selector_field_path_const(
 	BT_ASSERT_PRE_FC_NON_NULL(fc);
 	BT_ASSERT_PRE_FC_IS_OPTION_WITH_SEL("field-class", fc, "Field class");
 	BT_ASSERT_PRE_FC_MIP_VERSION_EQ(fc, 0);
-	return opt_fc->selector_field_path;
+	BT_ASSERT_DBG(opt_fc->selector_field_xref_kind == FIELD_XREF_KIND_PATH);
+	return opt_fc->selector_field.path.path;
+}
+
+BT_EXPORT
+const struct bt_field_location *
+bt_field_class_option_with_selector_field_borrow_selector_field_location_const(
+		const struct bt_field_class *fc)
+{
+	const struct bt_field_class_option_with_selector_field *opt_fc =
+		(const void *) fc;
+
+	BT_ASSERT_PRE_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_FC_IS_OPTION_WITH_SEL("field-class", fc, "Field class");
+	BT_ASSERT_PRE_FC_MIP_VERSION_GE(fc, 1);
+	BT_ASSERT_DBG(opt_fc->selector_field_xref_kind == FIELD_XREF_KIND_LOCATION);
+	return opt_fc->selector_field.location;
 }
 
 BT_EXPORT
@@ -1525,48 +1706,51 @@ void destroy_variant_with_selector_field_field_class(struct bt_object *obj)
 
 	BT_ASSERT(fc);
 	finalize_variant_field_class(&fc->common);
-	BT_LOGD_STR("Putting selector field path.");
-	BT_OBJECT_PUT_REF_AND_RESET(fc->selector_field_path);
-	BT_LOGD_STR("Putting selector field class.");
-	BT_OBJECT_PUT_REF_AND_RESET(fc->selector_fc);
+
+	if (fc->selector_field_xref_kind == FIELD_XREF_KIND_PATH) {
+		BT_LOGD_STR("Putting selector field path.");
+		BT_OBJECT_PUT_REF_AND_RESET(fc->selector_field.path.path);
+		BT_LOGD_STR("Putting selector field class.");
+		BT_OBJECT_PUT_REF_AND_RESET(fc->selector_field.path.class);
+	} else {
+		BT_ASSERT(fc->selector_field_xref_kind == FIELD_XREF_KIND_LOCATION);
+		BT_LOGD_STR("Putting selector field location.");
+		BT_OBJECT_PUT_REF_AND_RESET(fc->selector_field.location);
+	}
+
 	g_free(fc);
 }
 
-BT_EXPORT
-struct bt_field_class *bt_field_class_variant_create(
-		bt_trace_class *trace_class, bt_field_class *selector_fc)
+static
+struct bt_field_class *create_variant_field_class(
+		struct bt_trace_class *trace_class,
+		enum bt_field_class_type fc_type,
+		struct bt_field_class *selector_fc,
+		const struct bt_field_location *selector_fl)
 {
 	int ret;
 	struct bt_field_class_variant *var_fc = NULL;
 	struct bt_field_class_variant_with_selector_field *var_with_sel_fc = NULL;
-	enum bt_field_class_type fc_type;
 
-	BT_ASSERT_PRE_NO_ERROR();
-	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
-	BT_ASSERT_PRE_TC_MIP_VERSION_EQ(trace_class, 0);
+	if (fc_type != BT_FIELD_CLASS_TYPE_VARIANT_WITHOUT_SELECTOR_FIELD) {
+		BT_ASSERT((selector_fc && !selector_fl) ||
+			(!selector_fc && selector_fl));
 
-	if (selector_fc) {
-		BT_ASSERT_PRE_FC_IS_INT("selector-field-class", selector_fc,
-			"Selector field class");
-	}
 
-	BT_LIB_LOGD("Creating default variant field class: %![sel-fc-]+F",
-		selector_fc);
+		if (selector_fc) {
+			BT_LIB_LOGD("Creating default variant field class with selector field class: %![sel-fc-]+F",
+				selector_fc);
+		} else {
+			BT_LIB_LOGD("Creating default variant field class with selector field location: %![sel-fl-]+L",
+				selector_fl);
+		}
 
-	if (selector_fc) {
 		var_with_sel_fc = g_new0(
 			struct bt_field_class_variant_with_selector_field, 1);
 		if (!var_with_sel_fc) {
 			BT_LIB_LOGE_APPEND_CAUSE(
 				"Failed to allocate one variant field class with selector.");
 			goto error;
-		}
-
-		if (bt_field_class_type_is(selector_fc->type,
-				BT_FIELD_CLASS_TYPE_UNSIGNED_INTEGER)) {
-			fc_type = BT_FIELD_CLASS_TYPE_VARIANT_WITH_UNSIGNED_INTEGER_SELECTOR_FIELD;
-		} else {
-			fc_type = BT_FIELD_CLASS_TYPE_VARIANT_WITH_SIGNED_INTEGER_SELECTOR_FIELD;
 		}
 
 		ret = init_named_field_classes_container(
@@ -1579,13 +1763,27 @@ struct bt_field_class *bt_field_class_variant_create(
 			goto error;
 		}
 
-		var_with_sel_fc->selector_fc = selector_fc;
-		bt_object_get_ref_no_null_check(var_with_sel_fc->selector_fc);
-		bt_field_class_freeze(selector_fc);
+		if (selector_fc) {
+			var_with_sel_fc->selector_field_xref_kind = FIELD_XREF_KIND_PATH;
+			var_with_sel_fc->selector_field.path.class = selector_fc;
+			bt_object_get_ref_no_null_check(selector_fc);
+			bt_field_class_freeze(selector_fc);
+
+			BT_LIB_LOGD("Created default variant field class with selector field class: "
+				"%![var-fc-]+F, %![sel-fc-]+F", var_with_sel_fc, selector_fc);
+		} else {
+			var_with_sel_fc->selector_field_xref_kind = FIELD_XREF_KIND_LOCATION;
+			var_with_sel_fc->selector_field.location = selector_fl;
+			bt_object_get_ref_no_null_check(var_with_sel_fc->selector_field.location);
+
+			BT_LIB_LOGD("Created default variant field class with selector field location: "
+				"%![var-fc-]+F, %![sel-fl-]+L", var_fc, selector_fl);
+		}
+
 		var_fc = (void *) var_with_sel_fc;
-		BT_LIB_LOGD("Created default variant field class with selector object: "
-			"%![var-fc-]+F, %![sel-fc-]+F", var_fc, selector_fc);
 	} else {
+		BT_LIB_LOGD("Creating default variant field class without selector.");
+
 		var_fc = g_new0(struct bt_field_class_variant, 1);
 		if (!var_fc) {
 			BT_LIB_LOGE_APPEND_CAUSE(
@@ -1593,8 +1791,7 @@ struct bt_field_class *bt_field_class_variant_create(
 			goto error;
 		}
 
-		ret = init_named_field_classes_container((void *) var_fc,
-			BT_FIELD_CLASS_TYPE_VARIANT_WITHOUT_SELECTOR_FIELD,
+		ret = init_named_field_classes_container((void *) var_fc, fc_type,
 			destroy_variant_field_class, destroy_named_field_class,
 			trace_class);
 		if (ret) {
@@ -1614,6 +1811,80 @@ error:
 
 end:
 	return (void *) var_fc;
+}
+
+BT_EXPORT
+struct bt_field_class *bt_field_class_variant_create(
+		struct bt_trace_class *trace_class,
+		struct bt_field_class *selector_fc)
+{
+	enum bt_field_class_type fc_type;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_TC_MIP_VERSION_EQ(trace_class, 0);
+
+	if (selector_fc) {
+		bt_field_class_type selector_fc_type;
+
+		BT_ASSERT_PRE_FC_IS_INT("selector-field-class", selector_fc,
+			"Selector field class");
+
+		selector_fc_type = bt_field_class_get_type(selector_fc);
+
+		if (bt_field_class_type_is(selector_fc_type,
+				BT_FIELD_CLASS_TYPE_UNSIGNED_INTEGER)) {
+			fc_type = BT_FIELD_CLASS_TYPE_VARIANT_WITH_UNSIGNED_INTEGER_SELECTOR_FIELD;
+		} else {
+			fc_type = BT_FIELD_CLASS_TYPE_VARIANT_WITH_SIGNED_INTEGER_SELECTOR_FIELD;
+		}
+	} else {
+		fc_type = BT_FIELD_CLASS_TYPE_VARIANT_WITHOUT_SELECTOR_FIELD;
+	}
+
+	return create_variant_field_class(trace_class, fc_type, selector_fc, NULL);
+}
+
+BT_EXPORT
+struct bt_field_class *bt_field_class_variant_without_selector_field_location_create(
+		struct bt_trace_class *trace_class)
+{
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace_class, 1);
+
+	return create_variant_field_class(trace_class,
+		BT_FIELD_CLASS_TYPE_VARIANT_WITHOUT_SELECTOR_FIELD, NULL, NULL);
+}
+
+BT_EXPORT
+struct bt_field_class *bt_field_class_variant_with_selector_field_location_integer_unsigned_create(
+		struct bt_trace_class *trace_class,
+		const struct bt_field_location *selector_fl)
+{
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace_class, 1);
+	BT_ASSERT_PRE_SELECTOR_FL_NON_NULL(selector_fl);
+
+	return create_variant_field_class(trace_class,
+		BT_FIELD_CLASS_TYPE_VARIANT_WITH_UNSIGNED_INTEGER_SELECTOR_FIELD,
+		NULL, selector_fl);
+}
+
+BT_EXPORT
+struct bt_field_class *bt_field_class_variant_with_selector_field_location_integer_signed_create(
+		struct bt_trace_class *trace_class,
+		const struct bt_field_location *selector_fl)
+{
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace_class, 1);
+	BT_ASSERT_PRE_SELECTOR_FL_NON_NULL(selector_fl);
+
+	return create_variant_field_class(trace_class,
+		BT_FIELD_CLASS_TYPE_VARIANT_WITH_SIGNED_INTEGER_SELECTOR_FIELD,
+		NULL, selector_fl);
 }
 
 #define VAR_FC_OPT_NAME_IS_UNIQUE_ID					\
@@ -2020,7 +2291,24 @@ bt_field_class_variant_with_selector_field_borrow_selector_field_path_const(
 	BT_ASSERT_PRE_DEV_FC_IS_VARIANT_WITH_SEL("field-class", fc,
 		"Field class");
 	BT_ASSERT_PRE_FC_MIP_VERSION_EQ(fc, 0);
-	return var_fc->selector_field_path;
+	BT_ASSERT_DBG(var_fc->selector_field_xref_kind == FIELD_XREF_KIND_PATH);
+	return var_fc->selector_field.path.path;
+}
+
+BT_EXPORT
+const struct bt_field_location *
+bt_field_class_variant_with_selector_field_borrow_selector_field_location_const(
+		const struct bt_field_class *fc)
+{
+	const struct bt_field_class_variant_with_selector_field *var_fc =
+		(const void *) fc;
+
+	BT_ASSERT_PRE_DEV_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_DEV_FC_IS_VARIANT_WITH_SEL("field-class", fc,
+		"Field class");
+	BT_ASSERT_PRE_DEV_FC_MIP_VERSION_GE(fc, 1);
+	BT_ASSERT_DBG(var_fc->selector_field_xref_kind == FIELD_XREF_KIND_LOCATION);
+	return var_fc->selector_field.location;
 }
 
 static
@@ -2144,11 +2432,61 @@ void destroy_dynamic_array_field_class(struct bt_object *obj)
 	BT_ASSERT(fc);
 	BT_LIB_LOGD("Destroying dynamic array field class object: %!+F", fc);
 	finalize_array_field_class((void *) fc);
-	BT_LOGD_STR("Putting length field path.");
-	BT_OBJECT_PUT_REF_AND_RESET(fc->length_field_path);
-	BT_LOGD_STR("Putting length field class.");
-	BT_OBJECT_PUT_REF_AND_RESET(fc->length_fc);
+
+	if (fc->common.common.type == BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITH_LENGTH_FIELD) {
+		switch (fc->length_field.xref_kind) {
+		case FIELD_XREF_KIND_PATH:
+			BT_LOGD_STR("Putting length field class.");
+			BT_OBJECT_PUT_REF_AND_RESET(fc->length_field.path.class);
+			fc->length_field.path.class = NULL;
+
+			BT_LOGD_STR("Putting length field path.");
+			BT_OBJECT_PUT_REF_AND_RESET(fc->length_field.path.path);
+			fc->length_field.path.path = NULL;
+			break;
+		case FIELD_XREF_KIND_LOCATION:
+			BT_LOGD_STR("Putting length field location.");
+			BT_OBJECT_PUT_REF_AND_RESET(fc->length_field.location);
+			fc->length_field.location = NULL;
+			break;
+		};
+	}
+
 	g_free(fc);
+}
+
+static
+struct bt_field_class_array_dynamic *create_dynamic_array_field_class(
+		struct bt_trace_class *trace_class,
+		struct bt_field_class *element_fc,
+		enum bt_field_class_type fc_type,
+		const char *api_func)
+{
+	struct bt_field_class_array_dynamic *array_fc = NULL;
+
+	BT_ASSERT_PRE_NON_NULL_FROM_FUNC(api_func, "element-field-class", element_fc,
+		"Element field class");
+	BT_LOGD_STR("Creating default dynamic array field class object.");
+	array_fc = g_new0(struct bt_field_class_array_dynamic, 1);
+	if (!array_fc) {
+		BT_LIB_LOGE_APPEND_CAUSE(
+			"Failed to allocate one dynamic array field class.");
+		goto error;
+	}
+
+	if (init_array_field_class((void *) array_fc, fc_type,
+			destroy_dynamic_array_field_class, element_fc,
+			trace_class)) {
+		goto error;
+	}
+
+	goto end;
+
+error:
+	BT_OBJECT_PUT_REF_AND_RESET(array_fc);
+
+end:
+	return array_fc;
 }
 
 BT_EXPORT
@@ -2159,37 +2497,98 @@ struct bt_field_class *bt_field_class_array_dynamic_create(
 {
 	struct bt_field_class_array_dynamic *array_fc = NULL;
 
+
 	BT_ASSERT_PRE_NO_ERROR();
 	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
 	BT_ASSERT_PRE_TC_MIP_VERSION_EQ(trace_class, 0);
-	BT_ASSERT_PRE_NON_NULL("element-field-class", element_fc,
-		"Element field class");
-	BT_LOGD_STR("Creating default dynamic array field class object.");
-	array_fc = g_new0(struct bt_field_class_array_dynamic, 1);
-	if (!array_fc) {
-		BT_LIB_LOGE_APPEND_CAUSE(
-			"Failed to allocate one dynamic array field class.");
-		goto error;
-	}
 
-	if (init_array_field_class((void *) array_fc,
-			length_fc ?
-				BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITH_LENGTH_FIELD :
-				BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITHOUT_LENGTH_FIELD,
-			destroy_dynamic_array_field_class, element_fc,
-			trace_class)) {
+	array_fc = create_dynamic_array_field_class(trace_class, element_fc,
+		length_fc ?
+			BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITH_LENGTH_FIELD :
+			BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITHOUT_LENGTH_FIELD,
+		 __func__);
+	if (!array_fc) {
 		goto error;
 	}
 
 	if (length_fc) {
+		array_fc->length_field.xref_kind = FIELD_XREF_KIND_PATH;
+
 		BT_ASSERT_PRE_FC_IS_UNSIGNED_INT("length-field-class",
 			length_fc, "Length field class");
-		array_fc->length_fc = length_fc;
-		bt_object_get_ref_no_null_check(array_fc->length_fc);
+		array_fc->length_field.path.class = length_fc;
+		bt_object_get_ref_no_null_check(length_fc);
 		bt_field_class_freeze(length_fc);
 	}
 
 	BT_LIB_LOGD("Created dynamic array field class object: %!+F", array_fc);
+
+	goto end;
+
+error:
+	BT_OBJECT_PUT_REF_AND_RESET(array_fc);
+
+end:
+	return (void *) array_fc;
+}
+
+BT_EXPORT
+struct bt_field_class *bt_field_class_array_dynamic_without_length_field_location_create(
+		struct bt_trace_class *trace_class,
+		struct bt_field_class *element_field_class)
+{
+	struct bt_field_class_array_dynamic *array_fc = NULL;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace_class, 1);
+
+	array_fc = create_dynamic_array_field_class(trace_class,
+		element_field_class, BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITHOUT_LENGTH_FIELD,
+		__func__);
+	if (!array_fc) {
+		goto error;
+	}
+
+	BT_LIB_LOGD("Created dynamic array field class without field location object: %!+F",
+		array_fc);
+
+	goto end;
+
+error:
+	BT_OBJECT_PUT_REF_AND_RESET(array_fc);
+
+end:
+	return (void *) array_fc;
+}
+
+BT_EXPORT
+struct bt_field_class *bt_field_class_array_dynamic_with_length_field_location_create(
+		struct bt_trace_class *trace_class,
+		struct bt_field_class *element_field_class,
+		const struct bt_field_location *length_field_location)
+{
+	struct bt_field_class_array_dynamic *array_fc = NULL;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_TC_NON_NULL(trace_class);
+	BT_ASSERT_PRE_FL_NON_NULL(length_field_location);
+	BT_ASSERT_PRE_TC_MIP_VERSION_GE(trace_class, 1);
+
+	array_fc = create_dynamic_array_field_class(trace_class,
+		element_field_class, BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITH_LENGTH_FIELD,
+		__func__);
+	if (!array_fc) {
+		goto error;
+	}
+
+	array_fc->length_field.xref_kind = FIELD_XREF_KIND_LOCATION;
+	array_fc->length_field.location = length_field_location;
+	bt_object_get_ref_no_null_check(length_field_location);
+
+	BT_LIB_LOGD("Created dynamic array field class with field location object: %!+F",
+		array_fc);
+
 	goto end;
 
 error:
@@ -2207,13 +2606,32 @@ bt_field_class_array_dynamic_with_length_field_borrow_length_field_path_const(
 	const struct bt_field_class_array_dynamic *seq_fc = (const void *) fc;
 
 	BT_ASSERT_PRE_NO_ERROR();
-	BT_ASSERT_PRE_DEV_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_FC_NON_NULL(fc);
 	BT_ASSERT_PRE_FC_HAS_TYPE("field-class", fc,
 		"dynamic-array-field-class-with-length-field",
 		BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITH_LENGTH_FIELD,
 		"Field class");
 	BT_ASSERT_PRE_FC_MIP_VERSION_EQ(fc, 0);
-	return seq_fc->length_field_path;
+	BT_ASSERT_DBG(seq_fc->length_field.xref_kind == FIELD_XREF_KIND_PATH);
+	return seq_fc->length_field.path.path;
+}
+
+BT_EXPORT
+const struct bt_field_location *
+bt_field_class_array_dynamic_with_length_field_borrow_length_field_location_const(
+		const struct bt_field_class *fc)
+{
+	const struct bt_field_class_array_dynamic *seq_fc = (const void *) fc;
+
+	BT_ASSERT_PRE_NO_ERROR();
+	BT_ASSERT_PRE_FC_NON_NULL(fc);
+	BT_ASSERT_PRE_FC_HAS_TYPE("field-class", fc,
+		"dynamic-array-field-class-with-length-field",
+		BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITH_LENGTH_FIELD,
+		"Field class");
+	BT_ASSERT_PRE_FC_MIP_VERSION_GE(fc, 1);
+	BT_ASSERT_DBG(seq_fc->length_field.xref_kind == FIELD_XREF_KIND_LOCATION);
+	return seq_fc->length_field.location;
 }
 
 static

@@ -226,16 +226,27 @@ static inline void format_field_class(char **buf_ch, bool extended,
 
 		format_array_field_class(buf_ch, prefix, field_class);
 
-		if (array_fc->length_fc) {
-			SET_TMP_PREFIX("length-fc-");
-			format_field_class(buf_ch, extended, tmp_prefix,
-				array_fc->length_fc);
-		}
+		if (field_class->type == BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITH_LENGTH_FIELD) {
+			switch (array_fc->length_field.xref_kind) {
+			case FIELD_XREF_KIND_PATH:
+				BT_ASSERT(array_fc->length_field.path.class);
+				SET_TMP_PREFIX("length-fc-");
+				format_field_class(buf_ch, extended, tmp_prefix,
+					array_fc->length_field.path.class);
 
-		if (array_fc->length_field_path) {
-			SET_TMP_PREFIX("length-field-path-");
-			format_field_path(buf_ch, extended, tmp_prefix,
-				array_fc->length_field_path);
+				if (array_fc->length_field.path.path) {
+					SET_TMP_PREFIX("length-field-path-");
+					format_field_path(buf_ch, extended, tmp_prefix,
+						array_fc->length_field.path.path);
+				}
+				break;
+			case FIELD_XREF_KIND_LOCATION:
+				BT_ASSERT(array_fc->length_field.location);
+				SET_TMP_PREFIX("length-fl-");
+				format_field_location(buf_ch, extended, tmp_prefix,
+					array_fc->length_field.location);
+				break;
+			}
 		}
 
 		break;
@@ -257,16 +268,25 @@ static inline void format_field_class(char **buf_ch, bool extended,
 			const struct bt_field_class_option_with_selector_field *opt_with_sel_fc =
 				(const void *) field_class;
 
-			if (opt_with_sel_fc->selector_fc) {
+			switch (opt_with_sel_fc->selector_field_xref_kind) {
+			case FIELD_XREF_KIND_PATH:
+				BT_ASSERT(opt_with_sel_fc->selector_field.path.class);
 				SET_TMP_PREFIX("selector-fc-");
 				format_field_class(buf_ch, extended, tmp_prefix,
-					opt_with_sel_fc->selector_fc);
-			}
+					opt_with_sel_fc->selector_field.path.class);
 
-			if (opt_with_sel_fc->selector_field_path) {
-				SET_TMP_PREFIX("selector-field-path-");
-				format_field_path(buf_ch, extended, tmp_prefix,
-					opt_with_sel_fc->selector_field_path);
+				if (opt_with_sel_fc->selector_field.path.path) {
+					SET_TMP_PREFIX("selector-field-path-");
+					format_field_path(buf_ch, extended, tmp_prefix,
+						opt_with_sel_fc->selector_field.path.path);
+				}
+				break;
+			case FIELD_XREF_KIND_LOCATION:
+				BT_ASSERT_DBG(opt_with_sel_fc->selector_field.location);
+				SET_TMP_PREFIX("selector-fl-");
+				format_field_location(buf_ch, extended, tmp_prefix,
+					opt_with_sel_fc->selector_field.location);
+				break;
 			}
 		}
 
@@ -289,16 +309,26 @@ static inline void format_field_class(char **buf_ch, bool extended,
 			const struct bt_field_class_variant_with_selector_field *var_with_sel_fc =
 				(const void *) var_fc;
 
-			if (var_with_sel_fc->selector_fc) {
+			switch (var_with_sel_fc->selector_field_xref_kind) {
+			case FIELD_XREF_KIND_PATH:
+				BT_ASSERT(var_with_sel_fc->selector_field.path.class);
 				SET_TMP_PREFIX("selector-fc-");
 				format_field_class(buf_ch, extended, tmp_prefix,
-					var_with_sel_fc->selector_fc);
-			}
+					var_with_sel_fc->selector_field.path.class);
 
-			if (var_with_sel_fc->selector_field_path) {
-				SET_TMP_PREFIX("selector-field-path-");
-				format_field_path(buf_ch, extended, tmp_prefix,
-					var_with_sel_fc->selector_field_path);
+
+				if (var_with_sel_fc->selector_field.path.path) {
+					SET_TMP_PREFIX("selector-field-path-");
+					format_field_path(buf_ch, extended, tmp_prefix,
+						var_with_sel_fc->selector_field.path.path);
+				}
+				break;
+			case FIELD_XREF_KIND_LOCATION:
+				BT_ASSERT(var_with_sel_fc->selector_field.location);
+				SET_TMP_PREFIX("selector-fl-");
+				format_field_location(buf_ch, extended, tmp_prefix,
+					var_with_sel_fc->selector_field.location);
+				break;
 			}
 		}
 

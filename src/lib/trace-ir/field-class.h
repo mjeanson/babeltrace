@@ -25,6 +25,15 @@
 	(&bt_g_array_index((_mapping)->ranges,				\
 		struct bt_field_class_enumeration_mapping_range, (_index)))
 
+enum field_xref_kind {
+	/*
+	 * Start at 1 to be able to differentiate a zero-initialized field from
+	 * an initialized field.
+	 */
+	FIELD_XREF_KIND_PATH = 1,
+	FIELD_XREF_KIND_LOCATION,
+};
+
 struct bt_field_class {
 	struct bt_object base;
 	enum bt_field_class_type type;
@@ -154,11 +163,24 @@ struct bt_field_class_array_static {
 struct bt_field_class_array_dynamic {
 	struct bt_field_class_array common;
 
-	/* Owned by this */
-	struct bt_field_class *length_fc;
+	/* Used with BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITH_LENGTH_FIELD */
+	struct {
+		enum field_xref_kind xref_kind;
 
-	/* Owned by this */
-	struct bt_field_path *length_field_path;
+		union {
+			/* Used with FIELD_XREF_KIND_PATH */
+			struct {
+				/* Owned by this */
+				struct bt_field_class *class;
+
+				/* Owned by this */
+				struct bt_field_path *path;
+			} path;
+
+			/* Used with FIELD_XREF_KIND_LOCATION, owned by this */
+			const struct bt_field_location *location;
+		};
+	} length_field;
 };
 
 struct bt_field_class_option {
@@ -171,11 +193,21 @@ struct bt_field_class_option {
 struct bt_field_class_option_with_selector_field {
 	struct bt_field_class_option common;
 
-	/* Owned by this */
-	struct bt_field_class *selector_fc;
+	enum field_xref_kind selector_field_xref_kind;
 
-	/* Owned by this */
-	struct bt_field_path *selector_field_path;
+	union {
+		/* Used with FIELD_XREF_KIND_PATH */
+		struct {
+			/* Owned by this */
+			struct bt_field_class *class;
+
+			/* Owned by this */
+			struct bt_field_path *path;
+		} path;
+
+		/* Used with FIELD_XREF_KIND_LOCATION, owned by this */
+		const struct bt_field_location *location;
+	} selector_field;
 };
 
 struct bt_field_class_option_with_selector_field_bool {
@@ -215,14 +247,24 @@ struct bt_field_class_variant {
 struct bt_field_class_variant_with_selector_field {
 	struct bt_field_class_variant common;
 
-	/*
-	 * Owned by this, but never dereferenced: only use to find it
-	 * elsewhere.
-	 */
-	const struct bt_field_class *selector_fc;
+	enum field_xref_kind selector_field_xref_kind;
 
-	/* Owned by this */
-	struct bt_field_path *selector_field_path;
+	union {
+		/* Used with FIELD_XREF_KIND_PATH */
+		struct {
+			/*
+			* Owned by this, but never dereferenced: only use to find it
+			* elsewhere.
+			*/
+			const struct bt_field_class *class;
+
+			/* Owned by this */
+			struct bt_field_path *path;
+		} path;
+
+		/* Used with FIELD_XREF_KIND_LOCATION, owned by this */
+		const struct bt_field_location *location;
+	} selector_field;
 };
 
 void _bt_field_class_freeze(const struct bt_field_class *field_class);

@@ -534,6 +534,13 @@
 	BT_ASSERT_PRE_NON_NULL(_BT_ASSERT_PRE_FC_ID, (_fc),		\
 		_BT_ASSERT_PRE_FC_NAME)
 
+#define _BT_ASSERT_PRE_SELECTOR_FC_NAME	"Selector field class"
+#define _BT_ASSERT_PRE_SELECTOR_FC_ID	"selector-field-class"
+
+#define BT_ASSERT_PRE_SELECTOR_FC_NON_NULL(_fc)					\
+	BT_ASSERT_PRE_NON_NULL(_BT_ASSERT_PRE_SELECTOR_FC_ID, (_fc),		\
+		_BT_ASSERT_PRE_SELECTOR_FC_NAME)
+
 #define BT_ASSERT_PRE_DEV_FC_NON_NULL(_fc)				\
 	BT_ASSERT_PRE_DEV_NON_NULL(_BT_ASSERT_PRE_FC_ID, (_fc),		\
 		_BT_ASSERT_PRE_FC_NAME)
@@ -565,9 +572,25 @@
 #define _BT_ASSERT_PRE_FL_ID	"field-location"
 
 /* Asserts that `_fl` is non-NULL */
-#define BT_ASSERT_PRE_FL_NON_NULL(_fl)					\
-	BT_ASSERT_PRE_NON_NULL(_BT_ASSERT_PRE_FL_ID, (_fl),		\
+#define BT_ASSERT_PRE_FL_NON_NULL(_fl)				\
+	BT_ASSERT_PRE_NON_NULL(_BT_ASSERT_PRE_FL_ID, (_fl),	\
 		_BT_ASSERT_PRE_FL_NAME)
+
+#define _BT_ASSERT_PRE_SELECTOR_FL_NAME	"Selector field location"
+#define _BT_ASSERT_PRE_SELECTOR_FL_ID	"selector-field-location"
+
+/* Asserts that `_fl` is non-NULL */
+#define BT_ASSERT_PRE_SELECTOR_FL_NON_NULL(_fl)				\
+	BT_ASSERT_PRE_NON_NULL(_BT_ASSERT_PRE_SELECTOR_FL_ID, (_fl),	\
+		_BT_ASSERT_PRE_SELECTOR_FL_NAME)
+
+#define _BT_ASSERT_PRE_LENGTH_FL_NAME	"Length field location"
+#define _BT_ASSERT_PRE_LENGTH_FL_ID	"length-field-location"
+
+/* Asserts that `_fl` is non-NULL */
+#define BT_ASSERT_PRE_LENGTH_FL_NON_NULL(_fl)				\
+	BT_ASSERT_PRE_NON_NULL(_BT_ASSERT_PRE_LENGTH_FL_ID, (_fl),	\
+		_BT_ASSERT_PRE_LENGTH_FL_NAME)
 
 #define _BT_ASSERT_PRE_FP_NAME	"Field path"
 #define _BT_ASSERT_PRE_FP_ID	"field-path"
@@ -963,12 +986,27 @@
 		_mip_version == _val,				\
 		"MIP version is not equal to %" PRIu64, _val)
 
+/* Asserts that the MIP version `_mip_version` is equal to `_val`. */
+#define BT_ASSERT_PRE_DEV_MIP_VERSION_EQ(_mip_version, _val)	\
+	BT_ASSERT_PRE_DEV(_BT_ASSERT_PRE_MIP_VERSION_VALID_ID,	\
+		_mip_version == _val,				\
+		"MIP version is not equal to %" PRIu64, _val)
+
 /*
  * Asserts that the given MIP version `_mip_version` is greater than or equal
  * to `_val`.
  */
 #define BT_ASSERT_PRE_MIP_VERSION_GE(_mip_version, _val)			\
 	BT_ASSERT_PRE(_BT_ASSERT_PRE_MIP_VERSION_VALID_ID,			\
+		_mip_version >= _val,						\
+		"MIP version is less than %" PRIu64, _val)
+
+/*
+ * Asserts that the given MIP version `_mip_version` is greater than or equal
+ * to `_val`.
+ */
+#define BT_ASSERT_PRE_DEV_MIP_VERSION_GE(_mip_version, _val)			\
+	BT_ASSERT_PRE_DEV(_BT_ASSERT_PRE_MIP_VERSION_VALID_ID,			\
 		_mip_version >= _val,						\
 		"MIP version is less than %" PRIu64, _val)
 
@@ -990,6 +1028,24 @@
  */
 #define BT_ASSERT_PRE_FC_MIP_VERSION_EQ(_field_class, _val)		\
 	BT_ASSERT_PRE_MIP_VERSION_EQ((_field_class)->mip_version, _val)
+
+/* Asserts that the effective MIP version for `_field_class` is equal to `_val`. */
+#define BT_ASSERT_PRE_DEV_FC_MIP_VERSION_EQ(_field_class, _val)		\
+	BT_ASSERT_PRE_DEV_MIP_VERSION_EQ((_field_class)->mip_version, _val)
+
+/*
+ * Asserts that the effective MIP version for `_field_class` is greator than or
+ * equal to `_val`.
+ */
+#define BT_ASSERT_PRE_FC_MIP_VERSION_GE(_field_class, _val)		\
+	BT_ASSERT_PRE_MIP_VERSION_GE((_field_class)->mip_version, _val)
+
+/*
+ * Asserts that the effective MIP version for `_field_class` is greator than or
+ * equal to `_val`.
+ */
+#define BT_ASSERT_PRE_DEV_FC_MIP_VERSION_GE(_field_class, _val)		\
+	BT_ASSERT_PRE_DEV_MIP_VERSION_GE((_field_class)->mip_version, _val)
 
 #define _BT_ASSERT_PRE_INTR_NAME	"Interrupter"
 #define _BT_ASSERT_PRE_INTR_ID		"interrupter"

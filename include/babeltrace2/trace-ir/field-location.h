@@ -43,9 +43,22 @@ given \bt_field from a given <em>root scope</em>.
 
 A field location indicates how to reach:
 
-- The length field(s) of a \bt_darray_field (with a length field).
-- The selector field of a \bt_opt_field (with a selector field).
-- The selector field of a \bt_var_field (with a selector field).
+- The length field of a \bt_darray_field
+  (instances with a linked length field).
+
+- The selector field of a \bt_opt_field
+  (instances with a linked selector field).
+
+- The selector field of a \bt_var_field
+  (instances with a linked selector field).
+
+You can borrow the field location from the \ref api-tir-fc "classes" of
+such fields with
+bt_field_class_array_dynamic_with_length_field_borrow_length_field_location_const(),
+bt_field_class_option_with_selector_field_borrow_selector_field_location_const(),
+and
+bt_field_class_variant_with_selector_field_borrow_selector_field_location_const().
+See \ref api-tir-fc-link "Field classes with links to other field classes".
 
 A field location is a \ref api-tir "trace IR" metadata object.
 

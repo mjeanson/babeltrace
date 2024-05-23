@@ -110,7 +110,7 @@ functions for each type of \em concrete (non-abstract) field class:
   <tr>
     <th>Name
     <th>Type enumerator
-    <th>Creation function
+    <th>Creation function(s)
   <tr>
     <td><em>\ref api-tir-fc-bool "Boolean"</em>
     <td>#BT_FIELD_CLASS_TYPE_BOOL
@@ -152,45 +152,81 @@ functions for each type of \em concrete (non-abstract) field class:
     <td>#BT_FIELD_CLASS_TYPE_STATIC_ARRAY
     <td>bt_field_class_array_static_create()
   <tr>
-    <td><em>Dynamic \ref api-tir-fc-array "array" (no length field)</em>
+    <td>
+      <em>Dynamic \ref api-tir-fc-array "array"
+      (instances without a linked length field)</em>
     <td>#BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITHOUT_LENGTH_FIELD
-    <td>bt_field_class_array_dynamic_create()
+    <td>
+      - bt_field_class_array_dynamic_create()
+      - bt_field_class_array_dynamic_without_length_field_location_create()
   <tr>
-    <td><em>Dynamic \ref api-tir-fc-array "array" (with length field)</em>
+    <td>
+      <em>Dynamic \ref api-tir-fc-array "array"
+      (instances with a linked length field)</em>
     <td>#BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY_WITH_LENGTH_FIELD
-    <td>bt_field_class_array_dynamic_create()
+    <td>
+      - bt_field_class_array_dynamic_create()
+      - bt_field_class_array_dynamic_with_length_field_location_create()
   <tr>
     <td><em>\ref api-tir-fc-struct "Structure"</em>
     <td>#BT_FIELD_CLASS_TYPE_STRUCTURE
     <td>bt_field_class_structure_create()
   <tr>
-    <td><em>\ref api-tir-fc-opt "Option" (no selector field)</em>
+    <td>
+      <em>\ref api-tir-fc-opt "Option"
+      (instances without a linked selector field)</em>
     <td>#BT_FIELD_CLASS_TYPE_OPTION_WITHOUT_SELECTOR_FIELD
-    <td>bt_field_class_option_without_selector_create()
+    <td>
+      - bt_field_class_option_without_selector_create()
+      - bt_field_class_option_without_selector_field_location_create()
   <tr>
-    <td><em>\ref api-tir-fc-opt "Option" (boolean selector field)</em>
+    <td>
+      <em>\ref api-tir-fc-opt "Option"
+      (instances with a linked boolean selector field)</em>
     <td>#BT_FIELD_CLASS_TYPE_OPTION_WITH_BOOL_SELECTOR_FIELD
-    <td>bt_field_class_option_with_selector_field_bool_create()
+    <td>
+      - bt_field_class_option_with_selector_field_bool_create()
+      - bt_field_class_option_with_selector_field_location_bool_create()
   <tr>
-    <td><em>\ref api-tir-fc-opt "Option" (unsigned integer selector field)</em>
+    <td>
+      <em>\ref api-tir-fc-opt "Option"
+      (instances with a linked unsigned integer selector field)</em>
     <td>#BT_FIELD_CLASS_TYPE_OPTION_WITH_UNSIGNED_INTEGER_SELECTOR_FIELD
-    <td>bt_field_class_option_with_selector_field_integer_unsigned_create()
+    <td>
+      - bt_field_class_option_with_selector_field_integer_unsigned_create()
+      - bt_field_class_option_with_selector_field_location_integer_unsigned_create()
   <tr>
-    <td><em>\ref api-tir-fc-opt "Option" (signed integer selector field)</em>
+    <td>
+      <em>\ref api-tir-fc-opt "Option"
+      (instances with a linked signed integer selector field)</em>
     <td>#BT_FIELD_CLASS_TYPE_OPTION_WITH_SIGNED_INTEGER_SELECTOR_FIELD
-    <td>bt_field_class_option_with_selector_field_integer_signed_create()
+    <td>
+      - bt_field_class_option_with_selector_field_integer_signed_create()
+      - bt_field_class_option_with_selector_field_location_integer_signed_create()
   <tr>
-    <td><em>\ref api-tir-fc-var "Variant" (no selector field)</em>
+    <td>
+      <em>\ref api-tir-fc-var "Variant"
+      (instances without a linked selector field)</em>
     <td>#BT_FIELD_CLASS_TYPE_VARIANT_WITHOUT_SELECTOR_FIELD
-    <td>bt_field_class_variant_create()
+    <td>
+      - bt_field_class_variant_create()
+      - bt_field_class_variant_without_selector_field_location_create()
   <tr>
-    <td><em>\ref api-tir-fc-var "Variant" (unsigned integer selector field)</em>
+    <td>
+      <em>\ref api-tir-fc-var "Variant"
+      (instances with a linked unsigned integer selector field)</em>
     <td>#BT_FIELD_CLASS_TYPE_VARIANT_WITH_UNSIGNED_INTEGER_SELECTOR_FIELD
-    <td>bt_field_class_variant_create()
+    <td>
+      - bt_field_class_variant_create()
+      - bt_field_class_variant_with_selector_field_location_integer_unsigned_create()
   <tr>
-    <td><em>\ref api-tir-fc-var "Variant" (signed integer selector field)</em>
+    <td>
+      <em>\ref api-tir-fc-var "Variant"
+      (instances with a linked signed integer selector field)</em>
     <td>#BT_FIELD_CLASS_TYPE_VARIANT_WITH_SIGNED_INTEGER_SELECTOR_FIELD
-    <td>bt_field_class_variant_create()
+    <td>
+      - bt_field_class_variant_create()
+      - bt_field_class_variant_with_selector_field_location_integer_signed_create()
 </table>
 
 You need a \bt_trace_cls to create a field class: create one from a
@@ -219,9 +255,10 @@ When you call one of the four functions above:
   with the passed field class or with any of its contained field
   classes.
 
-- If any of the field classes recursively contained in the passed
-  field class has a \ref api-tir-fc-link "link to another field class",
-  it must honor the field class link rules.
+- If an instance of any of the field classes recursively contained in
+  the passed field class has a
+  \ref api-tir-fc-link "link to an anterior field", it must
+  honor the field link rules.
 
 Once you have called one of the four functions above, the passed field
 class becomes \ref api-fund-freezing "frozen".
@@ -555,31 +592,58 @@ one. The concrete array field classes are:
 
   <dt>Dynamic array field class</dt>
   <dd>
-    Its instances (dynamic array fields) contain a variable number array
+    Its instances (dynamic array fields) contain a variable number
     of fields.
 
-    There are two types of dynamic array field classes: without or
-    with a length field. See
-    \ref api-tir-fc-link "Field classes with links to other field classes"
+    There are two types of dynamic array field classes: instances
+    without or with a linked length field. See
+    \ref api-tir-fc-link "Fields with links to other fields"
     to learn more.
 
-    @image html darray-link.png "Dynamic array field class with a length field."
+    @image html darray-link.png "A dynamic array field linked to an unsigned integer length field."
 
-    Create with bt_field_class_array_dynamic_create().
+    Create with, depending on the effective \bt_mip (MIP) version of the
+    trace processing \bt_graph:
 
-    A dynamic array field class with a length field has the
-    specific property:
+    <dl>
+      <dt>MIP&nbsp;0</dt>
+      <dd>bt_field_class_array_dynamic_create().</dt>
+
+      <dt>MIP&nbsp;1</dt>
+      <dd>
+        bt_field_class_array_dynamic_without_length_field_location_create()
+        or
+        bt_field_class_array_dynamic_with_length_field_location_create().
+      </dd>
+    </dl>
+
+    The class of a dynamic array field with a linked length field has
+    one of the following specific properties, depending on the
+    effective MIP version of the trace processing graph:
 
     <dl>
       <dt>
         \anchor api-tir-fc-darray-prop-len-fp
-        Length field path
+        MIP&nbsp;0: Length field path
       </dt>
       <dd>
-        Field path of the linked length field class.
+        \bt_c_field_path to locate the linked length field of
+        an instance.
 
-        Get a dynamic array field class's length field path with
+        Borrow a dynamic array field class's length field path with
         bt_field_class_array_dynamic_with_length_field_borrow_length_field_path_const().
+      </dd>
+
+      <dt>
+        \anchor api-tir-fc-darray-prop-len-fl
+        MIP&nbsp;1: Length field location
+      </dt>
+      <dd>
+        \bt_c_field_loc to locate the linked length field of an
+        instance.
+
+        Borrow a dynamic array field class's length field location with
+        bt_field_class_array_dynamic_with_length_field_borrow_length_field_location_const().
       </dd>
     </dl>
   </dd>
@@ -600,7 +664,7 @@ Array field classes have the following common property:
     is created.
 
     Borrow an array field class's element field class with
-    Use bt_field_class_array_borrow_element_field_class() and
+    bt_field_class_array_borrow_element_field_class() and
     bt_field_class_array_borrow_element_field_class_const().
   </dd>
 </dl>
@@ -679,38 +743,51 @@ A structure field class has the following specific property:
 <strong><em>Option field classes</em></strong> are classes
 of \bt_p_opt_field.
 
-An option field either does or doesn't contain a field, called its
+An option field either does or doesn't \em contain a field, called its
 optional field.
 
 An option field class is an \em abstract field class: you cannot create
-one. An option field class either has a selector field (it's linked to a
-selector field class; see
-\ref api-tir-fc-link "Field classes with links to other field classes")
+one. An instance of an option field class either has a linked selector
+field (see \ref api-tir-fc-link "Fields with links to other fields")
 or none. Therefore, the concrete option field classes are:
 
 <dl>
-  <dt>Option field class without a selector field</dt>
+  <dt>Option field class (instances without a linked selector field)</dt>
   <dd>
-    Create with bt_field_class_option_without_selector_create().
+    Create with, depending on the effective \bt_mip (MIP) version
+    of the trace processing \bt_graph:
 
-    An option field class without a selector field has no specific
-    properties.
+    <dl>
+      <dt>MIP&nbsp;0</dt>
+      <dd>bt_field_class_option_without_selector_create()</dt>
+
+      <dt>MIP&nbsp;1</dt>
+      <dd>bt_field_class_option_without_selector_field_location_create()</dd>
+    </dl>
+
+    The class of an option field without a linked selector field has no
+    specific properties.
   </dd>
 
-  <dt>Option field class with a boolean selector field</dt>
+  <dt>Option field class (instances with a linked boolean selector field)</dt>
   <dd>
     The linked selector field of an option field class's instance
     (an option field) is a \bt_bool_field.
 
-    Consequently, the option field class's selector field class is
-    a \bt_bool_fc.
-
     @image html opt-link.png "Option field class with a boolean selector field."
 
-    Create with bt_field_class_option_with_selector_field_bool_create().
+    Create with, depending on the effective \bt_mip (MIP) version:
 
-    An option field class with a boolean selector field has the
-    following specific property:
+    <dl>
+      <dt>MIP&nbsp;0</dt>
+      <dd>bt_field_class_option_with_selector_field_bool_create()</dt>
+
+      <dt>MIP&nbsp;1</dt>
+      <dd>bt_field_class_option_with_selector_field_location_bool_create()</dd>
+    </dl>
+
+    The class of an option field with a linked boolean selector field
+    has the following specific property:
 
     <dl>
       <dt>
@@ -718,9 +795,9 @@ or none. Therefore, the concrete option field classes are:
         Selector is reversed?
       </dt>
       <dd>
-        Whether or not the linked boolean selector field makes the
-        option field class's instance (an option field) contain a field
-        when it's #BT_TRUE or when it's #BT_FALSE.
+        Whether or not the linked boolean selector field make the
+        option field class's instance (an option field) \em contain a
+        field when it's #BT_TRUE or when it's #BT_FALSE.
 
         If this property is #BT_TRUE, then if the linked selector field
         has the value #BT_FALSE, the option field contains a field.
@@ -733,22 +810,27 @@ or none. Therefore, the concrete option field classes are:
     </dl>
   </dd>
 
-  <dt>Option field class with an unsigned selector field</dt>
+  <dt>Option field class (instances with a linked unsigned integer selector field)</dt>
   <dd>
     The linked selector field of an option field class's instance
     (an option field) is an \bt_uint_field.
 
-    Consequently, the option field class's selector field class is
-    an \bt_uint_fc.
+    Create with, depending on the effective \bt_mip (MIP) version
+    of the trace processing \bt_graph:
 
-    Create with
-    bt_field_class_option_with_selector_field_integer_unsigned_create().
+    <dl>
+      <dt>MIP&nbsp;0</dt>
+      <dd>bt_field_class_option_with_selector_field_integer_unsigned_create()</dt>
+
+      <dt>MIP&nbsp;1</dt>
+      <dd>bt_field_class_option_with_selector_field_location_integer_unsigned_create()</dd>
+    </dl>
 
     Pass an \bt_uint_rs on creation to set which values of the selector
     field can make the option field contain a field.
 
-    An option field class with an unsigned integer selector field has
-    the following specific property:
+    The class of an option field with a linked unsigned integer selector
+    field has the following specific property:
 
     <dl>
       <dt>
@@ -759,34 +841,39 @@ or none. Therefore, the concrete option field classes are:
         If the linked unsigned integer selector field of an option
         field class's instance (an option field) has a value which
         intersects with the selector's unsigned integer ranges, then
-        the option field contains a field.
+        the option field \em contains a field.
 
         You cannot change the selector's unsigned integer ranges once
         the option field class is created.
 
-        Borrow the selector's unsigned integer ranges from an
-        option field class with an unsigned integer selector field with
+        Borrow the selector's unsigned integer ranges from such an
+        option field class with
         bt_field_class_option_with_selector_field_integer_unsigned_borrow_selector_ranges_const().
       </dd>
     </dl>
   </dd>
 
-  <dt>Option field class with a signed selector field</dt>
+  <dt>Option field class (instances with a linked signed integer selector field)</dt>
   <dd>
     The linked selector field of an option field class's instance
     (an option field) is a \bt_sint_field.
 
-    Consequently, the option field class's selector field class is
-    a \bt_sint_fc.
+    Create with, depending on the effective \bt_mip (MIP) version of
+    the trace processing \bt_graph:
 
-    Create with
-    bt_field_class_option_with_selector_field_integer_signed_create().
+    <dl>
+      <dt>MIP&nbsp;0</dt>
+      <dd>bt_field_class_option_with_selector_field_integer_signed_create()</dt>
+
+      <dt>MIP&nbsp;1</dt>
+      <dd>bt_field_class_option_with_selector_field_location_integer_signed_create()</dd>
+    </dl>
 
     Pass a \bt_sint_rs on creation to set which values of the selector
     field can make the option field contain a field.
 
-    An option field class with a signed integer selector field has
-    the following specific property:
+    The class of an option field class with a linked signed integer
+    selector field has the following specific property:
 
     <dl>
       <dt>
@@ -797,32 +884,44 @@ or none. Therefore, the concrete option field classes are:
         If the linked signed integer selector field of an option
         field class's instance (an option field) has a value which
         intersects with the selector's signed integer ranges, then
-        the option field contains a field.
+        the option field \em contains a field.
 
         You cannot change the selector's signed integer ranges once
         the option field class is created.
 
-        Borrow the selector's signed integer ranges from an
-        option field class with a signed integer selector field with
+        Borrow the selector's signed integer ranges from such an
+        option field class with
         bt_field_class_option_with_selector_field_integer_signed_borrow_selector_ranges_const().
       </dd>
     </dl>
   </dd>
 </dl>
 
-Option field classes with a selector have the following common
-property:
+The classes of option fields with a linked selector field have one of
+the following common properties, depending on the effective
+\bt_mip (MIP) version of the trace processing \bt_graph:
 
 <dl>
   <dt>
     \anchor api-tir-fc-opt-prop-sel-fp
-    Selector field path
+    MIP&nbsp;0: Selector field path
   </dt>
   <dd>
-    Field path of the linked selector field class.
+    \bt_c_field_path to locate the linked selector field of an instance.
 
     Borrow such an option field class's selector field path with
     bt_field_class_option_with_selector_field_borrow_selector_field_path_const().
+  </dd>
+
+  <dt>
+    \anchor api-tir-fc-opt-prop-sel-fl
+    MIP&nbsp;1: Selector field location
+  </dt>
+  <dd>
+    \bt_c_field_loc to locate the linked selector field of an instance.
+
+    Borrow such an option field class's selector field location with
+    bt_field_class_option_with_selector_field_borrow_selector_field_location_const().
   </dd>
 </dl>
 
@@ -841,7 +940,7 @@ Option field classes have the following common property:
     class is created.
 
     Borrow an option field class's optional field class with
-    Use bt_field_class_option_borrow_field_class() and
+    bt_field_class_option_borrow_field_class() and
     bt_field_class_option_borrow_field_class_const().
   </dd>
 </dl>
@@ -860,36 +959,54 @@ class option has a name, a field class, user attributes, and integer
 ranges, depending on the exact type.
 
 A variant field class is an \em abstract field class: you cannot create
-one. A variant field class either has a selector field (it's linked to a
-selector field class; see
-\ref api-tir-fc-link "Field classes with links to other field classes")
+one. An instance of a variant field class either has a linked selector
+field (see \ref api-tir-fc-link "Fields with links to other fields")
 or none. Therefore, the concrete variant field classes are:
 
 <dl>
-  <dt>Variant field class without a selector field</dt>
+  <dt>Variant field class (instances without a linked selector field)</dt>
   <dd>
-    Create with bt_field_class_variant_create(), passing \c NULL as
-    the selector field class.
+    Create with, depending on the effective \bt_mip (MIP) version
+    of the trace processing \bt_graph:
+
+    <dl>
+      <dt>MIP&nbsp;0</dt>
+      <dd>
+        bt_field_class_variant_create(), passing \c NULL as
+        the selector field class.
+      </dt>
+
+      <dt>MIP&nbsp;1</dt>
+      <dd>bt_field_class_variant_without_selector_field_location_create().</dd>
+    </dl>
 
     Append an option to such a variant field class with
     bt_field_class_variant_without_selector_append_option().
 
-    A variant field class without a selector field has no specific
-    properties.
+    The class of a variant field without a linked selector field has no
+    specific properties.
   </dd>
 
-  <dt>Variant field class with an unsigned selector field</dt>
+  <dt>Variant field class (instances with a linked unsigned selector field)</dt>
   <dd>
     The linked selector field of a variant field class's instance
     (a variant field) is an \bt_uint_field.
 
-    Consequently, the variant field class's selector field class is
-    an \bt_uint_fc.
+    @image html var-link.png "A variant field linked to an unsigned integer selector field."
 
-    @image html var-link.png "Variant field class with an unsigned integer selector field."
+    Create with, depending on the effective \bt_mip (MIP) version of the
+    trace processing \bt_graph:
 
-    Create with bt_field_class_variant_create(), passing an
-    unsigned integer field class as the selector field class.
+    <dl>
+      <dt>MIP&nbsp;0</dt>
+      <dd>
+        bt_field_class_variant_create(), passing an unsigned integer
+        field class as the selector field class.
+      </dt>
+
+      <dt>MIP&nbsp;1</dt>
+      <dd>bt_field_class_variant_with_selector_field_location_integer_unsigned_create().</dd>
+    </dl>
 
     Append an option to such a variant field class with
     bt_field_class_variant_with_selector_field_integer_unsigned_append_option().
@@ -904,16 +1021,24 @@ or none. Therefore, the concrete variant field classes are:
     bt_field_class_variant_with_selector_field_integer_unsigned_borrow_option_by_name_const().
   </dd>
 
-  <dt>Variant field class with a signed selector field</dt>
+  <dt>Variant field class (instances with a linked signed selector field)</dt>
   <dd>
     The linked selector field of a variant field class's instance
     (a variant field) is a \bt_sint_field.
 
-    Consequently, the variant field class's selector field class is
-    a \bt_sint_fc.
+    Create with, depending on the effective \bt_mip (MIP) version of the
+    trace processing \bt_graph:
 
-    Create with bt_field_class_variant_create(), passing a
-    signed integer field class as the selector field class.
+    <dl>
+      <dt>MIP&nbsp;0</dt>
+      <dd>
+        bt_field_class_variant_create(), passing an signed integer
+        field class as the selector field class.
+      </dt>
+
+      <dt>MIP&nbsp;1</dt>
+      <dd>bt_field_class_variant_with_selector_field_location_integer_signed_create().</dd>
+    </dl>
 
     Append an option to such a variant field class with
     bt_field_class_variant_with_selector_field_integer_signed_append_option().
@@ -929,19 +1054,31 @@ or none. Therefore, the concrete variant field classes are:
   </dd>
 </dl>
 
-Variant field classes with a selector have the following common
-property:
+The classes of variant fields with a linked selector field have one of
+the following common properties, depending on the effective
+\bt_mip (MIP) version of the trace processing \bt_graph:
 
 <dl>
   <dt>
     \anchor api-tir-fc-var-prop-sel-fp
-    Selector field path
+    MIP&nbsp;0: Selector field path
   </dt>
   <dd>
-    Field path of the linked selector field class.
+    \bt_c_field_path to locate the linked selector field of an instance.
 
     Borrow such a variant field class's selector field path with
     bt_field_class_variant_with_selector_field_borrow_selector_field_path_const().
+  </dd>
+
+  <dt>
+    \anchor api-tir-fc-var-prop-sel-fl
+    MIP&nbsp;1: Selector field location
+  </dt>
+  <dd>
+    \bt_c_field_loc to locate the linked selector field of an instance.
+
+    Borrow such a variant field class's selector field location with
+    bt_field_class_variant_with_selector_field_borrow_selector_field_location_const().
   </dd>
 </dl>
 
@@ -962,15 +1099,16 @@ Variant field classes have the following common property:
     - A field class.
     - User attributes.
 
-    If the variant field class is linked to a selector field class, then
-    each option also has an \bt_int_rs. In that case, the ranges of a
-    given option cannot overlap any range of any other option.
+    If an instance of the variant field class is linked to a selector
+    field, then each option also has an \bt_int_rs. In that case, the
+    ranges of a given option cannot overlap any range of any other
+    option.
 
     A variant field class must contain at least one option.
 
-    Depending on whether or not the variant field class has a selector
-    field class, append an option to a variant field class
-    with bt_field_class_variant_without_selector_append_option(),
+    Depending on whether or not an instance of the variant field class
+    has a linked selector field, append an option to a variant field
+    class with bt_field_class_variant_without_selector_append_option(),
     bt_field_class_variant_with_selector_field_integer_unsigned_append_option(),
     or
     bt_field_class_variant_with_selector_field_integer_signed_append_option().
@@ -995,8 +1133,8 @@ Variant field classes have the following common property:
     bt_field_class_variant_option_borrow_field_class() and
     bt_field_class_variant_option_borrow_field_class_const().
 
-    Borrow the option of a variant field classes with a selector field
-    class with
+    Borrow the option of the class of a variant field with a linked
+    selector field with
     bt_field_class_variant_with_selector_field_integer_unsigned_borrow_option_by_index_const(),
     bt_field_class_variant_with_selector_field_integer_unsigned_borrow_option_by_name_const(),
     bt_field_class_variant_with_selector_field_integer_signed_borrow_option_by_index_const(), or
@@ -1012,8 +1150,8 @@ Variant field classes have the following common property:
     or
     bt_field_class_variant_with_selector_field_integer_signed_option_as_option_const().
 
-    Borrow the option's ranges from a variant field class with a
-    selector field class with
+    Borrow the option's ranges from the class of a variant field with a
+    linked selector field with
     bt_field_class_variant_with_selector_field_integer_unsigned_option_borrow_ranges_const()
     or
     bt_field_class_variant_with_selector_field_integer_signed_option_borrow_ranges_const().
@@ -1027,16 +1165,14 @@ Variant field classes have the following common property:
   </dd>
 </dl>
 
-<h1>\anchor api-tir-fc-link Field classes with links to other field classes</h1>
+<h1>\anchor api-tir-fc-link Fields with links to other fields</h1>
 
-\bt_cp_darray_fc, \bt_p_opt_fc, and \bt_p_var_fc \em can have links to
-other, preceding field classes.
-
-When a field class&nbsp;A has a link to another field class&nbsp;B, then
-an instance (\bt_field) of A has a link to an instance of B.
+An instance of a \bt_darray_fc, a \bt_opt_fc, or a \bt_var_fc \em may
+have a link to another, anterior field within the same \bt_pkt or
+\bt_ev.
 
 This feature exists so that the linked field can contain the value of a
-dynamic property of the field. Those properties are:
+dynamic property of the "dependent" field. Those properties are:
 
 <dl>
   <dt>\bt_c_darray_field</dt>
@@ -1058,122 +1194,176 @@ dynamic property of the field. Those properties are:
   </dd>
 </dl>
 
-Having a linked field class is <em>optional</em>: you always set the
-field properties with a dedicated function anyway. For example, even if
-a dynamic array field is linked to a preceding length field, you must
-still set its length with bt_field_array_dynamic_set_length(). In that
-case, the value of the length field must match what you pass to
-bt_field_array_dynamic_set_length().
+Having a linked field is <em>optional</em>: you always set the field
+properties with a dedicated function anyway. For example, even if a
+dynamic array field is linked to an anterior length field, you must
+still set its integral length with bt_field_array_dynamic_set_length().
+In that case, the value of the linked length field \em must match what
+you pass to bt_field_array_dynamic_set_length().
 
 The purpose of this feature is to eventually save space when a
-\bt_sink_comp writes trace files: if the trace format can convey that
-a preceding, existing field represents the length of a dynamic array
-field, then the sink component doesn't need to write the dynamic array
-field's length twice. This is the case of the
-<a href="https://diamon.org/ctf/">Common Trace Format</a>, for
-example.
+\bt_sink_comp writes trace files: if, for example, the trace format can
+convey that an anterior, existing field represents the length of a
+dynamic array field, then the sink component doesn't need to write the
+dynamic array field's length twice. This is the case of the
+<a href="https://diamon.org/ctf/">Common Trace Format</a>, for example.
 
-@image html darray-link.png "A dynamic array field class linked to an unsigned integer field class."
+@image html darray-link.png "A dynamic array field linked to an unsigned integer length field."
 
-To link a field class&nbsp;A to a preceding field class&nbsp;B, pass
-field class&nbsp;B when you create field class&nbsp;A. For example, pass
-the \bt_uint_fc to bt_field_class_array_dynamic_create() to create a
-\bt_darray_fc with a length field.
+How exactly you link a dependent field to another field at the field
+class level depends on the effective \bt_mip (MIP) version of the trace
+processing \bt_graph:
 
-When you call bt_stream_class_set_packet_context_field_class(),
-bt_stream_class_set_event_common_context_field_class(),
-bt_event_class_set_specific_context_field_class(), or
-bt_event_class_set_payload_field_class() with a field class containing
-a field class&nbsp;A with a linked field class&nbsp;B, the path to
-B becomes available in A. The functions to borrow this field path are:
+<dl>
+  <dt>MIP&nbsp;0: \bt_c_field_path API
+  <dd>
+    Pass the class of the linked field when you create the class of the
+    dependent field.
 
-- bt_field_class_array_dynamic_with_length_field_borrow_length_field_path_const()
-- bt_field_class_option_with_selector_field_borrow_selector_field_path_const()
-- bt_field_class_variant_with_selector_field_borrow_selector_field_path_const()
+    For example, pass the unsigned integer length field class to
+    bt_field_class_array_dynamic_create() to create a class of
+    \bt_darray_field with a linked length field.
 
-A field path indicates how to reach a linked field from a given
-root <em>scope</em>. The available scopes are:
+    Then, when you call
+    bt_stream_class_set_packet_context_field_class(),
+    bt_stream_class_set_event_common_context_field_class(),
+    bt_event_class_set_specific_context_field_class(), or
+    bt_event_class_set_payload_field_class() with a field class
+    containing a dependent field class with the class a linked field,
+    the path to the linked field becomes available in the dependent
+    field class. The functions to borrow said field path are:
+
+    - bt_field_class_array_dynamic_with_length_field_borrow_length_field_path_const()
+    - bt_field_class_option_with_selector_field_borrow_selector_field_path_const()
+    - bt_field_class_variant_with_selector_field_borrow_selector_field_path_const()
+  </dd>
+
+  <dt>MIP&nbsp;1: \bt_c_field_loc API
+  <dd>
+    Pass the field location when you create the class of the
+    dependent field.
+
+    For example, pass the length field location to
+    bt_field_class_array_dynamic_with_length_field_location_create() to
+    create a class of \bt_darray_field with a linked length field.
+
+    The functions to borrow the field location of a field class are:
+
+    - bt_field_class_array_dynamic_with_length_field_borrow_length_field_location_const()
+    - bt_field_class_option_with_selector_field_borrow_selector_field_location_const()
+    - bt_field_class_variant_with_selector_field_borrow_selector_field_location_const()
+  </dd>
+</dl>
+
+Both \bt_p_field_path (MIP&nbsp;0 API) and \bt_p_field_loc (MIP&nbsp;1
+API) indicate how to reach the linked field of a dependent field from
+some specific root <em>scope</em> (the starting point). The available
+scopes are:
 
 <dl>
   <dt>#BT_FIELD_PATH_SCOPE_PACKET_CONTEXT</dt>
+  <dt>#BT_FIELD_LOCATION_SCOPE_PACKET_CONTEXT</dt>
   <dd>
-    Packet context field.
+    Context field of the current \bt_pkt.
 
     See bt_packet_borrow_context_field_const().
   </dd>
 
   <dt>#BT_FIELD_PATH_SCOPE_EVENT_COMMON_CONTEXT</dt>
+  <dt>#BT_FIELD_LOCATION_SCOPE_EVENT_COMMON_CONTEXT</dt>
   <dd>
-    Event common context field.
+    Common context field of the current \bt_ev.
 
     See bt_event_borrow_common_context_field_const().
   </dd>
 
   <dt>#BT_FIELD_PATH_SCOPE_EVENT_SPECIFIC_CONTEXT</dt>
+  <dt>#BT_FIELD_LOCATION_SCOPE_EVENT_SPECIFIC_CONTEXT</dt>
   <dd>
-    Event specific context field.
+    Specific context field of the current event.
 
     See bt_event_borrow_specific_context_field_const().
   </dd>
 
   <dt>#BT_FIELD_PATH_SCOPE_EVENT_PAYLOAD</dt>
+  <dt>#BT_FIELD_LOCATION_SCOPE_EVENT_PAYLOAD</dt>
   <dd>
-    Event payload field.
+    Payload field of the current event.
 
     See bt_event_borrow_payload_field_const().
   </dd>
 </dl>
 
-The rules regarding field class&nbsp;A vs. field class&nbsp;B (linked
-field class) are:
+The difference between a field path and a field location is that a field
+path works with \bt_struct_field member \em indexes while a field
+location works with structure field member <em>names</em>. The latter is
+more versatile because many fields may be candidates for the
+length/selector field of a dependent field (when they're all part of the
+same \bt_var_field).
 
-- If A is within a packet context field class, B must also be in the
-  same packet context field class.
+The rules regarding the dependent field&nbsp;\bt_var{A} vs. the linked
+field&nbsp;\bt_var{B} are:
+
+- If \bt_var{A} is within some packet context field, then \bt_var{B}
+  must also be in the same packet context field.
 
   See bt_stream_class_set_packet_context_field_class().
 
-- If A is within a event common context field class, B must be in one
-  of:
+- If \bt_var{A} is within some common event context field, then
+  \bt_var{B} must be in one of:
 
-  - The same event common context field class.
-  - The packet context field class of the same \bt_stream_cls.
+  - The same common event context field.
+  - The context field of the same packet.
 
   See bt_stream_class_set_event_common_context_field_class().
 
-- If A is within an event specific context field class, B must be in
-  one of:
+- If \bt_var{A} is within some specific event context field, then
+  \bt_var{B} must be in one of:
 
-  - The same event specific context field class.
-  - The event common context field class of the same stream class.
-  - The packet context field class of the same stream class.
+  - The same specific event context field.
+  - The common context field of the same event.
+  - The context field of the same packet.
 
   See bt_event_class_set_specific_context_field_class().
 
-- If A is within an event payload field class, B must be in one of:
+- If \bt_var{A} is within some event payload field, then \bt_var{B} must
+  be in one of:
 
-  - The same event payload field class.
-  - The event specific context field class of the same \bt_ev_cls.
-  - The event common context field class of the same stream class.
-  - The packet context field class of the same stream class.
+  - The same event payload field.
+  - The specific context field of the same event.
+  - The common context field of the same event.
+  - The context field of the same packet.
 
   See bt_event_class_set_payload_field_class().
 
-- If both A and B are in the same scope, then:
+- If both \bt_var{A} and \bt_var{B} are in the same scope, then:
 
-  - The lowest common ancestor field class of A and B must be a
-    \bt_struct_fc.
+  - The lowest common ancestor field of \bt_var{A} and \bt_var{B} must
+    be a structure field.
 
-  - B must precede A.
+  - \bt_var{B} must precede \bt_var{A}.
 
-    Considering that the members of a structure field class are ordered,
-    then B must be part of a member that's before the member which
-    contains A in their lowest common ancestor structure field class.
+    Considering that the members of a structure field are ordered,
+    then \bt_var{B} must be part of a member that's before the member
+    which contains \bt_var{A} in their lowest common ancestor
+    structure field.
 
-  - The path from the lowest common ancestor structure field class of A
-    and B to A and to B must only contain structure field classes.
+  - <strong>Under MIP&nbsp;0</strong>, the path from the lowest common
+    ancestor structure field of \bt_var{A} and \bt_var{B} to \bt_var{A}
+    and to \bt_var{B} must only contain structure fields.
 
-- If A is in a different scope than B, the path from the root scope of B
-  to B must only contain structure field classes.
+  - <strong>Under MIP&nbsp;1</strong>, the path from the lowest common
+    ancestor structure field of \bt_var{A} and \bt_var{B} to \bt_var{A}
+    and to \bt_var{B} must only contain structure and variant fields.
+
+- If \bt_var{A} is in a different scope than \bt_var{B}, then:
+
+  - <strong>Under MIP&nbsp;0</strong>, the path from the root scope of
+    \bt_var{B} to \bt_var{B} must only contain structure fields.
+
+  - <strong>Under MIP&nbsp;1</strong>, the path from the root scope of
+    \bt_var{B} to \bt_var{B} must only contain structure and variant
+    fields.
 */
 
 /*! @{ */
@@ -1333,7 +1523,7 @@ typedef enum bt_field_class_type {
 
 	/*!
 	@brief
-	    \bt_c_darray_fc (without a length field).
+	    \bt_c_darray_fc (instances without a linked length field).
 
 	This type conceptually inherits
 	#BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY.
@@ -1342,7 +1532,7 @@ typedef enum bt_field_class_type {
 
 	/*!
 	@brief
-	    \bt_c_darray_fc (with a length field).
+	    \bt_c_darray_fc (instances with a linked length field).
 
 	This type conceptually inherits
 	#BT_FIELD_CLASS_TYPE_DYNAMIC_ARRAY.
@@ -1360,13 +1550,13 @@ typedef enum bt_field_class_type {
 
 	/*!
 	@brief
-	    \bt_c_opt_fc (without a selector field).
+	    \bt_c_opt_fc (instances without a linked selector field).
 	*/
 	BT_FIELD_CLASS_TYPE_OPTION_WITHOUT_SELECTOR_FIELD			= (1ULL << 17) | BT_FIELD_CLASS_TYPE_OPTION,
 
 	/*!
 	@brief
-	    \bt_c_opt_fc (with a selector field).
+	    \bt_c_opt_fc (instances with a linked selector field).
 
 	This type conceptually inherits #BT_FIELD_CLASS_TYPE_OPTION.
 
@@ -1377,7 +1567,7 @@ typedef enum bt_field_class_type {
 
 	/*!
 	@brief
-	    \bt_c_opt_fc (with a boolean selector field).
+	    \bt_c_opt_fc (instances with a linked boolean selector field).
 
 	This type conceptually inherits
 	#BT_FIELD_CLASS_TYPE_OPTION_WITH_SELECTOR_FIELD.
@@ -1386,7 +1576,7 @@ typedef enum bt_field_class_type {
 
 	/*!
 	@brief
-	    \bt_c_opt_fc (with an integer selector field).
+	    \bt_c_opt_fc (instances with a linked integer selector field).
 
 	This type conceptually inherits
 	#BT_FIELD_CLASS_TYPE_OPTION_WITH_SELECTOR_FIELD.
@@ -1398,7 +1588,7 @@ typedef enum bt_field_class_type {
 
 	/*!
 	@brief
-	    \bt_c_opt_fc (with an unsigned integer selector field).
+	    \bt_c_opt_fc (instances with a linked unsigned integer selector field).
 
 	This type conceptually inherits
 	#BT_FIELD_CLASS_TYPE_OPTION_WITH_INTEGER_SELECTOR_FIELD.
@@ -1407,7 +1597,7 @@ typedef enum bt_field_class_type {
 
 	/*!
 	@brief
-	    \bt_c_opt_fc (with a signed integer selector field).
+	    \bt_c_opt_fc (instances with a linked signed integer selector field).
 
 	This type conceptually inherits
 	#BT_FIELD_CLASS_TYPE_OPTION_WITH_INTEGER_SELECTOR_FIELD.
@@ -1425,13 +1615,13 @@ typedef enum bt_field_class_type {
 
 	/*!
 	@brief
-	    \bt_c_var_fc (without a selector field).
+	    \bt_c_var_fc (instances without a linked selector field).
 	*/
 	BT_FIELD_CLASS_TYPE_VARIANT_WITHOUT_SELECTOR_FIELD			= (1ULL << 24) | BT_FIELD_CLASS_TYPE_VARIANT,
 
 	/*!
 	@brief
-	    \bt_c_var_fc (with a selector field).
+	    \bt_c_var_fc (instances with a linked selector field).
 
 	This type conceptually inherits
 	#BT_FIELD_CLASS_TYPE_VARIANT.
@@ -1443,7 +1633,7 @@ typedef enum bt_field_class_type {
 
 	/*!
 	@brief
-	    \bt_c_var_fc (with an integer selector field).
+	    \bt_c_var_fc (instances with a linked integer selector field).
 
 	This type conceptually inherits
 	#BT_FIELD_CLASS_TYPE_VARIANT_WITH_SELECTOR_FIELD.
@@ -1455,7 +1645,7 @@ typedef enum bt_field_class_type {
 
 	/*!
 	@brief
-	    \bt_c_opt_fc (with an unsigned integer selector field).
+	    \bt_c_opt_fc (instances with a linked unsigned integer selector field).
 
 	This type conceptually inherits
 	#BT_FIELD_CLASS_TYPE_VARIANT_WITH_INTEGER_SELECTOR_FIELD.
@@ -1464,7 +1654,7 @@ typedef enum bt_field_class_type {
 
 	/*!
 	@brief
-	    \bt_c_opt_fc (with a signed integer selector field).
+	    \bt_c_opt_fc (instances with a linked signed integer selector field).
 
 	This type conceptually inherits
 	#BT_FIELD_CLASS_TYPE_VARIANT_WITH_INTEGER_SELECTOR_FIELD.
@@ -2786,7 +2976,7 @@ property values:
 
 @bt_pre_not_null{trace_class}
 @bt_pre_not_null{element_field_class}
-bt_pre_fc_not_in_tc{element_field_class}
+@bt_pre_fc_not_in_tc{element_field_class}
 
 @bt_post_success_frozen{element_field_class}
 */
@@ -2825,10 +3015,22 @@ extern uint64_t bt_field_class_array_static_get_length(
     Creates a \bt_darray_fc having the element field class
     \bt_p{element_field_class} from the trace class \bt_p{trace_class}.
 
-If \bt_p{length_field_class} is not \c NULL, then the created dynamic
-array field class has a linked length field class.
-See
-\ref api-tir-fc-link "Field classes with links to other field classes"
+@note
+    @parblock
+    This function is only available when \bt_p{trace_class} was created
+    from a \bt_self_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;0.
+
+    To create a dynamic array field class from a trace class which was
+    created from a self component which belongs to a trace processing
+    graph with the effective MIP version&nbsp;1, use
+    bt_field_class_array_dynamic_without_length_field_location_create()
+    or bt_field_class_array_dynamic_with_length_field_location_create().
+    @endparblock
+
+If \bt_p{length_field_class} is not \c NULL, then an instance of
+the created dynamic array field class has a linked length field.
+See \ref api-tir-fc-link "Fields with links to other fields"
 to learn more.
 
 On success, the returned dynamic array field class has the following
@@ -2859,8 +3061,8 @@ property values:
     field class to create.
 @param[in] length_field_class
     @parblock
-    Linked length field class of the dynamic array field class to
-    create.
+    Class of a linked length field of an instance of the dynamic array
+    field class to create.
 
     Can be \c NULL.
     @endparblock
@@ -2878,35 +3080,155 @@ property values:
 
 @bt_post_success_frozen{element_field_class}
 @bt_post_success_frozen{length_field_class}
+
+@sa bt_field_class_array_dynamic_without_length_field_location_create() &mdash;
+    Creates a class of dynamic array field without a linked length field
+    (\bt_mip version&nbsp;1).
+@sa bt_field_class_array_dynamic_with_length_field_location_create() &mdash;
+    Creates a class of dynamic array field with a linked length field
+    (\bt_mip version&nbsp;1).
 */
 extern bt_field_class *bt_field_class_array_dynamic_create(
 		bt_trace_class *trace_class,
 		bt_field_class *element_field_class,
 		bt_field_class *length_field_class) __BT_NOEXCEPT;
 
+/*!
+@brief
+    Creates a \bt_darray_fc (instances without a linked length field)
+    having the element field class \bt_p{element_field_class} from the
+    trace class \bt_p{trace_class}.
+
+On success, the returned dynamic array field class has the following
+property values:
+
+<table>
+  <tr>
+    <th>Property
+    <th>Value
+  <tr>
+    <td>\ref api-tir-fc-array-prop-elem-fc "Element field class"
+    <td>\bt_p{element_field_class}
+  <tr>
+    <td>\ref api-tir-fc-darray-prop-len-fl "Length field location"
+    <td>
+      \em None
+  <tr>
+    <td>\ref api-tir-fc-prop-user-attrs "User attributes"
+    <td>Empty \bt_map_val
+</table>
+
+@param[in] trace_class
+    Trace class from which to create a dynamic array field class.
+@param[in] element_field_class
+    Class of the element fields of the instances of the dynamic array
+    field class to create.
+
+@returns
+    New dynamic array field class reference (without a length field),
+    or \c NULL on memory error.
+
+@bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 1}
+@bt_pre_not_null{element_field_class}
+@bt_pre_fc_not_in_tc{element_field_class}
+
+@bt_post_success_frozen{element_field_class}
+
+@sa bt_field_class_array_dynamic_with_length_field_location_create() &mdash;
+    Creates a class of dynamic array field with a linked length field.
+*/
+extern bt_field_class *bt_field_class_array_dynamic_without_length_field_location_create(
+		bt_trace_class *trace_class,
+		bt_field_class *element_field_class);
+
 /*! @} */
 
 /*!
-@name Dynamic array field class with length field
+@name Dynamic array field class: instances with linked length field
 @{
 */
 
 /*!
 @brief
-    Borrows the length field path from the \bt_darray_fc (with a length
-    field) \bt_p{field_class}.
+    Creates a \bt_darray_fc (instances with a linked length field)
+    having the element field class \bt_p{element_field_class} and the
+    length \bt_field_loc \bt_p{length_field_location} from the
+    trace class \bt_p{trace_class}.
+
+On success, the returned dynamic array field class has the following
+property values:
+
+<table>
+  <tr>
+    <th>Property
+    <th>Value
+  <tr>
+    <td>\ref api-tir-fc-array-prop-elem-fc "Element field class"
+    <td>\bt_p{element_field_class}
+  <tr>
+    <td>\ref api-tir-fc-darray-prop-len-fl "Length field location"
+    <td>
+      \bt_p{length_field_location}.
+
+      See \ref api-tir-fc-link "Fields with links to other fields"
+      to learn more.
+  <tr>
+    <td>\ref api-tir-fc-prop-user-attrs "User attributes"
+    <td>Empty \bt_map_val
+</table>
+
+@param[in] trace_class
+    Trace class from which to create a dynamic array field class.
+@param[in] element_field_class
+    Class of the element fields of the instances of the dynamic array
+    field class to create.
+@param[in] length_field_location
+    Length field location of the dynamic array field class to create.
+
+@returns
+    New dynamic array field class reference (instances with a linked
+    length field), or \c NULL on memory error.
+
+@bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 1}
+@bt_pre_not_null{element_field_class}
+@bt_pre_fc_not_in_tc{element_field_class}
+@bt_pre_not_null{length_field_location}
+
+@bt_post_success_frozen{element_field_class}
+
+@sa bt_field_class_array_dynamic_without_length_field_location_create() &mdash;
+    Creates a class of dynamic array field without a linked
+    length field.
+*/
+extern bt_field_class *bt_field_class_array_dynamic_with_length_field_location_create(
+		bt_trace_class *trace_class,
+		bt_field_class *element_field_class,
+		const bt_field_location *length_field_location);
+
+/*!
+@brief
+    Borrows the length field path from the \bt_darray_fc (instances with
+    a linked length field) \bt_p{field_class}.
 
 See the \ref api-tir-fc-darray-prop-len-fp "length field path" property.
 
-This property is only available when a \bt_struct_fc containing
-(recursively) \bt_p{field_class} is passed to one of:
+This property is only available when all the following are true:
 
-- bt_stream_class_set_packet_context_field_class()
-- bt_stream_class_set_event_common_context_field_class()
-- bt_event_class_set_specific_context_field_class()
-- bt_event_class_set_payload_field_class()
+- \bt_p{field_class} was created with
+  bt_field_class_array_dynamic_create() with \bt_p{length_field_class}
+  set to an \bt_uint_fc (not \c NULL).
 
-In the meantime, this function returns \c NULL.
+- A \bt_struct_fc containing (recursively) \bt_p{field_class} is passed
+  to one of:
+
+  - bt_stream_class_set_packet_context_field_class()
+  - bt_stream_class_set_event_common_context_field_class()
+  - bt_event_class_set_specific_context_field_class()
+  - bt_event_class_set_payload_field_class()
+
+  In the meantime, this function returns \c NULL.
 
 @param[in] field_class
     Dynamic array field class from which to borrow the length
@@ -2922,6 +3244,32 @@ In the meantime, this function returns \c NULL.
 extern const bt_field_path *
 bt_field_class_array_dynamic_with_length_field_borrow_length_field_path_const(
 		const bt_field_class *field_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Borrows the length field location from the \bt_darray_fc (instances
+    with a linked length field) \bt_p{field_class}.
+
+See the \ref api-tir-fc-darray-prop-len-fl "length field location"
+property.
+
+This property is only available when \bt_p{field_class} was created
+with bt_field_class_array_dynamic_with_length_field_location_create().
+
+@param[in] field_class
+    Dynamic array field class from which to borrow the length
+    field location.
+
+@returns
+    Length field location of \bt_p{field_class}.
+
+@bt_pre_not_null{field_class}
+@bt_pre_is_darray_wl_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 1}
+*/
+extern const bt_field_location *
+bt_field_class_array_dynamic_with_length_field_borrow_length_field_location_const(
+		const bt_field_class *field_class);
 
 /*! @} */
 
@@ -3319,15 +3667,27 @@ bt_field_class_option_borrow_field_class_const(
 /*! @} */
 
 /*!
-@name Option field class without a selector field
+@name Option field class: instances without a linked selector field
 @{
 */
 
 /*!
 @brief
-    Creates an \bt_opt_fc (without a selector field) having the optional
-    field class \bt_p{optional_field_class} from the trace class
-    \bt_p{trace_class}.
+    Creates an \bt_opt_fc (instances without a linked selector field)
+    having the optional field class \bt_p{optional_field_class} from the
+    trace class \bt_p{trace_class}.
+
+@note
+    @parblock
+    This function is only available when \bt_p{trace_class} was created
+    from a \bt_self_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;0.
+
+    To create a similar option field class from a trace class which was
+    created from a self component which belongs to a trace processing
+    graph with the effective MIP version&nbsp;1, use
+    bt_field_class_option_without_selector_field_location_create().
+    @endparblock
 
 On success, the returned option field class has the following property
 values:
@@ -3354,38 +3714,100 @@ values:
     New option field class reference, or \c NULL on memory error.
 
 @bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 0}
 @bt_pre_not_null{optional_field_class}
 @bt_pre_fc_not_in_tc{optional_field_class}
 
 @bt_post_success_frozen{optional_field_class}
+
+@sa bt_field_class_option_without_selector_field_location_create() &mdash;
+    Creates a class of option field without a linked selector field
+    (\bt_mip version&nbsp;1).
 */
 extern bt_field_class *bt_field_class_option_without_selector_create(
+		bt_trace_class *trace_class,
+		bt_field_class *optional_field_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Creates an \bt_opt_fc (instances without a linked selector
+    field) having the optional field class \bt_p{optional_field_class}
+    from the trace class \bt_p{trace_class}.
+
+On success, the returned option field class has the following property
+values:
+
+<table>
+  <tr>
+    <th>Property
+    <th>Value
+  <tr>
+    <td>\ref api-tir-fc-opt-prop-fc "Optional field class"
+    <td>\bt_p{optional_field_class}
+  <tr>
+    <td>\ref api-tir-fc-prop-user-attrs "User attributes"
+    <td>Empty \bt_map_val
+</table>
+
+@param[in] trace_class
+    Trace class from which to create an option field class.
+@param[in] optional_field_class
+    Class of the optional fields of the instances of the option field
+    class to create.
+
+@returns
+    New option field class reference, or \c NULL on memory error.
+
+@bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 1}
+@bt_pre_not_null{optional_field_class}
+@bt_pre_fc_not_in_tc{optional_field_class}
+
+@bt_post_success_frozen{optional_field_class}
+
+@sa bt_field_class_option_with_selector_field_location_bool_create() &mdash;
+    Creates a class of option field with a linked boolean selector field.
+@sa bt_field_class_option_with_selector_field_location_integer_unsigned_create() &mdash;
+    Creates a class of option field with a linked unsigned integer
+    selector field.
+@sa bt_field_class_option_with_selector_field_location_integer_signed_create() &mdash;
+    Creates a class of option field with a linked signed integer
+    selector field.
+*/
+extern bt_field_class *bt_field_class_option_without_selector_field_location_create(
 		bt_trace_class *trace_class,
 		bt_field_class *optional_field_class) __BT_NOEXCEPT;
 
 /*! @} */
 
 /*!
-@name Option field class with a selector field
+@name Option field class: instances with a linked selector field
 @{
 */
 
 /*!
 @brief
-    Borrows the selector field path from the \bt_opt_fc (with a selector
-    field) \bt_p{field_class}.
+    Borrows the selector field path from the \bt_opt_fc (instances
+    with a linked selector field) \bt_p{field_class}.
 
 See the \ref api-tir-fc-opt-prop-sel-fp "selector field path" property.
 
-This property is only available when a \bt_struct_fc containing
-(recursively) \bt_p{field_class} is passed to one of:
+This property is only available when all the following are true:
 
-- bt_stream_class_set_packet_context_field_class()
-- bt_stream_class_set_event_common_context_field_class()
-- bt_event_class_set_specific_context_field_class()
-- bt_event_class_set_payload_field_class()
+- \bt_p{field_class} was created with
+  bt_field_class_option_with_selector_field_bool_create(),
+  bt_field_class_option_with_selector_field_integer_unsigned_create(),
+  or bt_field_class_option_with_selector_field_integer_signed_create().
 
-In the meantime, this function returns \c NULL.
+- A \bt_struct_fc containing (recursively) \bt_p{field_class} is passed
+  to one of:
+
+  - bt_stream_class_set_packet_context_field_class()
+  - bt_stream_class_set_event_common_context_field_class()
+  - bt_event_class_set_specific_context_field_class()
+  - bt_event_class_set_payload_field_class()
+
+  In the meantime, this function returns \c NULL.
 
 @param[in] field_class
     Option field class from which to borrow the selector field path.
@@ -3401,18 +3823,56 @@ extern const bt_field_path *
 bt_field_class_option_with_selector_field_borrow_selector_field_path_const(
 		const bt_field_class *field_class) __BT_NOEXCEPT;
 
+/*!
+@brief
+    Borrows the selector field location from the \bt_opt_fc (instances
+    with a linked selector field) \bt_p{field_class}.
+
+See the \ref api-tir-fc-opt-prop-sel-fl "selector field location"
+property.
+
+This property is only available when \bt_p{field_class} was created
+with bt_field_class_option_with_selector_field_location_bool_create(),
+
+
+@param[in] field_class
+    Option field class from which to borrow the selector field location.
+
+@returns
+    Selector field location of \bt_p{field_class}.
+
+@bt_pre_not_null{field_class}
+@bt_pre_is_opt_ws_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 1}
+*/
+extern const bt_field_location *
+bt_field_class_option_with_selector_field_borrow_selector_field_location_const(
+		const bt_field_class *field_class) __BT_NOEXCEPT;
+
 /*! @} */
 
 /*!
-@name Option field class with a boolean selector field
+@name Option field class: instances with a linked boolean selector field
 @{
 */
 
 /*!
 @brief
-    Creates an \bt_opt_fc (with a boolean selector field) having the
-    optional field class \bt_p{optional_field_class} from the trace
-    class \bt_p{trace_class}.
+    Creates an \bt_opt_fc (instances with a linked boolean selector
+    field) having the optional field class \bt_p{optional_field_class}
+    from the trace class \bt_p{trace_class}.
+
+@note
+    @parblock
+    This function is only available when \bt_p{trace_class} was created
+    from a \bt_self_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;0.
+
+    To create a similar option field class from a trace class which was
+    created from a self component which belongs to a trace processing
+    graph with the effective MIP version&nbsp;1, use
+    bt_field_class_option_with_selector_field_location_bool_create().
+    @endparblock
 
 On success, the returned option field class has the following property
 values:
@@ -3443,7 +3903,8 @@ values:
     Class of the optional fields of the instances of the option field
     class to create.
 @param[in] selector_field_class
-    Linked selector field class of the option field class to create.
+    Class of a linked boolean selector field of an instance of the
+    option field class to create.
 
 @returns
     New option field class reference, or \c NULL on memory error.
@@ -3458,11 +3919,81 @@ values:
 
 @bt_post_success_frozen{optional_field_class}
 @bt_post_success_frozen{selector_field_class}
+
+@sa bt_field_class_option_with_selector_field_location_bool_create() &mdash;
+    Creates a class of option field with a linked boolean selector field
+    (\bt_mip version&nbsp;1).
 */
 extern bt_field_class *bt_field_class_option_with_selector_field_bool_create(
 		bt_trace_class *trace_class,
 		bt_field_class *optional_field_class,
 		bt_field_class *selector_field_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Creates an \bt_opt_fc (instances with a linked boolean selector
+    field) having the optional field class \bt_p{optional_field_class}
+    and the selector \bt_field_loc \bt_p{selector_field_location} from
+    the trace class \bt_p{trace_class}.
+
+On success, the returned option field class has the following property
+values:
+
+<table>
+  <tr>
+    <th>Property
+    <th>Value
+  <tr>
+    <td>\ref api-tir-fc-opt-prop-fc "Optional field class"
+    <td>\bt_p{optional_field_class}
+  <tr>
+    <td>\ref api-tir-fc-opt-prop-sel-fl "Selector field location"
+    <td>
+      \bt_p{selector_field_location}.
+
+      See \ref api-tir-fc-link "Fields with links to other fields"
+      to learn more.
+  <tr>
+    <td>\ref api-tir-fc-opt-prop-sel-rev "Selector is reversed?"
+    <td>#BT_FALSE
+  <tr>
+    <td>\ref api-tir-fc-prop-user-attrs "User attributes"
+    <td>Empty \bt_map_val
+</table>
+
+@param[in] trace_class
+    Trace class from which to create an option field class.
+@param[in] optional_field_class
+    Class of the optional fields of the instances of the option field
+    class to create.
+@param[in] selector_field_location
+    Selector field location of the option field class to create.
+
+@returns
+    New option field class reference, or \c NULL on memory error.
+
+@bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 1}
+@bt_pre_not_null{optional_field_class}
+@bt_pre_fc_not_in_tc{optional_field_class}
+@bt_pre_not_null{selector_field_location}
+
+@bt_post_success_frozen{optional_field_class}
+@bt_post_success_frozen{selector_field_class}
+
+@sa bt_field_class_option_without_selector_field_location_create() &mdash;
+    Creates a class of option field without a linked selector field.
+@sa bt_field_class_option_with_selector_field_location_integer_unsigned_create() &mdash;
+    Creates a class of option field with a linked unsigned integer
+    selector field.
+@sa bt_field_class_option_with_selector_field_location_integer_signed_create() &mdash;
+    Creates a class of option field with a linked signed integer
+    selector field.
+*/
+extern bt_field_class *bt_field_class_option_with_selector_field_location_bool_create(
+		bt_trace_class *trace_class,
+		bt_field_class *optional_field_class,
+		const bt_field_location *selector_field_location) __BT_NOEXCEPT;
 
 /*!
 @brief
@@ -3520,15 +4051,27 @@ bt_field_class_option_with_selector_field_bool_selector_is_reversed(
 /*! @} */
 
 /*!
-@name Option field class with an unsigned integer selector field
+@name Option field class: instances with a linked unsigned integer selector field
 @{
 */
 
 /*!
 @brief
-    Creates an \bt_opt_fc (with an unsigned integer selector field)
-    having the optional field class \bt_p{optional_field_class} from the
-    trace class \bt_p{trace_class}.
+    Creates an \bt_opt_fc (instances with a linked unsigned integer
+    selector field) having the optional field class
+    \bt_p{optional_field_class} from the trace class \bt_p{trace_class}.
+
+@note
+    @parblock
+    This function is only available when \bt_p{trace_class} was created
+    from a \bt_self_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;0.
+
+    To create a similar option field class from a trace class which was
+    created from a self component which belongs to a trace processing
+    graph with the effective MIP version&nbsp;1, use
+    bt_field_class_option_with_selector_field_location_integer_unsigned_create().
+    @endparblock
 
 On success, the returned option field class has the following property
 values:
@@ -3573,7 +4116,7 @@ values:
 @bt_pre_fc_not_in_tc{optional_field_class}
 @bt_pre_not_null{selector_field_class}
 @pre
-    \bt_p{selector_field_class} is a \bt_uint_fc.
+    \bt_p{selector_field_class} is an \bt_uint_fc.
 @bt_pre_not_null{ranges}
 @pre
     \bt_p{ranges} contains one or more \bt_p_uint_rg.
@@ -3581,6 +4124,10 @@ values:
 @bt_post_success_frozen{optional_field_class}
 @bt_post_success_frozen{selector_field_class}
 @bt_post_success_frozen{ranges}
+
+@sa bt_field_class_option_with_selector_field_location_integer_unsigned_create() &mdash;
+    Creates a class of option field with a linked unsigned integer
+    selector field (\bt_mip version&nbsp;1).
 */
 extern bt_field_class *
 bt_field_class_option_with_selector_field_integer_unsigned_create(
@@ -3589,6 +4136,80 @@ bt_field_class_option_with_selector_field_integer_unsigned_create(
 		bt_field_class *selector_field_class,
 		const bt_integer_range_set_unsigned *ranges)
 		__BT_NOEXCEPT;
+
+/*!
+@brief
+    Creates an \bt_opt_fc (instances with a linked unsigned integer
+    selector field) having the optional field class
+    \bt_p{optional_field_class} and the selector \bt_field_loc
+    \bt_p{selector_field_location} from the trace class
+    \bt_p{trace_class}.
+
+On success, the returned option field class has the following property
+values:
+
+<table>
+  <tr>
+    <th>Property
+    <th>Value
+  <tr>
+    <td>\ref api-tir-fc-opt-prop-fc "Optional field class"
+    <td>\bt_p{optional_field_class}
+  <tr>
+    <td>\ref api-tir-fc-opt-prop-sel-fl "Selector field location"
+    <td>
+      \bt_p{selector_field_location}.
+
+      See \ref api-tir-fc-link "Fields with links to other fields"
+      to learn more.
+  <tr>
+    <td>\ref api-tir-fc-opt-prop-uint-rs "Selector's unsigned integer ranges"
+    <td>\bt_p{ranges}
+  <tr>
+    <td>\ref api-tir-fc-prop-user-attrs "User attributes"
+    <td>Empty \bt_map_val
+</table>
+
+@param[in] trace_class
+    Trace class from which to create an option field class.
+@param[in] optional_field_class
+    Class of the optional fields of the instances of the option field
+    class to create.
+@param[in] selector_field_location
+    Selector field location of the option field class to create.
+@param[in] ranges
+    Selector's unsigned integer ranges of the option field class to
+    create.
+
+@returns
+    New option field class reference, or \c NULL on memory error.
+
+@bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 1}
+@bt_pre_not_null{optional_field_class}
+@bt_pre_fc_not_in_tc{optional_field_class}
+@bt_pre_not_null{selector_field_location}
+@bt_pre_not_null{ranges}
+@pre
+    \bt_p{ranges} contains one or more \bt_p_uint_rg.
+
+@bt_post_success_frozen{optional_field_class}
+@bt_post_success_frozen{ranges}
+
+@sa bt_field_class_option_without_selector_field_location_create() &mdash;
+    Creates a class of option field without a linked selector field.
+@sa bt_field_class_option_with_selector_field_location_bool_create() &mdash;
+    Creates a class of option field with a linked boolean selector field.
+@sa bt_field_class_option_with_selector_field_location_integer_signed_create() &mdash;
+    Creates a class of option field with a linked signed integer
+    selector field.
+*/
+extern bt_field_class *
+bt_field_class_option_with_selector_field_location_integer_unsigned_create(
+		bt_trace_class *trace_class,
+		bt_field_class *optional_field_class,
+		const bt_field_location *selector_field_location,
+		const bt_integer_range_set_unsigned *ranges) __BT_NOEXCEPT;
 
 /*!
 @brief
@@ -3615,15 +4236,27 @@ bt_field_class_option_with_selector_field_integer_unsigned_borrow_selector_range
 /*! @} */
 
 /*!
-@name Option field class with a signed integer selector field
+@name Option field class: instances with a linked signed integer selector field
 @{
 */
 
 /*!
 @brief
-    Creates an \bt_opt_fc (with a signed integer selector field)
-    having the optional field class \bt_p{optional_field_class} from the
-    trace class \bt_p{trace_class}.
+    Creates an \bt_opt_fc (instances with a linked signed integer
+    selector field) having the optional field class
+    \bt_p{optional_field_class} from the trace class \bt_p{trace_class}.
+
+@note
+    @parblock
+    This function is only available when \bt_p{trace_class} was created
+    from a \bt_self_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;0.
+
+    To create a similar option field class from a trace class which was
+    created from a self component which belongs to a trace processing
+    graph with the effective MIP version&nbsp;1, use
+    bt_field_class_option_with_selector_field_location_integer_signed_create().
+    @endparblock
 
 On success, the returned option field class has the following property
 values:
@@ -3668,7 +4301,7 @@ values:
 @bt_pre_fc_not_in_tc{optional_field_class}
 @bt_pre_not_null{selector_field_class}
 @pre
-    \bt_p{selector_field_class} is a \bt_uint_fc.
+    \bt_p{selector_field_class} is an \bt_uint_fc.
 @bt_pre_not_null{ranges}
 @pre
     \bt_p{ranges} contains one or more \bt_p_uint_rg.
@@ -3676,12 +4309,90 @@ values:
 @bt_post_success_frozen{optional_field_class}
 @bt_post_success_frozen{selector_field_class}
 @bt_post_success_frozen{ranges}
+
+@sa bt_field_class_option_with_selector_field_location_integer_signed_create() &mdash;
+    Creates an option field class with a linked signed integer
+    selector field (\bt_mip version&nbsp;1).
 */
 extern bt_field_class *
 bt_field_class_option_with_selector_field_integer_signed_create(
 		bt_trace_class *trace_class,
 		bt_field_class *optional_field_class,
 		bt_field_class *selector_field_class,
+		const bt_integer_range_set_signed *ranges) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Creates an \bt_opt_fc (instances with a linked signed integer
+    selector field) having the optional field class
+    \bt_p{optional_field_class} and the selector \bt_field_loc
+    \bt_p{selector_field_location} from the trace class
+    \bt_p{trace_class}.
+
+On success, the returned option field class has the following property
+values:
+
+<table>
+  <tr>
+    <th>Property
+    <th>Value
+  <tr>
+    <td>\ref api-tir-fc-opt-prop-fc "Optional field class"
+    <td>\bt_p{optional_field_class}
+  <tr>
+    <td>\ref api-tir-fc-opt-prop-sel-fl "Selector field location"
+    <td>
+      \bt_p{selector_field_location}.
+
+      See \ref api-tir-fc-link "Fields with links to other fields"
+      to learn more.
+  <tr>
+    <td>\ref api-tir-fc-opt-prop-uint-rs "Selector's signed integer ranges"
+    <td>\bt_p{ranges}
+  <tr>
+    <td>\ref api-tir-fc-prop-user-attrs "User attributes"
+    <td>Empty \bt_map_val
+</table>
+
+@param[in] trace_class
+    Trace class from which to create an option field class.
+@param[in] optional_field_class
+    Class of the optional fields of the instances of the option field
+    class to create.
+@param[in] selector_field_location
+    Selector field location of the option field class to create.
+@param[in] ranges
+    Selector's signed integer ranges of the option field class to
+    create.
+
+@returns
+    New option field class reference, or \c NULL on memory error.
+
+@bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 1}
+@bt_pre_not_null{optional_field_class}
+@bt_pre_fc_not_in_tc{optional_field_class}
+@bt_pre_not_null{selector_field_location}
+@bt_pre_not_null{ranges}
+@pre
+    \bt_p{ranges} contains one or more \bt_p_uint_rg.
+
+@bt_post_success_frozen{optional_field_class}
+@bt_post_success_frozen{ranges}
+
+@sa bt_field_class_variant_without_selector_field_location_create() &mdash;
+    Creates a class of option field without a linked selector field.
+@sa bt_field_class_option_with_selector_field_location_bool_create() &mdash;
+    Creates a class of option field with a linked boolean selector field.
+@sa bt_field_class_option_with_selector_field_location_integer_unsigned_create() &mdash;
+    Creates a class of option field with a linked unsigned integer
+    selector field.
+*/
+extern bt_field_class *
+bt_field_class_option_with_selector_field_location_integer_signed_create(
+		bt_trace_class *trace_class,
+		bt_field_class *optional_field_class,
+		const bt_field_location *selector_field_class,
 		const bt_integer_range_set_signed *ranges) __BT_NOEXCEPT;
 
 /*!
@@ -3715,12 +4426,25 @@ bt_field_class_option_with_selector_field_integer_signed_borrow_selector_ranges_
 
 /*!
 @brief
-    Creates a \bt_var_fc from the trace class \bt_p{trace_class}.
+    Creates an empty \bt_var_fc from the trace class \bt_p{trace_class}.
 
-If \bt_p{selector_field_class} is not \c NULL, then the created variant
-field class has a linked selector field class.
-See
-\ref api-tir-fc-link "Field classes with links to other field classes"
+@note
+    @parblock
+    This function is only available when \bt_p{trace_class} was created
+    from a \bt_self_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;0.
+
+    To create a variant field class from a trace class which was
+    created from a self component which belongs to a trace processing
+    graph with the effective MIP version&nbsp;1, use
+    bt_field_class_variant_without_selector_field_location_create(),
+    bt_field_class_variant_with_selector_field_location_integer_unsigned_create(),
+    or bt_field_class_variant_with_selector_field_location_integer_signed_create().
+    @endparblock
+
+If \bt_p{selector_field_class} is not \c NULL, then an instance of
+the created variant field class has a linked selector field.
+See \ref api-tir-fc-link "Fields with links to other fields"
 to learn more.
 
 On success, the returned variant field class has the following
@@ -3748,7 +4472,8 @@ property values:
     Trace class from which to create a variant field class.
 @param[in] selector_field_class
     @parblock
-    Linked selector field class of the variant field class to create.
+    Class of a linked selector field of an instance of the variant field
+    class to create.
 
     Can be \c NULL.
     @endparblock
@@ -3764,6 +4489,16 @@ property values:
 
 @bt_post_success_frozen{element_field_class}
 @bt_post_success_frozen{selector_field_class}
+
+@sa bt_field_class_variant_without_selector_field_location_create() &mdash;
+    Creates a class of variant field without a linked selector field
+    (\bt_mip version&nbsp;1).
+@sa bt_field_class_variant_with_selector_field_location_integer_unsigned_create() &mdash;
+    Creates a class of variant field with a linked unsigned integer
+    selector field (\bt_mip version&nbsp;1).
+@sa bt_field_class_variant_with_selector_field_location_integer_signed_create() &mdash;
+    Creates a class of variant field with a linked signed integer
+    selector field (\bt_mip version&nbsp;1).
 */
 extern bt_field_class *bt_field_class_variant_create(
 		bt_trace_class *trace_class,
@@ -4035,9 +4770,52 @@ extern const bt_value *bt_field_class_variant_option_borrow_user_attributes_cons
 /*! @} */
 
 /*!
-@name Variant field class without a selector field
+@name Variant field class: instances without a linked selector field
 @{
 */
+
+/*!
+@brief
+    Creates an empty \bt_var_fc (instances without a linked
+    selector field) from the trace class \bt_p{trace_class}.
+
+On success, the returned variant field class has the following
+property values:
+
+<table>
+  <tr>
+    <th>Property
+    <th>Value
+  <tr>
+    <td>\ref api-tir-fc-var-prop-sel-fp "Selector field location"
+    <td>
+      \em None
+  <tr>
+    <td>\ref api-tir-fc-var-prop-opts "Options"
+    <td>\em None
+  <tr>
+    <td>\ref api-tir-fc-prop-user-attrs "User attributes"
+    <td>Empty \bt_map_val
+</table>
+
+@param[in] trace_class
+    Trace class from which to create a variant field class.
+
+@returns
+    New option field class reference, or \c NULL on memory error.
+
+@bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 1}
+
+@sa bt_field_class_variant_with_selector_field_location_integer_unsigned_create() &mdash;
+    Creates a class of variant field with a linked unsigned integer
+    selector field.
+@sa bt_field_class_variant_with_selector_field_location_integer_signed_create() &mdash;
+    Creates a class of variant field with a linked signed integer
+    selector field.
+*/
+extern bt_field_class *bt_field_class_variant_without_selector_field_location_create(
+		bt_trace_class *trace_class) __BT_NOEXCEPT;
 
 /*!
 @brief
@@ -4060,9 +4838,9 @@ typedef enum bt_field_class_variant_without_selector_append_option_status {
 
 /*!
 @brief
-    Appends an option to the \bt_var_fc (without a selector field)
-    \bt_p{field_class} having the name \bt_p{name} and the
-    field class \bt_p{option_field_class}.
+    Appends an option to the \bt_var_fc (instances without a linked
+    selector field) \bt_p{field_class} having the name \bt_p{name} and
+    the field class \bt_p{option_field_class}.
 
 See the \ref api-tir-fc-var-prop-opts "options" property.
 
@@ -4098,7 +4876,7 @@ bt_field_class_variant_without_selector_append_option(
 /*! @} */
 
 /*!
-@name Variant field class with a selector field
+@name Variant field class: instances with a linked selector field
 @{
 */
 
@@ -4125,20 +4903,26 @@ typedef enum bt_field_class_variant_with_selector_field_integer_append_option_st
 
 /*!
 @brief
-    Borrows the selector field path from the \bt_var_fc (with a selector
-    field) \bt_p{field_class}.
+    Borrows the selector field path from the \bt_var_fc (instances with
+    a linked selector field) \bt_p{field_class}.
 
 See the \ref api-tir-fc-var-prop-sel-fp "selector field path" property.
 
-This property is only available when a \bt_struct_fc containing
-(recursively) \bt_p{field_class} is passed to one of:
+This property is only available when all the following are true:
 
-- bt_stream_class_set_packet_context_field_class()
-- bt_stream_class_set_event_common_context_field_class()
-- bt_event_class_set_specific_context_field_class()
-- bt_event_class_set_payload_field_class()
+- \bt_p{field_class} was created with
+  bt_field_class_variant_create() with \bt_p{selector_field_class}
+  set to an \bt_int_fc (not \c NULL).
 
-In the meantime, this function returns \c NULL.
+- A \bt_struct_fc containing (recursively) \bt_p{field_class} is passed
+  to one of:
+
+  - bt_stream_class_set_packet_context_field_class()
+  - bt_stream_class_set_event_common_context_field_class()
+  - bt_event_class_set_specific_context_field_class()
+  - bt_event_class_set_payload_field_class()
+
+  In the meantime, this function returns \c NULL.
 
 @param[in] field_class
     Variant field class from which to borrow the selector field path.
@@ -4154,18 +4938,96 @@ extern const bt_field_path *
 bt_field_class_variant_with_selector_field_borrow_selector_field_path_const(
 		const bt_field_class *field_class) __BT_NOEXCEPT;
 
+/*!
+@brief
+    Borrows the selector field location from the \bt_var_fc (instances
+    with a linked selector field) \bt_p{field_class}.
+
+See the \ref api-tir-fc-var-prop-sel-fl "selector field location"
+property.
+
+This property is only available when \bt_p{field_class} was created with
+bt_field_class_variant_with_selector_field_location_integer_unsigned_create()
+or
+bt_field_class_variant_with_selector_field_location_integer_signed_create().
+
+@param[in] field_class
+    Option field class from which to borrow the selector field location.
+
+@returns
+    Selector field location of \bt_p{field_class}.
+
+@bt_pre_not_null{field_class}
+@bt_pre_is_var_ws_fc{field_class}
+@bt_pre_fc_with_mip{field_class, 1}
+*/
+extern const bt_field_location *
+bt_field_class_variant_with_selector_field_borrow_selector_field_location_const(
+		const bt_field_class *field_class);
+
 /*! @} */
 
 /*!
-@name Variant field class with an unsigned integer selector field
+@name Variant field class: instances with a linked unsigned integer selector field
 @{
 */
 
 /*!
 @brief
-    Appends an option to the \bt_var_fc (with an unsigned integer
-    selector field) \bt_p{field_class} having the name \bt_p{name},
-    the field class \bt_p{option_field_class}, and the
+    Creates an empty \bt_var_fc (instances with a linked
+    unsigned integer selector field) having the
+    selector \bt_field_loc \bt_p{selector_field_location}
+    from the trace class \bt_p{trace_class}.
+
+On success, the returned variant field class has the following
+property values:
+
+<table>
+  <tr>
+    <th>Property
+    <th>Value
+  <tr>
+    <td>\ref api-tir-fc-var-prop-sel-fp "Selector field location"
+    <td>
+      \bt_p{selector_field_location}.
+
+      See \ref api-tir-fc-link "Fields with links to other fields"
+      to learn more.
+  <tr>
+    <td>\ref api-tir-fc-var-prop-opts "Options"
+    <td>\em None
+  <tr>
+    <td>\ref api-tir-fc-prop-user-attrs "User attributes"
+    <td>Empty \bt_map_val
+</table>
+
+@param[in] trace_class
+    Trace class from which to create a variant field class.
+@param[in] selector_field_location
+    Selector field location of the variant field class to create.
+
+@returns
+    New variant field class reference, or \c NULL on memory error.
+
+@bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 1}
+@bt_pre_not_null{selector_field_location}
+
+@sa bt_field_class_variant_without_selector_field_location_create() &mdash;
+    Creates a class of variant field without a linked selector field.
+@sa bt_field_class_option_with_selector_field_location_integer_signed_create() &mdash;
+    Creates a class of variant field with a linked signed integer
+    selector field.
+*/
+extern bt_field_class *bt_field_class_variant_with_selector_field_location_integer_unsigned_create(
+		bt_trace_class *trace_class,
+		const bt_field_location *selector_field_location) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Appends an option to the \bt_var_fc (instances with a linked
+    unsigned integer selector field) \bt_p{field_class} having the name
+    \bt_p{name}, the field class \bt_p{option_field_class}, and the
     \bt_p_uint_rg \bt_p{ranges}.
 
 See the \ref api-tir-fc-var-prop-opts "options" property.
@@ -4214,7 +5076,7 @@ bt_field_class_variant_with_selector_field_integer_unsigned_append_option(
 /*!
 @brief
     Borrows the option at index \bt_p{index} from the
-    \bt_var_fc (with an unsigned integer selector field)
+    \bt_var_fc (instances with a linked unsigned integer selector field)
     \bt_p{field_class}.
 
 See the \ref api-tir-fc-var-prop-opts "options" property.
@@ -4252,7 +5114,7 @@ bt_field_class_variant_with_selector_field_integer_unsigned_borrow_option_by_ind
 /*!
 @brief
     Borrows the option having the name \bt_p{name} from the
-    \bt_var_fc (with an unsigned integer selector field)
+    \bt_var_fc (instances with a linked unsigned integer selector field)
     \bt_p{field_class}.
 
 See the \ref api-tir-fc-var-prop-opts "options" property.
@@ -4291,7 +5153,7 @@ bt_field_class_variant_with_selector_field_integer_unsigned_borrow_option_by_nam
 /*! @} */
 
 /*!
-@name Variant field class (with an unsigned integer selector field) option
+@name Variant field class option: instances with a linked unsigned integer selector field
 @{
 */
 
@@ -4299,13 +5161,14 @@ bt_field_class_variant_with_selector_field_integer_unsigned_borrow_option_by_nam
 @typedef struct bt_field_class_variant_with_selector_field_integer_unsigned_option bt_field_class_variant_with_selector_field_integer_unsigned_option;
 
 @brief
-    Variant field class (with an unsigned integer selector field) option.
+    Variant field class option (instances with a linked unsigned integer selector field).
 */
 
 /*!
 @brief
-    Borrows the \bt_p_uint_rg from the \bt_var_fc (with an unsigned
-    integer selector field) option \bt_p{option}.
+    Borrows the \bt_p_uint_rg from the \bt_var_fc option
+    (instances with a linked unsigned integer selector field)
+    \bt_p{option}.
 
 See the \ref api-tir-fc-var-prop-opts "options" property.
 
@@ -4325,8 +5188,8 @@ bt_field_class_variant_with_selector_field_integer_unsigned_option_borrow_ranges
 
 /*!
 @brief
-    \ref api-fund-c-typing "Upcasts" the \bt_var_fc (with an
-    unsigned integer selector field) option \bt_p{option} to the
+    \ref api-fund-c-typing "Upcasts" the \bt_var_fc option (instances
+    with a linked unsigned integer selector field) \bt_p{option} to the
     common #bt_field_class_variant_option type.
 
 See the \ref api-tir-fc-var-prop-opts "options" property.
@@ -4353,15 +5216,66 @@ bt_field_class_variant_with_selector_field_integer_unsigned_option_as_option_con
 /*! @} */
 
 /*!
-@name Variant field class with a signed integer selector field
+@name Variant field class: instances with a linked signed integer selector field
 @{
 */
 
 /*!
 @brief
-    Appends an option to the \bt_var_fc (with a signed integer
-    selector field) \bt_p{field_class} having the name \bt_p{name},
-    the field class \bt_p{option_field_class}, and the
+    Creates an empty \bt_var_fc (instances with a linked
+    signed integer selector field) having the
+    selector \bt_field_loc \bt_p{selector_field_location}
+    from the trace class \bt_p{trace_class}.
+
+On success, the returned variant field class has the following
+property values:
+
+<table>
+  <tr>
+    <th>Property
+    <th>Value
+  <tr>
+    <td>\ref api-tir-fc-var-prop-sel-fp "Selector field location"
+    <td>
+      \bt_p{selector_field_location}.
+
+      See \ref api-tir-fc-link "Fields with links to other fields"
+      to learn more.
+  <tr>
+    <td>\ref api-tir-fc-var-prop-opts "Options"
+    <td>\em None
+  <tr>
+    <td>\ref api-tir-fc-prop-user-attrs "User attributes"
+    <td>Empty \bt_map_val
+</table>
+
+@param[in] trace_class
+    Trace class from which to create a variant field class.
+@param[in] selector_field_location
+    Selector field location of the variant field class to create.
+
+@returns
+    New variant field class reference, or \c NULL on memory error.
+
+@bt_pre_not_null{trace_class}
+@bt_pre_tc_with_mip{trace_class, 1}
+@bt_pre_not_null{selector_field_location}
+
+@sa bt_field_class_variant_without_selector_field_location_create() &mdash;
+    Creates a class of variant field without a linked selector field.
+@sa bt_field_class_option_with_selector_field_location_integer_unsigned_create() &mdash;
+    Creates a class of variant field with a linked unsigned integer
+    selector field.
+*/
+extern bt_field_class *bt_field_class_variant_with_selector_field_location_integer_signed_create(
+		bt_trace_class *trace_class,
+		const bt_field_location *selector_field_location) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Appends an option to the \bt_var_fc (instances with a linked signed
+    integer selector field) \bt_p{field_class} having the name
+    \bt_p{name}, the field class \bt_p{option_field_class}, and the
     \bt_p_sint_rg \bt_p{ranges}.
 
 See the \ref api-tir-fc-var-prop-opts "options" property.
@@ -4411,7 +5325,7 @@ bt_field_class_variant_with_selector_field_integer_signed_append_option(
 /*!
 @brief
     Borrows the option at index \bt_p{index} from the
-    \bt_var_fc (with a signed integer selector field)
+    \bt_var_fc (instances with a linked signed integer selector field)
     \bt_p{field_class}.
 
 See the \ref api-tir-fc-var-prop-opts "options" property.
@@ -4449,7 +5363,7 @@ bt_field_class_variant_with_selector_field_integer_signed_borrow_option_by_index
 /*!
 @brief
     Borrows the option having the name \bt_p{name} from the
-    \bt_var_fc (with a signed integer selector field)
+    \bt_var_fc (instances with a linked signed integer selector field)
     \bt_p{field_class}.
 
 See the \ref api-tir-fc-var-prop-opts "options" property.
@@ -4488,7 +5402,7 @@ bt_field_class_variant_with_selector_field_integer_signed_borrow_option_by_name_
 /*! @} */
 
 /*!
-@name Variant field class (with a signed integer selector field) option
+@name Variant field class option: instances with a linked signed integer selector field
 @{
 */
 
@@ -4496,13 +5410,14 @@ bt_field_class_variant_with_selector_field_integer_signed_borrow_option_by_name_
 @typedef struct bt_field_class_variant_with_selector_field_integer_signed_option bt_field_class_variant_with_selector_field_integer_signed_option;
 
 @brief
-    Variant field class (with a signed integer selector field) option.
+    Variant field class option (instances with a linked signed integer selector field).
 */
 
 /*!
 @brief
-    Borrows the \bt_p_sint_rg from the \bt_var_fc (with a signed
-    integer selector field) option \bt_p{option}.
+    Borrows the \bt_p_sint_rg from the \bt_var_fc option
+    (instances with a linked signed integer selector field)
+    \bt_p{option}.
 
 See the \ref api-tir-fc-var-prop-opts "options" property.
 
@@ -4522,9 +5437,9 @@ bt_field_class_variant_with_selector_field_integer_signed_option_borrow_ranges_c
 
 /*!
 @brief
-    \ref api-fund-c-typing "Upcasts" the \bt_var_fc (with a signed
-    integer selector field) option \bt_p{option} to the
-    common #bt_field_class_variant_option type.
+    \ref api-fund-c-typing "Upcasts" the \bt_var_fc option
+    (instances with a linked signed integer selector field)
+    \bt_p{option} to the common #bt_field_class_variant_option type.
 
 See the \ref api-tir-fc-var-prop-opts "options" property.
 
