@@ -865,12 +865,17 @@ static inline void format_clock_class(char **buf_ch, bool extended,
 
 	BUF_APPEND(", %sis-frozen=%d, %sprecision=%" PRIu64 ", "
 		"%soffset-s=%" PRId64 ", "
-		"%soffset-cycles=%" PRIu64 ", %sorigin-is-unix-epoch=%d, "
+		"%soffset-cycles=%" PRIu64 ", "
+		"%sorigin-namespace=%s, "
+		"%sorigin-name=%s, "
+		"%sorigin-uid=%s, "
 		"%sbase-offset-ns=%" PRId64,
 		PRFIELD(clock_class->frozen), PRFIELD(clock_class->precision),
 		PRFIELD(clock_class->offset_seconds),
 		PRFIELD(clock_class->offset_cycles),
-		PRFIELD(clock_class->origin_is_unix_epoch),
+		PRFIELD(clock_class->origin.ns),
+		PRFIELD(clock_class->origin.name),
+		PRFIELD(clock_class->origin.uid),
 		PRFIELD(clock_class->base_offset.value_ns));
 
 	SET_TMP_PREFIX("cs-pool-");

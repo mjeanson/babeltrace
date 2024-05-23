@@ -1017,6 +1017,13 @@
 	BT_ASSERT_PRE_MIP_VERSION_EQ((_clock_class)->mip_version, _val)
 
 /*
+ * Asserts that the effective MIP version for `_clock_class` is greater than or
+ * equal to `_val`.
+ */
+#define BT_ASSERT_PRE_CC_MIP_VERSION_GE(_clock_class, _val)		\
+	BT_ASSERT_PRE_MIP_VERSION_GE((_clock_class)->mip_version, _val)
+
+/*
  * Asserts that the effective MIP version for `_trace_class` is equal to `_val`.
  */
 #define BT_ASSERT_PRE_TC_MIP_VERSION_EQ(_trace_class, _val)		\
@@ -1339,6 +1346,13 @@
 #define BT_ASSERT_PRE_DEV_NAME_NON_NULL(_name)				\
 	BT_ASSERT_PRE_DEV_NON_NULL(_BT_ASSERT_PRE_NAME_ID, (_name),	\
 		_BT_ASSERT_PRE_NAME_NAME)
+
+#define _BT_ASSERT_PRE_NAMESPACE_NAME	"Namespace"
+#define _BT_ASSERT_PRE_NAMESPACE_ID	"namespace"
+
+#define BT_ASSERT_PRE_NAMESPACE_NON_NULL(_name)				\
+	BT_ASSERT_PRE_NON_NULL(_BT_ASSERT_PRE_NAMESPACE_ID, (_name),	\
+		_BT_ASSERT_PRE_NAMESPACE_NAME)
 
 #define _BT_ASSERT_PRE_DESCR_NAME	"Description"
 #define _BT_ASSERT_PRE_DESCR_ID		"description"

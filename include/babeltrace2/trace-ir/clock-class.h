@@ -33,8 +33,8 @@ clocks.
 
 A clock class is a \ref api-tir "trace IR" metadata object.
 
-<em>Stream clocks</em> only exist conceptually in \bt_name because they
-are stateful objects. \bt_cp_msg cannot refer to stateful objects
+<em>Stream clocks</em> only exist conceptually in \bt_name because
+they're stateful objects. \bt_cp_msg cannot refer to stateful objects
 because they must not change while being transported from one
 \bt_comp to the other.
 
@@ -48,9 +48,12 @@ In the illustration above, notice that:
 
 - \bt_cp_stream (horizontal blue rectangles) are instances of a
   \bt_stream_cls (orange).
+
 - A stream class has a default clock class (orange bell alarm clock).
+
 - Each stream has a default clock (yellow bell alarm clock): this is an
   instance of the stream's class's default clock class.
+
 - Each \bt_msg (objects in blue stream rectangles) created for a given
   stream has a default \bt_cs (yellow star): this is a snapshot of the
   stream's default clock.
@@ -76,52 +79,69 @@ The type of a clock class is #bt_clock_class.
 Create a default clock class from a \bt_self_comp with
 bt_clock_class_create().
 
-<h1>\anchor api-tir-clock-cls-origin Clock value vs. clock class origin</h1>
+<h1>\anchor api-tir-clock-cls-origin Clock value vs. clock origin</h1>
 
 The value of a \bt_stream clock (a conceptual instance of a clock class)
 is in <em>cycles</em>. This value is always positive and is relative to
-the clock's class's offset, which is relative to its origin.
+the clock's offset, which is itself relative to its origin.
 
-A clock class's origin is one of:
+A clock's origin is one of, depending on its class:
 
 <dl>
+  <dt>If bt_clock_class_origin_is_unknown() returns #BT_TRUE</dt>
+  <dd>
+    Undefined.
+
+    Two stream clocks of which the classes have an unknown
+    origin only have a correlation if they share the same
+    \link api-tir-clock-cls-prop-iden identity\endlink.
+  </dd>
+
   <dt>If bt_clock_class_origin_is_unix_epoch() returns #BT_TRUE</dt>
   <dd>
     The
     <a href="https://en.wikipedia.org/wiki/Unix_time">Unix epoch</a>.
 
-    The stream clocks of all the clock classes which have a Unix
-    epoch origin, whatever the clock class
-    <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUIDs</a>,
-    are correlatable.
+    All stream clocks with a Unix epoch origin, whatever their
+    \link api-tir-clock-cls-prop-iden identity\endlink,
+    have a correlation.
   </dd>
 
-  <dt>If bt_clock_class_origin_is_unix_epoch() returns #BT_FALSE</dt>
+  <dt>
+    Otherwise (only available when the clock class was created
+    from a \bt_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip version&nbsp;1)
+  </dt>
   <dd>
-    Undefined.
+    The namespace, name, and
+    <a href="https://en.wikipedia.org/wiki/Unique_identifier">unique identifier</a>
+    (UID) tuple returned by
+    bt_clock_class_get_origin_namespace(),
+    bt_clock_class_get_origin_name(), and
+    bt_clock_class_get_origin_uid().
 
-    In that case, two clock classes which share the same UUID, as
-    returned by bt_clock_class_get_uuid(), including having no UUID,
-    also share the same origin: their instances (stream clocks) are
-    correlatable.
+    All stream clocks with the same custom origin, whatever their
+    \link api-tir-clock-cls-prop-iden identity\endlink,
+    have a correlation.
   </dd>
 </dl>
 
-To compute an effective stream clock value, in cycles from its class's
-origin:
+To compute an effective stream clock value, in cycles from its origin:
 
--# Convert the clock class's
+-# Convert the clock's
    \link api-tir-clock-cls-prop-offset "offset in seconds"\endlink
    property to cycles using its
    \ref api-tir-clock-cls-prop-freq "frequency".
--# Add the value of 1., the stream clock's value, and the clock class's
+
+-# Add the value of step&nbsp;1, the stream clock's value,
+   and the clock's
    \link api-tir-clock-cls-prop-offset "offset in cycles"\endlink
    property.
 
 Because typical tracer clocks have a high frequency (often 1&nbsp;GHz
 and more), an effective stream clock value (cycles since Unix epoch, for
-example) can be larger than \c UINT64_MAX. This is why a clock class has
-two offset properties (one in seconds and one in cycles): to make it
+example) can be \em larger than \c UINT64_MAX. This is why a clock class
+has two offset properties (one in seconds and one in cycles): to make it
 possible for a stream clock to have smaller values, relative to this
 offset.
 
@@ -133,20 +153,22 @@ using the relevant clock class properties (frequency and offset).
 
 Those functions perform this computation:
 
--# Convert the clock class's "offset in cycles" property to seconds
-   using its frequency.
--# Convert the stream clock's value to seconds using the clock class's
+-# Convert the clock's "offset in cycles" property to seconds using its
    frequency.
--# Add the values of 1., 2., and the clock class's "offset in seconds"
-   property.
--# Convert the value of 3. to nanoseconds.
+
+-# Convert the clock's value to seconds using the clock's frequency.
+
+-# Add the values of step&nbsp;1, step&nbsp;2, and the clock's
+   "offset in seconds" property.
+
+-# Convert the value of step&nbsp;3 to nanoseconds.
 
 The following illustration shows the possible scenarios:
 
 @image html clock-terminology.png
 
-The clock class's "offset in seconds" property can be negative.
-For example, considering:
+The clock's "offset in seconds" property can be negative. For example,
+considering:
 
 - Frequency: 1000&nbsp;Hz.
 - Offset in seconds: −10&nbsp;seconds.
@@ -175,10 +197,10 @@ A clock class has the following properties:
     Offset (in seconds and in cycles)
   </dt>
   <dd>
-    Offset in seconds relative to the clock class's
-    \ref api-tir-clock-cls-origin "origin", and offset in cycles
-    relative to the offset in seconds, of the clock class's
-    instances (stream clocks).
+    Offset in seconds relative to the
+    \ref api-tir-clock-cls-origin "origin" of the clock class's
+    instances (stream clocks), and offset in cycles relative to the
+    offset in seconds.
 
     The values of the clock class's instances are relative to the
     computed offset.
@@ -200,24 +222,72 @@ A clock class has the following properties:
   </dd>
 
   <dt>
-    \anchor api-tir-clock-cls-prop-origin-unix-epoch
-    Origin is Unix epoch?
+    \anchor api-tir-clock-cls-prop-origin
+    Origin
   </dt>
   <dd>
-    Whether or not the clock class's
-    \ref api-tir-clock-cls-origin "origin"
-    is the
-    <a href="https://en.wikipedia.org/wiki/Unix_time">Unix epoch</a>.
+    Origin of the clock class's instances (stream clocks).
 
-    Use bt_clock_class_set_origin_is_unix_epoch() and
-    bt_clock_class_origin_is_unix_epoch().
+    Depending on the effective \bt_mip (MIP) version of the trace
+    processing \bt_graph:
+
+    <dl>
+      <dt>MIP&nbsp;0 or MIP&nbsp;1</dt>
+      <dd>
+        <dl>
+          <dt>Unknown origin</dt>
+          <dd>
+            Use bt_clock_class_set_origin_unknown() and
+            bt_clock_class_origin_is_unknown().
+          </dd>
+
+          <dt>Unix epoch origin</dt>
+          <dd>
+            Use bt_clock_class_set_origin_unix_epoch() and
+            bt_clock_class_origin_is_unix_epoch(),
+          </dd>
+        </dl>
+      </dd>
+
+      <dt>MIP&nbsp;1: custom origin</dt>
+      <dd>
+        Use bt_clock_class_set_origin(),
+        bt_clock_class_get_origin_namespace(),
+        bt_clock_class_get_origin_name(), and
+        bt_clock_class_get_origin_uid().
+      </dd>
+    </dl>
   </dd>
 
-  <dt>\anchor api-tir-clock-cls-prop-name \bt_dt_opt Name</dt>
+  <dt>\anchor api-tir-clock-cls-prop-iden \bt_dt_opt Identity</dt>
   <dd>
-    Name of the clock class.
+    Identity of the clock class's instances (stream clocks).
 
-    Use bt_clock_class_set_name() and bt_clock_class_get_name().
+    Depending on the effective \bt_mip (MIP) version of the trace
+    processing \bt_graph:
+
+    <dl>
+      <dt>MIP&nbsp;0</dt>
+      <dd>
+        The name and UUID property pair.
+
+        A valid identity only requires the UUID property.
+
+        Use bt_clock_class_set_name(), bt_clock_class_get_name(),
+        bt_clock_class_set_uuid(), and bt_clock_class_get_uuid().
+      </dd>
+
+      <dt>MIP&nbsp;1</dt>
+      <dd>
+        The namespace, name, and UID property tuple.
+
+        A valid identity only requires the name and UID properties.
+
+        Use bt_clock_class_set_namespace(), bt_clock_class_get_namespace(),
+        bt_clock_class_set_name(), bt_clock_class_get_name(),
+        bt_clock_class_set_uid(), and bt_clock_class_get_uid().
+      </dd>
+    </dl>
   </dd>
 
   <dt>\anchor api-tir-clock-cls-prop-descr \bt_dt_opt Description</dt>
@@ -226,21 +296,6 @@ A clock class has the following properties:
 
     Use bt_clock_class_set_description() and
     bt_clock_class_get_description().
-  </dd>
-
-  <dt>\anchor api-tir-clock-cls-prop-uuid \bt_dt_opt UUID</dt>
-  <dd>
-    <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a>
-    of the clock class.
-
-    The clock class's UUID uniquely identifies the clock class.
-
-    When the clock class's origin is \em not the
-    <a href="https://en.wikipedia.org/wiki/Unix_time">Unix epoch</a>,
-    then the clock class's UUID determines whether or not two different
-    clock classes have correlatable instances.
-
-    Use bt_clock_class_set_uuid() and bt_clock_class_get_uuid().
   </dd>
 
   <dt>
@@ -302,16 +357,23 @@ On success, the returned clock class has the following property values:
     <td>\ref api-tir-clock-cls-prop-precision "Precision"
     <td>0&nbsp;cycles
   <tr>
-    <td>\ref api-tir-clock-cls-prop-origin-unix-epoch "Origin is Unix epoch?"
-    <td>Yes
+    <td>\ref api-tir-clock-cls-prop-origin "Origin"
+    <td>Unix epoch
   <tr>
-    <td>\ref api-tir-clock-cls-prop-name "Name"
-    <td>\em None
+    <td>\ref api-tir-clock-cls-prop-iden "Identity"
+    <td>
+      <em>None</em>, that is, depending on the effective \bt_mip (MIP)
+      version of the trace processing \bt_graph:
+
+      <dl>
+        <dt>MIP&nbsp;0</dt>
+        <dd>No name and no UUID</dd>
+
+        <dt>MIP&nbsp;1</dt>
+        <dd>No namespace, no name, and no UID</dd>
+      </dl>
   <tr>
     <td>\ref api-tir-clock-cls-prop-descr "Description"
-    <td>\em None
-  <tr>
-    <td>\ref api-tir-clock-cls-prop-uuid "UUID"
     <td>\em None
   <tr>
     <td>\ref api-tir-clock-cls-prop-user-attrs "User attributes"
@@ -483,18 +545,31 @@ extern uint64_t bt_clock_class_get_precision(
 
 /*!
 @brief
-    Sets whether or not the \ref api-tir-clock-cls-origin "origin"
-    of the clock class \bt_p{clock_class} is the
+    Sets whether the \ref api-tir-clock-cls-origin "origin"
+    of the clock class \bt_p{clock_class} is unknown or the
     <a href="https://en.wikipedia.org/wiki/Unix_time">Unix epoch</a>.
 
-See the \ref api-tir-clock-cls-prop-origin-unix-epoch "origin is Unix epoch?"
-property.
+@deprecated
+    Use bt_clock_class_set_origin_unknown() or
+    bt_clock_class_set_origin_unix_epoch().
+
+See the \ref api-tir-clock-cls-prop-origin "origin" property.
 
 @param[in] clock_class
-    Clock class of which to set whether or not its origin is the
-    Unix epoch.
+    Clock class of which to set whether its origin is unknown or
+    the Unix epoch.
 @param[in] origin_is_unix_epoch
-    #BT_TRUE to make \bt_p{clock_class} have a Unix epoch origin.
+    @parblock
+    One of:
+
+    <dl>
+      <dt>#BT_FALSE</dt>
+      <dd>Make the origin of \bt_p{clock_class} unknown.</dd>
+
+      <dt>#BT_TRUE</dt>
+      <dd>Make the origin of \bt_p{clock_class} the Unix epoch.</dd>
+    </dl>
+    @endparblock
 
 @bt_pre_not_null{clock_class}
 @bt_pre_hot{clock_class}
@@ -508,12 +583,178 @@ extern void bt_clock_class_set_origin_is_unix_epoch(bt_clock_class *clock_class,
 
 /*!
 @brief
+    Makes the \ref api-tir-clock-cls-origin "origin"
+    of the clock class \bt_p{clock_class} unknown.
+
+See the \ref api-tir-clock-cls-prop-origin "origin" property.
+
+@param[in] clock_class
+    Clock class of which to make the origin unknown.
+
+@bt_pre_not_null{clock_class}
+@bt_pre_hot{clock_class}
+
+@post
+    bt_clock_class_get_origin_namespace(),
+    bt_clock_class_get_origin_name(),
+    and bt_clock_class_get_origin_uid() return \c NULL.
+
+@sa bt_clock_class_set_origin_unix_epoch() &mdash;
+    Makes the origin of a clock class the Unix epoch.
+@sa bt_clock_class_set_origin() &mdash;
+    Sets the custom origin of a clock class.
+@sa bt_clock_class_origin_is_unknown() &mdash;
+    Returns whether or not the origin of a clock class is unknown.
+*/
+extern void
+bt_clock_class_set_origin_unknown(bt_clock_class *clock_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Makes the \ref api-tir-clock-cls-origin "origin"
+    of the clock class \bt_p{clock_class} the
+    <a href="https://en.wikipedia.org/wiki/Unix_time">Unix epoch</a>.
+
+See the \ref api-tir-clock-cls-prop-origin "origin" property.
+
+@note
+    @parblock
+    As of \bt_name_version_min_maj, this function sets the origin
+    of the \bt_p{clock_class} to:
+
+    <dl>
+      <dt>Namespace</dt>
+      <dd><code>babeltrace.org,2020</code></dd>
+
+      <dt>Name</dt>
+      <dd><code>unix-epoch</code></dd>
+
+      <dt>UID</dt>
+      <dd>Empty string</dd>
+    </dl>
+
+    You must not rely on the specific values of this special origin.
+    @endparblock
+
+@param[in] clock_class
+    Clock class of which to make the origin the Unix epoch.
+
+@bt_pre_not_null{clock_class}
+@bt_pre_hot{clock_class}
+
+@sa bt_clock_class_set_origin_unknown() &mdash;
+    Makes the origin of a clock class unknown.
+@sa bt_clock_class_set_origin() &mdash;
+    Sets the custom origin of a clock class.
+@sa bt_clock_class_origin_is_unix_epoch() &mdash;
+    Returns whether or not the origin of a clock class is the
+    Unix epoch.
+*/
+extern void
+bt_clock_class_set_origin_unix_epoch(bt_clock_class *clock_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Status codes for bt_clock_class_set_origin().
+*/
+typedef enum bt_clock_class_set_origin_status {
+	/*!
+	@brief
+	    Success.
+	*/
+	BT_CLOCK_CLASS_SET_ORIGIN_STATUS_OK		= __BT_FUNC_STATUS_OK,
+
+	/*!
+	@brief
+	    Out of memory.
+	*/
+	BT_CLOCK_CLASS_SET_ORIGIN_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
+} bt_clock_class_set_origin_status;
+
+/*!
+@brief
+    Sets the custom \ref api-tir-clock-cls-origin "origin"
+    of the clock class \bt_p{clock_class} to the
+    \bt_p{ns}, \bt_p{name}, and \bt_p{uid} tuple.
+
+See the \ref api-tir-clock-cls-prop-origin "origin" property.
+
+@param[in] clock_class
+    Clock class of which to set the origin to the
+    \bt_p{ns}, \bt_p{name}, and \bt_p{uid} tuple.
+@param[in] ns
+    @parblock
+    Namespace of the custom origin of \bt_p{clock_class} (copied).
+
+    Can be \c NULL.
+    @endparblock
+@param[in] name
+    Name of the custom origin of \bt_p{clock_class} (copied).
+@param[in] uid
+    <a href="https://en.wikipedia.org/wiki/Unique_identifier">Unique identifier</a>
+    (UID) of the custom origin of \bt_p{clock_class} (copied).
+
+@retval #BT_CLOCK_CLASS_SET_ORIGIN_STATUS_OK
+    Success.
+@retval #BT_CLOCK_CLASS_SET_ORIGIN_STATUS_MEMORY_ERROR
+    Out of memory.
+
+@bt_pre_not_null{clock_class}
+@bt_pre_hot{clock_class}
+@bt_pre_clock_cls_with_mip{clock_class, 1}
+@bt_pre_not_null{name}
+@bt_pre_not_null{uid}
+
+@sa bt_clock_class_set_origin_unknown() &mdash;
+    Makes the origin of a clock class unknown.
+@sa bt_clock_class_set_origin_unix_epoch() &mdash;
+    Makes the origin of a clock class the Unix epoch.
+@sa bt_clock_class_get_origin_namespace() &mdash;
+    Returns the namespace of the origin of a clock class.
+@sa bt_clock_class_get_origin_name() &mdash;
+    Returns the name of the origin of a clock class.
+@sa bt_clock_class_get_origin_uid() &mdash;
+    Returns the UID of the origin of a clock class.
+*/
+extern bt_clock_class_set_origin_status bt_clock_class_set_origin(
+		bt_clock_class *clock_class, const char *ns, const char *name,
+		const char *uid) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns whether or not the \ref api-tir-clock-cls-origin "origin"
+    of the clock class \bt_p{clock_class} is unknown.
+
+See the \ref api-tir-clock-cls-prop-origin "origin" property.
+
+@param[in] clock_class
+    Clock class of which to get whether or not its origin is unknown.
+
+@returns
+    #BT_TRUE if the origin of \bt_p{clock_class} is unknown.
+
+@bt_pre_not_null{clock_class}
+
+@sa bt_clock_class_origin_is_unix_epoch() &mdash;
+    Returns whether or not the origin of a clock class is the
+    Unix epoch.
+@sa bt_clock_class_set_origin_unknown() &mdash;
+    Makes the origin of a clock class unknown.
+@sa bt_clock_class_set_origin_unix_epoch() &mdash;
+    Makes the origin of a clock class the Unix epoch.
+@sa bt_clock_class_set_origin() &mdash;
+    Sets the custom origin of a clock class.
+*/
+extern bt_bool bt_clock_class_origin_is_unknown(
+		const bt_clock_class *clock_class) __BT_NOEXCEPT;
+
+/*!
+@brief
     Returns whether or not the \ref api-tir-clock-cls-origin "origin"
     of the clock class \bt_p{clock_class} is the
     <a href="https://en.wikipedia.org/wiki/Unix_time">Unix epoch</a>.
 
-See the \ref api-tir-clock-cls-prop-origin-unix-epoch "origin is Unix epoch?"
-property.
+See the \ref api-tir-clock-cls-prop-origin "origin" property.
 
 @param[in] clock_class
     Clock class of which to get whether or not its origin is the
@@ -524,11 +765,116 @@ property.
 
 @bt_pre_not_null{clock_class}
 
-@sa bt_clock_class_set_origin_is_unix_epoch() &mdash;
-    Sets whether or not the origin of a clock class is the Unix epoch.
+@sa bt_clock_class_origin_is_unknown() &mdash;
+    Returns whether or not the origin of a clock class is unknown.
+@sa bt_clock_class_set_origin_unknown() &mdash;
+    Makes the origin of a clock class unknown.
+@sa bt_clock_class_set_origin_unix_epoch() &mdash;
+    Makes the origin of a clock class the Unix epoch.
+@sa bt_clock_class_set_origin() &mdash;
+    Sets the custom origin of a clock class.
 */
 extern bt_bool bt_clock_class_origin_is_unix_epoch(
 		const bt_clock_class *clock_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the namespace of the \ref api-tir-clock-cls-origin "origin"
+    of the clock class \bt_p{clock_class}.
+
+See the \ref api-tir-clock-cls-prop-origin "origin" property.
+
+@param[in] clock_class
+    Clock class of which to get the origin namespace.
+
+@returns
+    @parblock
+    Origin namespace of \bt_p{clock_class}, or \c NULL if none.
+
+    The returned pointer remains valid as long as \bt_p{clock_class}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{clock_class}
+@bt_pre_clock_cls_with_mip{clock_class, 1}
+
+@sa bt_clock_class_get_origin_name() &mdash;
+    Returns the name of the origin of a clock class.
+@sa bt_clock_class_get_origin_uid() &mdash;
+    Returns the UID of the origin of a clock class.
+@sa bt_clock_class_set_origin() &mdash;
+    Sets the custom origin of a clock class.
+*/
+extern const char *bt_clock_class_get_origin_namespace(
+	const bt_clock_class *clock_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the name of the \ref api-tir-clock-cls-origin "origin"
+    of the clock class \bt_p{clock_class}.
+
+See the \ref api-tir-clock-cls-prop-origin "origin" property.
+
+@param[in] clock_class
+    Clock class of which to get the origin name.
+
+@returns
+    @parblock
+    Origin name of \bt_p{clock_class}, or \c NULL if none.
+
+    If this function doesn't return \c NULL, then
+    bt_clock_class_get_origin_uid() also doesn't return \c NULL.
+
+    The returned pointer remains valid as long as \bt_p{clock_class}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{clock_class}
+@bt_pre_clock_cls_with_mip{clock_class, 1}
+
+@sa bt_clock_class_get_origin_namespace() &mdash;
+    Returns the namespace of the origin of a clock class.
+@sa bt_clock_class_get_origin_uid() &mdash;
+    Returns the UID of the origin of a clock class.
+@sa bt_clock_class_set_origin() &mdash;
+    Sets the custom origin of a clock class.
+*/
+extern const char *bt_clock_class_get_origin_name(
+	const bt_clock_class *clock_class) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the UID of the \ref api-tir-clock-cls-origin "origin"
+    of the clock class \bt_p{clock_class}.
+
+See the \ref api-tir-clock-cls-prop-origin "origin" property.
+
+@param[in] clock_class
+    Clock class of which to get the origin UID.
+
+@returns
+    @parblock
+    Origin UID of \bt_p{clock_class}, or \c NULL if none.
+
+    If this function doesn't return \c NULL, then
+    bt_clock_class_get_origin_name() also doesn't return \c NULL.
+
+    The returned pointer remains valid as long as \bt_p{clock_class}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{clock_class}
+@bt_pre_clock_cls_with_mip{clock_class, 1}
+
+@sa bt_clock_class_get_origin_namespace() &mdash;
+    Returns the namespace of the origin of a clock class.
+@sa bt_clock_class_get_origin_name() &mdash;
+    Returns the name of the origin of a clock class.
+@sa bt_clock_class_set_origin() &mdash;
+    Sets the custom origin of a clock class.
+*/
+extern const char *bt_clock_class_get_origin_uid(
+	const bt_clock_class *clock_class) __BT_NOEXCEPT;
 
 /*!
 @brief
@@ -553,7 +899,7 @@ typedef enum bt_clock_class_set_name_status {
     Sets the name of the clock class \bt_p{clock_class} to
     a copy of \bt_p{name}.
 
-See the \ref api-tir-clock-cls-prop-name "name" property.
+See the \ref api-tir-clock-cls-prop-iden "identity" property.
 
 @param[in] clock_class
     Clock class of which to set the name to \bt_p{name}.
@@ -579,7 +925,7 @@ extern bt_clock_class_set_name_status bt_clock_class_set_name(
 @brief
     Returns the name of the clock class \bt_p{clock_class}.
 
-See the \ref api-tir-clock-cls-prop-name "name" property.
+See the \ref api-tir-clock-cls-prop-iden "identity" property.
 
 If \bt_p{clock_class} has no name, this function returns \c NULL.
 
@@ -619,6 +965,68 @@ typedef enum bt_clock_class_set_description_status {
 	*/
 	BT_CLOCK_CLASS_SET_DESCRIPTION_STATUS_MEMORY_ERROR	= __BT_FUNC_STATUS_MEMORY_ERROR,
 } bt_clock_class_set_description_status;
+
+/*!
+@brief
+    Sets the
+    <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a>
+    of the clock class \bt_p{clock_class} to a copy of \bt_p{uuid}.
+
+@note
+    This function is only available when \bt_p{clock_class} was
+    created from a \bt_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip (MIP) version&nbsp;0.
+
+See the \ref api-tir-clock-cls-prop-iden "identity" property.
+
+@param[in] clock_class
+    Clock class of which to set the UUID to \bt_p{uuid}.
+@param[in] uuid
+    New UUID of \bt_p{clock_class} (copied).
+
+@bt_pre_not_null{clock_class}
+@bt_pre_hot{clock_class}
+@bt_pre_clock_cls_with_mip{clock_class, 0}
+@bt_pre_not_null{uuid}
+
+@sa bt_clock_class_get_uuid() &mdash;
+    Returns the UUID of a clock class.
+*/
+extern void bt_clock_class_set_uuid(bt_clock_class *clock_class,
+		bt_uuid uuid) __BT_NOEXCEPT;
+
+/*!
+@brief
+    Returns the UUID of the clock class \bt_p{clock_class}.
+
+@note
+    This function is only available when \bt_p{clock_class} was
+    created from a \bt_comp which belongs to a trace processing \bt_graph
+    with the effective \bt_mip (MIP) version&nbsp;0.
+
+See the \ref api-tir-clock-cls-prop-iden "identity" property.
+
+If \bt_p{clock_class} has no UUID, this function returns \c NULL.
+
+@param[in] clock_class
+    Clock class of which to get the UUID.
+
+@returns
+    @parblock
+    UUID of \bt_p{clock_class}, or \c NULL if none.
+
+    The returned pointer remains valid as long as \bt_p{clock_class}
+    is not modified.
+    @endparblock
+
+@bt_pre_not_null{clock_class}
+@bt_pre_clock_cls_with_mip{clock_class, 0}
+
+@sa bt_clock_class_set_uuid() &mdash;
+    Sets the UUID of a clock class.
+*/
+extern bt_uuid bt_clock_class_get_uuid(
+		const bt_clock_class *clock_class) __BT_NOEXCEPT;
 
 /*!
 @brief
@@ -673,56 +1081,6 @@ If \bt_p{clock_class} has no description, this function returns \c NULL.
     Sets the description of a clock class.
 */
 extern const char *bt_clock_class_get_description(
-		const bt_clock_class *clock_class) __BT_NOEXCEPT;
-
-/*!
-@brief
-    Sets the
-    <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a>
-    of the clock class \bt_p{clock_class} to a copy of \bt_p{uuid}.
-
-See the \ref api-tir-clock-cls-prop-uuid "UUID" property.
-
-@param[in] clock_class
-    Clock class of which to set the UUID to \bt_p{uuid}.
-@param[in] uuid
-    New UUID of \bt_p{clock_class} (copied).
-
-@bt_pre_not_null{clock_class}
-@bt_pre_hot{clock_class}
-@bt_pre_not_null{uuid}
-
-@sa bt_clock_class_get_uuid() &mdash;
-    Returns the UUID of a clock class.
-*/
-extern void bt_clock_class_set_uuid(bt_clock_class *clock_class,
-		bt_uuid uuid) __BT_NOEXCEPT;
-
-/*!
-@brief
-    Returns the UUID of the clock class \bt_p{clock_class}.
-
-See the \ref api-tir-clock-cls-prop-uuid "UUID" property.
-
-If \bt_p{clock_class} has no UUID, this function returns \c NULL.
-
-@param[in] clock_class
-    Clock class of which to get the UUID.
-
-@returns
-    @parblock
-    UUID of \bt_p{clock_class}, or \c NULL if none.
-
-    The returned pointer remains valid as long as \bt_p{clock_class}
-    is not modified.
-    @endparblock
-
-@bt_pre_not_null{clock_class}
-
-@sa bt_clock_class_set_uuid() &mdash;
-    Sets the UUID of a clock class.
-*/
-extern bt_uuid bt_clock_class_get_uuid(
 		const bt_clock_class *clock_class) __BT_NOEXCEPT;
 
 /*!

@@ -123,6 +123,7 @@ ALIASES                += bt_pre_is_se_msg{1}="@pre \bt_p{\1} is a \link api-msg
 ALIASES                += bt_pre_tc_with_mip{2}="@pre \bt_p{\1} was created from a \bt_comp which belongs to a trace processing \bt_graph with the effective \bt_mip version&nbsp;\2."
 ALIASES                += bt_pre_fc_with_mip{2}="@pre \bt_p{\1} was created from a \bt_trace_cls which was created from a \bt_comp which belongs to a trace processing \bt_graph with the effective \bt_mip version&nbsp;\2."
 ALIASES                += bt_pre_trace_with_mip{2}="@pre The \link api-tir-trace-cls class\endlink of \bt_p{\1} was created from a \bt_comp which belongs to a trace processing \bt_graph with the effective \bt_mip version&nbsp;\2."
+ALIASES                += bt_pre_clock_cls_with_mip{2}="@pre \bt_p{\1} was created from a \bt_comp which belongs to a trace processing \bt_graph with the effective \bt_mip version&nbsp;\2."
 
 # Aliases: field class object types: singular
 ALIASES                += bt_fc="\link api-tir-fc field class\endlink"
