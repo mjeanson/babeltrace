@@ -8,9 +8,7 @@
 #define BABELTRACE_PLUGINS_CTF_COMMON_SRC_ITEM_SEQ_MEDIUM_HPP
 
 #include <cstdint>
-#include <cstdlib>
 #include <memory>
-#include <stdexcept>
 
 #include "cpp-common/bt2c/data-len.hpp"
 
@@ -41,10 +39,6 @@ public:
      * `size.hasExtraBits()` must be false.
      */
     explicit Buf(const std::uint8_t *addr, bt2c::DataLen size) noexcept;
-
-    /* Default copy operations */
-    Buf(const Buf&) noexcept = default;
-    Buf& operator=(const Buf&) noexcept = default;
 
     /*
      * Address of this buffer.

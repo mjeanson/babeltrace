@@ -62,16 +62,16 @@ viewer_status_to_live_iterator_status(enum lttng_live_viewer_status viewer_statu
     bt_common_abort();
 }
 
-static inline enum ctf_msg_iter_medium_status
-viewer_status_to_ctf_msg_iter_medium_status(enum lttng_live_viewer_status viewer_status)
+static inline enum lttng_live_get_stream_bytes_status
+viewer_status_to_lttng_live_get_stream_bytes_status(enum lttng_live_viewer_status viewer_status)
 {
     switch (viewer_status) {
     case LTTNG_LIVE_VIEWER_STATUS_OK:
-        return CTF_MSG_ITER_MEDIUM_STATUS_OK;
+        return LTTNG_LIVE_GET_STREAM_BYTES_STATUS_OK;
     case LTTNG_LIVE_VIEWER_STATUS_INTERRUPTED:
-        return CTF_MSG_ITER_MEDIUM_STATUS_AGAIN;
+        return LTTNG_LIVE_GET_STREAM_BYTES_STATUS_AGAIN;
     case LTTNG_LIVE_VIEWER_STATUS_ERROR:
-        return CTF_MSG_ITER_MEDIUM_STATUS_ERROR;
+        return LTTNG_LIVE_GET_STREAM_BYTES_STATUS_ERROR;
     }
 
     bt_common_abort();
@@ -730,8 +730,7 @@ lttng_live_create_viewer_session(struct lttng_live_msg_iter *lttng_live_msg_iter
 }
 
 static enum lttng_live_viewer_status receive_streams(struct lttng_live_session *session,
-                                                     uint32_t stream_count,
-                                                     bt_self_message_iterator *self_msg_iter)
+                                                     uint32_t stream_count)
 {
     uint32_t i;
     struct lttng_live_msg_iter *lttng_live_msg_iter = session->lttng_live_msg_iter;
@@ -767,8 +766,7 @@ static enum lttng_live_viewer_status receive_streams(struct lttng_live_session *
         } else {
             BT_CPPLOGI_SPEC(viewer_connection->logger, "    stream {} : {}/{}", stream_id,
                             stream.path_name, stream.channel_name);
-            live_stream =
-                lttng_live_stream_iterator_create(session, ctf_trace_id, stream_id, self_msg_iter);
+            live_stream = lttng_live_stream_iterator_create(session, ctf_trace_id, stream_id);
             if (!live_stream) {
                 BT_CPPLOGE_APPEND_CAUSE_SPEC(viewer_connection->logger, "Error creating stream");
                 return LTTNG_LIVE_VIEWER_STATUS_ERROR;
@@ -779,8 +777,7 @@ static enum lttng_live_viewer_status receive_streams(struct lttng_live_session *
     return LTTNG_LIVE_VIEWER_STATUS_OK;
 }
 
-enum lttng_live_viewer_status lttng_live_session_attach(struct lttng_live_session *session,
-                                                        bt_self_message_iterator *self_msg_iter)
+enum lttng_live_viewer_status lttng_live_session_attach(struct lttng_live_session *session)
 {
     struct lttng_viewer_cmd cmd;
     enum lttng_live_viewer_status status;
@@ -851,7 +848,7 @@ enum lttng_live_viewer_status lttng_live_session_attach(struct lttng_live_sessio
     }
 
     /* We receive the initial list of streams. */
-    status = receive_streams(session, streams_count, self_msg_iter);
+    status = receive_streams(session, streams_count);
     switch (status) {
     case LTTNG_LIVE_VIEWER_STATUS_OK:
         break;
@@ -941,14 +938,13 @@ enum lttng_live_viewer_status lttng_live_session_detach(struct lttng_live_sessio
 }
 
 enum lttng_live_get_one_metadata_status
-lttng_live_get_one_metadata_packet(struct lttng_live_trace *trace, std::vector<char>& buf)
+lttng_live_get_one_metadata_packet(struct lttng_live_trace *trace, std::vector<uint8_t>& buf)
 {
     uint64_t len = 0;
     enum lttng_live_viewer_status viewer_status;
     struct lttng_viewer_cmd cmd;
     struct lttng_viewer_get_metadata rq;
     struct lttng_viewer_metadata_packet rp;
-    std::vector<char> data;
     struct lttng_live_session *session = trace->session;
     struct lttng_live_msg_iter *lttng_live_msg_iter = session->lttng_live_msg_iter;
     struct lttng_live_metadata *metadata = trace->metadata.get();
@@ -1025,21 +1021,15 @@ lttng_live_get_one_metadata_packet(struct lttng_live_trace *trace, std::vector<c
         return LTTNG_LIVE_GET_ONE_METADATA_STATUS_ERROR;
     }
 
-    BT_DIAG_PUSH
-    BT_DIAG_IGNORE_NULL_DEREFERENCE
-    data.resize(len);
-    BT_DIAG_POP
+    std::vector<char> localBuf(len);
 
-    viewer_status = lttng_live_recv(viewer_connection, data.data(), len);
+    viewer_status = lttng_live_recv(viewer_connection, localBuf.data(), len);
     if (viewer_status != LTTNG_LIVE_VIEWER_STATUS_OK) {
         viewer_handle_recv_status(viewer_status, "get metadata packet");
         return (lttng_live_get_one_metadata_status) viewer_status;
     }
 
-    /*
-     * Write the metadata to the file handle.
-     */
-    buf.insert(buf.end(), data.begin(), data.end());
+    buf.insert(buf.end(), localBuf.begin(), localBuf.end());
 
     return LTTNG_LIVE_GET_ONE_METADATA_STATUS_OK;
 }
@@ -1197,7 +1187,7 @@ lttng_live_get_next_index(struct lttng_live_msg_iter *lttng_live_msg_iter,
     }
 }
 
-enum ctf_msg_iter_medium_status
+lttng_live_get_stream_bytes_status
 lttng_live_get_stream_bytes(struct lttng_live_msg_iter *lttng_live_msg_iter,
                             struct lttng_live_stream_iterator *stream, uint8_t *buf,
                             uint64_t offset, uint64_t req_len, uint64_t *recv_len)
@@ -1237,13 +1227,13 @@ lttng_live_get_stream_bytes(struct lttng_live_msg_iter *lttng_live_msg_iter,
     viewer_status = lttng_live_send(viewer_connection, &cmd_buf, cmd_buf_len);
     if (viewer_status != LTTNG_LIVE_VIEWER_STATUS_OK) {
         viewer_handle_send_status(viewer_status, "get data packet command");
-        return viewer_status_to_ctf_msg_iter_medium_status(viewer_status);
+        return viewer_status_to_lttng_live_get_stream_bytes_status(viewer_status);
     }
 
     viewer_status = lttng_live_recv(viewer_connection, &rp, sizeof(rp));
     if (viewer_status != LTTNG_LIVE_VIEWER_STATUS_OK) {
         viewer_handle_recv_status(viewer_status, "get data packet reply");
-        return viewer_status_to_ctf_msg_iter_medium_status(viewer_status);
+        return viewer_status_to_lttng_live_get_stream_bytes_status(viewer_status);
     }
 
     flags = be32toh(rp.flags);
@@ -1261,7 +1251,7 @@ lttng_live_get_stream_bytes(struct lttng_live_msg_iter *lttng_live_msg_iter,
         break;
     case LTTNG_VIEWER_GET_PACKET_RETRY:
         /* Unimplemented by relay daemon */
-        return CTF_MSG_ITER_MEDIUM_STATUS_AGAIN;
+        return LTTNG_LIVE_GET_STREAM_BYTES_STATUS_AGAIN;
     case LTTNG_VIEWER_GET_PACKET_ERR:
         if (flags & LTTNG_VIEWER_FLAG_NEW_METADATA) {
             BT_CPPLOGD_SPEC(viewer_connection->logger,
@@ -1281,39 +1271,38 @@ lttng_live_get_stream_bytes(struct lttng_live_msg_iter *lttng_live_msg_iter,
             BT_CPPLOGD_SPEC(viewer_connection->logger,
                             "Reply with any one flags set means we should retry: response={}",
                             static_cast<lttng_viewer_get_packet_return_code>(rp_status));
-            return CTF_MSG_ITER_MEDIUM_STATUS_AGAIN;
+            return LTTNG_LIVE_GET_STREAM_BYTES_STATUS_AGAIN;
         }
         BT_CPPLOGE_APPEND_CAUSE_SPEC(viewer_connection->logger,
                                      "Received get_data_packet response: error");
-        return CTF_MSG_ITER_MEDIUM_STATUS_ERROR;
+        return LTTNG_LIVE_GET_STREAM_BYTES_STATUS_ERROR;
     case LTTNG_VIEWER_GET_PACKET_EOF:
-        return CTF_MSG_ITER_MEDIUM_STATUS_EOF;
+        return LTTNG_LIVE_GET_STREAM_BYTES_STATUS_EOF;
     default:
         BT_CPPLOGE_APPEND_CAUSE_SPEC(viewer_connection->logger,
                                      "Received get_data_packet response: unknown ({})", rp_status);
-        return CTF_MSG_ITER_MEDIUM_STATUS_ERROR;
+        return LTTNG_LIVE_GET_STREAM_BYTES_STATUS_ERROR;
     }
 
     if (req_len == 0) {
-        return CTF_MSG_ITER_MEDIUM_STATUS_ERROR;
+        return LTTNG_LIVE_GET_STREAM_BYTES_STATUS_ERROR;
     }
 
     viewer_status = lttng_live_recv(viewer_connection, buf, req_len);
     if (viewer_status != LTTNG_LIVE_VIEWER_STATUS_OK) {
         viewer_handle_recv_status(viewer_status, "get data packet");
-        return viewer_status_to_ctf_msg_iter_medium_status(viewer_status);
+        return viewer_status_to_lttng_live_get_stream_bytes_status(viewer_status);
     }
     *recv_len = req_len;
 
-    return CTF_MSG_ITER_MEDIUM_STATUS_OK;
+    return LTTNG_LIVE_GET_STREAM_BYTES_STATUS_OK;
 }
 
 /*
  * Request new streams for a session.
  */
 enum lttng_live_iterator_status
-lttng_live_session_get_new_streams(struct lttng_live_session *session,
-                                   bt_self_message_iterator *self_msg_iter)
+lttng_live_session_get_new_streams(struct lttng_live_session *session)
 {
     struct lttng_viewer_cmd cmd;
     struct lttng_viewer_new_streams_request rq;
@@ -1383,7 +1372,7 @@ lttng_live_session_get_new_streams(struct lttng_live_session *session,
         return LTTNG_LIVE_ITERATOR_STATUS_ERROR;
     }
 
-    viewer_status = receive_streams(session, streams_count, self_msg_iter);
+    viewer_status = receive_streams(session, streams_count);
     if (viewer_status != LTTNG_LIVE_VIEWER_STATUS_OK) {
         viewer_handle_recv_status(viewer_status, "new streams");
         return viewer_status_to_live_iterator_status(viewer_status);

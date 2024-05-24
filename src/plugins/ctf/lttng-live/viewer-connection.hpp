@@ -7,6 +7,7 @@
 #ifndef BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_VIEWER_CONNECTION_HPP
 #define BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_VIEWER_CONNECTION_HPP
 
+#include <memory>
 #include <string>
 
 #include <glib.h>
@@ -110,5 +111,18 @@ lttng_live_create_viewer_session(struct lttng_live_msg_iter *lttng_live_msg_iter
 
 bt2::Value::Shared
 live_viewer_connection_list_sessions(struct live_viewer_connection *viewer_connection);
+
+enum lttng_live_get_stream_bytes_status
+{
+    LTTNG_LIVE_GET_STREAM_BYTES_STATUS_OK = __BT_FUNC_STATUS_OK,
+    LTTNG_LIVE_GET_STREAM_BYTES_STATUS_AGAIN = __BT_FUNC_STATUS_AGAIN,
+    LTTNG_LIVE_GET_STREAM_BYTES_STATUS_ERROR = __BT_FUNC_STATUS_ERROR,
+    LTTNG_LIVE_GET_STREAM_BYTES_STATUS_EOF = __BT_FUNC_STATUS_END,
+};
+
+lttng_live_get_stream_bytes_status
+lttng_live_get_stream_bytes(struct lttng_live_msg_iter *lttng_live_msg_iter,
+                            struct lttng_live_stream_iterator *stream, uint8_t *buf,
+                            uint64_t offset, uint64_t req_len, uint64_t *recv_len);
 
 #endif /* BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_VIEWER_CONNECTION_HPP */

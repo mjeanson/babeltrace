@@ -22,6 +22,11 @@ public:
     {
     }
 
+    ObjT *operator->() noexcept
+    {
+        return &_mObj;
+    }
+
     const ObjT *operator->() const noexcept
     {
         return &_mObj;

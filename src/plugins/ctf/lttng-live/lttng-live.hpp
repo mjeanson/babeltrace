@@ -19,8 +19,8 @@
 #include "cpp-common/bt2/message.hpp"
 #include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 
-#include "../common/src/metadata/tsdl/decoder.hpp"
-#include "../common/src/msg-iter/msg-iter.hpp"
+#include "../common/src/metadata/metadata-stream-parser-utils.hpp"
+#include "../common/src/msg-iter.hpp"
 #include "viewer-connection.hpp"
 
 /*
@@ -113,7 +113,7 @@ struct lttng_live_stream_iterator
      * Since only a single iterator per viewer connection, we have
      * only a single message iterator per stream.
      */
-    ctf_msg_iter_up msg_iter;
+    bt2s::optional<ctf::src::MsgIter> msg_iter;
 
     uint64_t viewer_stream_id = 0;
 
@@ -122,13 +122,6 @@ struct lttng_live_stream_iterator
         bool is_set = false;
         uint64_t value = 0;
     } ctf_stream_class_id;
-
-    /* base offset in current index. */
-    uint64_t base_offset = 0;
-    /* len to read in current index. */
-    uint64_t len = 0;
-    /* offset in current index. */
-    uint64_t offset = 0;
 
     /*
      * Clock Snapshot value of the last message iterator inactivity message
@@ -154,28 +147,63 @@ struct lttng_live_stream_iterator
     /* Timestamp in nanoseconds of the current message (current_msg). */
     int64_t current_msg_ts_ns = 0;
 
-    std::vector<uint8_t> buf;
-
     std::string name;
 
     bool has_stream_hung_up = false;
+
+    struct CurPktInfo
+    {
+        bt2c::DataLen offsetInRelay;
+        bt2c::DataLen len;
+    };
+
+    bt2s::optional<CurPktInfo> curPktInfo;
 };
 
 struct lttng_live_metadata
 {
     using UP = std::unique_ptr<lttng_live_metadata>;
 
-    explicit lttng_live_metadata(const bt2c::Logger& parentLogger) :
-        logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/METADATA"}
+    explicit lttng_live_metadata(const bt2::SelfComponent selfComp,
+                                 const bt2c::Logger& parentLogger) :
+        logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/METADATA"},
+        _mSelfComp {selfComp}
+
     {
+    }
+
+    const ctf::src::TraceCls *traceCls() const
+    {
+        return _mMetadataStreamParser->traceCls();
+    }
+
+    const bt2s::optional<bt2c::Uuid>& metadataStreamUuid() const noexcept
+    {
+        return _mMetadataStreamParser->metadataStreamUuid();
+    }
+
+    void parseSection(const bt2c::ConstBytes data)
+    {
+        if (!_mMetadataStreamParser) {
+            _mMetadataStreamParser =
+                ctf::src::createMetadataStreamParser(data, _mSelfComp, {}, logger);
+        }
+
+        _mMetadataStreamParser->parseSection(data);
+    }
+
+    bt2::SelfComponent selfComp() const noexcept
+    {
+        return _mSelfComp;
     }
 
     bt2c::Logger logger;
 
     uint64_t stream_id = 0;
 
-    /* Weak reference. */
-    ctf_metadata_decoder_up decoder;
+private:
+    bt2::SelfComponent _mSelfComp;
+    ctf::src::MetadataStreamParser::UP _mMetadataStreamParser;
 };
 
 enum lttng_live_metadata_stream_state
@@ -219,11 +247,9 @@ struct lttng_live_trace
 
     bt2::Trace::Shared trace;
 
-    bt2::TraceClass::Shared trace_class;
-
     lttng_live_metadata::UP metadata;
 
-    const bt_clock_class *clock_class = nullptr;
+    bt2::OptionalBorrowedObject<bt2::ConstClockClass> clock_class;
 
     std::vector<lttng_live_stream_iterator::UP> stream_iterators;
 
@@ -235,8 +261,10 @@ struct lttng_live_session
 {
     using UP = std::unique_ptr<lttng_live_session>;
 
-    explicit lttng_live_session(const bt2c::Logger& parentLogger) :
-        logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/SESSION"}
+    explicit lttng_live_session(const bt2c::Logger& parentLogger,
+                                const bt2::SelfComponent selfCompParam) :
+        logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/SESSION"},
+        selfComp {selfCompParam}
     {
     }
 
@@ -244,7 +272,7 @@ struct lttng_live_session
 
     bt2c::Logger logger;
 
-    bt_self_component *self_comp = nullptr;
+    bt2::SelfComponent selfComp;
 
     /* Weak reference. */
     struct lttng_live_msg_iter *lttng_live_msg_iter = nullptr;
@@ -277,15 +305,16 @@ struct lttng_live_component
 {
     using UP = std::unique_ptr<lttng_live_component>;
 
-    explicit lttng_live_component(bt2c::Logger loggerParam) noexcept :
-        logger {std::move(loggerParam)}
+    explicit lttng_live_component(bt2c::Logger loggerParam,
+                                  const bt2::SelfComponent selfCompParam) noexcept :
+        logger {std::move(loggerParam)},
+        selfComp {selfCompParam}
     {
     }
 
     bt2c::Logger logger;
 
-    /* Weak reference. */
-    bt_self_component *self_comp = nullptr;
+    bt2::SelfComponent selfComp;
 
     struct
     {
@@ -306,8 +335,10 @@ struct lttng_live_msg_iter
 {
     using UP = std::unique_ptr<lttng_live_msg_iter>;
 
-    explicit lttng_live_msg_iter(const bt2c::Logger& parentLogger) :
-        logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/MSG-ITER"}
+    explicit lttng_live_msg_iter(const bt2c::Logger& parentLogger,
+                                 const bt2::SelfComponent selfCompParam) :
+        logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/MSG-ITER"},
+        selfComp {selfCompParam}
     {
     }
 
@@ -315,7 +346,7 @@ struct lttng_live_msg_iter
 
     bt2c::Logger logger;
 
-    bt_self_component *self_comp = nullptr;
+    bt2::SelfComponent selfComp;
 
     /* Weak reference. */
     struct lttng_live_component *lttng_live_comp = nullptr;
@@ -411,14 +442,12 @@ lttng_live_msg_iter_init(bt_self_message_iterator *self_msg_it,
 
 void lttng_live_msg_iter_finalize(bt_self_message_iterator *it);
 
-enum lttng_live_viewer_status lttng_live_session_attach(struct lttng_live_session *session,
-                                                        bt_self_message_iterator *self_msg_iter);
+enum lttng_live_viewer_status lttng_live_session_attach(struct lttng_live_session *session);
 
 enum lttng_live_viewer_status lttng_live_session_detach(struct lttng_live_session *session);
 
 enum lttng_live_iterator_status
-lttng_live_session_get_new_streams(struct lttng_live_session *session,
-                                   bt_self_message_iterator *self_msg_iter);
+lttng_live_session_get_new_streams(struct lttng_live_session *session);
 
 struct lttng_live_trace *
 lttng_live_session_borrow_or_create_trace_by_id(struct lttng_live_session *session,
@@ -435,20 +464,18 @@ int lttng_live_add_session(struct lttng_live_msg_iter *lttng_live_msg_iter, uint
  * written to the file.
  */
 enum lttng_live_get_one_metadata_status
-lttng_live_get_one_metadata_packet(struct lttng_live_trace *trace, std::vector<char>& buf);
+lttng_live_get_one_metadata_packet(struct lttng_live_trace *trace, std::vector<uint8_t>& buf);
 
 enum lttng_live_iterator_status
 lttng_live_get_next_index(struct lttng_live_msg_iter *lttng_live_msg_iter,
                           struct lttng_live_stream_iterator *stream, struct packet_index *index);
 
-enum ctf_msg_iter_medium_status
-lttng_live_get_stream_bytes(struct lttng_live_msg_iter *lttng_live_msg_iter,
-                            struct lttng_live_stream_iterator *stream, uint8_t *buf,
-                            uint64_t offset, uint64_t req_len, uint64_t *recv_len);
-
 bool lttng_live_graph_is_canceled(struct lttng_live_msg_iter *msg_iter);
 
 void lttng_live_stream_iterator_set_state(struct lttng_live_stream_iterator *stream_iter,
                                           enum lttng_live_stream_state new_state);
+
+void lttng_live_stream_iterator_set_stream_class(lttng_live_stream_iterator *streamIter,
+                                                 uint64_t ctfStreamClsId);
 
 #endif /* BABELTRACE_PLUGINS_CTF_LTTNG_LIVE_LTTNG_LIVE_HPP */
