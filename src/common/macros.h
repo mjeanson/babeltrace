@@ -80,6 +80,7 @@ extern "C" {
 #define BT_DIAG_POP _Pragma ("GCC diagnostic push")
 
 #define BT_DIAG_IGNORE_SHADOW _Pragma("GCC diagnostic ignored \"-Wshadow\"")
+#define BT_DIAG_IGNORE_NULL_DEREFERENCE _Pragma("GCC diagnostic ignored \"-Wnull-dereference\"")
 
 #if defined __clang__
 #  if __has_warning("-Wunused-but-set-variable")

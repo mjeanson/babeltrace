@@ -1025,7 +1025,10 @@ lttng_live_get_one_metadata_packet(struct lttng_live_trace *trace, std::vector<c
         return LTTNG_LIVE_GET_ONE_METADATA_STATUS_ERROR;
     }
 
+    BT_DIAG_PUSH
+    BT_DIAG_IGNORE_NULL_DEREFERENCE
     data.resize(len);
+    BT_DIAG_POP
 
     viewer_status = lttng_live_recv(viewer_connection, data.data(), len);
     if (viewer_status != LTTNG_LIVE_VIEWER_STATUS_OK) {
