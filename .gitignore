@@ -80,8 +80,11 @@ __pycache__
 *.swp
 *~
 .cache/
+.clangd
 .coverage
+.gdb_history
 .theia
+.vscode
 compile_commands.json
 cscope*
 htmlcov/
