@@ -27,21 +27,46 @@
 #include "cpp-common/vendor/wise-enum/wise_enum.h"
 #include "logging/log-api.h"
 
+#include "text-loc-str.hpp"
+
 namespace bt2c {
 
 /*
  * A logger contains an actor (self component class, self component,
  * self message iterator, or simple module name), a current logging
- * level, and a logging tag.
+ * level, a logging tag, and a current text location string format.
  *
- * It offers the log(), logMem(), logErrno(), logErrorAndThrow(),
- * logErrorAndRethrow(), logErrorErrnoAndThrow(), and
- * logErrorErrnoAndRethrow() method templates to log using a given
- * level, optionally append a cause to the error of the current thread
- * using the correct actor, and optionally throw or rethrow.
+ * It offers:
  *
- * The methods above expect a format string and zero or more arguments
- * to be formatted with fmt::format().
+ * log():
+ *     Logs a normal message.
+ *
+ * logMem():
+ *     Logs a message with a hexadecimal view of memory bytes.
+ *
+ * logErrno():
+ *     Logs a message with the error message corresponding to the
+ *     current value of `errno`.
+ *
+ * logTextLoc():
+ *     Logs a message with a text location using the current text
+ *     location string format.
+ *
+ *     The initial text location string format is
+ *     `TextLocStrFmt::LineColNosAndOffset`.
+ *
+ *     Change the default text location string format with
+ *     textLocStrFmt().
+ *
+ * Some methods have their logError*AndThrow() and logError*AndThrow()
+ * equivalents to append a cause to the error of the current thread
+ * using the correct actor, and then throw or rethrow.
+ *
+ * The logging methods above expect a format string and zero or more
+ * arguments to be formatted with fmt::format().
+ *
+ * Use the BT_CPPLOG*() macros to use `__FILE__`, `__func__`, `__LINE__`
+ * as the file name, function name, and line number.
  */
 class Logger final
 {
@@ -142,7 +167,7 @@ public:
     explicit Logger(const Logger& other, std::string newTag) :
         _mSelfCompCls {other._mSelfCompCls}, _mSelfComp {other._mSelfComp},
         _mSelfMsgIter {other._mSelfMsgIter}, _mModuleName {other._mModuleName},
-        _mLevel {other._mLevel}, _mTag {std::move(newTag)}
+        _mLevel {other._mLevel}, _mTag {std::move(newTag)}, _mTextLocStrFmt {other._mTextLocStrFmt}
     {
     }
 
@@ -248,6 +273,25 @@ public:
     const bt2s::optional<std::string>& moduleName() const noexcept
     {
         return _mModuleName;
+    }
+
+    /*
+     * Sets the text location string format to be used by logTextLoc(),
+     * logErrorTextLocAndThrow(), and logErrorTextLocAndRethrow() to
+     * `fmt`.
+     */
+    void textLocStrFmt(const TextLocStrFmt fmt) noexcept
+    {
+        _mTextLocStrFmt = fmt;
+    }
+
+    /*
+     * Text location string format used by logTextLoc(),
+     * logErrorTextLocAndThrow(), and logErrorTextLocAndRethrow().
+     */
+    TextLocStrFmt textLocStrFmt() const noexcept
+    {
+        return _mTextLocStrFmt;
     }
 
 private:
@@ -369,6 +413,59 @@ public:
         throw;
     }
 
+    /*
+     * Logs the text location of `textLoc` followed with a message using
+     * the level `LevelV`.
+     *
+     * The log message starts with the formatted text location and is
+     * followed with what fmt::format() creates given `fmt` and `args`.
+     *
+     * This method uses the current text location string format
+     * (see textLocStrFmt()) to format `textLoc`.
+     *
+     * If `AppendCauseV` is true, this method also appends a cause to
+     * the error of the current thread using the same message.
+     */
+    template <Level LevelV, bool AppendCauseV, typename... ArgTs>
+    void logTextLoc(const char * const fileName, const char * const funcName,
+                    const unsigned int lineNo, const TextLoc& textLoc,
+                    fmt::format_string<ArgTs...> fmt, ArgTs&&...args) const
+    {
+        this->_log<_InitMsgLogWriter, LevelV, AppendCauseV>(
+            fileName, funcName, lineNo, {}, this->_textLocPrefixStr(textLoc).c_str(), fmt,
+            std::forward<ArgTs>(args)...);
+    }
+
+    /*
+     * Like logTextLoc() with the `Level::Error` level, but also throws
+     * a default-constructed instance of `ExcT`.
+     */
+    template <bool AppendCauseV, typename ExcT, typename... ArgTs>
+    [[noreturn]] void
+    logErrorTextLocAndThrow(const char * const fileName, const char * const funcName,
+                            const unsigned int lineNo, const TextLoc& textLoc,
+                            fmt::format_string<ArgTs...> fmt, ArgTs&&...args) const
+    {
+        this->logTextLoc<Level::Error, AppendCauseV>(fileName, funcName, lineNo, textLoc, fmt,
+                                                     std::forward<ArgTs>(args)...);
+        throw ExcT {};
+    }
+
+    /*
+     * Like logTextLoc() with the `Level::Error` level, but also
+     * rethrows.
+     */
+    template <bool AppendCauseV, typename... ArgTs>
+    [[noreturn]] void
+    logErrorTextLocAndRethrow(const char * const fileName, const char * const funcName,
+                              const unsigned int lineNo, const TextLoc& textLoc,
+                              fmt::format_string<ArgTs...> fmt, ArgTs&&...args) const
+    {
+        this->logTextLoc<Level::Error, AppendCauseV>(fileName, funcName, lineNo, textLoc, fmt,
+                                                     std::forward<ArgTs>(args)...);
+        throw;
+    }
+
 private:
     struct _MemLogWriter final
     {
@@ -460,6 +557,11 @@ private:
         return fmt::format("{}: {}", initMsg, g_strerror(errno));
     }
 
+    std::string _textLocPrefixStr(const TextLoc& loc) const
+    {
+        return fmt::format("[{}] ", textLocStr(loc, _mTextLocStrFmt));
+    }
+
     /* Exactly one of the following four members has a value */
     bt2s::optional<bt2::SelfComponentClass> _mSelfCompCls;
     bt2s::optional<bt2::SelfComponent> _mSelfComp;
@@ -471,6 +573,9 @@ private:
 
     /* Logging tag */
     std::string _mTag;
+
+    /* Current text location string format */
+    TextLocStrFmt _mTextLocStrFmt = TextLocStrFmt::LineColNosAndOffset;
 
     /* Formatting buffer */
     mutable std::vector<char> _mBuf;
@@ -617,6 +722,52 @@ inline const char *maybeNull(const char * const s) noexcept
     BT_CPPLOGF_ERRNO_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_fmt), ##__VA_ARGS__)
 
 /*
+ * Calls logTextLoc() on `_logger` to log using the level `_lvl` and
+ * text location `_textLoc`.
+ */
+#define BT_CPPLOG_TEXT_LOC_EX(_lvl, _logger, _textLoc, _fmt, ...)                                  \
+    do {                                                                                           \
+        if (G_UNLIKELY((_logger).wouldLog(_lvl))) {                                                \
+            (_logger).template logTextLoc<(_lvl), false>(__FILE__, __func__, __LINE__, (_textLoc), \
+                                                         (_fmt), ##__VA_ARGS__);                   \
+        }                                                                                          \
+    } while (0)
+
+/*
+ * BT_CPPLOG_TEXT_LOC_EX() with specific logging levels.
+ */
+#define BT_CPPLOGT_TEXT_LOC_SPEC(_logger, _textLoc, _fmt, ...)                                     \
+    BT_CPPLOG_TEXT_LOC_EX(bt2c::Logger::Level::Trace, (_logger), (_textLoc), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGD_TEXT_LOC_SPEC(_logger, _textLoc, _fmt, ...)                                     \
+    BT_CPPLOG_TEXT_LOC_EX(bt2c::Logger::Level::Debug, (_logger), (_textLoc), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGI_TEXT_LOC_SPEC(_logger, _textLoc, _fmt, ...)                                     \
+    BT_CPPLOG_TEXT_LOC_EX(bt2c::Logger::Level::Info, (_logger), (_textLoc), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGW_TEXT_LOC_SPEC(_logger, _textLoc, _fmt, ...)                                     \
+    BT_CPPLOG_TEXT_LOC_EX(bt2c::Logger::Level::Warning, (_logger), (_textLoc), (_fmt),             \
+                          ##__VA_ARGS__)
+#define BT_CPPLOGE_TEXT_LOC_SPEC(_logger, _textLoc, _fmt, ...)                                     \
+    BT_CPPLOG_TEXT_LOC_EX(bt2c::Logger::Level::Error, (_logger), (_textLoc), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGF_TEXT_LOC_SPEC(_logger, _textLoc, _fmt, ...)                                     \
+    BT_CPPLOG_TEXT_LOC_EX(bt2c::Logger::Level::Fatal, (_logger), (_textLoc), (_fmt), ##__VA_ARGS__)
+
+/*
+ * BT_CPPLOG_TEXT_LOC_EX() with specific logging levels and using the
+ * default logger.
+ */
+#define BT_CPPLOGT_TEXT_LOC(_textLoc, _fmt, ...)                                                   \
+    BT_CPPLOGT_TEXT_LOC_SPEC(_BT_CPPLOG_DEF_LOGGER, (_textLoc), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGD_TEXT_LOC(_textLoc, _fmt, ...)                                                   \
+    BT_CPPLOGD_TEXT_LOC_SPEC(_BT_CPPLOG_DEF_LOGGER, (_textLoc), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGI_TEXT_LOC(_textLoc, _fmt, ...)                                                   \
+    BT_CPPLOGI_TEXT_LOC_SPEC(_BT_CPPLOG_DEF_LOGGER, (_textLoc), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGW_TEXT_LOC(_textLoc, _fmt, ...)                                                   \
+    BT_CPPLOGW_TEXT_LOC_SPEC(_BT_CPPLOG_DEF_LOGGER, (_textLoc), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGE_TEXT_LOC(_textLoc, _fmt, ...)                                                   \
+    BT_CPPLOGE_TEXT_LOC_SPEC(_BT_CPPLOG_DEF_LOGGER, (_textLoc), (_fmt), ##__VA_ARGS__)
+#define BT_CPPLOGF_TEXT_LOC(_textLoc, _fmt, ...)                                                   \
+    BT_CPPLOGF_TEXT_LOC_SPEC(_BT_CPPLOG_DEF_LOGGER, (_textLoc), (_fmt), ##__VA_ARGS__)
+
+/*
  * Calls log() on `_logger` with the `Error` level to log an error and
  * append a cause to the error of the current thread.
  */
@@ -706,5 +857,53 @@ inline const char *maybeNull(const char * const s) noexcept
 #define BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_RETHROW(_initMsg, _fmt, ...)                             \
     BT_CPPLOGE_ERRNO_APPEND_CAUSE_AND_RETHROW_SPEC(_BT_CPPLOG_DEF_LOGGER, (_initMsg), (_fmt),      \
                                                    ##__VA_ARGS__)
+
+/*
+ * Calls logTextLoc() on `_logger` with the `Level::Error` level to log
+ * an error and append a cause to the error of the current thread.
+ */
+#define BT_CPPLOGE_TEXT_LOC_APPEND_CAUSE_SPEC(_logger, _textLoc, _fmt, ...)                        \
+    (_logger).template logTextLoc<bt2c::Logger::Level::Error, true>(                               \
+        __FILE__, __func__, __LINE__, (_textLoc), (_fmt), ##__VA_ARGS__)
+
+/*
+ * BT_CPPLOGE_TEXT_LOC_APPEND_CAUSE_SPEC() using the default logger.
+ */
+#define BT_CPPLOGE_TEXT_LOC_APPEND_CAUSE(_textLoc, _fmt, ...)                                      \
+    BT_CPPLOGE_TEXT_LOC_APPEND_CAUSE_SPEC(_BT_CPPLOG_DEF_LOGGER, (_textLoc), (_fmt), ##__VA_ARGS__)
+
+/*
+ * Calls logErrorErrnoAndThrow() on `_logger` to log an error, append a
+ * cause to the error of the current thread, and throw an instance of
+ * `_excCls`.
+ */
+#define BT_CPPLOGE_TEXT_LOC_APPEND_CAUSE_AND_THROW_SPEC(_logger, _excCls, _textLoc, _fmt, ...)     \
+    (_logger).template logErrorTextLocAndThrow<true, _excCls>(__FILE__, __func__, __LINE__,        \
+                                                              (_textLoc), (_fmt), ##__VA_ARGS__)
+
+/*
+ * BT_CPPLOGE_TEXT_LOC_APPEND_CAUSE_AND_THROW_SPEC() using the default
+ * logger.
+ */
+#define BT_CPPLOGE_TEXT_LOC_APPEND_CAUSE_AND_THROW(_excCls, _textLoc, _fmt, ...)                   \
+    BT_CPPLOGE_TEXT_LOC_APPEND_CAUSE_AND_THROW_SPEC(_BT_CPPLOG_DEF_LOGGER, _excCls, (_textLoc),    \
+                                                    (_fmt), ##__VA_ARGS__)
+
+/*
+ * Calls logErrorErrnoAndRethrow() on `_logger` to log an error, append
+ * a cause to the error of the current thread, and throw an instance of
+ * `_excCls`.
+ */
+#define BT_CPPLOGE_TEXT_LOC_APPEND_CAUSE_AND_RETHROW_SPEC(_logger, _textLoc, _fmt, ...)            \
+    (_logger).template logErrorTextLocAndRethrow<true>(__FILE__, __func__, __LINE__, (_textLoc),   \
+                                                       (_fmt), ##__VA_ARGS__)
+
+/*
+ * BT_CPPLOGE_TEXT_LOC_APPEND_CAUSE_AND_RETHROW_SPEC() using the default
+ * logger.
+ */
+#define BT_CPPLOGE_TEXT_LOC_APPEND_CAUSE_AND_RETHROW(_textLoc, _fmt, ...)                          \
+    BT_CPPLOGE_TEXT_LOC_APPEND_CAUSE_AND_RETHROW_SPEC(_BT_CPPLOG_DEF_LOGGER, (_textLoc), (_fmt),   \
+                                                      ##__VA_ARGS__)
 
 #endif /* BABELTRACE_CPP_COMMON_BT2C_LOGGING_HPP */
