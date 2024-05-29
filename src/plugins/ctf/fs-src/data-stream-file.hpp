@@ -126,7 +126,9 @@ struct ctf_fs_ds_file_group
                                   ctf_fs_ds_index indexParam) noexcept :
 
         sc {scParam},
-        stream_id(streamInstanceId), ctf_fs_trace {trace}, index {std::move(indexParam)}
+        stream_id(streamInstanceId), ctf_fs_trace {trace},
+        /* Don't use brace initialization, because of gcc 4.8. */
+        index(std::move(indexParam))
 
     {
     }

@@ -140,7 +140,8 @@ public:
     explicit TestSource(const bt2::SelfSourceComponent self, bt2::ConstMapValue,
                         TestSourceData * const data) :
         _ThisUserSourceComponent {self, "TEST-SRC"},
-        _mData {*data}
+        /* Don't use brace initialization, because of gcc 4.8. */
+        _mData(*data)
     {
         this->_addOutputPort("out", _mData);
     }
