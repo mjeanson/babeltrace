@@ -150,17 +150,17 @@ private:
     unsigned long long _mLenBits = 0;
 };
 
-static inline DataLen operator+(const DataLen lenA, const DataLen lenB) noexcept
+inline DataLen operator+(const DataLen lenA, const DataLen lenB) noexcept
 {
     return DataLen::fromBits(safeAdd(*lenA, *lenB));
 }
 
-static inline DataLen operator-(const DataLen lenA, const DataLen lenB) noexcept
+inline DataLen operator-(const DataLen lenA, const DataLen lenB) noexcept
 {
     return DataLen::fromBits(safeSub(*lenA, *lenB));
 }
 
-static inline DataLen operator*(const DataLen len, const unsigned long long mul) noexcept
+inline DataLen operator*(const DataLen len, const unsigned long long mul) noexcept
 {
     return DataLen::fromBits(safeMul(*len, mul));
 }
@@ -176,44 +176,42 @@ static inline DataLen operator*(const DataLen len, const unsigned long long mul)
 namespace literals {
 namespace datalen {
 
-/* The spaces between `operator""` and the suffixes is to please g++ 4.8. */
-
-static inline DataLen operator"" _bits(const unsigned long long val) noexcept
+inline DataLen operator"" _bits(const unsigned long long val) noexcept
 {
     return DataLen::fromBits(val);
 }
 
-static inline DataLen operator"" _KiBits(const unsigned long long val) noexcept
+inline DataLen operator"" _KiBits(const unsigned long long val) noexcept
 {
     return DataLen::fromBits(safeMul(val, 1024ULL));
 }
 
-static inline DataLen operator"" _MiBits(const unsigned long long val) noexcept
+inline DataLen operator"" _MiBits(const unsigned long long val) noexcept
 {
     return DataLen::fromBits(safeMul(val, 1024ULL * 1024));
 }
 
-static inline DataLen operator"" _GiBits(const unsigned long long val) noexcept
+inline DataLen operator"" _GiBits(const unsigned long long val) noexcept
 {
     return DataLen::fromBits(safeMul(val, 1024ULL * 1024 * 1024));
 }
 
-static inline DataLen operator"" _bytes(const unsigned long long val) noexcept
+inline DataLen operator"" _bytes(const unsigned long long val) noexcept
 {
     return DataLen::fromBytes(val);
 }
 
-static inline DataLen operator"" _KiBytes(const unsigned long long val) noexcept
+inline DataLen operator"" _KiBytes(const unsigned long long val) noexcept
 {
     return DataLen::fromBytes(safeMul(val, 1024ULL));
 }
 
-static inline DataLen operator"" _MiBytes(const unsigned long long val) noexcept
+inline DataLen operator"" _MiBytes(const unsigned long long val) noexcept
 {
     return DataLen::fromBytes(safeMul(val, 1024ULL * 1024));
 }
 
-static inline DataLen operator"" _GiBytes(const unsigned long long val) noexcept
+inline DataLen operator"" _GiBytes(const unsigned long long val) noexcept
 {
     return DataLen::fromBytes(safeMul(val, 1024ULL * 1024 * 1024));
 }
