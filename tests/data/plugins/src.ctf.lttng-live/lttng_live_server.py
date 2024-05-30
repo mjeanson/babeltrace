@@ -804,7 +804,7 @@ class _LttngDataStreamIndex(Sequence[_LttngIndexEntryT]):
 class _LttngStream(ABC):
     @abstractmethod
     def __init__(self, creation_timestamp: int):
-        self._creation_timestamp: int = creation_timestamp
+        self._creation_timestamp = creation_timestamp
 
     @property
     def creation_timestamp(self):
