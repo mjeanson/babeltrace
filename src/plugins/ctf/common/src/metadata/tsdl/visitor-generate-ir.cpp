@@ -465,12 +465,10 @@ ctf_visitor_generate_ir::~ctf_visitor_generate_ir()
 }
 
 ctf_visitor_generate_ir::UP
-ctf_visitor_generate_ir_create(const ctf::src::ClkClsCfg& clkClsCfg,
-                               const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
+ctf_visitor_generate_ir_create(const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
                                const bt2c::Logger& logger)
 {
-    ctf_visitor_generate_ir::UP ctx =
-        bt2s::make_unique<ctf_visitor_generate_ir>(clkClsCfg, selfComp, logger);
+    ctf_visitor_generate_ir::UP ctx = bt2s::make_unique<ctf_visitor_generate_ir>(selfComp, logger);
 
     if (selfComp) {
         bt_trace_class *trace_class = bt_trace_class_create(selfComp->libObjPtr());
@@ -4164,91 +4162,6 @@ error:
     return ret;
 }
 
-static inline uint64_t cycles_from_ns(uint64_t frequency, uint64_t ns)
-{
-    uint64_t cycles;
-
-    /* 1GHz */
-    if (frequency == UINT64_C(1000000000)) {
-        cycles = ns;
-    } else {
-        cycles = (uint64_t) (((double) ns * (double) frequency) / 1e9);
-    }
-
-    return cycles;
-}
-
-static void apply_clock_class_is_absolute(struct ctf_visitor_generate_ir *ctx,
-                                          struct ctf_clock_class *clock)
-{
-    if (ctx->clkClsCfg.forceOriginIsUnixEpoch) {
-        clock->is_absolute = true;
-    }
-
-    return;
-}
-
-static void apply_clock_class_offset(struct ctf_visitor_generate_ir *ctx,
-                                     struct ctf_clock_class *clock)
-{
-    uint64_t freq;
-    int64_t offset_s_to_apply = ctx->clkClsCfg.offsetSec;
-    uint64_t offset_ns_to_apply;
-    int64_t cur_offset_s;
-    uint64_t cur_offset_cycles;
-    long long offsetSecLL;
-    unsigned long long offsetCyclesULL;
-
-    if (ctx->clkClsCfg.offsetSec == 0 && ctx->clkClsCfg.offsetNanoSec == 0) {
-        goto end;
-    }
-
-    /* Transfer nanoseconds to seconds as much as possible */
-    if (ctx->clkClsCfg.offsetNanoSec < 0) {
-        const int64_t abs_ns = -ctx->clkClsCfg.offsetNanoSec;
-        const int64_t abs_extra_s = abs_ns / INT64_C(1000000000) + 1;
-        const int64_t extra_s = -abs_extra_s;
-        const int64_t offset_ns = ctx->clkClsCfg.offsetNanoSec - (extra_s * INT64_C(1000000000));
-
-        BT_ASSERT(offset_ns > 0);
-        offset_ns_to_apply = (uint64_t) offset_ns;
-        offset_s_to_apply += extra_s;
-    } else {
-        const int64_t extra_s = ctx->clkClsCfg.offsetNanoSec / INT64_C(1000000000);
-        const int64_t offset_ns = ctx->clkClsCfg.offsetNanoSec - (extra_s * INT64_C(1000000000));
-
-        BT_ASSERT(offset_ns >= 0);
-        offset_ns_to_apply = (uint64_t) offset_ns;
-        offset_s_to_apply += extra_s;
-    }
-
-    freq = clock->frequency;
-    cur_offset_s = clock->offset_seconds;
-    cur_offset_cycles = clock->offset_cycles;
-
-    /* Apply offsets */
-    cur_offset_s += offset_s_to_apply;
-    cur_offset_cycles += cycles_from_ns(freq, offset_ns_to_apply);
-
-    /*
-     * Recalibrate offsets because the part in cycles can be greater
-     * than the frequency at this point.
-     */
-    {
-        offsetSecLL = cur_offset_s;
-        offsetCyclesULL = cur_offset_cycles;
-
-        const auto offsetParts = ctf::src::normalizeClkOffset(offsetSecLL, offsetCyclesULL, freq);
-
-        /* Set final offsets */
-        clock->offset_seconds = offsetParts.first;
-        clock->offset_cycles = offsetParts.second;
-    }
-
-end:
-    return;
-}
-
 static int visit_clock_decl(struct ctf_visitor_generate_ir *ctx, struct ctf_node *clock_node)
 {
     int ret = 0;
@@ -4319,8 +4232,6 @@ static int visit_clock_decl(struct ctf_visitor_generate_ir *ctx, struct ctf_node
         clock->offset_cycles = offsetCyclesULL;
     }
 
-    apply_clock_class_offset(ctx, clock);
-    apply_clock_class_is_absolute(ctx, clock);
     g_ptr_array_add(ctx->ctf_tc->clock_classes, clock);
     clock = NULL;
 

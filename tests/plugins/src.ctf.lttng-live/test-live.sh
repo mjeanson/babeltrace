@@ -306,6 +306,13 @@ test_compare_to_ctf_fs() {
 	bt_cli "$expected_stdout" "$expected_stderr" "${trace_dir}/succeed/multi-domains" -c sink.text.details --params "with-trace-name=false,with-stream-name=false"
 	bt_remove_cr "${expected_stdout}"
 	bt_remove_cr "${expected_stderr}"
+
+	# Hack. To be removed when src.ctf.lttng-live is updated to use the new
+	# IR generator.
+	"$BT_TESTS_SED_BIN" -i '/User attributes:/d' "${expected_stdout}"
+	"$BT_TESTS_SED_BIN" -i '/babeltrace.org,2020:/d' "${expected_stdout}"
+	"$BT_TESTS_SED_BIN" -i '/log-level: warning/d' "${expected_stdout}"
+
 	run_test "$test_text" "$cli_args_template" "$expected_stdout" \
 		"$expected_stderr" "$trace_dir_native" "${server_args[@]}"
 	diag "Inverse session order from lttng-relayd"

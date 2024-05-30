@@ -70,8 +70,6 @@ struct ctf_metadata_decoder_config
     /* Weak, used to create a bt_trace_class, if not nullptr. */
     bt_self_component *self_comp = nullptr;
 
-    ctf::src::ClkClsCfg clkClsCfg;
-
     /* True to create trace class objects */
     bool create_trace_class = false;
 

@@ -758,7 +758,6 @@ plugins_ctf_babeltrace_plugin_ctf_la_SOURCES = \
 	plugins/ctf/fs-src/fs.cpp \
 	plugins/ctf/fs-src/fs.hpp \
 	plugins/ctf/fs-src/lttng-index.hpp \
-	plugins/ctf/fs-src/metadata.cpp \
 	plugins/ctf/fs-src/metadata.hpp \
 	plugins/ctf/fs-src/query.cpp \
 	plugins/ctf/fs-src/query.hpp \

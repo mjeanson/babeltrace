@@ -72,7 +72,7 @@ expect_failure() {
 		"${test_name}: error stack is produced"
 
 	bt_grep_ok \
-		"No event class with ID of event class ID to use in stream class" \
+		"At 48 bits: no event record class exists with ID 255 within the data stream class with ID 0." \
 		"$stderr_file" \
 		"$test_name: expected error message is present"
 }

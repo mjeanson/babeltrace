@@ -16,10 +16,12 @@ namespace src {
 
 MetadataStreamMajorVersion getMetadataStreamMajorVersion(const bt2c::ConstBytes buffer) noexcept
 {
-    BT_ASSERT(buffer.data());
+    {
+        BT_ASSERT(buffer.data());
 
-    /* CTF 2 if it starts with an RS byte, otherwise CTF 1 */
-    return (buffer[0] == 30) ? MetadataStreamMajorVersion::V2 : MetadataStreamMajorVersion::V1;
+        /* CTF 2 if it starts with an RS byte, otherwise CTF 1 */
+        return (buffer[0] == 30) ? MetadataStreamMajorVersion::V2 : MetadataStreamMajorVersion::V1;
+    }
 }
 
 std::unique_ptr<MetadataStreamParser>

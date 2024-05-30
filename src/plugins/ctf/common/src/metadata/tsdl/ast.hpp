@@ -22,7 +22,6 @@
 #include "cpp-common/bt2c/logging.hpp"
 #include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 
-#include "../../clk-cls-cfg.hpp"
 #include "ctf-meta.hpp"
 
 // the parameter name (of the reentrant 'yyparse' function)
@@ -485,12 +484,10 @@ struct ctf_visitor_generate_ir
     using UP = std::unique_ptr<ctf_visitor_generate_ir>;
 
     explicit ctf_visitor_generate_ir(
-        const ctf::src::ClkClsCfg& clkClsCfgParam,
         const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfCompParam,
         bt2c::Logger loggerParam) noexcept :
-
         logger {std::move(loggerParam)},
-        selfComp {selfCompParam}, clkClsCfg {clkClsCfgParam}
+        selfComp {selfCompParam}
     {
     }
 
@@ -514,13 +511,10 @@ struct ctf_visitor_generate_ir
 
     /* True if this is an LTTng trace */
     bool is_lttng = false;
-
-    ctf::src::ClkClsCfg clkClsCfg;
 };
 
 ctf_visitor_generate_ir::UP
-ctf_visitor_generate_ir_create(const ctf::src::ClkClsCfg& clkClsCfg,
-                               bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
+ctf_visitor_generate_ir_create(const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
                                const bt2c::Logger& parentLogger);
 
 bt2::TraceClass::Shared

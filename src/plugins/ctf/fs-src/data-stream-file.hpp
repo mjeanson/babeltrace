@@ -20,14 +20,19 @@
 #include "cpp-common/bt2c/data-len.hpp"
 #include "cpp-common/bt2c/logging.hpp"
 
-#include "../common/src/msg-iter/msg-iter.hpp"
+#include "../common/src/item-seq/medium.hpp"
+#include "../common/src/metadata/ctf-ir.hpp"
 #include "file.hpp"
 
 struct ctf_fs_ds_file_info
 {
     using UP = std::unique_ptr<ctf_fs_ds_file_info>;
 
+    ctf_fs_ds_file_info(std::string pathParam, const bt2c::Logger& parentLogger);
+
+    bt2c::Logger logger;
     std::string path;
+    bt2c::DataLen size;
 
     /* Guaranteed to be set, as opposed to the index. */
     int64_t begin_ns = 0;
@@ -37,8 +42,8 @@ struct ctf_fs_ds_file
 {
     using UP = std::unique_ptr<ctf_fs_ds_file>;
 
-    explicit ctf_fs_ds_file(const bt2c::Logger& parentLogger) :
-        logger {parentLogger, "PLUGIN/SRC.CTF.FS/DS"}
+    explicit ctf_fs_ds_file(const bt2c::Logger& parentLogger, const size_t mmapMaxLenParam) :
+        logger {parentLogger, "PLUGIN/SRC.CTF.FS/DS"}, mmap_max_len {mmapMaxLenParam}
     {
     }
 
@@ -48,12 +53,7 @@ struct ctf_fs_ds_file
 
     bt2c::Logger logger;
 
-    /* Weak */
-    struct ctf_fs_metadata *metadata = nullptr;
-
     ctf_fs_file::UP file;
-
-    bt2::Stream::Shared stream;
 
     void *mmap_addr = nullptr;
 
@@ -68,28 +68,31 @@ struct ctf_fs_ds_file
 
     /* Offset in the file where the current mapping starts. */
     off_t mmap_offset_in_file = 0;
-
-    /*
-     * Offset, in the current mapping, of the address to return on the next
-     * request.
-     */
-    off_t request_offset_in_mapping = 0;
 };
 
 struct ctf_fs_ds_index_entry
 {
-    ctf_fs_ds_index_entry(const bt2c::CStringView pathParam, const bt2c::DataLen offsetParam,
-                          const bt2c::DataLen packetSizeParam) noexcept :
+    ctf_fs_ds_index_entry(const bt2c::CStringView pathParam, const bt2c::DataLen offsetInFileParam,
+                          const bt2c::DataLen packetSizeParam) :
         path {pathParam},
-        offset {offsetParam}, packetSize {packetSizeParam}
+        offsetInFile {offsetInFileParam}, offsetInStream {offsetInFileParam},
+        packetSize {packetSizeParam}
     {
+        BT_ASSERT(path);
     }
 
     /* Weak, belongs to ctf_fs_ds_file_info. */
     const char *path;
 
     /* Position of the packet from the beginning of the file. */
-    bt2c::DataLen offset;
+    bt2c::DataLen offsetInFile;
+
+    /*
+     * Position of the packet from the beginning of the stream.  Starts equal
+     * to `offsetInFile`, but can change when multiple data stream files
+     * belonging to the same stream are merged.
+     */
+    bt2c::DataLen offsetInStream;
 
     /* Size of the packet. */
     bt2c::DataLen packetSize;
@@ -114,22 +117,25 @@ struct ctf_fs_ds_index_entry
 
 struct ctf_fs_ds_index
 {
-    std::vector<ctf_fs_ds_index_entry> entries;
+    using EntriesT = std::vector<ctf_fs_ds_index_entry>;
+
+    EntriesT entries;
+
+    void updateOffsetsInStream();
 };
 
 struct ctf_fs_ds_file_group
 {
     using UP = std::unique_ptr<ctf_fs_ds_file_group>;
 
-    explicit ctf_fs_ds_file_group(struct ctf_fs_trace * const trace,
-                                  ctf_stream_class * const scParam, const uint64_t streamInstanceId,
+    explicit ctf_fs_ds_file_group(struct ctf_fs_trace * const ctfFsTrace,
+                                  const ctf::src::DataStreamCls& dataStreamClsParam,
+                                  const uint64_t streamInstanceId,
                                   ctf_fs_ds_index indexParam) noexcept :
-
-        sc {scParam},
-        stream_id(streamInstanceId), ctf_fs_trace {trace},
+        dataStreamCls {&dataStreamClsParam},
+        stream_id {streamInstanceId}, ctf_fs_trace {ctfFsTrace},
         /* Don't use brace initialization, because of gcc 4.8. */
         index(std::move(indexParam))
-
     {
     }
 
@@ -148,8 +154,7 @@ struct ctf_fs_ds_file_group
      */
     std::vector<ctf_fs_ds_file_info::UP> ds_file_infos;
 
-    /* Owned by this */
-    struct ctf_stream_class *sc = nullptr;
+    const ctf::src::DataStreamCls *dataStreamCls;
 
     bt2::Stream::Shared stream;
 
@@ -162,45 +167,36 @@ struct ctf_fs_ds_file_group
     ctf_fs_ds_index index;
 };
 
-ctf_fs_ds_file::UP ctf_fs_ds_file_create(ctf_fs_trace *ctf_fs_trace, bt2::Stream::Shared stream,
-                                         const char *path, const bt2c::Logger& logger);
+ctf_fs_ds_file::UP ctf_fs_ds_file_create(const char *path, const bt2c::Logger& parentLogger);
 
-bt2s::optional<ctf_fs_ds_index> ctf_fs_ds_file_build_index(struct ctf_fs_ds_file *ds_file,
-                                                           struct ctf_fs_ds_file_info *ds_file_info,
-                                                           struct ctf_msg_iter *msg_iter);
+bt2s::optional<ctf_fs_ds_index> ctf_fs_ds_file_build_index(const ctf_fs_ds_file_info& file_info,
+                                                           const ctf::src::TraceCls& traceCls);
 
-ctf_fs_ds_file_info::UP ctf_fs_ds_file_info_create(const char *path, int64_t begin_ns);
+namespace ctf {
+namespace src {
+namespace fs {
 
-/*
- * Medium operations to iterate on a single ctf_fs_ds_file.
- *
- * The data pointer when using this must be a pointer to the ctf_fs_ds_file.
- */
-extern struct ctf_msg_iter_medium_ops ctf_fs_ds_file_medops;
-
-/*
- * Medium operations to iterate on the packet of a ctf_fs_ds_group.
- *
- * The iteration is done based on the index of the group.
- *
- * The data pointer when using these medops must be a pointer to a ctf_fs_ds
- * group_medops_data structure.
- */
-extern struct ctf_msg_iter_medium_ops ctf_fs_ds_group_medops;
-
-struct ctf_fs_ds_group_medops_data_deleter
+struct Medium : public ctf::src::Medium
 {
-    void operator()(struct ctf_fs_ds_group_medops_data *data) noexcept;
+    explicit Medium(const ctf_fs_ds_index& index, const bt2c::Logger& parentLogger);
+
+    ~Medium() = default;
+    Medium(const Medium&) = delete;
+    Medium& operator=(const Medium&) = delete;
+
+    ctf::src::Buf buf(bt2c::DataLen offset, bt2c::DataLen minSize) override;
+
+private:
+    ctf_fs_ds_index::EntriesT::const_iterator
+    _mFindIndexEntryForOffset(bt2c::DataLen offsetInStream) const noexcept;
+
+    const ctf_fs_ds_index& _mIndex;
+    bt2c::Logger _mLogger;
+    ctf_fs_ds_file::UP _mCurrentDsFile;
 };
 
-using ctf_fs_ds_group_medops_data_up =
-    std::unique_ptr<ctf_fs_ds_group_medops_data, ctf_fs_ds_group_medops_data_deleter>;
-
-enum ctf_msg_iter_medium_status
-ctf_fs_ds_group_medops_data_create(struct ctf_fs_ds_file_group *ds_file_group,
-                                   bt_self_message_iterator *self_msg_iter,
-                                   const bt2c::Logger& logger, ctf_fs_ds_group_medops_data_up& out);
-
-void ctf_fs_ds_group_medops_data_reset(struct ctf_fs_ds_group_medops_data *data);
+} /* namespace fs */
+} /* namespace src */
+} /* namespace ctf */
 
 #endif /* BABELTRACE_PLUGINS_CTF_FS_SRC_DATA_STREAM_FILE_HPP */

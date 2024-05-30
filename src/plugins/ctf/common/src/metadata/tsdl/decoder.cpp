@@ -90,11 +90,7 @@ ctf_metadata_decoder_up
 ctf_metadata_decoder_create(const struct ctf_metadata_decoder_config *config)
 {
     BT_ASSERT(config);
-    BT_CPPLOGD_SPEC(config->logger,
-                    "Creating CTF metadata decoder: "
-                    "clock-class-offset-s={}, "
-                    "clock-class-offset-ns={}",
-                    config->clkClsCfg.offsetSec, config->clkClsCfg.offsetNanoSec);
+    BT_CPPLOGD_SPEC(config->logger, "Creating CTF metadata decoder");
 
     ctf_metadata_decoder *mdec = new ctf_metadata_decoder {config->logger};
     mdec->scanner = ctf_scanner_alloc(mdec->logger);
@@ -117,8 +113,7 @@ ctf_metadata_decoder_create(const struct ctf_metadata_decoder_config *config)
 
     mdec->bo = -1;
     mdec->config = *config;
-    mdec->visitor =
-        ctf_visitor_generate_ir_create(config->clkClsCfg, config->self_comp, config->logger);
+    mdec->visitor = ctf_visitor_generate_ir_create(config->self_comp, config->logger);
     if (!mdec->visitor) {
         BT_CPPLOGE_APPEND_CAUSE_SPEC(mdec->logger,
                                      "Failed to create a CTF IR metadata AST visitor: "
@@ -127,11 +122,7 @@ ctf_metadata_decoder_create(const struct ctf_metadata_decoder_config *config)
         goto error;
     }
 
-    BT_CPPLOGD_SPEC(mdec->logger,
-                    "Creating CTF metadata decoder: "
-                    "clock-class-offset-s={}, "
-                    "clock-class-offset-ns={}, addr={}",
-                    config->clkClsCfg.offsetSec, config->clkClsCfg.offsetNanoSec, fmt::ptr(mdec));
+    BT_CPPLOGD_SPEC(mdec->logger, "Created CTF metadata decoder: addr={}", fmt::ptr(mdec));
     goto end;
 
 error:

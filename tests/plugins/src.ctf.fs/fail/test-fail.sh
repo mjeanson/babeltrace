@@ -63,7 +63,7 @@ test_fail \
 test_fail \
 	"valid-events-then-invalid-events" \
 	"${data_dir}/valid-events-then-invalid-events.expect" \
-	"No event class with ID of event class ID to use in stream class: .*stream-class-id=0, event-class-id=255"
+	"At 24 bits: no event record class exists with ID 255 within the data stream class with ID 0."
 
 test_fail \
 	"metadata-syntax-error" \
