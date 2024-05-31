@@ -205,6 +205,11 @@ public:
         return this->_constComponentClass().help();
     }
 
+    Shared shared() const noexcept
+    {
+        return Shared::createWithRef(*this);
+    }
+
 private:
     ConstComponentClass _constComponentClass() const noexcept
     {
@@ -316,6 +321,11 @@ public:
         return this->_constComponentClass().help();
     }
 
+    Shared shared() const noexcept
+    {
+        return Shared::createWithRef(*this);
+    }
+
 private:
     ConstComponentClass _constComponentClass() const noexcept
     {
@@ -425,6 +435,11 @@ public:
     bt2c::CStringView help() const noexcept
     {
         return this->_constComponentClass().help();
+    }
+
+    Shared shared() const noexcept
+    {
+        return Shared::createWithRef(*this);
     }
 
 private:
