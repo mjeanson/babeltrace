@@ -63,7 +63,7 @@ public:
     }
 
     static Shared create(const ConstComponentClass compCls, const bt2c::CStringView objectName,
-                         const OptionalBorrowedObject<ConstMapValue> params = {})
+                         const OptionalBorrowedObject<ConstValue> params = {})
     {
         return CommonQueryExecutor::_create(compCls, objectName, params,
                                             static_cast<void *>(nullptr));
@@ -72,7 +72,7 @@ public:
     template <typename QueryDataT>
     static Shared create(const ConstComponentClass compCls, const bt2c::CStringView objectName,
                          QueryDataT& queryData,
-                         const OptionalBorrowedObject<ConstMapValue> params = {})
+                         const OptionalBorrowedObject<ConstValue> params = {})
     {
         return CommonQueryExecutor::_create(compCls, objectName, params, &queryData);
     }
@@ -101,7 +101,7 @@ public:
 private:
     template <typename QueryDataT>
     static Shared _create(const ConstComponentClass compCls, const bt2c::CStringView objectName,
-                          const OptionalBorrowedObject<ConstMapValue> params,
+                          const OptionalBorrowedObject<ConstValue> params,
                           QueryDataT * const queryData)
     {
         const auto libObjPtr = bt_query_executor_create_with_method_data(
