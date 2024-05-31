@@ -73,7 +73,8 @@ noinst_PROGRAMS += test-plugins
 test_plugins_SOURCES = test-plugins.cpp
 test_plugins_LDADD = \
 	$(COMMON_TEST_LDADD) \
-	$(top_builddir)/src/lib/libbabeltrace2.la
+	$(top_builddir)/src/lib/libbabeltrace2.la \
+	$(top_builddir)/src/cpp-common/vendor/fmt/libfmt.la
 
 noinst_LTLIBRARIES += test-plugins-plugins/plugin-minimal.la
 test_plugins_plugins_plugin_minimal_la_SOURCES = \
