@@ -70,7 +70,7 @@ if !ENABLE_BUILT_IN_PLUGINS
 # test-plugins
 
 noinst_PROGRAMS += test-plugins
-test_plugins_SOURCES = test-plugins.c
+test_plugins_SOURCES = test-plugins.cpp
 test_plugins_LDADD = \
 	$(COMMON_TEST_LDADD) \
 	$(top_builddir)/src/lib/libbabeltrace2.la
