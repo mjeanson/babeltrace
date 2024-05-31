@@ -173,6 +173,7 @@ cpp_common_libcpp_common_la_SOURCES = \
 	cpp-common/bt2c/make-span.hpp \
 	cpp-common/bt2c/prio-heap.hpp \
 	cpp-common/bt2c/read-fixed-len-int.hpp \
+	cpp-common/bt2c/regex.hpp \
 	cpp-common/bt2c/safe-ops.hpp \
 	cpp-common/bt2c/std-int.hpp \
 	cpp-common/bt2c/text-loc.cpp \
