@@ -1,4 +1,8 @@
-﻿# For clang-format 13
+# SPDX-FileCopyrightText: 2024 EfficiOS Inc.
+#
+# SPDX-License-Identifier: MIT
+
+# For clang-format 13
 AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 AlignArrayOfStructures: None

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2024 EfficiOS Inc.
+#
 # SPDX-License-Identifier: MIT
 
 include $(top_srcdir)/src/Makefile.common.inc

@@ -1,4 +1,5 @@
-# SPDX-FileCopyrightText: 2013-2020 EfficiOS, Inc.
+# SPDX-FileCopyrightText: 2013-2024 EfficiOS, Inc.
+#
 # SPDX-License-Identifier: MIT
 
 noinst_LTLIBRARIES = libtap.la

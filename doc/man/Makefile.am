@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2024 EfficiOS Inc.
+#
 # SPDX-License-Identifier: MIT
 
 # Man pages are only built if they are enabled at configure time.

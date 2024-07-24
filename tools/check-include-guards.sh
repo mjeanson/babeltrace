@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-# Copyright (C) 2024 EfficiOS Inc.
+# SPDX-FileCopyrightText: 2024 EfficiOS Inc.
 
 # Change directory to the root of the project, to make `find` simpler
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1

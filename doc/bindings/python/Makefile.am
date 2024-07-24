@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2024 EfficiOS Inc.
+#
 # SPDX-License-Identifier: MIT
 
 SPHINX_SOURCE_DIR = $(srcdir)/source

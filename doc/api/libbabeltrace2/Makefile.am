@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2024 EfficiOS Inc.
+#
 # SPDX-License-Identifier: MIT
 
 API_DOC_INSTALL_DIR = "$(DESTDIR)$(docdir)/api"

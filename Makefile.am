@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2024 EfficiOS Inc.
+#
 # SPDX-License-Identifier: MIT
 
 ACLOCAL_AMFLAGS = -I m4
@@ -17,6 +19,7 @@ dist_doc_DATA = \
 dist_noinst_DATA = CodingStyle
 
 EXTRA_DIST = \
+	.reuse/dep5 \
 	LICENSES/BSD-2-Clause.txt \
 	LICENSES/BSD-4-Clause.txt \
 	LICENSES/BSL-1.0.txt \

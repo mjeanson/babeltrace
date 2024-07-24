@@ -1,4 +1,5 @@
-# SPDX-FileCopyrightText: 2019-2023 EfficiOS, Inc.
+# SPDX-FileCopyrightText: 2019-2024 EfficiOS, Inc.
+#
 # SPDX-License-Identifier: MIT
 
 # Build the current dir containing the library and plugins before the cli and

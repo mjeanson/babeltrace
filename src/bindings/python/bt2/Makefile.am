@@ -1,4 +1,5 @@
-# SPDX-FileCopyrightText: 2019-2023 EfficiOS, Inc.
+# SPDX-FileCopyrightText: 2019-2024 EfficiOS, Inc.
+#
 # SPDX-License-Identifier: MIT
 
 # Since the shared object used by the python bindings is not built with

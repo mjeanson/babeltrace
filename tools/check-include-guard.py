@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2024 Simon Marchi <simon.marchi@efficios.com>
+#
+# SPDX-License-Identifier: GPL-2.0-only
+
 # Usage: check-include-guard.py [--fix] FILE
 #
 # Checks (and optionally tries to fix) the C/C++ header include guard
