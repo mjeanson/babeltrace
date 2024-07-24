@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: FSFULLR
+#
 # serial 13  -*- Autoconf -*-
 # Enable extensions on systems that normally disable them.
 

@@ -1,17 +1,22 @@
 # SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2016 Jérémie Galarneau <jeremie.galarneau@efficios.com>
+# SPDX-FileCopyrightText: 2020 Michael Jeanson <mjeanson@efficios.com>
 #
-# Copyright (C) 2016 Jérémie Galarneau <jeremie.galarneau@efficios.com>
-# Copyright (C) 2020 Michael Jeanson <mjeanson@efficios.com>
+# SYNOPSIS
 #
-# ae_lib_elfutils.m4 -- Check elfutils version
+#   AE_LIB_ELFUTILS(MAJOR_VERSION, MINOR_VERSION, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
 #
-# Check the currently installed version of elfutils by using the
-# `_ELFUTILS_PREREQ` macro defined in <elfutils/version.h>.
+# DESCRIPTION
 #
-# The cache variable for this test is `ae_cv_lib_elfutils`.
+#   Check elfutils version
 #
-# AE_LIB_ELFUTILS(MAJOR_VERSION, MINOR_VERSION, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
-# ---------------------------------------------------------------------------
+#   Check the currently installed version of elfutils by using the
+#   `_ELFUTILS_PREREQ` macro defined in <elfutils/version.h>.
+#
+#   The cache variable for this test is `ae_cv_lib_elfutils`.
+
+#serial 2
+
 AC_DEFUN([AE_LIB_ELFUTILS], [
 m4_pushdef([major_version], [$1])
 m4_pushdef([minor_version], [$2])

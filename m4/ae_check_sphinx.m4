@@ -1,11 +1,8 @@
-# check_sphinx.m4 -- check for Sphinx Python package
+# SPDX-FileCopyrightText: 2015 Philippe Proulx <pproulx@efficios.com>
+# SPDX-License-Identifier: FSFULLR
 #
-# Copyright (C) 2015 - Philippe Proulx <pproulx@efficios.com>
+# ae_check_sphinx.m4 -- check for Sphinx Python package
 #
-# This file is free software; the Free Software Foundation gives
-# unlimited permission to copy and/or distribute it, with or without
-# modifications, as long as this notice is preserved.
-
 # Sphinx ships with a script named "sphinx-build", which is usually
 # installed in "/usr/bin". Unfortunately, this script uses
 # "/usr/bin/python" as its interpreter. Since "/usr/bin/python" can

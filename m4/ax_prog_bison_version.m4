@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: FSFAP
+#
 # ===========================================================================
 #   https://www.gnu.org/software/autoconf-archive/ax_prog_bison_version.html
 # ===========================================================================
