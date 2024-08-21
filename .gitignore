@@ -8,6 +8,9 @@
 .deps
 .libs
 
+# Output of `make dist`
+/babeltrace2-*.tar.bz2
+
 # Generated Autotools files
 .dirstamp
 aclocal.m4
@@ -25,10 +28,24 @@ Makefile
 Makefile.in
 stamp-h1
 
+# Generated documentation files
+/doc/api/libbabeltrace2/Doxyfile
+/doc/api/libbabeltrace2/output
+/doc/bindings/python/build/
+/doc/man/*.1
+/doc/man/*.7
+/doc/man/asciidoc-attrs.conf
+
 # Generated Python files
 *.egg-info
 __pycache__
 /src/bindings/python/bt2/dist
+/src/bindings/python/bt2/setup.py
+/src/bindings/python/bt2/bt2/native_bt.c
+/src/bindings/python/bt2/bt2/native_bt.d
+/src/bindings/python/bt2/bt2/native_bt.py
+/src/bindings/python/bt2/bt2/version.py
+/src/bindings/python/bt2/build/
 
 # Generated pkg-config files
 /src/babeltrace2-ctf-writer.pc
