@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: MIT
+#
+# Copyright (C) 2024 EfficiOS, Inc.
+#
+
+repos:
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 23.12.1
+    hooks:
+      - id: black
+        exclude: '(tests/utils/python/normand.py|tests/utils/python/tap/.*|tests/utils/python/typing/.*)'
+  - repo:  https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        exclude: '(tests/utils/python/normand.py|tests/utils/python/tap/.*|tests/utils/python/typing/.*)'
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        exclude: '(tests/utils/python/normand.py|tests/utils/python/tap/.*|tests/utils/python/typing/.*)'
