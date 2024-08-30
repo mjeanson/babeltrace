@@ -1510,17 +1510,14 @@ bt_component_class_initialize_method_status ctf_fs_init(bt_self_component_source
                                                         const bt_value *params, void *)
 {
     try {
-        bt_component_class_initialize_method_status ret =
-            BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK;
-
         ctf_fs_component::UP ctf_fs = ctf_fs_create(bt2::ConstMapValue {params}, self_comp_src);
         if (!ctf_fs) {
-            ret = BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_ERROR;
+            return BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_ERROR;
         }
 
         bt_self_component_set_data(bt_self_component_source_as_self_component(self_comp_src),
                                    ctf_fs.release());
-        return ret;
+        return BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK;
     } catch (const std::bad_alloc&) {
         return BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_MEMORY_ERROR;
     } catch (const bt2::Error&) {
