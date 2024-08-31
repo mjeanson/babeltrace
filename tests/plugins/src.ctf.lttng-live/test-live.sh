@@ -85,7 +85,8 @@ get_cli_output_with_lttng_live_server() {
 	local cli_stderr_file="$3"
 	local port_file="$4"
 	local trace_path_prefix="$5"
-	shift 5
+	local kill_server_on_cli_failure="$6"
+	shift 6
 	local server_args=("$@")
 
 	local i
@@ -138,8 +139,11 @@ get_cli_output_with_lttng_live_server() {
 
 	if ! bt_cli "$cli_stdout_file" "$cli_stderr_file" "${cli_args[@]}"; then
 		# CLI failed: cancel everything else
-		kill_lttng_live_server "$server_pid_file"
-		wait
+		if [[ $kill_server_on_cli_failure == true ]]; then
+			kill_lttng_live_server "$server_pid_file"
+			wait
+		fi
+
 		rm -f "$server_pid_file"
 		rm -f "$server_retcode_file"
 		return 1
@@ -191,8 +195,7 @@ run_test() {
 	port_file="$(mktemp -t test-live-server-port.XXXXXX)"
 
 	get_cli_output_with_lttng_live_server "$cli_args_template" "$cli_stdout" \
-		"$cli_stderr" "$port_file" "$trace_path_prefix" "${server_args[@]}"
-	port=$(<"$port_file")
+		"$cli_stderr" "$port_file" "$trace_path_prefix" true "${server_args[@]}"
 
 	bt_diff "$expected_stdout" "$cli_stdout"
 	ok $? "$test_text - stdout"
@@ -201,6 +204,41 @@ run_test() {
 
 	rm -f "$cli_stderr"
 	rm -f "$cli_stdout"
+	rm -f "$port_file"
+}
+
+run_test_fail() {
+	local test_text="$1"
+	local cli_args_template="$2"
+	local expected_stdout="$3"
+	local expected_stderr_re="$4"
+	local trace_path_prefix="$5"
+	shift 5
+	local server_args=("$@")
+
+	local cli_stdout
+	local cli_stderr
+	local cli_stderr_no_crlf
+	local port_file
+	local port
+
+	cli_stdout="$(mktemp -t test-live-stdout.XXXXXX)"
+	cli_stderr="$(mktemp -t test-live-stderr.XXXXXX)"
+	cli_stderr_no_crlf="$(mktemp -t test-live-stderr-no-crlf.XXXXXX)"
+	port_file="$(mktemp -t test-live-server-port.XXXXXX)"
+
+	get_cli_output_with_lttng_live_server "$cli_args_template" "$cli_stdout" \
+		"$cli_stderr" "$port_file" "$trace_path_prefix" false "${server_args[@]}"
+
+	bt_diff "$expected_stdout" "$cli_stdout"
+	ok $? "$test_text - stdout"
+
+	bt_remove_crlf "$cli_stderr" "$cli_stderr_no_crlf"
+	bt_grep_ok "$expected_stderr_re" "$cli_stderr_no_crlf" "$test_text - stderr"
+
+	rm -f "$cli_stdout"
+	rm -f "$cli_stderr"
+	rm -f "$cli_stderr_no_crlf"
 	rm -f "$port_file"
 }
 
@@ -226,7 +264,7 @@ test_list_sessions() {
 	tmp_stdout_expected="$(mktemp -t test-live-list-sessions-stdout-expected.XXXXXX)"
 
 	get_cli_output_with_lttng_live_server "$cli_args_template" "$cli_stdout" \
-		"$cli_stderr" "$port_file" "$trace_dir_native" "${server_args[@]}"
+		"$cli_stderr" "$port_file" "$trace_dir_native" true "${server_args[@]}"
 	port=$(<"$port_file")
 
 	# Craft the expected output. This is necessary since the port number
@@ -418,7 +456,18 @@ test_live_new_stream_during_inactivity() {
 	rm -rf "$tmp_dir"
 }
 
-plan_tests 20
+test_invalid_metadata() {
+	local test_text="invalid metadata sent by the relay"
+	local cli_args_template="-i lttng-live net://localhost:@PORT@/host/hostname/invalid-metadata"
+	local server_args=("$test_data_dir/invalid-metadata.json")
+	local expected_stdout="/dev/null"
+
+	run_test_fail "$test_text" "$cli_args_template" "$expected_stdout" \
+		"At line 12 in metadata stream: syntax error, unexpected IDENTIFIER:  token=\"perchaude\"" \
+		"$trace_dir_native" "${server_args[@]}"
+}
+
+plan_tests 22
 
 test_list_sessions
 test_base
@@ -429,3 +478,4 @@ test_inactivity_discarded_packet
 test_split_metadata
 test_stored_values
 test_live_new_stream_during_inactivity
+test_invalid_metadata

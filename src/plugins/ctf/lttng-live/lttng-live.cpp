@@ -147,6 +147,8 @@ lttng_live_session::~lttng_live_session()
 
 lttng_live_msg_iter::~lttng_live_msg_iter()
 {
+    this->sessions.clear();
+
     BT_ASSERT(this->lttng_live_comp);
     BT_ASSERT(this->lttng_live_comp->has_msg_iter);
 
