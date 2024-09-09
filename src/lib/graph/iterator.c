@@ -686,14 +686,12 @@ void assert_post_dev_clock_classes_are_compatible_one(
 		const struct bt_message *msg)
 {
 	enum bt_clock_correlation_validator_error_type type;
-	bt_uuid expected_uuid;
 	const bt_clock_class *actual_clock_cls;
-	const bt_clock_class *expected_clock_cls;
+	const bt_clock_class *ref_clock_cls;
 
 	if (!bt_clock_correlation_validator_validate_message(
 			iterator->correlation_validator, msg, &type,
-			&expected_uuid, &actual_clock_cls,
-			&expected_clock_cls)) {
+			&actual_clock_cls, &ref_clock_cls)) {
 		switch (type) {
 		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_NO_CLOCK_CLASS_GOT_ONE:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
@@ -725,8 +723,9 @@ void assert_post_dev_clock_classes_are_compatible_one(
 		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UUID_GOT_OTHER_UUID:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
 				"clock-class-has-expected-uuid", false,
-				"Expecting a clock class with UUID, got one with a different UUID: %![cc-]+K, expected-uuid=%!u",
-				actual_clock_cls, expected_uuid);
+				"Expecting a clock class with UUID, got one with a different UUID: "
+				"%![cc-]+K, expected-uuid=%!u",
+				actual_clock_cls, bt_clock_class_get_uuid(ref_clock_cls));
 
 		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_NO_UUID_GOT_NONE:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
@@ -736,7 +735,7 @@ void assert_post_dev_clock_classes_are_compatible_one(
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
 				"clock-class-is-expected", false,
 				"Unexpected clock class: %![expected-cc-]+K, %![actual-cc-]+K",
-				expected_clock_cls, actual_clock_cls);
+				ref_clock_cls, actual_clock_cls);
 		}
 
 		bt_common_abort();

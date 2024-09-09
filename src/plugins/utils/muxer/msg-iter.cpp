@@ -251,6 +251,7 @@ void MsgIter::_validateMsgClkCls(const bt2::ConstMessage msg)
         using Type = bt2ccv::ClockCorrelationError::Type;
 
         const auto actualClkCls = error.actualClockCls();
+        const auto refClkCls = error.refClockCls();
 
         switch (error.type()) {
         case Type::ExpectingNoClockClassGotOne:
@@ -296,7 +297,7 @@ void MsgIter::_validateMsgClkCls(const bt2::ConstMessage msg)
                 bt2::Error,
                 "Expecting a clock class with a specific UUID, but got one with a different UUID: "
                 "clock-class-addr={}, clock-class-name={}, expected-uuid=\"{}\", uuid=\"{}\"",
-                fmt::ptr(actualClkCls->libObjPtr()), actualClkCls->name(), *error.expectedUuid(),
+                fmt::ptr(actualClkCls->libObjPtr()), actualClkCls->name(), *refClkCls->uuid(),
                 *actualClkCls->uuid());
 
         case Type::ExpectingOriginNoUuidGotOther:
@@ -305,7 +306,7 @@ void MsgIter::_validateMsgClkCls(const bt2::ConstMessage msg)
                 "Unexpected clock class: "
                 "expected-clock-class-addr={}, expected-clock-class-name={}, "
                 "actual-clock-class-addr={}, actual-clock-class-name={}",
-                fmt::ptr(error.expectedClockCls()->libObjPtr()), error.expectedClockCls()->name(),
+                fmt::ptr(refClkCls->libObjPtr()), refClkCls->name(),
                 fmt::ptr(actualClkCls->libObjPtr()), actualClkCls->name());
         }
     }

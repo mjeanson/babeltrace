@@ -40,9 +40,8 @@ bool bt_clock_correlation_validator_validate_message(
 	struct bt_clock_correlation_validator *validator,
 	const struct bt_message *msg,
 	enum bt_clock_correlation_validator_error_type *type,
-	bt_uuid *expected_uuid,
 	const struct bt_clock_class ** const actual_clock_cls,
-	const struct bt_clock_class ** const expected_clock_cls) BT_NOEXCEPT;
+	const struct bt_clock_class ** const ref_clock_cls) BT_NOEXCEPT;
 
 void bt_clock_correlation_validator_destroy(
 	struct bt_clock_correlation_validator *validator) BT_NOEXCEPT;

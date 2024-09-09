@@ -36,27 +36,27 @@ void ClockCorrelationValidator::_validate(const bt2::ConstMessage msg)
     case PropsExpectation::Unset:
         /*
          * This is the first analysis of a message with a clock
-         * snapshot: record the properties of that clock, against which
-         * we'll compare the clock properties of the following messages.
+         * snapshot: record the clock class against which we'll compare
+         * the clock class properties of the following messages.
          */
-        if (!clockCls) {
-            _mExpectation = PropsExpectation::None;
-        } else if (clockCls->origin().isUnixEpoch()) {
-            _mExpectation = PropsExpectation::OriginUnix;
-        } else if (const auto uuid = clockCls->uuid()) {
-            _mExpectation = PropsExpectation::OriginOtherUuid;
-            _mUuid = *uuid;
-        } else {
-            _mExpectation = PropsExpectation::OriginOtherNoUuid;
-            _mClockClass = clockCls->shared();
-        }
+        if (clockCls) {
+            _mRefClockClass = clockCls->shared();
 
+            if (clockCls->origin().isUnixEpoch()) {
+                _mExpectation = PropsExpectation::OriginUnix;
+            } else if (const auto uuid = clockCls->uuid()) {
+                _mExpectation = PropsExpectation::OriginOtherUuid;
+            } else {
+                _mExpectation = PropsExpectation::OriginOtherNoUuid;
+            }
+        } else {
+            _mExpectation = PropsExpectation::None;
+        }
         break;
 
     case PropsExpectation::None:
         if (clockCls) {
             throw ClockCorrelationError {ClockCorrelationError::Type::ExpectingNoClockClassGotOne,
-                                         bt2s::nullopt,
                                          *clockCls,
                                          {},
                                          streamCls};
@@ -67,18 +67,14 @@ void ClockCorrelationValidator::_validate(const bt2::ConstMessage msg)
     case PropsExpectation::OriginUnix:
         if (!clockCls) {
             throw ClockCorrelationError {ClockCorrelationError::Type::ExpectingOriginUnixGotNone,
-                                         bt2s::nullopt,
                                          {},
-                                         {},
+                                         *_mRefClockClass,
                                          streamCls};
         }
 
         if (!clockCls->origin().isUnixEpoch()) {
             throw ClockCorrelationError {ClockCorrelationError::Type::ExpectingOriginUnixGotOther,
-                                         bt2s::nullopt,
-                                         *clockCls,
-                                         {},
-                                         streamCls};
+                                         *clockCls, *_mRefClockClass, streamCls};
         }
 
         break;
@@ -87,37 +83,27 @@ void ClockCorrelationValidator::_validate(const bt2::ConstMessage msg)
     {
         if (!clockCls) {
             throw ClockCorrelationError {ClockCorrelationError::Type::ExpectingOriginUuidGotNone,
-                                         bt2s::nullopt,
                                          {},
-                                         {},
+                                         *_mRefClockClass,
                                          streamCls};
         }
 
         if (clockCls->origin().isUnixEpoch()) {
             throw ClockCorrelationError {ClockCorrelationError::Type::ExpectingOriginUuidGotUnix,
-                                         bt2s::nullopt,
-                                         *clockCls,
-                                         {},
-                                         streamCls};
+                                         *clockCls, *_mRefClockClass, streamCls};
         }
 
         const auto uuid = clockCls->uuid();
 
         if (!uuid) {
             throw ClockCorrelationError {ClockCorrelationError::Type::ExpectingOriginUuidGotNoUuid,
-                                         bt2s::nullopt,
-                                         *clockCls,
-                                         {},
-                                         streamCls};
+                                         *clockCls, *_mRefClockClass, streamCls};
         }
 
-        if (*uuid != _mUuid) {
+        if (*uuid != *_mRefClockClass->uuid()) {
             throw ClockCorrelationError {
-                ClockCorrelationError::Type::ExpectingOriginUuidGotOtherUuid,
-                _mUuid,
-                *clockCls,
-                {},
-                streamCls};
+                ClockCorrelationError::Type::ExpectingOriginUuidGotOtherUuid, *clockCls,
+                *_mRefClockClass, streamCls};
         }
 
         break;
@@ -126,15 +112,14 @@ void ClockCorrelationValidator::_validate(const bt2::ConstMessage msg)
     case PropsExpectation::OriginOtherNoUuid:
         if (!clockCls) {
             throw ClockCorrelationError {ClockCorrelationError::Type::ExpectingOriginNoUuidGotNone,
-                                         bt2s::nullopt,
                                          {},
-                                         {},
+                                         *_mRefClockClass,
                                          streamCls};
         }
 
-        if (clockCls->libObjPtr() != _mClockClass->libObjPtr()) {
+        if (clockCls->libObjPtr() != _mRefClockClass->libObjPtr()) {
             throw ClockCorrelationError {ClockCorrelationError::Type::ExpectingOriginNoUuidGotOther,
-                                         bt2s::nullopt, *clockCls, *_mClockClass, streamCls};
+                                         *clockCls, *_mRefClockClass, streamCls};
         }
 
         break;
@@ -158,9 +143,9 @@ bt_clock_correlation_validator *bt_clock_correlation_validator_create() noexcept
 
 bool bt_clock_correlation_validator_validate_message(
     bt_clock_correlation_validator * const validator, const bt_message * const msg,
-    bt_clock_correlation_validator_error_type * const type, bt_uuid * const expectedUuidOut,
+    bt_clock_correlation_validator_error_type * const type,
     const bt_clock_class ** const actualClockClsOut,
-    const bt_clock_class ** const expectedClockClsOut) noexcept
+    const bt_clock_class ** const refClockClsOut) noexcept
 {
     try {
         reinterpret_cast<bt2ccv::ClockCorrelationValidator *>(validator)->validate(bt2::wrap(msg));
@@ -168,22 +153,16 @@ bool bt_clock_correlation_validator_validate_message(
     } catch (const bt2ccv::ClockCorrelationError& error) {
         *type = static_cast<bt_clock_correlation_validator_error_type>(error.type());
 
-        if (error.expectedUuid()) {
-            *expectedUuidOut = error.expectedUuid()->data();
-        } else {
-            *expectedUuidOut = nullptr;
-        }
-
         if (error.actualClockCls()) {
             *actualClockClsOut = error.actualClockCls()->libObjPtr();
         } else {
             *actualClockClsOut = nullptr;
         }
 
-        if (error.expectedClockCls()) {
-            *expectedClockClsOut = error.expectedClockCls()->libObjPtr();
+        if (error.refClockCls()) {
+            *refClockClsOut = error.refClockCls()->libObjPtr();
         } else {
-            *expectedClockClsOut = nullptr;
+            *refClockClsOut = nullptr;
         }
 
         return false;
