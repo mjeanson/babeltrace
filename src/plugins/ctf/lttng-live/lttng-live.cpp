@@ -13,7 +13,7 @@
 
 #include "common/assert.h"
 #include "cpp-common/bt2/wrap.hpp"
-#include "cpp-common/bt2c/fmt.hpp"
+#include "cpp-common/bt2c/fmt.hpp" /* IWYU pragma: keep */
 #include "cpp-common/bt2c/glib-up.hpp"
 #include "cpp-common/bt2c/vector.hpp"
 #include "cpp-common/bt2s/make-unique.hpp"
