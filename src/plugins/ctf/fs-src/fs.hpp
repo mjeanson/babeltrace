@@ -107,14 +107,12 @@ struct ctf_fs_msg_iter_data
 {
     using UP = std::unique_ptr<ctf_fs_msg_iter_data>;
 
-    explicit ctf_fs_msg_iter_data(bt_self_message_iterator *selfMsgIter) :
-        self_msg_iter {selfMsgIter},
-        logger {bt2::SelfMessageIterator {self_msg_iter}, "PLUGIN/SRC.CTF.FS/MSG-ITER"}
+    explicit ctf_fs_msg_iter_data(const bt2::SelfMessageIterator selfMsgIterParam) :
+        selfMsgIter {selfMsgIterParam}, logger {selfMsgIter, "PLUGIN/SRC.CTF.FS/MSG-ITER"}
     {
     }
 
-    /* Weak */
-    bt_self_message_iterator *self_msg_iter = nullptr;
+    bt2::SelfMessageIterator selfMsgIter;
 
     bt2c::Logger logger;
 
@@ -165,14 +163,11 @@ ctf_fs_iterator_seek_beginning(bt_self_message_iterator *message_iterator);
  * `paths_value` must be an array of strings,
  *
  * The created `struct ctf_fs_trace` is assigned to `ctf_fs->trace`.
- *
- * `self_comp` and `self_comp_class` are used for logging, only one of them
- * should be set.
  */
 
 int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
                                          bt2::ConstArrayValue pathsValue, const char *traceName,
-                                         bt_self_component *selfComp);
+                                         bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp);
 
 namespace ctf {
 namespace src {

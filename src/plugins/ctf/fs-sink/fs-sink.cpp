@@ -10,6 +10,7 @@
 #include <babeltrace2/babeltrace.h>
 
 #include "common/assert.h"
+#include "cpp-common/bt2/wrap.hpp"
 #include "cpp-common/vendor/fmt/format.h"
 #include "ctfser/ctfser.h"
 
@@ -136,9 +137,8 @@ bt_component_class_initialize_method_status ctf_fs_sink_init(bt_self_component_s
         bt_component_class_initialize_method_status status;
         bt_self_component_add_port_status add_port_status;
         struct fs_sink_comp *fs_sink = NULL;
-        bt_self_component *self_comp = bt_self_component_sink_as_self_component(self_comp_sink);
 
-        fs_sink = new fs_sink_comp {bt2::SelfSinkComponent {self_comp_sink}};
+        fs_sink = new fs_sink_comp {bt2::wrap(self_comp_sink)};
         fs_sink->output_dir_path = g_string_new(NULL);
         status = configure_component(fs_sink, params);
         if (status != BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK) {
@@ -177,7 +177,8 @@ bt_component_class_initialize_method_status ctf_fs_sink_init(bt_self_component_s
             goto end;
         }
 
-        bt_self_component_set_data(self_comp, fs_sink);
+        bt_self_component_set_data(bt_self_component_sink_as_self_component(self_comp_sink),
+                                   fs_sink);
 
 end:
         if (status != BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK) {

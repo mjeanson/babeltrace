@@ -121,10 +121,10 @@ static void instantiateMsgIter(ctf_fs_msg_iter_data *msg_iter_data)
     ctf_fs_ds_file_group *ds_file_group = msg_iter_data->port_data->ds_file_group;
 
     Medium::UP medium = bt2s::make_unique<fs::Medium>(ds_file_group->index, msg_iter_data->logger);
-    msg_iter_data->msgIter.emplace(
-        bt2::wrap(msg_iter_data->self_msg_iter), *ds_file_group->ctf_fs_trace->cls(),
-        ds_file_group->ctf_fs_trace->metadataStreamUuid(), *ds_file_group->stream,
-        std::move(medium), msg_iter_data->port_data->ctf_fs->quirks, msg_iter_data->logger);
+    msg_iter_data->msgIter.emplace(msg_iter_data->selfMsgIter, *ds_file_group->ctf_fs_trace->cls(),
+                                   ds_file_group->ctf_fs_trace->metadataStreamUuid(),
+                                   *ds_file_group->stream, std::move(medium),
+                                   msg_iter_data->port_data->ctf_fs->quirks, msg_iter_data->logger);
 }
 
 bt_message_iterator_class_seek_beginning_method_status
@@ -162,7 +162,7 @@ ctf_fs_iterator_init(bt_self_message_iterator *self_msg_iter,
             bt_self_component_port_output_as_self_component_port(self_port));
         BT_ASSERT(port_data);
 
-        auto msg_iter_data = bt2s::make_unique<ctf_fs_msg_iter_data>(self_msg_iter);
+        auto msg_iter_data = bt2s::make_unique<ctf_fs_msg_iter_data>(bt2::wrap(self_msg_iter));
         msg_iter_data->port_data = port_data;
 
         instantiateMsgIter(msg_iter_data.get());
@@ -235,7 +235,7 @@ std::string ctf_fs_make_port_name(ctf_fs_ds_file_group *ds_file_group)
 
 static int create_one_port_for_trace(struct ctf_fs_component *ctf_fs,
                                      struct ctf_fs_ds_file_group *ds_file_group,
-                                     bt_self_component_source *self_comp_src)
+                                     const bt2::SelfSourceComponent selfSrcComp)
 {
     const auto port_name = ctf_fs_make_port_name(ds_file_group);
     auto port_data = bt2s::make_unique<ctf_fs_port_data>();
@@ -245,7 +245,7 @@ static int create_one_port_for_trace(struct ctf_fs_component *ctf_fs,
     port_data->ctf_fs = ctf_fs;
     port_data->ds_file_group = ds_file_group;
 
-    int ret = bt_self_component_source_add_output_port(self_comp_src, port_name.c_str(),
+    int ret = bt_self_component_source_add_output_port(selfSrcComp.libObjPtr(), port_name.c_str(),
                                                        port_data.get(), NULL);
     if (ret) {
         return ret;
@@ -257,11 +257,11 @@ static int create_one_port_for_trace(struct ctf_fs_component *ctf_fs,
 
 static int create_ports_for_trace(struct ctf_fs_component *ctf_fs,
                                   struct ctf_fs_trace *ctf_fs_trace,
-                                  bt_self_component_source *self_comp_src)
+                                  const bt2::SelfSourceComponent selfSrcComp)
 {
     /* Create one output port for each stream file group */
     for (const auto& ds_file_group : ctf_fs_trace->ds_file_groups) {
-        int ret = create_one_port_for_trace(ctf_fs, ds_file_group.get(), self_comp_src);
+        int ret = create_one_port_for_trace(ctf_fs, ds_file_group.get(), selfSrcComp);
         if (ret) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(ctf_fs->logger, "Cannot create output port.");
             return ret;
@@ -490,9 +490,10 @@ static void set_trace_name(const bt2::Trace trace, const char *name_suffix)
     trace.name(name);
 }
 
-static ctf_fs_trace::UP ctf_fs_trace_create(const char *path, const char *name,
-                                            const ctf::src::ClkClsCfg& clkClsCfg,
-                                            bt_self_component *selfComp, const bt2c::Logger& logger)
+static ctf_fs_trace::UP
+ctf_fs_trace_create(const char *path, const char *name, const ctf::src::ClkClsCfg& clkClsCfg,
+                    const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp,
+                    const bt2c::Logger& logger)
 {
     auto ctf_fs_trace = bt2s::make_unique<struct ctf_fs_trace>(clkClsCfg, selfComp, logger);
     const auto metadataPath = fmt::format("{}" G_DIR_SEPARATOR_S CTF_FS_METADATA_FILENAME, path);
@@ -505,9 +506,9 @@ static ctf_fs_trace::UP ctf_fs_trace_create(const char *path, const char *name,
     if (ctf_fs_trace->cls()->libCls()) {
         bt2::TraceClass traceCls = *ctf_fs_trace->cls()->libCls();
         ctf_fs_trace->trace = traceCls.instantiate();
-        ctf_trace_class_configure_ir_trace(*ctf_fs_trace->cls(), *ctf_fs_trace->trace,
-                                           bt_self_component_get_graph_mip_version(selfComp),
-                                           logger);
+        ctf_trace_class_configure_ir_trace(
+            *ctf_fs_trace->cls(), *ctf_fs_trace->trace,
+            bt_self_component_get_graph_mip_version(selfComp->libObjPtr()), logger);
         set_trace_name(*ctf_fs_trace->trace, name);
     }
 
@@ -527,11 +528,10 @@ static int path_is_ctf_trace(const char *path)
 
 /* Helper for ctf_fs_component_create_ctf_fs_trace, to handle a single path. */
 
-static int ctf_fs_component_create_ctf_fs_trace_one_path(struct ctf_fs_component *ctf_fs,
-                                                         const char *path_param,
-                                                         const char *trace_name,
-                                                         std::vector<ctf_fs_trace::UP>& traces,
-                                                         bt_self_component *selfComp)
+static int ctf_fs_component_create_ctf_fs_trace_one_path(
+    struct ctf_fs_component *ctf_fs, const char *path_param, const char *trace_name,
+    std::vector<ctf_fs_trace::UP>& traces,
+    const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp)
 {
     bt2c::GStringUP norm_path {bt_common_normalize_path(path_param, NULL)};
     if (!norm_path) {
@@ -1267,9 +1267,9 @@ static bool compare_ds_file_groups_by_first_path(const ctf_fs_ds_file_group::UP&
     return first_ds_file_info_a.path < first_ds_file_info_b.path;
 }
 
-int ctf_fs_component_create_ctf_fs_trace(struct ctf_fs_component *ctf_fs,
-                                         const bt2::ConstArrayValue pathsValue,
-                                         const char *traceName, bt_self_component *selfComp)
+int ctf_fs_component_create_ctf_fs_trace(
+    struct ctf_fs_component *ctf_fs, const bt2::ConstArrayValue pathsValue, const char *traceName,
+    const bt2::OptionalBorrowedObject<bt2::SelfComponent> selfComp)
 {
     std::vector<std::string> paths;
 
@@ -1467,22 +1467,22 @@ ctf::src::fs::Parameters read_src_fs_parameters(const bt2::ConstMapValue params,
 }
 
 static ctf_fs_component::UP ctf_fs_create(const bt2::ConstMapValue params,
-                                          bt_self_component_source *self_comp_src)
+                                          const bt2::SelfSourceComponent selfSrcComp)
 {
-    bt_self_component *self_comp = bt_self_component_source_as_self_component(self_comp_src);
-    const bt2c::Logger logger {bt2::SelfSourceComponent {self_comp_src}, "PLUGIN/SRC.CTF.FS/COMP"};
+    const bt2c::Logger logger {selfSrcComp, "PLUGIN/SRC.CTF.FS/COMP"};
     const auto parameters = read_src_fs_parameters(params, logger);
     auto ctf_fs = bt2s::make_unique<ctf_fs_component>(parameters.clkClsCfg, logger);
 
-    if (ctf_fs_component_create_ctf_fs_trace(
-            ctf_fs.get(), parameters.inputs,
-            parameters.traceName ? parameters.traceName->c_str() : nullptr, self_comp)) {
+    if (ctf_fs_component_create_ctf_fs_trace(ctf_fs.get(), parameters.inputs,
+                                             parameters.traceName ? parameters.traceName->c_str() :
+                                                                    nullptr,
+                                             static_cast<bt2::SelfComponent>(selfSrcComp))) {
         return nullptr;
     }
 
     create_streams_for_trace(ctf_fs->trace.get());
 
-    if (create_ports_for_trace(ctf_fs.get(), ctf_fs->trace.get(), self_comp_src)) {
+    if (create_ports_for_trace(ctf_fs.get(), ctf_fs->trace.get(), selfSrcComp)) {
         return nullptr;
     }
 
@@ -1494,7 +1494,8 @@ bt_component_class_initialize_method_status ctf_fs_init(bt_self_component_source
                                                         const bt_value *params, void *)
 {
     try {
-        ctf_fs_component::UP ctf_fs = ctf_fs_create(bt2::ConstMapValue {params}, self_comp_src);
+        ctf_fs_component::UP ctf_fs =
+            ctf_fs_create(bt2::ConstMapValue {params}, bt2::wrap(self_comp_src));
         if (!ctf_fs) {
             return BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_ERROR;
         }

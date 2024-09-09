@@ -13,7 +13,6 @@
 
 #include "common/assert.h"
 #include "compat/mman.h" /* IWYU pragma: keep  */
-#include "cpp-common/bt2/wrap.hpp"
 #include "cpp-common/bt2s/make-unique.hpp"
 #include "cpp-common/vendor/fmt/format.h"
 
@@ -139,7 +138,7 @@ lttng_live_stream_iterator_create_msg_iter(lttng_live_stream_iterator *liveStrea
     liveStreamIter->stream->name(liveStreamIter->name);
 
     auto medium = bt2s::make_unique<ctf::src::live::CtfLiveMedium>(*liveStreamIter);
-    liveStreamIter->msg_iter.emplace(bt2::wrap(liveMsgIter->self_msg_iter), *ctfTc,
+    liveStreamIter->msg_iter.emplace(liveMsgIter->selfMsgIter, *ctfTc,
                                      liveStreamIter->trace->metadata->metadataStreamUuid(),
                                      *liveStreamIter->stream, std::move(medium),
                                      ctf::src::MsgIterQuirks {}, liveStreamIter->logger);
@@ -147,7 +146,7 @@ lttng_live_stream_iterator_create_msg_iter(lttng_live_stream_iterator *liveStrea
 }
 
 enum lttng_live_iterator_status lttng_live_lazy_msg_init(struct lttng_live_session *session,
-                                                         bt_self_message_iterator *self_msg_iter)
+                                                         const bt2::SelfMessageIterator selfMsgIter)
 {
     if (!session->lazy_stream_msg_init) {
         return LTTNG_LIVE_ITERATOR_STATUS_OK;
@@ -156,7 +155,7 @@ enum lttng_live_iterator_status lttng_live_lazy_msg_init(struct lttng_live_sessi
     BT_CPPLOGD_SPEC(session->logger,
                     "Lazily initializing self message iterator for live session: "
                     "session-id={}, self-msg-iter-addr={}",
-                    session->id, fmt::ptr(self_msg_iter));
+                    session->id, fmt::ptr(selfMsgIter.libObjPtr()));
 
     for (lttng_live_trace::UP& trace : session->traces) {
         for (lttng_live_stream_iterator::UP& stream_iter : trace->stream_iterators) {
@@ -169,7 +168,7 @@ enum lttng_live_iterator_status lttng_live_lazy_msg_init(struct lttng_live_sessi
                             "Creating CTF message iterator: session-id={}, ctf-tc-addr={}, "
                             "stream-iter-name={}, self-msg-iter-addr={}",
                             session->id, fmt::ptr(ctfTraceCls), stream_iter->name.c_str(),
-                            fmt::ptr(self_msg_iter));
+                            fmt::ptr(selfMsgIter.libObjPtr()));
         }
     }
 

@@ -62,7 +62,7 @@ bool lttng_live_graph_is_canceled(struct lttng_live_msg_iter *msg_iter)
         return false;
     }
 
-    return bt_self_message_iterator_is_interrupted(msg_iter->self_msg_iter);
+    return bt_self_message_iterator_is_interrupted(msg_iter->selfMsgIter.libObjPtr());
 }
 
 static struct lttng_live_trace *
@@ -361,7 +361,7 @@ lttng_live_get_session(struct lttng_live_msg_iter *lttng_live_msg_iter,
      * Now that we have the metadata we can initialize the downstream
      * iterator.
      */
-    return lttng_live_lazy_msg_init(session, lttng_live_msg_iter->self_msg_iter);
+    return lttng_live_lazy_msg_init(session, lttng_live_msg_iter->selfMsgIter);
 }
 
 static void
@@ -472,7 +472,7 @@ emit_inactivity_message(struct lttng_live_msg_iter *lttng_live_msg_iter,
                     timestamp);
 
     const auto msg = bt_message_message_iterator_inactivity_create(
-        lttng_live_msg_iter->self_msg_iter, stream_iter->trace->clock_class->libObjPtr(),
+        lttng_live_msg_iter->selfMsgIter.libObjPtr(), stream_iter->trace->clock_class->libObjPtr(),
         timestamp);
 
     if (!msg) {
@@ -919,13 +919,13 @@ handle_late_message(struct lttng_live_msg_iter *lttng_live_msg_iter,
     const auto adjust_status = bt2c::call([&] {
         switch (late_msg.type()) {
         case bt2::MessageType::DiscardedEvents:
-            return adjust_discarded_events_message(lttng_live_msg_iter->self_msg_iter,
+            return adjust_discarded_events_message(lttng_live_msg_iter->selfMsgIter.libObjPtr(),
                                                    *stream_iter->stream,
                                                    late_msg.asDiscardedEvents(), adjustedMessage,
                                                    stream_iter->last_inactivity_ts.value);
 
         case bt2::MessageType::DiscardedPackets:
-            return adjust_discarded_packets_message(lttng_live_msg_iter->self_msg_iter,
+            return adjust_discarded_packets_message(lttng_live_msg_iter->selfMsgIter.libObjPtr(),
                                                     *stream_iter->stream,
                                                     late_msg.asDiscardedPackets(), adjustedMessage,
                                                     stream_iter->last_inactivity_ts.value);
@@ -1468,13 +1468,12 @@ return_status:
 
 static lttng_live_msg_iter::UP
 lttng_live_msg_iter_create(struct lttng_live_component *lttng_live_comp,
-                           bt_self_message_iterator *self_msg_it)
+                           const bt2::SelfMessageIterator selfMsgIter)
 {
-    auto msg_iter = bt2s::make_unique<struct lttng_live_msg_iter>(lttng_live_comp->logger,
-                                                                  lttng_live_comp->selfComp);
+    auto msg_iter = bt2s::make_unique<struct lttng_live_msg_iter>(
+        lttng_live_comp->logger, lttng_live_comp->selfComp, selfMsgIter);
 
     msg_iter->lttng_live_comp = lttng_live_comp;
-    msg_iter->self_msg_iter = self_msg_it;
     msg_iter->active_stream_iter = 0;
     msg_iter->last_msg_ts_ns = INT64_MIN;
     msg_iter->was_interrupted = false;
@@ -1497,7 +1496,7 @@ lttng_live_msg_iter_init(bt_self_message_iterator *self_msg_it,
         BT_ASSERT(!lttng_live->has_msg_iter);
         lttng_live->has_msg_iter = true;
 
-        auto lttng_live_msg_iter = lttng_live_msg_iter_create(lttng_live, self_msg_it);
+        auto lttng_live_msg_iter = lttng_live_msg_iter_create(lttng_live, bt2::wrap(self_msg_it));
         if (!lttng_live_msg_iter) {
             BT_CPPLOGE_APPEND_CAUSE_SPEC(lttng_live->logger,
                                          "Failed to create lttng_live_msg_iter");
@@ -1627,9 +1626,6 @@ static bt2::Value::Shared lttng_live_query_support_info(const bt2::ConstMapValue
 {
     struct bt_common_lttng_live_url_parts parts = {};
     bt_common_lttng_live_url_parts_deleter partsDeleter {parts};
-
-    /* Used by the logging macros */
-    __attribute__((unused)) bt_self_component *self_comp = NULL;
 
     const auto typeValue = params["type"];
     if (!typeValue) {
@@ -1795,7 +1791,6 @@ lttng_live_component_init(bt_self_component_source *self_comp_src,
     try {
         lttng_live_component::UP lttng_live;
         bt_component_class_initialize_method_status ret;
-        bt_self_component *self_comp = bt_self_component_source_as_self_component(self_comp_src);
         bt_self_component_add_port_status add_port_status;
 
         ret = lttng_live_component_create(params, self_comp_src, lttng_live);
@@ -1810,7 +1805,8 @@ lttng_live_component_init(bt_self_component_source *self_comp_src,
             return ret;
         }
 
-        bt_self_component_set_data(self_comp, lttng_live.release());
+        bt_self_component_set_data(bt_self_component_source_as_self_component(self_comp_src),
+                                   lttng_live.release());
 
         return BT_COMPONENT_CLASS_INITIALIZE_METHOD_STATUS_OK;
     } catch (const std::bad_alloc&) {

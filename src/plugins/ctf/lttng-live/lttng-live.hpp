@@ -336,9 +336,10 @@ struct lttng_live_msg_iter
     using UP = std::unique_ptr<lttng_live_msg_iter>;
 
     explicit lttng_live_msg_iter(const bt2c::Logger& parentLogger,
-                                 const bt2::SelfComponent selfCompParam) :
+                                 const bt2::SelfComponent selfCompParam,
+                                 const bt2::SelfMessageIterator selfMsgIter) :
         logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/MSG-ITER"},
-        selfComp {selfCompParam}
+        selfComp {selfCompParam}, selfMsgIter {selfMsgIter}
     {
     }
 
@@ -351,8 +352,7 @@ struct lttng_live_msg_iter
     /* Weak reference. */
     struct lttng_live_component *lttng_live_comp = nullptr;
 
-    /* Weak reference. */
-    bt_self_message_iterator *self_msg_iter = nullptr;
+    bt2::SelfMessageIterator selfMsgIter;
 
     live_viewer_connection::UP viewer_connection;
 
@@ -432,7 +432,7 @@ bt_component_class_query_method_status lttng_live_query(bt_self_component_class_
 void lttng_live_component_finalize(bt_self_component_source *component);
 
 bt_message_iterator_class_next_method_status
-lttng_live_msg_iter_next(bt_self_message_iterator *iterator, bt_message_array_const msgs,
+lttng_live_msg_iter_next(bt_self_message_iterator *self_msg_it, bt_message_array_const msgs,
                          uint64_t capacity, uint64_t *count);
 
 bt_message_iterator_class_initialize_method_status

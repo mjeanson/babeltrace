@@ -145,7 +145,7 @@ bt2::Value::Shared trace_infos_query(const bt2::ConstMapValue params, const bt2c
 
     if (ctf_fs_component_create_ctf_fs_trace(
             &ctf_fs, parameters.inputs,
-            parameters.traceName ? parameters.traceName->c_str() : nullptr, nullptr)) {
+            parameters.traceName ? parameters.traceName->c_str() : nullptr, {})) {
         BT_CPPLOGE_APPEND_CAUSE_AND_THROW_SPEC(logger, bt2::Error, "Failed to create trace");
     }
 
