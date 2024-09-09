@@ -10,7 +10,7 @@
 
 #include <babeltrace2/babeltrace.h>
 
-#include "cpp-common/bt2c/fmt.hpp"
+#include "cpp-common/bt2c/fmt.hpp" /* IWYU pragma: keep */
 #include "cpp-common/bt2s/make-unique.hpp"
 #include "cpp-common/vendor/fmt/format.h"
 
