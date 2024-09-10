@@ -333,13 +333,13 @@ const ErrorTestCase errorTestCases[] = {
      [](const bt2::SelfComponent self) {
          return self.createClockClass();
      },
-     "no clock class followed by clock class", "Expecting no clock class, but got one"},
+     "no clock class followed by clock class", "Expecting no clock class, got one"},
 
     {[](const bt2::SelfComponent self) {
          return self.createClockClass();
      },
      noClockClass, "clock class with Unix epoch origin followed by no clock class",
-     "Expecting a clock class, but got none"},
+     "Expecting a clock class with Unix epoch origin, got none"},
 
     {[](const bt2::SelfComponent self) {
          return self.createClockClass();
@@ -350,8 +350,8 @@ const ErrorTestCase errorTestCases[] = {
          clockCls->originIsUnixEpoch(false);
          return clockCls;
      },
-     "clock class with Unix epoch origin followed by clock class with other origin",
-     "Expecting a clock class having a Unix epoch origin, but got one not having a Unix epoch origin"},
+     "clock class with Unix epoch origin followed by clock class with unknown origin",
+     "Expecting a clock class with Unix epoch origin, got one with unknown origin"},
 
     {[](const bt2::SelfComponent self) {
          const auto clockCls = self.createClockClass();
@@ -359,8 +359,8 @@ const ErrorTestCase errorTestCases[] = {
          clockCls->originIsUnixEpoch(false).uuid(uuidA);
          return clockCls;
      },
-     noClockClass, "clock class with other origin and a UUID followed by no clock class",
-     "Expecting a clock class, but got none"},
+     noClockClass, "clock class with unknown origin and a UUID followed by no clock class",
+     "Expecting a clock class with unknown origin and a specific UUID, got none"},
 
     {[](const bt2::SelfComponent self) {
          const auto clockCls = self.createClockClass();
@@ -371,8 +371,8 @@ const ErrorTestCase errorTestCases[] = {
      [](const bt2::SelfComponent self) {
          return self.createClockClass();
      },
-     "clock class with other origin and a UUID followed by clock class with Unix epoch origin",
-     "Expecting a clock class not having a Unix epoch origin, but got one having a Unix epoch origin"},
+     "clock class with unknown origin and a UUID followed by clock class with Unix epoch origin",
+     "Expecting a clock class with unknown origin and a specific UUID, got one with Unix epoch origin"},
 
     {[](const bt2::SelfComponent self) {
          const auto clockCls = self.createClockClass();
@@ -386,8 +386,8 @@ const ErrorTestCase errorTestCases[] = {
          clockCls->originIsUnixEpoch(false);
          return clockCls;
      },
-     "clock class with other origin and a UUID followed by clock class with other origin and no UUID",
-     "Expecting a clock class with a UUID, but got one without a UUID"},
+     "clock class with unknown origin and a UUID followed by clock class with unknown origin and no UUID",
+     "Expecting a clock class with unknown origin and a specific UUID, got one without a UUID"},
 
     {[](const bt2::SelfComponent self) {
          const auto clockCls = self.createClockClass();
@@ -401,8 +401,8 @@ const ErrorTestCase errorTestCases[] = {
          clockCls->originIsUnixEpoch(false).uuid(uuidB);
          return clockCls;
      },
-     "clock class with other origin and a UUID followed by clock class with other origin and another UUID",
-     "Expecting a clock class with a specific UUID, but got one with a different UUID"},
+     "clock class with unknown origin and a UUID followed by clock class with unknown origin and another UUID",
+     "Expecting a clock class with unknown origin and a specific UUID, got one with a different UUID"},
 
     {[](const bt2::SelfComponent self) {
          const auto clockCls = self.createClockClass();
@@ -410,8 +410,8 @@ const ErrorTestCase errorTestCases[] = {
          clockCls->originIsUnixEpoch(false);
          return clockCls;
      },
-     noClockClass, "clock class with other origin and no UUID followed by no clock class",
-     "Expecting a clock class, but got none"},
+     noClockClass, "clock class with unknown origin and no UUID followed by no clock class",
+     "Expecting a clock class, got none"},
 
     {[](const bt2::SelfComponent self) {
          const auto clockCls = self.createClockClass();
@@ -426,7 +426,7 @@ const ErrorTestCase errorTestCases[] = {
          clockCls->originIsUnixEpoch(false);
          return clockCls;
      },
-     "clock class with other origin and no UUID followed by different clock class",
+     "clock class with unknown origin and no UUID followed by different clock class",
      "Unexpected clock class"},
 };
 

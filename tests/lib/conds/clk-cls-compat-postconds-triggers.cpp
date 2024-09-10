@@ -190,7 +190,7 @@ void addClkClsCompatTriggers(CondTriggers& triggers)
         [](const bt2::SelfComponent self) {
             return self.createClockClass();
         },
-        "message-iterator-class-next-method:clock-class-has-non-unix-epoch-origin");
+        "message-iterator-class-next-method:clock-class-has-unknown-origin");
 
     addValidCases(
         [](const bt2::SelfComponent self) {
