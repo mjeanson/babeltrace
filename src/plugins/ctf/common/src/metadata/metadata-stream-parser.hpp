@@ -21,6 +21,12 @@
 namespace ctf {
 namespace src {
 
+enum class MetadataStreamMajorVersion
+{
+    V1 = 1,
+    V2,
+};
+
 /*
  * Abstract base CTF metadata stream parser class.
  */
@@ -36,6 +42,7 @@ public:
     {
         std::unique_ptr<TraceCls> traceCls;
         bt2s::optional<bt2c::Uuid> uuid;
+        MetadataStreamMajorVersion metadataVersion;
     };
 
 protected:

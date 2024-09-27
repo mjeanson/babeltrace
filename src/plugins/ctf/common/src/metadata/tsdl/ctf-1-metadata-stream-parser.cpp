@@ -707,7 +707,7 @@ Ctf1MetadataStreamParser::parse(const bt2::OptionalBorrowedObject<bt2::SelfCompo
     Ctf1MetadataStreamParser parser {selfComp, clkClsCfg, parentLogger};
 
     parser.parseSection(buffer);
-    return {parser.releaseTraceCls(), parser.metadataStreamUuid()};
+    return {parser.releaseTraceCls(), parser.metadataStreamUuid(), MetadataStreamMajorVersion::V1};
 }
 
 } /* namespace src */

@@ -66,7 +66,7 @@ Ctf2MetadataStreamParser::parse(const bt2::OptionalBorrowedObject<bt2::SelfCompo
             parser._mLogger, bt2::Error, "Missing data stream class fragment in metadata stream.");
     }
 
-    return {parser.releaseTraceCls(), parser.metadataStreamUuid()};
+    return {parser.releaseTraceCls(), parser.metadataStreamUuid(), MetadataStreamMajorVersion::V2};
 }
 
 void Ctf2MetadataStreamParser::_parseSection(const bt2c::ConstBytes buffer)

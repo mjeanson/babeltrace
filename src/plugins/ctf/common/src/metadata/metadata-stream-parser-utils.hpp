@@ -18,12 +18,6 @@
 namespace ctf {
 namespace src {
 
-enum class MetadataStreamMajorVersion
-{
-    V1 = 1,
-    V2,
-};
-
 /*
  * Returns the major CTF version (1 or 2) of the metadata stream
  * in `buffer`.
