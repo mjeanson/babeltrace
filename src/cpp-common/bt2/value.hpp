@@ -210,6 +210,17 @@ public:
         return CommonValueRawValueProxy<CommonValue> {*this};
     }
 
+    SharedValue<CommonValue<bt_value>, bt_value> copy() const
+    {
+        bt_value *copy;
+
+        if (bt_value_copy(this->libObjPtr(), &copy) == BT_VALUE_COPY_STATUS_MEMORY_ERROR) {
+            throw MemoryError {};
+        }
+
+        return SharedValue<CommonValue<bt_value>, bt_value>::createWithoutRef(copy);
+    }
+
     std::uint64_t arrayLength() const noexcept
     {
         return this->asArray().length();
