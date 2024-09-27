@@ -88,6 +88,17 @@ public:
 
     /*
      * Builds a logger from the self component class `selfCompCls` using
+     * the tag `tag` and the logging level `logLevel`.
+     */
+    explicit Logger(const bt2::SelfComponentClass selfCompCls, const bt2::LoggingLevel logLevel,
+                    std::string tag) noexcept :
+        _mSelfCompCls {selfCompCls},
+        _mLevel {static_cast<Level>(logLevel)}, _mTag {std::move(tag)}
+    {
+    }
+
+    /*
+     * Builds a logger from the self component class `selfCompCls` using
      * the tag `tag` and the logging level of `privQueryExec`.
      */
     explicit Logger(const bt2::SelfComponentClass selfCompCls,
