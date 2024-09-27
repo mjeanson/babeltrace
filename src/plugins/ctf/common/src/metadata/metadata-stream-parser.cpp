@@ -1820,7 +1820,9 @@ private:
                 clkCls.libCls()->setOriginIsUnixEpoch();
             } else if (_mMipVersion >= 1) {
                 /* Custom (MIP 1+) */
-                clkCls.libCls()->origin(clkCls.origin()->ns() ? *clkCls.origin()->ns() : nullptr,
+                clkCls.libCls()->origin(clkCls.origin()->ns() ?
+                                            static_cast<bt2c::CStringView>(*clkCls.origin()->ns()) :
+                                            nullptr,
                                         clkCls.origin()->name(), clkCls.origin()->uid());
             }
         } else {
