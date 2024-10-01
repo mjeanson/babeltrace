@@ -23,28 +23,25 @@ plan_tests $NUM_TESTS
 test_no_lost() {
 	local trace=$1
 
-	"${BT_TESTS_BT2_BIN}" "$trace" >/dev/null 2>&1
+	bt_cli "/dev/null" "/dev/null" "$trace"
 	ok $? "Trace parses"
-	"${BT_TESTS_BT2_BIN}" "$trace" 2>&1 >/dev/null | bt_grep "\[warning\] Tracer lost"
-	if test $? = 0; then
-		fail 1 "Should not find any lost events"
-	else
-		ok 0 "No events lost"
-	fi
+
+	bt_cli /dev/null /dev/fd/3 "$trace" 3>&1 | bt_grep "\[warning\] Tracer lost"
+	isnt $? 0 "No events lost"
 }
 
 test_lost() {
 	local trace=$1
 	local expectedcountstr=$2
 
-	"${BT_TESTS_BT2_BIN}" "$trace" >/dev/null 2>&1
+	bt_cli "/dev/null" "/dev/null" "$trace"
 	ok $? "Trace parses"
 
 	# Convert warnings like:
 	# WARNING: Tracer discarded 2 trace packets between ....
 	# WARNING: Tracer discarded 3 trace packets between ....
 	# into "2,3" and make sure it matches the expected result
-	"${BT_TESTS_BT2_BIN}" "$trace" 2>&1 >/dev/null | bt_grep "WARNING: Tracer discarded" \
+	bt_cli /dev/null /dev/fd/3 "$trace" 3>&1 | bt_grep "WARNING: Tracer discarded" \
 		| cut -d" " -f4 | tr "\n" "," | "${BT_TESTS_SED_BIN}" "s/.$//" | \
 		bt_grep "$expectedcountstr" >/dev/null
 	ok $? "Lost events string matches $expectedcountstr"
