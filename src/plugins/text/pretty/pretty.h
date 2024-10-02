@@ -63,6 +63,7 @@ struct pretty_options {
 
 struct pretty_component {
 	struct pretty_options options;
+	uint64_t mip_version;
 	bt_message_iterator *iterator;
 	FILE *out, *err;
 	int depth;	/* nesting, used for tabulation alignment. */

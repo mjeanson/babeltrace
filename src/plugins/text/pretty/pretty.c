@@ -578,6 +578,7 @@ bt_component_class_initialize_method_status pretty_init(
 		goto error;
 	}
 
+	pretty->mip_version = bt_self_component_get_graph_mip_version(self_comp);
 	pretty->self_comp = self_comp;
 	pretty->log_level = log_level;
 

@@ -1517,6 +1517,7 @@ int print_discarded_elements_msg(struct pretty_component *pretty,
 	const char *stream_name;
 	const char *trace_name;
 	bt_uuid trace_uuid;
+	const char *trace_uid;
 	int64_t stream_class_id;
 	int64_t stream_id;
 	const char *init_msg;
@@ -1543,8 +1544,12 @@ int print_discarded_elements_msg(struct pretty_component *pretty,
 		trace_name = "(unknown)";
 	}
 
-	/* Trace UUID */
-	trace_uuid = bt_trace_get_uuid(trace);
+	/* Trace UUID or UID */
+	if (pretty->mip_version == 0) {
+		trace_uuid = bt_trace_get_uuid(trace);
+	} else {
+		trace_uid = bt_trace_get_uid(trace);
+	}
 
 	/* Format message */
 	g_string_assign(pretty->string, "");
@@ -1584,12 +1589,22 @@ int print_discarded_elements_msg(struct pretty_component *pretty,
 
 	bt_common_g_string_append_printf(pretty->string, " in trace \"%s\" ", trace_name);
 
-	if (trace_uuid) {
-		bt_common_g_string_append_printf(pretty->string,
-			"(UUID: " BT_UUID_FMT ") ",
-			BT_UUID_FMT_VALUES(trace_uuid));
+	if (pretty->mip_version == 0) {
+		if (trace_uuid) {
+			bt_common_g_string_append_printf(pretty->string,
+				"(UUID: " BT_UUID_FMT ") ",
+				BT_UUID_FMT_VALUES(trace_uuid));
+		} else {
+			bt_common_g_string_append(pretty->string, "(no UUID) ");
+		}
 	} else {
-		bt_common_g_string_append(pretty->string, "(no UUID) ");
+		if (trace_uid) {
+			bt_common_g_string_append_printf(pretty->string,
+				"(UID: %s) ", trace_uid);
+		} else {
+			bt_common_g_string_append(pretty->string, "(no UID) ");
+
+		}
 	}
 
 	bt_common_g_string_append_printf(pretty->string,
