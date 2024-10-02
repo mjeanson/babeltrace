@@ -109,8 +109,7 @@ class _ScalarItem(_Item):
     # Returns the size, in bytes, of this item.
     @property
     @abc.abstractmethod
-    def size(self) -> int:
-        ...
+    def size(self) -> int: ...
 
 
 # A repeatable item.
@@ -618,7 +617,7 @@ class ParseError(RuntimeError):
 
     def _add_msg(self, msg: str, text_loc: TextLocation):
         self._msgs.append(
-            ParseErrorMessage._create(  # pyright: ignore[reportPrivateUsage]
+            ParseErrorMessage._create(
                 msg, text_loc
             )
         )
@@ -633,12 +632,12 @@ class ParseError(RuntimeError):
 
 # Raises a parsing error, forwarding the parameters to the constructor.
 def _raise_error(msg: str, text_loc: TextLocation) -> NoReturn:
-    raise ParseError._create(msg, text_loc)  # pyright: ignore[reportPrivateUsage]
+    raise ParseError._create(msg, text_loc)
 
 
 # Adds a message to the parsing error `exc`.
 def _add_error_msg(exc: ParseError, msg: str, text_loc: TextLocation):
-    exc._add_msg(msg, text_loc)  # pyright: ignore[reportPrivateUsage]
+    exc._add_msg(msg, text_loc)
 
 
 # Appends a message to the parsing error `exc` and reraises it.
@@ -761,7 +760,7 @@ class _Parser:
     # Current text location.
     @property
     def _text_loc(self):
-        return TextLocation._create(  # pyright: ignore[reportPrivateUsage]
+        return TextLocation._create(
             self._line_no, self._col_no
         )
 
@@ -2105,8 +2104,7 @@ class _NodeVisitor(ast.NodeVisitor):
         self._parent_is_call = False
 
     @abc.abstractmethod
-    def _visit_name(self, name: str):
-        ...
+    def _visit_name(self, name: str): ...
 
 
 # Expression validator: validates that all the names within the
@@ -2607,7 +2605,7 @@ class _Gen:
             # Process the contained group
             init_data_size = len(self._data)
             parse_error_msg = (
-                ParseErrorMessage._create(  # pyright: ignore[reportPrivateUsage]
+                ParseErrorMessage._create(
                     parse_error_msg_text, item.text_loc
                 )
             )
@@ -2833,9 +2831,7 @@ def parse(
         init_offset,
         init_byte_order,
     )
-    return ParseResult._create(  # pyright: ignore[reportPrivateUsage]
-        gen.data, gen.variables, gen.labels, gen.offset, gen.bo
-    )
+    return ParseResult._create(gen.data, gen.variables, gen.labels, gen.offset, gen.bo)
 
 
 # Raises a command-line error with the message `msg`.

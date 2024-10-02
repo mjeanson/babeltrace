@@ -221,8 +221,8 @@ def _check_type(val: Val, expected_type: Type[Val]):
         raise TypeError(
             "`{}`: expecting {} value, got {}".format(
                 val.path,
-                expected_type._name,  # pyright: ignore [reportPrivateUsage]
-                type(val)._name,  # pyright: ignore [reportPrivateUsage]
+                expected_type._name,
+                type(val)._name,
             )
         )
 

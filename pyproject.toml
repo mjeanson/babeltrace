@@ -26,3 +26,6 @@ extend_skip_glob = [
     "tests/utils/python/typing/typing.py",
 ]
 length_sort = true
+
+[tool.pyright]
+reportPrivateUsage = false
