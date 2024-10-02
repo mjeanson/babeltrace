@@ -200,9 +200,13 @@ int MessageComparator::_compareEventClasses(const bt2::ConstEventClass left,
 }
 
 int MessageComparator::_compareClockClasses(const bt2::ConstClockClass left,
-                                            const bt2::ConstClockClass right) noexcept
+                                            const bt2::ConstClockClass right) const noexcept
 {
-    if (const auto ret = _compareOptUuids(left.uuid(), right.uuid())) {
+    if (_mGraphMipVersion == 0) {
+        if (const auto ret = _compareOptUuids(left.uuid(), right.uuid())) {
+            return ret;
+        }
+    } else if (const auto ret = _compareIdentities(left.identity(), right.identity())) {
         return ret;
     }
 
@@ -222,7 +226,7 @@ int MessageComparator::_compareClockClasses(const bt2::ConstClockClass left,
 }
 
 int MessageComparator::_compareStreamsSameIds(const bt2::ConstStream left,
-                                              const bt2::ConstStream right) noexcept
+                                              const bt2::ConstStream right) const noexcept
 {
     BT_ASSERT_DBG(left.id() == right.id());
 
@@ -299,8 +303,11 @@ int MessageComparator::_compareStreamsSameIds(const bt2::ConstStream left,
     }
 
     /* Compare the clock classes associated to the stream classes. */
-    return _compareOptionalBorrowedObjects(leftCls.defaultClockClass(),
-                                           rightCls.defaultClockClass(), _compareClockClasses);
+    return _compareOptionalBorrowedObjects(
+        leftCls.defaultClockClass(), rightCls.defaultClockClass(),
+        [this](const bt2::ConstClockClass leftCc, const bt2::ConstClockClass rightCc) {
+            return _compareClockClasses(leftCc, rightCc);
+        });
 }
 
 int MessageComparator::_compareClockSnapshots(const bt2::ConstClockSnapshot left,
@@ -345,7 +352,7 @@ bt2::OptionalBorrowedObject<bt2::ConstStream> borrowStream(const bt2::ConstMessa
 } /* namespace */
 
 int MessageComparator::_compareMessagesSameType(const bt2::ConstMessage left,
-                                                const bt2::ConstMessage right) noexcept
+                                                const bt2::ConstMessage right) const noexcept
 {
     BT_ASSERT_DBG(left.type() == right.type());
 
