@@ -32,15 +32,13 @@ test_intersect() {
 	ok $? "run without --stream-intersection"
 
 	cnt=$(wc -l < "${stdout}")
-	test "${cnt// /}" = "$totalevents"
-	ok $? "$totalevents events in the whole trace"
+	is "${cnt// /}" "$totalevents" "$totalevents events in the whole trace"
 
 	bt_cli "${stdout}" "/dev/null" --stream-intersection "${trace}"
 	ok $? "run with --stream-intersection"
 
 	cnt=$(wc -l < "${stdout}")
-	test "${cnt// /}" = "$intersect"
-	ok $? "$intersect events in streams intersecting"
+	is "${cnt// /}" "$intersect" "$intersect events in streams intersecting"
 }
 
 test_intersect_fails() {
