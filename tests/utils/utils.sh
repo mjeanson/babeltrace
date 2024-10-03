@@ -234,11 +234,19 @@ bt_cli() {
 # Checks the differences between:
 #
 # • The (expected) contents of the file having the path `$1`.
-#
 # • The contents of another file having the path `$2`.
 #
-# Both files are passed through bt_remove_cr_inline() to remove CR
-# characters.
+# Both files are passed through bt_remove_cr_inline() to remove
+# CR characters.
+#
+# ┌──────────────────────────────────────────────────────────────────┐
+# │ NOTE: A common activity being to update an existing expectation  │
+# │ file from an actual output when developing features and fixing   │
+# │ bugs, and knowing that this function processes the majority of   │
+# │ expectation and result files, this function overwrites `$1` with │
+# │ `$2` when the `BT_TESTS_DIFF_WRITE_EXPECTED` variable isn't `0`  │
+# │ and `diff` finds differences.                                    │
+# └──────────────────────────────────────────────────────────────────┘
 #
 # Returns 0 if there's no difference, or not zero otherwise.
 bt_diff() {
@@ -256,6 +264,14 @@ bt_diff() {
 	fi
 
 	diff -u <(bt_remove_cr_inline "$expected_file") <(bt_remove_cr_inline "$actual_file") 1>&2
+
+	local -r ret=$?
+
+	if [[ $ret != 0 && -f $expected_file && ${BT_TESTS_DIFF_WRITE_EXPECTED:-0} != 0 ]]; then
+		cp "$actual_file" "$expected_file"
+	fi
+
+	return $ret
 }
 
 # Checks the difference between:
