@@ -31,7 +31,4 @@ EXTRA_DIST = \
 	LICENSES/MIT.txt \
 	LICENSES/PSF-2.0.txt \
 	std-ext-lib.txt \
-	tools/format-cpp.sh \
-	tools/lint-py.sh \
-	tools/shellcheck.sh \
 	version
