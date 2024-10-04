@@ -67,12 +67,20 @@ test_compare_to_ctf_fs() {
 	expected_stderr=$(mktemp -t test-debug-info-stderr-expected.XXXXXX)
 
 	# Create expected files using a graph without a `debug-info` component.
-	bt_cli "$expected_stdout" "$expected_stderr" "${cli_args[@]}" \
+	bt_cli \
+		"$expected_stdout" \
+		"$expected_stderr" \
+		"${cli_args[@]}" \
+		--allowed-mip-versions=0 \
 		"${details_cli_args[@]}"
 
 	# Read the same trace with a `debug-info` component in the graph.
-	bt_cli "$actual_stdout" "$actual_stderr" "${cli_args[@]}" \
-		"${details_cli_args[@]}" "${debug_info_cli_args[@]}"
+	bt_cli \
+		"$actual_stdout" \
+		"$actual_stderr" \
+		"${cli_args[@]}" \
+		"${details_cli_args[@]}" \
+		"${debug_info_cli_args[@]}"
 
 	bt_diff "$expected_stdout" "$actual_stdout"
 	ok $? "Input '$test_name' gives the expected stdout"

@@ -9,7 +9,7 @@ Trace class:
     Discarded packets have default clock snapshots: Yes
     Default clock class:
       Name: monotonic
-      UUID: db965ea1-f862-45a3-ab65-602642fdad90
+      UID: db965ea1-f862-45a3-ab65-602642fdad90
       Description: Monotonic Clock
       Frequency (Hz): 1,000,000,000
       Precision (cycles): 0
@@ -21,9 +21,6 @@ Trace class:
     Event common context field class: Structure (1 member):
       vpid: Signed integer (32-bit, Base 10)
     Event class `lttng_ust_statedump:procname` (ID 0):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (1 member):
         procname: String
@@ -31,8 +28,7 @@ Trace class:
 [Unknown]
 {Trace 0, Stream class ID 0, Stream ID 2}
 Stream beginning:
-  Trace:
-    UUID: 0f37a32b-1796-408d-b723-bd27b45921c6
+  Trace (UID `0f37a32b-1796-408d-b723-bd27b45921c6`):
     Environment (5 entries):
       domain: ust
       hostname: joraj-alpa

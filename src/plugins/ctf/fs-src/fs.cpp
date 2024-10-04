@@ -1489,6 +1489,40 @@ static ctf_fs_component::UP ctf_fs_create(const bt2::ConstMapValue params,
     return ctf_fs;
 }
 
+bt_component_class_get_supported_mip_versions_method_status
+ctf_fs_get_supported_mip_versions(bt_self_component_class_source *selfCompClsSrc,
+                                  const bt_value *params, void *, bt_logging_level logLevel,
+                                  bt_integer_range_set_unsigned *supportedVersionsRaw)
+{
+    try {
+        const bt2c::Logger logger {bt2::wrap(selfCompClsSrc),
+                                   static_cast<bt2::LoggingLevel>(logLevel),
+                                   "PLUGIN/SRC.CTF.FS/COMP"};
+        const auto parameters = read_src_fs_parameters(bt2::ConstMapValue {params}, logger);
+        auto ctf_fs = bt2s::make_unique<ctf_fs_component>(parameters.clkClsCfg, logger);
+
+        if (ctf_fs_component_create_ctf_fs_trace(
+                ctf_fs.get(), parameters.inputs,
+                parameters.traceName ? parameters.traceName->c_str() : nullptr, {})) {
+            throw bt2::Error {"Failed to build CTF trace"};
+        }
+
+        auto supportedVersions = bt2::wrap(supportedVersionsRaw);
+
+        supportedVersions.addRange(1, 1);
+
+        if (ctf_fs->trace->metadataVersion() == ctf::src::MetadataStreamMajorVersion::V1) {
+            supportedVersions.addRange(0, 0);
+        }
+
+        return BT_COMPONENT_CLASS_GET_SUPPORTED_MIP_VERSIONS_METHOD_STATUS_OK;
+    } catch (const std::bad_alloc&) {
+        return BT_COMPONENT_CLASS_GET_SUPPORTED_MIP_VERSIONS_METHOD_STATUS_MEMORY_ERROR;
+    } catch (const bt2::Error&) {
+        return BT_COMPONENT_CLASS_GET_SUPPORTED_MIP_VERSIONS_METHOD_STATUS_ERROR;
+    }
+}
+
 bt_component_class_initialize_method_status ctf_fs_init(bt_self_component_source *self_comp_src,
                                                         bt_self_component_source_configuration *,
                                                         const bt_value *params, void *)

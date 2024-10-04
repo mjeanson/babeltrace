@@ -19,18 +19,57 @@ source "$UTILSSH"
 this_dir_relative="plugins/sink.text.details/succeed"
 expect_dir="$BT_TESTS_DATADIR/$this_dir_relative"
 
+# Print the expected stdout file for test with name `$1`, CTF version
+# `$2` and MIP version `$3`.
+find_expect_file() {
+	local test_name="$1"
+	local ctf_version="$2"
+	local mip_version="$3"
+
+	names=(
+		"$expect_dir/$test_name-ctf$ctf_version-mip$mip_version.expect"
+		"$expect_dir/$test_name-ctf$ctf_version.expect"
+		"$expect_dir/$test_name-mip$mip_version.expect"
+		"$expect_dir/$test_name.expect"
+	)
+
+	for name in "${names[@]}"; do
+		if [[ -f "$name" ]]; then
+			echo "$name"
+			return
+		fi
+	done
+
+	echo "Could not find expect file for test $test_name, CTF $ctf_version, MIP $mip_version" >&2
+	exit 1
+}
+
 test_details() {
 	local test_name="$1"
 	local trace_name="$2"
 	shift 2
 	local details_args=("$@")
 	local trace_dir="$BT_CTF_TRACES_PATH/1/succeed/$trace_name"
-	local expect_path="$expect_dir/$test_name.expect"
+	local expect_path
 
-	bt_diff_cli "$expect_path" /dev/null \
-		"$trace_dir" -p trace-name=the-trace \
-		-c sink.text.details "${details_args[@]+${details_args[@]}}"
-	ok $? "'$test_name' test has the expected output"
+	for ctf_version in 1 2; do
+		local trace_dir="$BT_CTF_TRACES_PATH/${ctf_version}/succeed/$trace_name"
+
+		for mip_version in 0 1; do
+			if ! bt_is_valid_ctf_mip_combo $ctf_version $mip_version; then
+				continue;
+			fi
+
+			expect_path="$(find_expect_file "$test_name" $ctf_version $mip_version)"
+
+			diag "CTF $ctf_version, MIP $mip_version, expect file $expect_path"
+			bt_diff_cli "$expect_path" /dev/null \
+				--allowed-mip-versions=$mip_version \
+				"$trace_dir" -p trace-name=the-trace \
+				-c sink.text.details "${details_args[@]+${details_args[@]}}"
+			ok $? "CTF $ctf_version: MIP $mip_version: '$test_name' test has the expected output"
+		done
+	done
 }
 
 # This is used for the moment because the source is `src.ctf.fs` and
@@ -45,7 +84,7 @@ test_details_no_stream_name() {
 		"${details_args[@]+${details_args[@]}}" -p with-stream-name=no
 }
 
-plan_tests 12
+plan_tests 36
 
 test_details_no_stream_name default wk-heartbeat-u
 test_details_no_stream_name default-compact wk-heartbeat-u -p compact=yes

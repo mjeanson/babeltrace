@@ -9,7 +9,7 @@ Trace class:
     Discarded packets have default clock snapshots: Yes
     Default clock class:
       Name: monotonic
-      UUID: 78760d96-b4c7-47f0-bd66-b73a504fee96
+      UID: 78760d96-b4c7-47f0-bd66-b73a504fee96
       Description: Monotonic Clock
       Frequency (Hz): 1,000,000,000
       Precision (cycles): 0
@@ -19,15 +19,9 @@ Trace class:
     Packet context field class: Structure (1 member):
       cpu_id: Unsigned integer (32-bit, Base 10)
     Event class `lttng_ust_statedump:start` (ID 0):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (0 members)
     Event class `lttng_ust_statedump:bin_info` (ID 1):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (6 members):
         baddr: Unsigned integer (64-bit, Base 16)
@@ -37,34 +31,22 @@ Trace class:
         has_build_id: Unsigned integer (8-bit, Base 10)
         has_debug_link: Unsigned integer (8-bit, Base 10)
     Event class `lttng_ust_statedump:build_id` (ID 2):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (3 members):
         baddr: Unsigned integer (64-bit, Base 16)
         _build_id_length: Unsigned integer (64-bit, Base 10)
-        build_id: Dynamic array (with length field) (Length field path [Event payload: 1]):
+        build_id: Dynamic array (with length field) (Length field location [Event payload: _build_id_length]):
           Element: Unsigned integer (8-bit, Base 16)
     Event class `lttng_ust_statedump:debug_link` (ID 3):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (3 members):
         baddr: Unsigned integer (64-bit, Base 16)
         crc: Unsigned integer (32-bit, Base 10)
         filename: String
     Event class `lttng_ust_statedump:end` (ID 4):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (0 members)
     Event class `lttng_ust_lib:load` (ID 5):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (5 members):
         baddr: Unsigned integer (64-bit, Base 16)
@@ -73,43 +55,28 @@ Trace class:
         has_build_id: Unsigned integer (8-bit, Base 10)
         has_debug_link: Unsigned integer (8-bit, Base 10)
     Event class `lttng_ust_lib:build_id` (ID 6):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (3 members):
         baddr: Unsigned integer (64-bit, Base 16)
         _build_id_length: Unsigned integer (64-bit, Base 10)
-        build_id: Dynamic array (with length field) (Length field path [Event payload: 1]):
+        build_id: Dynamic array (with length field) (Length field location [Event payload: _build_id_length]):
           Element: Unsigned integer (8-bit, Base 16)
     Event class `lttng_ust_lib:debug_link` (ID 7):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (3 members):
         baddr: Unsigned integer (64-bit, Base 16)
         crc: Unsigned integer (32-bit, Base 10)
         filename: String
     Event class `lttng_ust_lib:unload` (ID 8):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (1 member):
         baddr: Unsigned integer (64-bit, Base 16)
     Event class `lttng_ust_tracef:event` (ID 9):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug
       Log level: Debug
       Payload field class: Structure (2 members):
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_EMERG` (ID 10):
-      User attributes:
-        lttng.org,2009:
-          log-level: emergency
       Log level: Emergency
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -118,9 +85,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_ALERT` (ID 11):
-      User attributes:
-        lttng.org,2009:
-          log-level: alert
       Log level: Alert
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -129,9 +93,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_CRIT` (ID 12):
-      User attributes:
-        lttng.org,2009:
-          log-level: critical
       Log level: Critical
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -140,9 +101,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_ERR` (ID 13):
-      User attributes:
-        lttng.org,2009:
-          log-level: error
       Log level: Error
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -151,9 +109,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_WARNING` (ID 14):
-      User attributes:
-        lttng.org,2009:
-          log-level: warning
       Log level: Warning
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -162,9 +117,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_NOTICE` (ID 15):
-      User attributes:
-        lttng.org,2009:
-          log-level: notice
       Log level: Notice
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -173,9 +125,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_INFO` (ID 16):
-      User attributes:
-        lttng.org,2009:
-          log-level: info
       Log level: Info
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -184,9 +133,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_SYSTEM` (ID 17):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:system
       Log level: Debug (system)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -195,9 +141,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_PROGRAM` (ID 18):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:program
       Log level: Debug (program)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -206,9 +149,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_PROCESS` (ID 19):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:process
       Log level: Debug (process)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -217,9 +157,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_MODULE` (ID 20):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:module
       Log level: Debug (module)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -228,9 +165,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_UNIT` (ID 21):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:unit
       Log level: Debug (unit)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -239,9 +173,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_FUNCTION` (ID 22):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:function
       Log level: Debug (function)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -250,9 +181,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_LINE` (ID 23):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -261,9 +189,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG` (ID 24):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug
       Log level: Debug
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -272,9 +197,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `ust_tests_hello:tptest` (ID 25):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (23 members):
         intfield: Signed integer (32-bit, Base 10)
@@ -294,32 +216,28 @@ Trace class:
           Element: Signed integer (64-bit, Base 16)
         arrfield2: String
         _seqfield1_length: Unsigned integer (64-bit, Base 10)
-        seqfield1: Dynamic array (with length field) (Length field path [Event payload: 11]):
+        seqfield1: Dynamic array (with length field) (Length field location [Event payload: _seqfield1_length]):
           Element: Signed integer (8-bit, Base 10)
         _seqfield1_hex_length: Unsigned integer (64-bit, Base 10)
-        seqfield1_hex: Dynamic array (with length field) (Length field path [Event payload: 13]):
+        seqfield1_hex: Dynamic array (with length field) (Length field location [Event payload: _seqfield1_hex_length]):
           Element: Signed integer (8-bit, Base 16)
         _seqfield2_length: Unsigned integer (64-bit, Base 10)
         seqfield2: String
         _seqfield_network_3_length: Unsigned integer (64-bit, Base 10)
-        seqfield_network_3: Dynamic array (with length field) (Length field path [Event payload: 17]):
+        seqfield_network_3: Dynamic array (with length field) (Length field location [Event payload: _seqfield_network_3_length]):
           Element: Signed integer (64-bit, Base 10)
         stringfield: String
         floatfield: Single-precision real
         doublefield: Double-precision real
         boolfield: Unsigned integer (8-bit, Base 10)
     Event class `ust_tests_hello:tptest_sighandler` (ID 26):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (0 members)
 
 [Unknown]
 {Trace 0, Stream class ID 0, Stream ID 0}
 Stream beginning:
-  Trace:
-    UUID: 21cdfa5e-9a64-490a-832c-53aca6c101ba
+  Trace (UID `21cdfa5e-9a64-490a-832c-53aca6c101ba`):
     Environment (8 entries):
       domain: ust
       hostname: smarchi-efficios
@@ -337,8 +255,7 @@ Stream beginning:
 [Unknown]
 {Trace 0, Stream class ID 0, Stream ID 1}
 Stream beginning:
-  Trace:
-    UUID: 21cdfa5e-9a64-490a-832c-53aca6c101ba
+  Trace (UID `21cdfa5e-9a64-490a-832c-53aca6c101ba`):
     Environment (8 entries):
       domain: ust
       hostname: smarchi-efficios
@@ -356,8 +273,7 @@ Stream beginning:
 [Unknown]
 {Trace 0, Stream class ID 0, Stream ID 2}
 Stream beginning:
-  Trace:
-    UUID: 21cdfa5e-9a64-490a-832c-53aca6c101ba
+  Trace (UID `21cdfa5e-9a64-490a-832c-53aca6c101ba`):
     Environment (8 entries):
       domain: ust
       hostname: smarchi-efficios
@@ -375,8 +291,7 @@ Stream beginning:
 [Unknown]
 {Trace 0, Stream class ID 0, Stream ID 3}
 Stream beginning:
-  Trace:
-    UUID: 21cdfa5e-9a64-490a-832c-53aca6c101ba
+  Trace (UID `21cdfa5e-9a64-490a-832c-53aca6c101ba`):
     Environment (8 entries):
       domain: ust
       hostname: smarchi-efficios
@@ -402,7 +317,7 @@ Trace class:
     Discarded packets have default clock snapshots: Yes
     Default clock class:
       Name: monotonic
-      UUID: 78760d96-b4c7-47f0-bd66-b73a504fee96
+      UID: 78760d96-b4c7-47f0-bd66-b73a504fee96
       Description: Monotonic Clock
       Frequency (Hz): 1,000,000,000
       Precision (cycles): 0
@@ -412,15 +327,9 @@ Trace class:
     Packet context field class: Structure (1 member):
       cpu_id: Unsigned integer (32-bit, Base 10)
     Event class `lttng_ust_statedump:start` (ID 0):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (0 members)
     Event class `lttng_ust_statedump:bin_info` (ID 1):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (6 members):
         baddr: Unsigned integer (64-bit, Base 16)
@@ -430,34 +339,22 @@ Trace class:
         has_build_id: Unsigned integer (8-bit, Base 10)
         has_debug_link: Unsigned integer (8-bit, Base 10)
     Event class `lttng_ust_statedump:build_id` (ID 2):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (3 members):
         baddr: Unsigned integer (64-bit, Base 16)
         _build_id_length: Unsigned integer (64-bit, Base 10)
-        build_id: Dynamic array (with length field) (Length field path [Event payload: 1]):
+        build_id: Dynamic array (with length field) (Length field location [Event payload: _build_id_length]):
           Element: Unsigned integer (8-bit, Base 16)
     Event class `lttng_ust_statedump:debug_link` (ID 3):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (3 members):
         baddr: Unsigned integer (64-bit, Base 16)
         crc: Unsigned integer (32-bit, Base 10)
         filename: String
     Event class `lttng_ust_statedump:end` (ID 4):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (0 members)
     Event class `lttng_ust_lib:load` (ID 5):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (5 members):
         baddr: Unsigned integer (64-bit, Base 16)
@@ -466,43 +363,28 @@ Trace class:
         has_build_id: Unsigned integer (8-bit, Base 10)
         has_debug_link: Unsigned integer (8-bit, Base 10)
     Event class `lttng_ust_lib:build_id` (ID 6):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (3 members):
         baddr: Unsigned integer (64-bit, Base 16)
         _build_id_length: Unsigned integer (64-bit, Base 10)
-        build_id: Dynamic array (with length field) (Length field path [Event payload: 1]):
+        build_id: Dynamic array (with length field) (Length field location [Event payload: _build_id_length]):
           Element: Unsigned integer (8-bit, Base 16)
     Event class `lttng_ust_lib:debug_link` (ID 7):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (3 members):
         baddr: Unsigned integer (64-bit, Base 16)
         crc: Unsigned integer (32-bit, Base 10)
         filename: String
     Event class `lttng_ust_lib:unload` (ID 8):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (1 member):
         baddr: Unsigned integer (64-bit, Base 16)
     Event class `lttng_ust_tracef:event` (ID 9):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug
       Log level: Debug
       Payload field class: Structure (2 members):
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_EMERG` (ID 10):
-      User attributes:
-        lttng.org,2009:
-          log-level: emergency
       Log level: Emergency
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -511,9 +393,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_ALERT` (ID 11):
-      User attributes:
-        lttng.org,2009:
-          log-level: alert
       Log level: Alert
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -522,9 +401,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_CRIT` (ID 12):
-      User attributes:
-        lttng.org,2009:
-          log-level: critical
       Log level: Critical
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -533,9 +409,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_ERR` (ID 13):
-      User attributes:
-        lttng.org,2009:
-          log-level: error
       Log level: Error
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -544,9 +417,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_WARNING` (ID 14):
-      User attributes:
-        lttng.org,2009:
-          log-level: warning
       Log level: Warning
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -555,9 +425,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_NOTICE` (ID 15):
-      User attributes:
-        lttng.org,2009:
-          log-level: notice
       Log level: Notice
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -566,9 +433,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_INFO` (ID 16):
-      User attributes:
-        lttng.org,2009:
-          log-level: info
       Log level: Info
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -577,9 +441,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_SYSTEM` (ID 17):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:system
       Log level: Debug (system)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -588,9 +449,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_PROGRAM` (ID 18):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:program
       Log level: Debug (program)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -599,9 +457,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_PROCESS` (ID 19):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:process
       Log level: Debug (process)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -610,9 +465,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_MODULE` (ID 20):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:module
       Log level: Debug (module)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -621,9 +473,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_UNIT` (ID 21):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:unit
       Log level: Debug (unit)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -632,9 +481,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_FUNCTION` (ID 22):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:function
       Log level: Debug (function)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -643,9 +489,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG_LINE` (ID 23):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -654,9 +497,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `lttng_ust_tracelog:TRACE_DEBUG` (ID 24):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug
       Log level: Debug
       Payload field class: Structure (5 members):
         line: Signed integer (32-bit, Base 10)
@@ -665,9 +505,6 @@ Trace class:
         _msg_length: Unsigned integer (32-bit, Base 10)
         msg: String
     Event class `ust_tests_hello:tptest` (ID 25):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (23 members):
         intfield: Signed integer (32-bit, Base 10)
@@ -687,32 +524,28 @@ Trace class:
           Element: Signed integer (64-bit, Base 16)
         arrfield2: String
         _seqfield1_length: Unsigned integer (64-bit, Base 10)
-        seqfield1: Dynamic array (with length field) (Length field path [Event payload: 11]):
+        seqfield1: Dynamic array (with length field) (Length field location [Event payload: _seqfield1_length]):
           Element: Signed integer (8-bit, Base 10)
         _seqfield1_hex_length: Unsigned integer (64-bit, Base 10)
-        seqfield1_hex: Dynamic array (with length field) (Length field path [Event payload: 13]):
+        seqfield1_hex: Dynamic array (with length field) (Length field location [Event payload: _seqfield1_hex_length]):
           Element: Signed integer (8-bit, Base 16)
         _seqfield2_length: Unsigned integer (64-bit, Base 10)
         seqfield2: String
         _seqfield_network_3_length: Unsigned integer (64-bit, Base 10)
-        seqfield_network_3: Dynamic array (with length field) (Length field path [Event payload: 17]):
+        seqfield_network_3: Dynamic array (with length field) (Length field location [Event payload: _seqfield_network_3_length]):
           Element: Signed integer (64-bit, Base 10)
         stringfield: String
         floatfield: Single-precision real
         doublefield: Double-precision real
         boolfield: Unsigned integer (8-bit, Base 10)
     Event class `ust_tests_hello:tptest_sighandler` (ID 26):
-      User attributes:
-        lttng.org,2009:
-          log-level: debug:line
       Log level: Debug (line)
       Payload field class: Structure (0 members)
 
 [Unknown]
 {Trace 1, Stream class ID 0, Stream ID 0}
 Stream beginning:
-  Trace:
-    UUID: 83656eb1-b131-40e7-9666-c04ae279b58c
+  Trace (UID `83656eb1-b131-40e7-9666-c04ae279b58c`):
     Environment (8 entries):
       domain: ust
       hostname: smarchi-efficios
@@ -730,8 +563,7 @@ Stream beginning:
 [Unknown]
 {Trace 1, Stream class ID 0, Stream ID 1}
 Stream beginning:
-  Trace:
-    UUID: 83656eb1-b131-40e7-9666-c04ae279b58c
+  Trace (UID `83656eb1-b131-40e7-9666-c04ae279b58c`):
     Environment (8 entries):
       domain: ust
       hostname: smarchi-efficios
@@ -749,8 +581,7 @@ Stream beginning:
 [Unknown]
 {Trace 1, Stream class ID 0, Stream ID 2}
 Stream beginning:
-  Trace:
-    UUID: 83656eb1-b131-40e7-9666-c04ae279b58c
+  Trace (UID `83656eb1-b131-40e7-9666-c04ae279b58c`):
     Environment (8 entries):
       domain: ust
       hostname: smarchi-efficios
@@ -768,8 +599,7 @@ Stream beginning:
 [Unknown]
 {Trace 1, Stream class ID 0, Stream ID 3}
 Stream beginning:
-  Trace:
-    UUID: 83656eb1-b131-40e7-9666-c04ae279b58c
+  Trace (UID `83656eb1-b131-40e7-9666-c04ae279b58c`):
     Environment (8 entries):
       domain: ust
       hostname: smarchi-efficios

@@ -13,9 +13,6 @@ Trace class:
       Offset from origin (s): 1,434,072,888
       Offset from origin (cycles): 0
     Event class `simple_uint32` (ID 0):
-      User attributes:
-        lttng.org,2009:
-          log-level: critical
       Log level: Critical
       Payload field class: Structure (1 member):
         value: Unsigned integer (32-bit, Base 10)
@@ -23,8 +20,7 @@ Trace class:
 [Unknown]
 {Trace 0, Stream class ID 0, Stream ID 0}
 Stream beginning:
-  Trace:
-    UUID: 437748de-9435-11e9-8353-5254007c6857
+  Trace (UID `437748de-9435-11e9-8353-5254007c6857`):
     Environment (6 entries):
       barectf_gen_date: 2019-06-21T11:00:09.758481
       domain: bare

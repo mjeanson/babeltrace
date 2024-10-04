@@ -50,6 +50,12 @@ struct ctf_fs_trace
         return _mParseRet->uuid;
     }
 
+    ctf::src::MetadataStreamMajorVersion metadataVersion() const noexcept
+    {
+        BT_ASSERT(_mParseRet);
+        return _mParseRet->metadataVersion;
+    }
+
     void parseMetadata(const bt2c::ConstBytes buffer)
     {
         _mParseRet = ctf::src::parseMetadataStream(_mSelfComp, _mClkClsCfg, buffer, _mLogger);
@@ -130,6 +136,11 @@ struct ctf_fs_msg_iter_data
         BT_MESSAGE_ITERATOR_CLASS_NEXT_METHOD_STATUS_OK;
     const struct bt_error *next_saved_error = nullptr;
 };
+
+bt_component_class_get_supported_mip_versions_method_status
+ctf_fs_get_supported_mip_versions(bt_self_component_class_source *selfCompClsSrc,
+                                  const bt_value *params, void *data, bt_logging_level logLevel,
+                                  bt_integer_range_set_unsigned *supportedVersions);
 
 bt_component_class_initialize_method_status
 ctf_fs_init(bt_self_component_source *source, bt_self_component_source_configuration *config,
