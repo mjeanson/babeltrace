@@ -28,6 +28,27 @@ expect_dir="$BT_TESTS_DATADIR/$this_dir_relative"
 
 test_ctf_common_details_args=("-p" "with-trace-name=no,with-stream-name=no")
 
+# Print the expected stdout file for test with name `$1` and CTF version `$2.
+find_expect_file() {
+	local test_name="$1"
+	local ctf="$2"
+
+	names=(
+		"$expect_dir/trace-$test_name-ctf$ctf.expect"
+		"$expect_dir/trace-$test_name.expect"
+	)
+
+	for name in "${names[@]}"; do
+		if [[ -f "$name" ]]; then
+			echo "$name"
+			return
+		fi
+	done
+
+	echo "Could not find expect file for test $test_name, CTF $ctf" >&2
+	exit 1
+}
+
 succeed_trace_path() {
 	name="$1"
 	ctf_version="$2"
@@ -50,11 +71,13 @@ test_ctf_single_version() {
 	local name="$1"
 	local ctf_version="$2"
 	local trace_path
+	local expected_stdout
 
 	trace_path=$(succeed_trace_path "$name" "$ctf_version")
+	expected_stdout=$(find_expect_file "$name" "$ctf_version")
 
-	bt_diff_details_ctf_single "$expect_dir/trace-$name.expect" \
-		"$trace_path" "${test_ctf_common_details_args[@]}"
+	bt_diff_details_ctf_single "$expected_stdout" "$trace_path" \
+		"${test_ctf_common_details_args[@]}"
 	ok $? "Trace '$name' gives the expected output - CTF $ctf_version"
 }
 
@@ -108,7 +131,7 @@ test_packet_end() {
 test_force_origin_unix_epoch() {
 	local name1="$1"
 	local name2="$2"
-	local expected_stdout="$expect_dir/trace-$name1-$name2.expect"
+	local expected_stdout
 	local src_ctf_fs_args=("-p" "force-clock-class-origin-unix-epoch=true")
 	local details_comp=("-c" "sink.text.details")
 	local details_args=("-p" "with-trace-name=no,with-stream-name=no,with-metadata=yes,compact=yes")
@@ -121,6 +144,7 @@ test_force_origin_unix_epoch() {
 	for ctf_version in 1 2; do
 		local trace_path
 
+		expected_stdout=$(find_expect_file "$name1-$name2" $ctf_version)
 		trace_1_path=$(succeed_trace_path "$name1" "$ctf_version")
 		trace_2_path=$(succeed_trace_path "$name2" "$ctf_version")
 

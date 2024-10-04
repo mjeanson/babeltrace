@@ -47,6 +47,26 @@ else
 	trace_dir_native="${trace_dir}"
 fi
 
+find_expect_file() {
+	local test_name="$1"
+	local ctf="$2"
+
+	names=(
+		"$expect_dir/$test_name-ctf$ctf.expect"
+		"$expect_dir/$test_name.expect"
+	)
+
+	for name in "${names[@]}"; do
+		if [[ -f "$name" ]]; then
+			echo "$name"
+			return
+		fi
+	done
+
+	echo "Could not find expect file for test $test_name, CTF $ctf" >&2
+	exit 1
+}
+
 lttng_live_server() {
 	local pid_file="$1"
 	local retcode_file="$2"
