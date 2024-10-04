@@ -432,12 +432,11 @@ bt_bool bt_clock_class_origin_is_unix_epoch(const struct bt_clock_class *clock_c
 }
 
 BT_EXPORT
-bt_bool bt_clock_class_origin_is_unknown(const struct bt_clock_class *clock_class)
+bt_bool bt_clock_class_origin_is_known(const struct bt_clock_class *clock_class)
 {
 	BT_ASSERT_PRE_NO_ERROR();
 	BT_ASSERT_PRE_DEV_CLK_CLS_NON_NULL(clock_class);
-	return !clock_class->origin.ns && !clock_class->origin.name &&
-		!clock_class->origin.uid;
+	return clock_class->origin.name && clock_class->origin.uid;
 }
 
 BT_EXPORT

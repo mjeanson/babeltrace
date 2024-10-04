@@ -88,7 +88,7 @@ the clock's offset, which is itself relative to its origin.
 A clock's origin is one of, depending on its class:
 
 <dl>
-  <dt>If bt_clock_class_origin_is_unknown() returns #BT_TRUE</dt>
+  <dt>If bt_clock_class_origin_is_known() returns #BT_FALSE</dt>
   <dd>
     Undefined.
 
@@ -272,7 +272,7 @@ A clock class has the following properties:
           <dt>Unknown origin</dt>
           <dd>
             Use bt_clock_class_set_origin_unknown() and
-            bt_clock_class_origin_is_unknown().
+            bt_clock_class_origin_is_known().
           </dd>
 
           <dt>Unix epoch origin</dt>
@@ -747,8 +747,8 @@ See the \ref api-tir-clock-cls-prop-origin "origin" property.
     Makes the origin of a clock class the Unix epoch.
 @sa bt_clock_class_set_origin() &mdash;
     Sets the custom origin of a clock class.
-@sa bt_clock_class_origin_is_unknown() &mdash;
-    Returns whether or not the origin of a clock class is unknown.
+@sa bt_clock_class_origin_is_known() &mdash;
+    Returns whether or not the origin of a clock class is known.
 */
 extern void
 bt_clock_class_set_origin_unknown(bt_clock_class *clock_class) __BT_NOEXCEPT;
@@ -867,15 +867,15 @@ extern bt_clock_class_set_origin_status bt_clock_class_set_origin(
 /*!
 @brief
     Returns whether or not the \ref api-tir-clock-cls-origin "origin"
-    of the clock class \bt_p{clock_class} is unknown.
+    of the clock class \bt_p{clock_class} is known.
 
 See the \ref api-tir-clock-cls-prop-origin "origin" property.
 
 @param[in] clock_class
-    Clock class of which to get whether or not its origin is unknown.
+    Clock class of which to get whether or not its origin is known.
 
 @returns
-    #BT_TRUE if the origin of \bt_p{clock_class} is unknown.
+    #BT_TRUE if the origin of \bt_p{clock_class} is known.
 
 @bt_pre_not_null{clock_class}
 
@@ -889,7 +889,7 @@ See the \ref api-tir-clock-cls-prop-origin "origin" property.
 @sa bt_clock_class_set_origin() &mdash;
     Sets the custom origin of a clock class.
 */
-extern bt_bool bt_clock_class_origin_is_unknown(
+extern bt_bool bt_clock_class_origin_is_known(
 		const bt_clock_class *clock_class) __BT_NOEXCEPT;
 
 /*!
@@ -909,8 +909,8 @@ See the \ref api-tir-clock-cls-prop-origin "origin" property.
 
 @bt_pre_not_null{clock_class}
 
-@sa bt_clock_class_origin_is_unknown() &mdash;
-    Returns whether or not the origin of a clock class is unknown.
+@sa bt_clock_class_origin_is_known() &mdash;
+    Returns whether or not the origin of a clock class is known.
 @sa bt_clock_class_set_origin_unknown() &mdash;
     Makes the origin of a clock class unknown.
 @sa bt_clock_class_set_origin_unix_epoch() &mdash;

@@ -406,9 +406,9 @@ public:
         return bt_clock_class_get_origin_uid(_mClkCls.libObjPtr());
     }
 
-    bool isUnknown() const noexcept
+    bool isKnown() const noexcept
     {
-        return bt_clock_class_origin_is_unknown(_mClkCls.libObjPtr());
+        return bt_clock_class_origin_is_known(_mClkCls.libObjPtr());
     }
 
     bool isUnixEpoch() const noexcept

@@ -1633,7 +1633,7 @@ void write_clock_class_prop_lines(struct details_write_ctx *ctx,
 	write_int_prop_line(ctx, "Offset from origin (s)", offset_seconds);
 	write_uint_prop_line(ctx, "Offset from origin (cycles)", offset_cycles);
 
-	if (!bt_clock_class_origin_is_unknown(cc)) {
+	if (bt_clock_class_origin_is_known(cc)) {
 		write_prop_name_line(ctx, "Origin");
 
 		if (bt_clock_class_origin_is_unix_epoch(cc)) {
