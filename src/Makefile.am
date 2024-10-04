@@ -133,6 +133,7 @@ cpp_common_libcpp_common_la_SOURCES = \
 	cpp-common/bt2/field-path.hpp \
 	cpp-common/bt2/field.hpp \
 	cpp-common/bt2/field-location.hpp \
+	cpp-common/bt2/identity-view.hpp \
 	cpp-common/bt2/integer-range-set.hpp \
 	cpp-common/bt2/integer-range.hpp \
 	cpp-common/bt2/internal/comp-cls-bridge.hpp \

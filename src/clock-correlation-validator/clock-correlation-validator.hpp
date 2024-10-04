@@ -21,24 +21,26 @@ public:
         ExpectingNoClockClassGotOne =
             BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_NO_CLOCK_CLASS_GOT_ONE,
 
-        ExpectingOriginUnixGotNoClockClass =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_NO_CLOCK_CLASS,
-        ExpectingOriginUnixGotUnknownOrigin =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_UNKNOWN_ORIGIN,
+        ExpectingOriginKnownGotNoClockClass =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_KNOWN_GOT_NO_CLOCK_CLASS,
+        ExpectingOriginKnownGotUnknownOrigin =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_KNOWN_GOT_UNKNOWN_ORIGIN,
+        ExpectingOriginKnownGotOtherOrigin =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_KNOWN_GOT_OTHER_ORIGIN,
 
-        ExpectingOriginUnknownWithUuidGotNoClockClass =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_NO_CLOCK_CLASS,
-        ExpectingOriginUnknownWithUuidGotUnixOrigin =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_UNIX_ORIGIN,
-        ExpectingOriginUnknownWithUuidGotWithoutUuid =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_WITHOUT_UUID,
-        ExpectingOriginUnknownWithUuidGotOtherUuid =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_OTHER_UUID,
+        ExpectingOriginUnknownWithIdGotNoClockClass =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_ID_GOT_NO_CLOCK_CLASS,
+        ExpectingOriginUnknownWithIdGotKnownOrigin =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_ID_GOT_KNOWN_ORIGIN,
+        ExpectingOriginUnknownWithIdGotWithoutId =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_ID_GOT_WITHOUT_ID,
+        ExpectingOriginUnknownWithIdGotOtherId =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_ID_GOT_OTHER_ID,
 
-        ExpectingOriginUnknownWithoutUuidGotNoClockClass =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITHOUT_UUID_GOT_NO_CLOCK_CLASS,
-        ExpectingOriginUnknownWithoutUuidGotOtherClockClass =
-            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITHOUT_UUID_GOT_OTHER_CLOCK_CLASS,
+        ExpectingOriginUnknownWithoutIdGotNoClockClass =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITHOUT_ID_GOT_NO_CLOCK_CLASS,
+        ExpectingOriginUnknownWithoutIdGotOtherClockClass =
+            BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITHOUT_ID_GOT_OTHER_CLOCK_CLASS,
     };
 
     explicit ClockCorrelationError(
@@ -90,28 +92,28 @@ private:
         /* Expect to have no clock. */
         None,
 
-        /* Expect a clock with a Unix epoch origin. */
-        OriginUnix,
+        /* Expect a clock with a known origin. */
+        OriginKnown,
 
-        /* Expect a clock with an unknown origin, but with a UUID. */
-        OriginUnknownWithUuid,
+        /* Expect a clock with an unknown origin, but with an identity. */
+        OriginUnknownWithId,
 
-        /* Expect a clock with an unknown origin and without a UUID. */
-        OriginUnknownWithoutUuid,
+        /* Expect a clock with an unknown origin and without an identity. */
+        OriginUnknownWithoutId,
     };
 
 public:
-    void validate(const bt2::ConstMessage msg)
+    void validate(const bt2::ConstMessage msg, const std::uint64_t graphMipVersion)
     {
         if (!msg.isStreamBeginning() && !msg.isMessageIteratorInactivity()) {
             return;
         }
 
-        this->_validate(msg);
+        this->_validate(msg, graphMipVersion);
     }
 
 private:
-    void _validate(const bt2::ConstMessage msg);
+    void _validate(const bt2::ConstMessage msg, std::uint64_t graphMipVersion);
 
     PropsExpectation _mExpectation = PropsExpectation::Unset;
 

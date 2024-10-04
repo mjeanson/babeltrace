@@ -14,6 +14,11 @@ namespace muxing {
 class MessageComparator final
 {
 public:
+    explicit MessageComparator(const std::uint64_t graphMipVersion) :
+        _mGraphMipVersion {graphMipVersion}
+    {
+    }
+
     int compare(bt2::ConstMessage left, bt2::ConstMessage right) const noexcept;
 
 private:
@@ -40,6 +45,8 @@ private:
     static int _compareUuids(const bt2c::UuidView left, const bt2c::UuidView right) noexcept;
     static int _compareOptUuids(const bt2s::optional<const bt2c::UuidView>& left,
                                 const bt2s::optional<const bt2c::UuidView>& right) noexcept;
+    static int _compareIdentities(const bt2::IdentityView& left,
+                                  const bt2::IdentityView& right) noexcept;
     static int _compareEventClasses(const bt2::ConstEventClass left,
                                     const bt2::ConstEventClass right) noexcept;
     static int _compareClockClasses(const bt2::ConstClockClass left,
@@ -52,6 +59,8 @@ private:
                                         const bt2::ConstMessage right) noexcept;
     static int _compareMessages(const bt2::ConstMessage left,
                                 const bt2::ConstMessage right) noexcept;
+
+    std::uint64_t _mGraphMipVersion;
 };
 
 } /* namespace muxing */

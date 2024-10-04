@@ -18,6 +18,7 @@
 
 #include "borrowed-object.hpp"
 #include "exc.hpp"
+#include "identity-view.hpp"
 #include "internal/utils.hpp"
 #include "shared-object.hpp"
 #include "value.hpp"
@@ -284,6 +285,11 @@ public:
         return bt_clock_class_get_uid(this->libObjPtr());
     }
 
+    IdentityView identity() const noexcept
+    {
+        return IdentityView {this->nameSpace(), this->name(), this->uid()};
+    }
+
     bool hasSameIdentity(const CommonClockClass<const bt_clock_class> other) const noexcept
     {
         return static_cast<bool>(
@@ -416,6 +422,11 @@ public:
         return bt_clock_class_origin_is_unix_epoch(_mClkCls.libObjPtr());
     }
 
+    IdentityView identity() const noexcept
+    {
+        return IdentityView {this->nameSpace(), this->name(), this->uid()};
+    }
+
 private:
     ConstClockClass _mClkCls;
 };
@@ -424,6 +435,16 @@ template <typename LibObjT>
 ClockOriginView CommonClockClass<LibObjT>::origin() const noexcept
 {
     return ClockOriginView {*this};
+}
+
+inline bool isSameClockOrigin(const bt2::ClockOriginView& a, const bt2::ClockOriginView& b,
+                              const std::uint64_t graphMipVersion)
+{
+    if (graphMipVersion == 0) {
+        return a.isUnixEpoch() == b.isUnixEpoch();
+    } else {
+        return a.identity() == b.identity();
+    }
 }
 
 } /* namespace bt2 */

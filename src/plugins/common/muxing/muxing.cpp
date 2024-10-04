@@ -166,6 +166,20 @@ int MessageComparator::_compareOptUuids(const bt2s::optional<const bt2c::UuidVie
     return _compareOptionals(left, right, _compareUuids);
 }
 
+int MessageComparator::_compareIdentities(const bt2::IdentityView& left,
+                                          const bt2::IdentityView& right) noexcept
+{
+    if (const auto ret = _compareStrings(left.nameSpace(), right.nameSpace())) {
+        return ret;
+    }
+
+    if (const auto ret = _compareStrings(left.name(), right.name())) {
+        return ret;
+    }
+
+    return _compareStrings(left.uid(), right.uid());
+}
+
 int MessageComparator::_compareEventClasses(const bt2::ConstEventClass left,
                                             const bt2::ConstEventClass right) noexcept
 {
@@ -453,12 +467,17 @@ int MessageComparator::compare(const bt2::ConstMessage left,
 
     if (const auto ret = _compareOptionalBorrowedObjects(
             borrowStream(left), borrowStream(right),
-            [](const bt2::ConstStream leftStream, const bt2::ConstStream rightStream) {
+            [&](const bt2::ConstStream leftStream, const bt2::ConstStream rightStream) {
                 const auto leftTrace = leftStream.trace();
                 const auto rightTrace = rightStream.trace();
 
-                /* Compare trace UUIDs. */
-                if (const auto ret = _compareOptUuids(leftTrace.uuid(), rightTrace.uuid())) {
+                /* Compare trace UUIDs or identities. */
+                if (_mGraphMipVersion == 0) {
+                    if (const auto ret = _compareOptUuids(leftTrace.uuid(), rightTrace.uuid())) {
+                        return ret;
+                    }
+                } else if (const auto ret =
+                               _compareIdentities(leftTrace.identity(), rightTrace.identity())) {
                     return ret;
                 }
 

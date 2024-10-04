@@ -691,6 +691,11 @@ public:
         return bt_trace_get_uid(this->libObjPtr());
     }
 
+    IdentityView identity() const noexcept
+    {
+        return IdentityView {this->nameSpace(), this->name(), this->uid()};
+    }
+
     CommonTrace uuid(const bt2c::UuidView& uuid) const noexcept
     {
         bt_trace_set_uuid(this->libObjPtr(), uuid.begin());

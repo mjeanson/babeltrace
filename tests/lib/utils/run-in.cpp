@@ -124,10 +124,3 @@ void runIn(RunIn& runIn, const std::uint64_t graphMipVersion)
     /* Run graph (executes `msgIterCtxFunc`) */
     graph->run();
 }
-
-void forEachMipVersion(const std::function<void(std::uint64_t)>& fn)
-{
-    for (std::uint64_t v = 0; v <= bt_get_maximal_mip_version(); ++v) {
-        fn(v);
-    }
-}

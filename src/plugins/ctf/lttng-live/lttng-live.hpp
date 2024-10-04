@@ -341,7 +341,8 @@ struct lttng_live_msg_iter
                                  const bt2::SelfComponent selfCompParam,
                                  const bt2::SelfMessageIterator selfMsgIter) :
         logger {parentLogger, "PLUGIN/SRC.CTF.LTTNG-LIVE/MSG-ITER"},
-        selfComp {selfCompParam}, selfMsgIter {selfMsgIter}
+        selfComp {selfCompParam}, selfMsgIter {selfMsgIter},
+        msgComparator {selfComp.graphMipVersion()}
     {
     }
 

@@ -32,7 +32,7 @@ private:
     class _HeapComparator final
     {
     public:
-        explicit _HeapComparator(const bt2c::Logger& logger);
+        explicit _HeapComparator(const bt2c::Logger& logger, const std::uint64_t graphMipVersion);
 
         bool operator()(const UpstreamMsgIter *upstreamMsgIterA,
                         const UpstreamMsgIter *upstreamMsgIterB) const noexcept;

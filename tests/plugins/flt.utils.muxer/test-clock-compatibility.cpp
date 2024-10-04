@@ -12,6 +12,8 @@
 #include "cpp-common/bt2c/call.hpp"
 #include "cpp-common/vendor/fmt/format.h" /* IWYU pragma: keep */
 
+#include "common.hpp"
+
 #include "tap/tap.h"
 
 namespace {
@@ -155,10 +157,11 @@ class ErrorTestCase final
 public:
     /* Intentionally not explicit */
     ErrorTestCase(CreateClockClass createClockClass1Param, CreateClockClass createClockClass2Param,
-                  const char * const testName, const char * const expectedCauseMsg) :
+                  const std::uint64_t graphMipVersion, const char * const testName,
+                  const char * const expectedCauseMsg) :
         _mCreateClockClass1 {createClockClass1Param},
-        _mCreateClockClass2 {createClockClass2Param}, _mTestName {testName},
-        _mExpectedCauseMsg {expectedCauseMsg}
+        _mCreateClockClass2 {createClockClass2Param}, _mGraphMipVersion {graphMipVersion},
+        _mTestName {testName}, _mExpectedCauseMsg {expectedCauseMsg}
     {
     }
 
@@ -169,6 +172,7 @@ private:
 
     CreateClockClass _mCreateClockClass1;
     CreateClockClass _mCreateClockClass2;
+    std::uint64_t _mGraphMipVersion;
     const char *_mTestName;
     const char *_mExpectedCauseMsg;
 };
@@ -230,16 +234,16 @@ void ErrorTestCase::run() const noexcept
 }
 
 std::string makeSpecTestName(const char * const testName, const MsgType msgType1,
-                             const MsgType msgType2)
+                             const MsgType msgType2, const std::uint64_t graphMipVersion)
 {
-    return fmt::format("{} ({}, {})", testName, msgType1, msgType2);
+    return fmt::format("{} ({}, {}, MIP {})", testName, msgType1, msgType2, graphMipVersion);
 }
 
 void ErrorTestCase::_runOne(const MsgType msgType1, const MsgType msgType2) const noexcept
 {
-    const auto specTestName = makeSpecTestName(_mTestName, msgType1, msgType2);
+    const auto specTestName = makeSpecTestName(_mTestName, msgType1, msgType2, _mGraphMipVersion);
     const auto srcCompCls = bt2::SourceComponentClass::create<TestSource>();
-    const auto graph = bt2::Graph::create(0);
+    const auto graph = bt2::Graph::create(_mGraphMipVersion);
 
     {
         /*
@@ -328,113 +332,229 @@ void ErrorTestCase::_runOne(const MsgType msgType1, const MsgType msgType2) cons
 const bt2c::Uuid uuidA {"f00aaf65-ebec-4eeb-85b2-fc255cf1aa8a"};
 const bt2c::Uuid uuidB {"03482981-a77b-4d7b-94c4-592bf9e91785"};
 
-const ErrorTestCase errorTestCases[] = {
-    {noClockClass,
-     [](const bt2::SelfComponent self) {
-         return self.createClockClass();
-     },
-     "no clock class followed by clock class", "Expecting no clock class, got one"},
+std::vector<ErrorTestCase> createErrorTestCases()
+{
+    std::vector<ErrorTestCase> cases;
 
-    {[](const bt2::SelfComponent self) {
-         return self.createClockClass();
-     },
-     noClockClass, "clock class with Unix epoch origin followed by no clock class",
-     "Expecting a clock class with Unix epoch origin, got none"},
+    forEachMipVersion([&](const std::uint64_t graphMipVersion) {
+        cases.emplace_back(
+            noClockClass,
+            [](const bt2::SelfComponent self) {
+                return self.createClockClass();
+            },
+            graphMipVersion, "no clock class followed by clock class",
+            "Expecting no clock class, got one");
 
-    {[](const bt2::SelfComponent self) {
-         return self.createClockClass();
-     },
-     [](const bt2::SelfComponent self) {
-         const auto clockCls = self.createClockClass();
+        if (graphMipVersion == 0) {
+            cases.emplace_back(
+                [](const bt2::SelfComponent self) {
+                    return self.createClockClass();
+                },
+                noClockClass, graphMipVersion,
+                "clock class with a Unix epoch origin followed by no clock class",
+                "Expecting a clock class with a Unix epoch origin, got none");
 
-         clockCls->originIsUnixEpoch(false);
-         return clockCls;
-     },
-     "clock class with Unix epoch origin followed by clock class with unknown origin",
-     "Expecting a clock class with Unix epoch origin, got one with unknown origin"},
+            cases.emplace_back(
+                [](const bt2::SelfComponent self) {
+                    return self.createClockClass();
+                },
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
 
-    {[](const bt2::SelfComponent self) {
-         const auto clockCls = self.createClockClass();
+                    clockCls->originIsUnixEpoch(false);
+                    return clockCls;
+                },
+                graphMipVersion,
+                "clock class with a Unix epoch origin followed by clock class with an unknown origin",
+                "Expecting a clock class with a Unix epoch origin, got one with an unknown origin");
 
-         clockCls->originIsUnixEpoch(false).uuid(uuidA);
-         return clockCls;
-     },
-     noClockClass, "clock class with unknown origin and a UUID followed by no clock class",
-     "Expecting a clock class with unknown origin and a specific UUID, got none"},
+            cases.emplace_back(
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
 
-    {[](const bt2::SelfComponent self) {
-         const auto clockCls = self.createClockClass();
+                    clockCls->originIsUnixEpoch(false).uuid(uuidA);
+                    return clockCls;
+                },
+                noClockClass, graphMipVersion,
+                "clock class with an unknown origin and a UUID followed by no clock class",
+                "Expecting a clock class with an unknown origin and a specific UUID, got none");
 
-         clockCls->originIsUnixEpoch(false).uuid(uuidA);
-         return clockCls;
-     },
-     [](const bt2::SelfComponent self) {
-         return self.createClockClass();
-     },
-     "clock class with unknown origin and a UUID followed by clock class with Unix epoch origin",
-     "Expecting a clock class with unknown origin and a specific UUID, got one with Unix epoch origin"},
+            cases.emplace_back(
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
 
-    {[](const bt2::SelfComponent self) {
-         const auto clockCls = self.createClockClass();
+                    clockCls->originIsUnixEpoch(false).uuid(uuidA);
+                    return clockCls;
+                },
+                [](const bt2::SelfComponent self) {
+                    return self.createClockClass();
+                },
+                graphMipVersion,
+                "clock class with an unknown origin and a UUID followed by clock class with a Unix epoch origin",
+                "Expecting a clock class with an unknown origin and a specific UUID, got one with a Unix epoch origin");
 
-         clockCls->originIsUnixEpoch(false).uuid(uuidA);
-         return clockCls;
-     },
-     [](const bt2::SelfComponent self) {
-         const auto clockCls = self.createClockClass();
+            cases.emplace_back(
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
 
-         clockCls->originIsUnixEpoch(false);
-         return clockCls;
-     },
-     "clock class with unknown origin and a UUID followed by clock class with unknown origin and no UUID",
-     "Expecting a clock class with unknown origin and a specific UUID, got one without a UUID"},
+                    clockCls->originIsUnixEpoch(false).uuid(uuidA);
+                    return clockCls;
+                },
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
 
-    {[](const bt2::SelfComponent self) {
-         const auto clockCls = self.createClockClass();
+                    clockCls->originIsUnixEpoch(false);
+                    return clockCls;
+                },
+                graphMipVersion,
+                "clock class with an unknown origin and a UUID followed by clock class with an unknown origin and no UUID",
+                "Expecting a clock class with an unknown origin and a specific UUID, got one without a UUID");
 
-         clockCls->originIsUnixEpoch(false).uuid(uuidA);
-         return clockCls;
-     },
-     [](const bt2::SelfComponent self) {
-         const auto clockCls = self.createClockClass();
+            cases.emplace_back(
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
 
-         clockCls->originIsUnixEpoch(false).uuid(uuidB);
-         return clockCls;
-     },
-     "clock class with unknown origin and a UUID followed by clock class with unknown origin and another UUID",
-     "Expecting a clock class with unknown origin and a specific UUID, got one with a different UUID"},
+                    clockCls->originIsUnixEpoch(false).uuid(uuidA);
+                    return clockCls;
+                },
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
 
-    {[](const bt2::SelfComponent self) {
-         const auto clockCls = self.createClockClass();
+                    clockCls->originIsUnixEpoch(false).uuid(uuidB);
+                    return clockCls;
+                },
+                graphMipVersion,
+                "clock class with an unknown origin and a UUID followed by clock class with an unknown origin and another UUID",
+                "Expecting a clock class with an unknown origin and a specific UUID, got one with a different UUID");
+        } else {
+            cases.emplace_back(
+                [](const bt2::SelfComponent self) {
+                    return self.createClockClass();
+                },
+                noClockClass, graphMipVersion,
+                "clock class a known origin followed by no clock class",
+                "Expecting a clock class with a known origin, got none");
 
-         clockCls->originIsUnixEpoch(false);
-         return clockCls;
-     },
-     noClockClass, "clock class with unknown origin and no UUID followed by no clock class",
-     "Expecting a clock class, got none"},
+            cases.emplace_back(
+                [](const bt2::SelfComponent self) {
+                    return self.createClockClass();
+                },
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
 
-    {[](const bt2::SelfComponent self) {
-         const auto clockCls = self.createClockClass();
+                    clockCls->originIsUnixEpoch(false);
+                    return clockCls;
+                },
+                graphMipVersion,
+                "clock class with a known origin followed by clock class with an unknown origin",
+                "Expecting a clock class with a known origin, got one with an unknown origin");
 
-         clockCls->originIsUnixEpoch(false);
-         return clockCls;
-     },
+            cases.emplace_back(
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
 
-     [](const bt2::SelfComponent self) {
-         const auto clockCls = self.createClockClass();
+                    clockCls->originIsUnixEpoch(false).nameSpace("ze-ns").name("ze-name").uid(
+                        "ze-uid");
+                    return clockCls;
+                },
+                noClockClass, graphMipVersion,
+                "clock class with an unknown origin and an identity followed by no clock class",
+                "Expecting a clock class with an unknown origin and a specific identity, got none");
 
-         clockCls->originIsUnixEpoch(false);
-         return clockCls;
-     },
-     "clock class with unknown origin and no UUID followed by different clock class",
-     "Unexpected clock class"},
-};
+            cases.emplace_back(
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
+
+                    clockCls->originIsUnixEpoch(false).nameSpace("ze-ns").name("ze-name").uid(
+                        "ze-uid");
+                    return clockCls;
+                },
+                [](const bt2::SelfComponent self) {
+                    return self.createClockClass();
+                },
+                graphMipVersion,
+                "clock class with an unknown origin and an identity followed by clock class with a known origin",
+                "Expecting a clock class with an unknown origin and a specific identity, got one with a known origin");
+
+            cases.emplace_back(
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
+
+                    clockCls->originIsUnixEpoch(false).nameSpace("ze-ns").name("ze-name").uid(
+                        "ze-uid");
+                    return clockCls;
+                },
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
+
+                    clockCls->originIsUnixEpoch(false);
+                    return clockCls;
+                },
+                graphMipVersion,
+                "clock class with an unknown origin and an identity followed by clock class with an unknown origin and no identity",
+                "Expecting a clock class with an unknown origin and a specific identity, got one without identity");
+
+            cases.emplace_back(
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
+
+                    clockCls->originIsUnixEpoch(false).nameSpace("ze-ns").name("ze-name").uid(
+                        "ze-uid");
+                    return clockCls;
+                },
+                [](const bt2::SelfComponent self) {
+                    const auto clockCls = self.createClockClass();
+
+                    clockCls->originIsUnixEpoch(false)
+                        .nameSpace("another-ns")
+                        .name("another-name")
+                        .uid("another-uid");
+                    return clockCls;
+                },
+                graphMipVersion,
+                "clock class with an unknown origin and an identity followed by clock class with an unknown origin and another identity",
+                "Expecting a clock class with an unknown origin and a specific identity, got one with a different identity");
+        }
+
+        cases.emplace_back(
+            [](const bt2::SelfComponent self) {
+                const auto clockCls = self.createClockClass();
+
+                clockCls->originIsUnixEpoch(false);
+                return clockCls;
+            },
+            noClockClass, graphMipVersion,
+            "clock class with an unknown origin and no UUID/identity followed by no clock class",
+            "Expecting a clock class, got none");
+
+        cases.emplace_back(
+            [](const bt2::SelfComponent self) {
+                const auto clockCls = self.createClockClass();
+
+                clockCls->originIsUnixEpoch(false);
+                return clockCls;
+            },
+            [](const bt2::SelfComponent self) {
+                const auto clockCls = self.createClockClass();
+
+                clockCls->originIsUnixEpoch(false);
+                return clockCls;
+            },
+            graphMipVersion,
+            "clock class with an unknown origin and no UUID/identity followed by different clock class",
+            "Unexpected clock class");
+    });
+
+    return cases;
+}
 
 } /* namespace */
 
 int main()
 {
-    plan_tests(150);
+    plan_tests(300);
+
+    const auto errorTestCases = createErrorTestCases();
 
     for (auto& errorTestCase : errorTestCases) {
         errorTestCase.run();

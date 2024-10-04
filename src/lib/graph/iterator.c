@@ -688,10 +688,36 @@ void assert_post_dev_clock_classes_are_compatible_one(
 	enum bt_clock_correlation_validator_error_type type;
 	const bt_clock_class *actual_clock_cls;
 	const bt_clock_class *ref_clock_cls;
+	const int graph_mip_version = iterator->graph->mip_version;
 
 	if (!bt_clock_correlation_validator_validate_message(
-			iterator->correlation_validator, msg, &type,
-			&actual_clock_cls, &ref_clock_cls)) {
+			iterator->correlation_validator, msg,
+			graph_mip_version, &type, &actual_clock_cls,
+			&ref_clock_cls)) {
+#define CC_ORIGIN_FMT(_prefix) \
+	_prefix "cc-origin-ns=%s, " \
+	_prefix "cc-origin-name=%s, " \
+	_prefix "cc-origin-uid=%s"
+#define EXP_CC_ORIGIN_FMT CC_ORIGIN_FMT("expected-")
+
+#define CC_ORIGIN_VALUES(_clock_cls) \
+	(_clock_cls)->origin.ns ? (_clock_cls)->origin.ns : "(null)", \
+	(_clock_cls)->origin.name ? (_clock_cls)->origin.name : "(null)", \
+	(_clock_cls)->origin.uid ? (_clock_cls)->origin.uid : "(null)"
+#define EXP_CC_ORIGIN_VALUES CC_ORIGIN_VALUES(ref_clock_cls)
+
+#define CC_ID_FMT(_prefix) \
+	_prefix "cc-ns=%s, " \
+	_prefix "cc-name=%s, " \
+	_prefix "cc-uid=%s"
+#define EXP_CC_ID_FMT CC_ID_FMT("expected-")
+
+#define CC_ID_VALUES(_clock_cls) \
+	(_clock_cls)->ns ? (_clock_cls)->ns : "(null)", \
+	(_clock_cls)->name ? (_clock_cls)->name : "(null)", \
+	(_clock_cls)->uid ? (_clock_cls)->uid : "(null)"
+#define EXP_CC_ID_VALUES CC_ID_VALUES(ref_clock_cls)
+
 		switch (type) {
 		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_NO_CLOCK_CLASS_GOT_ONE:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
@@ -699,53 +725,142 @@ void assert_post_dev_clock_classes_are_compatible_one(
 				"Expecting no clock class, got one: %![cc-]+K",
 				actual_clock_cls);
 
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_NO_CLOCK_CLASS:
-			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
-				"stream-class-has-clock-class-with-unix-epoch-origin", false,
-				"Expecting a clock class with Unix epoch origin, got none.");
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_KNOWN_GOT_NO_CLOCK_CLASS:
+			if (graph_mip_version == 0) {
+				BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
+					"stream-class-has-clock-class-with-unix-epoch-origin", false,
+					"Expecting a clock class with a Unix epoch origin, got none.");
+			} else {
+				BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
+					"stream-class-has-clock-class-with-known-origin", false,
+					"Expecting a clock class with a known origin, got none: " EXP_CC_ORIGIN_FMT,
+					EXP_CC_ORIGIN_VALUES);
+			}
 
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNIX_GOT_UNKNOWN_ORIGIN:
-			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
-				"clock-class-has-unix-epoch-origin", false,
-				"Expecting a clock class with Unix epoch origin, got one with "
-				"unknown origin: %![cc-]+K",
-				actual_clock_cls);
+			/*
+			 * GCC gives bogus `-Wimplicit-fallthrough`
+			 * warnings: convince it that it's not possible.
+			 */
+			bt_common_abort();
 
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_NO_CLOCK_CLASS:
-			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
-				"stream-class-has-clock-class-with-uuid", false,
-				"Expecting a clock class with unknown origin and a specific UUID, "
-				"got none: expected-uuid=%!u",
-				bt_clock_class_get_uuid(ref_clock_cls));
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_KNOWN_GOT_UNKNOWN_ORIGIN:
+			if (graph_mip_version == 0) {
+				BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
+					"clock-class-has-unix-epoch-origin", false,
+					"Expecting a clock class with a Unix epoch origin, got one with an"
+					"unknown origin: %![cc-]+K",
+					actual_clock_cls);
+			} else {
+				BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
+					"clock-class-has-known-origin", false,
+					"Expecting a clock class with a known origin: %![cc-]+K, " EXP_CC_ORIGIN_FMT,
+					actual_clock_cls, EXP_CC_ORIGIN_VALUES);
+			}
 
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_UNIX_ORIGIN:
-			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
-				"clock-class-has-unknown-origin", false,
-				"Expecting a clock class with unknown origin and a specific UUID, "
-				"got one with Unix epoch origin: %![cc-]+K, expected-uuid=%!u",
-				actual_clock_cls, bt_clock_class_get_uuid(ref_clock_cls));
+			/*
+			 * GCC gives bogus `-Wimplicit-fallthrough`
+			 * warnings: convince it that it's not possible.
+			 */
+			bt_common_abort();
 
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_WITHOUT_UUID:
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_KNOWN_GOT_OTHER_ORIGIN:
+			BT_ASSERT(graph_mip_version > 0);
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
-				"clock-class-has-uuid", false,
-				"Expecting a clock class with unknown origin and a specific UUID, "
-				"got one without a UUID: %![cc-]+K, expected-uuid=%!u",
-				actual_clock_cls, bt_clock_class_get_uuid(ref_clock_cls));
+				"clock-class-has-expected-origin", false,
+				"Expecting a clock class with a specific origin: %![cc-]+K, " EXP_CC_ORIGIN_FMT,
+				actual_clock_cls, EXP_CC_ORIGIN_VALUES);
 
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_UUID_GOT_OTHER_UUID:
-			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
-				"clock-class-has-expected-uuid", false,
-				"Expecting a clock class with unknown origin and a specific UUID, "
-				"got one with a different UUID: %![cc-]+K, expected-uuid=%!u",
-				actual_clock_cls, bt_clock_class_get_uuid(ref_clock_cls));
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_ID_GOT_NO_CLOCK_CLASS:
+			if (graph_mip_version == 0) {
+				BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
+					"stream-class-has-clock-class-with-uuid", false,
+					"Expecting a clock class with an unknown origin and a specific UUID, "
+					"got none: expected-uuid=%!u",
+					bt_clock_class_get_uuid(ref_clock_cls));
+			} else {
+				BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
+					"stream-class-has-clock-class-with-id", false,
+					"Expecting a clock class with an unknown origin and a specific identity, "
+					"got none: " EXP_CC_ID_FMT,
+					EXP_CC_ID_VALUES);
+			}
 
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITHOUT_UUID_GOT_NO_CLOCK_CLASS:
+			/*
+			 * GCC gives bogus `-Wimplicit-fallthrough`
+			 * warnings: convince it that it's not possible.
+			 */
+			bt_common_abort();
+
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_ID_GOT_KNOWN_ORIGIN:
+			if (graph_mip_version == 0) {
+				BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
+					"clock-class-has-unknown-origin", false,
+					"Expecting a clock class with an unknown origin and a specific UUID, "
+					"got one with a Unix epoch origin: %![cc-]+K, expected-uuid=%!u",
+					actual_clock_cls, bt_clock_class_get_uuid(ref_clock_cls));
+			} else {
+				BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
+					"clock-class-has-unknown-origin", false,
+					"Expecting a clock class with an unknown origin and a specific identity, "
+					"got one with a known origin: %![cc-]+K, " EXP_CC_ID_FMT,
+					actual_clock_cls, EXP_CC_ID_VALUES);
+			}
+
+			/*
+			 * GCC gives bogus `-Wimplicit-fallthrough`
+			 * warnings: convince it that it's not possible.
+			 */
+			bt_common_abort();
+
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_ID_GOT_WITHOUT_ID:
+			if (graph_mip_version == 0) {
+				BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
+					"clock-class-has-uuid", false,
+					"Expecting a clock class with an unknown origin and a specific UUID, "
+					"got one without a UUID: %![cc-]+K, expected-uuid=%!u",
+					actual_clock_cls, bt_clock_class_get_uuid(ref_clock_cls));
+			} else {
+				BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
+					"clock-class-has-id", false,
+					"Expecting a clock class with an unknown origin and a specific identity, "
+					"got one without identity: %![cc-]+K, " EXP_CC_ID_FMT,
+					actual_clock_cls, EXP_CC_ID_VALUES);
+			}
+
+			/*
+			 * GCC gives bogus `-Wimplicit-fallthrough`
+			 * warnings: convince it that it's not possible.
+			 */
+			bt_common_abort();
+
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITH_ID_GOT_OTHER_ID:
+			if (graph_mip_version == 0) {
+				BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
+					"clock-class-has-expected-uuid", false,
+					"Expecting a clock class with an unknown origin and a specific UUID, "
+					"got one with a different UUID: %![cc-]+K, expected-uuid=%!u",
+					actual_clock_cls, bt_clock_class_get_uuid(ref_clock_cls));
+			} else {
+				BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
+					"clock-class-has-expected-id", false,
+					"Expecting a clock class with an unknown origin and a specific identity, "
+					"got one with a different identity: %![cc-]+K, " EXP_CC_ID_FMT,
+					actual_clock_cls, EXP_CC_ID_VALUES);
+			}
+
+			/*
+			 * GCC gives bogus `-Wimplicit-fallthrough`
+			 * warnings: convince it that it's not possible.
+			 */
+			bt_common_abort();
+
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITHOUT_ID_GOT_NO_CLOCK_CLASS:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
 				"stream-class-has-clock-class", false,
 				"Expecting a clock class, got none: %![expected-cc-]+K",
 				ref_clock_cls);
 
-		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITHOUT_UUID_GOT_OTHER_CLOCK_CLASS:
+		case BT_CLOCK_CORRELATION_VALIDATOR_ERROR_TYPE_EXPECTING_ORIGIN_UNKNOWN_WITHOUT_ID_GOT_OTHER_CLOCK_CLASS:
 			BT_ASSERT_POST_DEV(NEXT_METHOD_NAME,
 				"clock-class-is-expected", false,
 				"Unexpected clock class: %![expected-cc-]+K, %![actual-cc-]+K",
