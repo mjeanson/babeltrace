@@ -323,6 +323,7 @@ AC_CHECK_FUNCS([ \
   munmap \
   rmdir \
   setenv \
+  setrlimit \
   socket \
   strchr \
   strdup \

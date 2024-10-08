@@ -17,6 +17,10 @@
 
 #include "utils.hpp"
 
+#ifdef HAVE_SETRLIMIT
+#    include <sys/resource.h>
+#endif /* HAVE_SETRLIMIT */
+
 CondTrigger::CondTrigger(const Type type, const std::string& condId,
                          const bt2c::CStringView nameSuffix) noexcept :
     _mType {type},
@@ -34,6 +38,19 @@ SimpleCondTrigger::SimpleCondTrigger(std::function<void()> func, const Type type
 }
 
 namespace {
+
+void disableCoreDumps() noexcept
+{
+#ifdef HAVE_SETRLIMIT
+    const rlimit limits {0, 0};
+    const auto ret = setrlimit(RLIMIT_CORE, &limits);
+
+    if (ret != 0) {
+        std::perror("setrlimit");
+        std::exit(1);
+    }
+#endif /* HAVE_SETRLIMIT */
+}
 
 void listCondTriggers(const CondTriggers& condTriggers) noexcept
 {
@@ -79,6 +96,14 @@ void condMain(const bt2s::span<const char * const> argv, const CondTriggers& con
          * any custom abortion command to run.
          */
         g_unsetenv("BABELTRACE_EXEC_ON_ABORT");
+
+        /*
+         * Since this program's purpose is to crash, it might generate
+         * a core dump every time it's started, which is not really
+         * useful (and has been known to overwhelm some CI workers).
+         * Disable them.
+         */
+        disableCoreDumps();
 
         /* Find the trigger */
         BT_ASSERT(argv.size() == 3);
