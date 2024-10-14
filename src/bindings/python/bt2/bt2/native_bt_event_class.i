@@ -14,8 +14,8 @@
 }
 
 %typemap(argout) bt_event_class_log_level * {
-	/* SWIG_Python_AppendOutput() steals the created object */
-	$result = SWIG_Python_AppendOutput($result, SWIG_From_int(*$1));
+	/* SWIG_AppendOutput() steals the created object */
+	$result = SWIG_AppendOutput($result, SWIG_From_int(*$1));
 }
 
 %include <babeltrace2/trace-ir/event-class.h>

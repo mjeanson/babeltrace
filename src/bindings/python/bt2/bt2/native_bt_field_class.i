@@ -22,10 +22,10 @@
 			PyList_SET_ITEM(py_label_list, i, PyUnicode_FromString((*$1)[i]));
 		}
 
-		$result = SWIG_Python_AppendOutput($result, py_label_list);
+		$result = SWIG_AppendOutput($result, py_label_list);
 	} else {
 		Py_INCREF(Py_None);
-		$result = SWIG_Python_AppendOutput($result, Py_None);
+		$result = SWIG_AppendOutput($result, Py_None);
 	}
 }
 

@@ -14,14 +14,14 @@
 %typemap(argout)
 	(bt_message_iterator **) {
 	if (*$1) {
-		/* SWIG_Python_AppendOutput() steals the created object */
-		$result = SWIG_Python_AppendOutput($result,
+		/* SWIG_AppendOutput() steals the created object */
+		$result = SWIG_AppendOutput($result,
 				SWIG_NewPointerObj(SWIG_as_voidptr(*$1),
 					SWIGTYPE_p_bt_message_iterator, 0));
 	} else {
-		/* SWIG_Python_AppendOutput() steals Py_None */
+		/* SWIG_AppendOutput() steals Py_None */
 		Py_INCREF(Py_None);
-		$result = SWIG_Python_AppendOutput($result, Py_None);
+		$result = SWIG_AppendOutput($result, Py_None);
 	}
 }
 

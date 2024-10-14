@@ -65,12 +65,12 @@ typedef uint64_t bt_listener_id;
 
 %typemap(argout) (const char **) {
 	if (*$1) {
-		/* SWIG_Python_AppendOutput() steals the created object */
-		$result = SWIG_Python_AppendOutput($result, SWIG_Python_str_FromChar(*$1));
+		/* SWIG_AppendOutput() steals the created object */
+		$result = SWIG_AppendOutput($result, SWIG_Python_str_FromChar(*$1));
 	} else {
-		/* SWIG_Python_AppendOutput() steals Py_None */
+		/* SWIG_AppendOutput() steals Py_None */
 		Py_INCREF(Py_None);
-		$result = SWIG_Python_AppendOutput($result, Py_None);
+		$result = SWIG_AppendOutput($result, Py_None);
 	}
 }
 
@@ -81,14 +81,14 @@ typedef uint64_t bt_listener_id;
 
 %typemap(argout) (bt_value **) {
 	if (*$1) {
-		/* SWIG_Python_AppendOutput() steals the created object */
-		$result = SWIG_Python_AppendOutput($result,
+		/* SWIG_AppendOutput() steals the created object */
+		$result = SWIG_AppendOutput($result,
 				SWIG_NewPointerObj(SWIG_as_voidptr(*$1),
 					SWIGTYPE_p_bt_value, 0));
 	} else {
-		/* SWIG_Python_AppendOutput() steals Py_None */
+		/* SWIG_AppendOutput() steals Py_None */
 		Py_INCREF(Py_None);
-		$result = SWIG_Python_AppendOutput($result, Py_None);
+		$result = SWIG_AppendOutput($result, Py_None);
 	}
 }
 
@@ -98,7 +98,7 @@ typedef uint64_t bt_listener_id;
 }
 
 %typemap(argout) uint64_t * {
-	$result = SWIG_Python_AppendOutput(resultobj,
+	$result = SWIG_AppendOutput(resultobj,
 			SWIG_From_unsigned_SS_long_SS_long((*$1)));
 }
 
@@ -108,7 +108,7 @@ typedef uint64_t bt_listener_id;
 }
 
 %typemap(argout) (int64_t *) {
-	$result = SWIG_Python_AppendOutput(resultobj, SWIG_From_long_SS_long((*$1)));
+	$result = SWIG_AppendOutput(resultobj, SWIG_From_long_SS_long((*$1)));
 }
 
 /* Output argument typemap for initialized unsigned int output parameter (always appends) */
@@ -117,7 +117,7 @@ typedef uint64_t bt_listener_id;
 }
 
 %typemap(argout) (unsigned int *) {
-	$result = SWIG_Python_AppendOutput(resultobj,
+	$result = SWIG_AppendOutput(resultobj,
 			SWIG_From_unsigned_SS_long_SS_long((uint64_t) (*$1)));
 }
 
@@ -127,7 +127,7 @@ typedef uint64_t bt_listener_id;
 }
 
 %typemap(argout) bt_bool * {
-	$result = SWIG_Python_AppendOutput(resultobj,
+	$result = SWIG_AppendOutput(resultobj,
 			SWIG_From_bool(*$1));
 }
 
